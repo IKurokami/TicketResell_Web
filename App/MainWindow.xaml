@@ -35,9 +35,6 @@
                         <NavigationThemeTransition />
                     </TransitionCollection>
                 </Frame.ContentTransitions>
-
-                <Button Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Content="Login Page" Click="Button_Click" />
             </Frame>
             <Frame x:Name="overlayFrame"
                    x:FieldModifier="public"

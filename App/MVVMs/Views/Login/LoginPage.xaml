@@ -12,7 +12,8 @@
     xmlns:labs="using:CommunityToolkit.Labs.WinUI"
     xmlns:ic="using:Microsoft.Xaml.Interactions.Core"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
-    xmlns:animatedvisuals="using:AnimatedVisuals">
+    xmlns:animatedvisuals="using:AnimatedVisuals"
+    xmlns:wuc="using:WinUICommunity">
 
     <Page.Resources>
         <labs:TransitionHelper x:Key="MyTransitionHelper">
@@ -43,139 +44,256 @@
 
             <labs:TransitionConfig Id="desc"
                                    EnableClipAnimation="True"
-                                   ScaleMode="Custom" />
+                                   ScaleMode="Scale" />
+
+            <labs:TransitionConfig Id="GoogleIcon"
+                                   EnableClipAnimation="True"
+                                   ScaleMode="Scale" />
         </labs:TransitionHelper>
     </Page.Resources>
     <Grid>
+        <!-- SelectView -->
         <Grid x:Name="Select"
               Margin="10"
               Visibility="Visible">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="150" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-            <Grid Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">
-                <Grid Margin="0, 0, 35, 0">
-                    <Border Width="240" Height="350"
-                            labs:TransitionHelper.Id="backgroundReg"
-                            Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
-                            CornerRadius="15" />
-
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                        <Grid Width="240" Height="240"
-                              labs:TransitionHelper.Id="imageReg">
-                            <AnimatedVisualPlayer>
-                                <animatedvisuals:RegisterAnimation />
-                            </AnimatedVisualPlayer>
-                        </Grid>
-                        <Grid Width="240" Height="110">
-                            <Button Click="Register_Click"
-                                    HorizontalAlignment="Center"
-                                    Width="120"
-                                    Height="50"
-                                    CornerRadius="25"
-                                    labs:TransitionHelper.Id="buttonReg" Content="Register">
-                                <i:Interaction.Behaviors>
-                                    <ic:EventTriggerBehavior EventName="Click">
-                                        <labs:StartTransitionAction Source="{Binding ElementName=Select}"
-                                                                    Target="{Binding ElementName=RegisterPanel}"
-                                                                    Transition="{StaticResource MyTransitionHelper}" />
-                                    </ic:EventTriggerBehavior>
-                                </i:Interaction.Behaviors>
-                            </Button>
-                        </Grid>
-                    </StackPanel>
-                </Grid>
+            <Grid Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center"
+                  labs:TransitionHelper.Id="GoogleIcon">
+                <StackPanel Orientation="Vertical">
+                    <Button>
+                        <AnimatedVisualPlayer Height="75">
+                            <animatedvisuals:Google />
+                        </AnimatedVisualPlayer>
+                    </Button>
+                </StackPanel>
             </Grid>
-            <Grid Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left">
-                <Grid Margin="35, 0, 0, 0">
-                    <Border Width="240" Height="350"
-                            labs:TransitionHelper.Id="backgroundLog"
-                            Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
-                            CornerRadius="15" />
 
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                        <Grid Width="240" Height="240"
-                              labs:TransitionHelper.Id="imageLog">
-                            <AnimatedVisualPlayer>
-                                <animatedvisuals:LoginAnimation />
-                            </AnimatedVisualPlayer>
-                        </Grid>
-                        <Grid Width="240" Height="110">
-                            <Button Click="Login_Click"
-                                    HorizontalAlignment="Center"
-                                    Width="120"
-                                    Height="50"
-                                    CornerRadius="25"
-                                    labs:TransitionHelper.Id="buttonLog" Content="Login">
-                                <i:Interaction.Behaviors>
-                                    <ic:EventTriggerBehavior EventName="Click">
-                                        <labs:StartTransitionAction Source="{Binding ElementName=Select}"
-                                                                    Target="{Binding ElementName=LoginPanel}"
-                                                                    Transition="{StaticResource MyTransitionHelper}" />
-                                    </ic:EventTriggerBehavior>
-                                </i:Interaction.Behaviors>
-                            </Button>
-                        </Grid>
-                    </StackPanel>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Right">
+                    <Grid Margin="0, 0, 35, 0">
+                        <Border Width="240" Height="350"
+                                labs:TransitionHelper.Id="backgroundReg"
+                                Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
+                                CornerRadius="15" />
+
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                            <Grid Width="240" Height="240"
+                                  labs:TransitionHelper.Id="imageReg">
+                                <AnimatedVisualPlayer>
+                                    <animatedvisuals:RegisterAnimation />
+                                </AnimatedVisualPlayer>
+                            </Grid>
+                            <Grid Width="240" Height="110">
+                                <Button HorizontalAlignment="Center"
+                                        Width="120"
+                                        Height="50"
+                                        CornerRadius="25"
+                                        Style="{StaticResource AccentButtonStyle}"
+                                        labs:TransitionHelper.Id="buttonReg" Content="Register">
+                                    <i:Interaction.Behaviors>
+                                        <ic:EventTriggerBehavior EventName="Click">
+                                            <labs:StartTransitionAction Source="{Binding ElementName=Select}"
+                                                                        Target="{Binding ElementName=RegisterPanel}"
+                                                                        Transition="{StaticResource MyTransitionHelper}" />
+                                        </ic:EventTriggerBehavior>
+                                    </i:Interaction.Behaviors>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+                <Grid Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Left">
+                    <Grid Margin="35, 0, 0, 0">
+                        <Border Width="240" Height="350"
+                                labs:TransitionHelper.Id="backgroundLog"
+                                Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
+                                CornerRadius="15" />
+
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                            <Grid Width="240" Height="240"
+                                  labs:TransitionHelper.Id="imageLog">
+                                <AnimatedVisualPlayer>
+                                    <animatedvisuals:LoginAnimation />
+                                </AnimatedVisualPlayer>
+                            </Grid>
+                            <Grid Width="240" Height="110">
+                                <Button Click="Login_Click"
+                                        HorizontalAlignment="Center"
+                                        Width="120"
+                                        Height="50"
+                                        CornerRadius="25"
+                                        Style="{StaticResource AccentButtonStyle}"
+                                        labs:TransitionHelper.Id="buttonLog" Content="Login">
+                                    <i:Interaction.Behaviors>
+                                        <ic:EventTriggerBehavior EventName="Click">
+                                            <labs:StartTransitionAction Source="{Binding ElementName=Select}"
+                                                                        Target="{Binding ElementName=LoginPanel}"
+                                                                        Transition="{StaticResource MyTransitionHelper}" />
+                                        </ic:EventTriggerBehavior>
+                                    </i:Interaction.Behaviors>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Grid>
         </Grid>
+
+        <!-- RegisterPanel -->
         <Grid x:Name="RegisterPanel"
               HorizontalAlignment="Center"
               VerticalAlignment="Center"
               Visibility="Collapsed">
+            <Border Width="880" Height="100"
+                    labs:TransitionHelper.Id="backgroundReg"
+                    Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
+                    CornerRadius="30" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Grid Width="880" Height="100">
+                    <TextBox x:Name="UsernameBox"
+                             labs:TransitionHelper.Id="desc"
+                             Tag="UsernameBox"
+                             KeyDown="UsernameBox_OnKeyDown"
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Center"
+                             PlaceholderText="Enter your username here...."
+                             MinWidth="400"
+                             MaxWidth="450">
+                    </TextBox>
+                    <Button labs:TransitionHelper.Id="buttonReg"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Width="100"
+                            Height="100"
+                            CornerRadius="30"
+                            Content="&#xE80D;"
+                            Style="{StaticResource NavigationBackButtonSmallStyle}">
+                        <i:Interaction.Behaviors>
+                            <ic:EventTriggerBehavior EventName="Click">
+                                <labs:StartTransitionAction Source="{Binding ElementName=RegisterPanel}"
+                                                            Target="{Binding ElementName=RegiserFull}"
+                                                            Transition="{StaticResource MyTransitionHelper}" />
+                            </ic:EventTriggerBehavior>
+                        </i:Interaction.Behaviors>
+                    </Button>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <HyperlinkButton labs:TransitionHelper.Id="customText"
+                                         VerticalAlignment="Center"
+                                         HorizontalAlignment="Left"
+                                         Height="100"
+                                         CornerRadius="30">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="10">
+                                <FontIcon Glyph="&#xF0D5;" />
+                                <TextBlock>Go Back</TextBlock>
+                            </StackPanel>
+
+                            <i:Interaction.Behaviors>
+                                <ic:EventTriggerBehavior EventName="Click">
+                                    <labs:StartTransitionAction Source="{Binding ElementName=RegisterPanel}"
+                                                                Target="{Binding ElementName=Select}"
+                                                                Transition="{StaticResource MyTransitionHelper}" />
+                                </ic:EventTriggerBehavior>
+                            </i:Interaction.Behaviors>
+                        </HyperlinkButton>
+                        <Grid Width="90" Height="90"
+                              labs:TransitionHelper.Id="imageReg"
+                              HorizontalAlignment="Left">
+                            <wuc:Gravatar Id="{Binding ElementName=UsernameBox, Path=Text}" />
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+        <!-- RegisterFull -->
+        <Grid x:Name="RegiserFull"
+              Visibility="Collapsed"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center">
             <Border Width="600" Height="600"
                     labs:TransitionHelper.Id="backgroundReg"
                     Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
                     CornerRadius="30" />
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                <Grid Width="200" Height="200"
-                      labs:TransitionHelper.Id="imageReg">
-                    <AnimatedVisualPlayer>
-                        <animatedvisuals:RegisterAnimation />
-                    </AnimatedVisualPlayer>
-                </Grid>
-                <Grid Width="600" Height="350">
-                    <TextBlock x:Name="RegisterError"
-                               labs:TransitionHelper.Id="desc"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               TextAlignment="DetectFromContent"
-                               FontSize="30"
-                               FontWeight="SemiBold"
-                               TextWrapping="WrapWholeWords">
-                    </TextBlock>
-                    <Button Click="Register_Click"
-                            VerticalAlignment="Bottom"
-                            HorizontalAlignment="Right"
-                            Width="100"
-                            Height="40"
-                            Margin="0, 0, 100, 0"
-                            CornerRadius="20"
-                            labs:TransitionHelper.Id="buttonReg" Content="Register">
-                    </Button>
-                    <HyperlinkButton VerticalAlignment="Bottom" HorizontalAlignment="Left"
-                                     Height="40"
-                                     Margin="100, 0, 0, 0"
-                                     CornerRadius="20">
-                        <StackPanel Orientation="Horizontal" Spacing="10" labs:TransitionHelper.Id="customText">
-                            <FontIcon Glyph="&#xF0D5;" />
-                            <TextBlock>Go Back</TextBlock>
-                        </StackPanel>
+            <Grid>
+                <HyperlinkButton labs:TransitionHelper.Id="customText"
+                                 VerticalAlignment="Bottom"
+                                 HorizontalAlignment="Left"
+                                 Height="50"
+                                 Margin="20,0, 0, 20"
+                                 CornerRadius="16">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <FontIcon Glyph="&#xF0D5;" />
+                        <TextBlock>Go Back</TextBlock>
+                    </StackPanel>
 
-                        <i:Interaction.Behaviors>
-                            <ic:EventTriggerBehavior EventName="Click">
-                                <labs:StartTransitionAction Source="{Binding ElementName=RegisterPanel}"
-                                                            Target="{Binding ElementName=Select}"
-                                                            Transition="{StaticResource MyTransitionHelper}" />
-                            </ic:EventTriggerBehavior>
-                        </i:Interaction.Behaviors>
-                    </HyperlinkButton>
+                    <i:Interaction.Behaviors>
+                        <ic:EventTriggerBehavior EventName="Click">
+                            <labs:StartTransitionAction Source="{Binding ElementName=RegiserFull}"
+                                                        Target="{Binding ElementName=Select}"
+                                                        Transition="{StaticResource MyTransitionHelper}" />
+                        </ic:EventTriggerBehavior>
+                    </i:Interaction.Behaviors>
+                </HyperlinkButton>
+
+                <Button labs:TransitionHelper.Id="buttonReg"
+                        Click="Register_Click"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Right"
+                        Width="100"
+                        Height="50"
+                        Margin="0, 0, 20, 20"
+                        CornerRadius="16"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Content="Regiser">
+                    <i:Interaction.Behaviors>
+                        <ic:EventTriggerBehavior EventName="Click">
+                            <labs:StartTransitionAction Source="{Binding ElementName=RegiserFull}"
+                                                        Target="{Binding ElementName=LoginPanel}"
+                                                        Transition="{StaticResource MyTransitionHelper}" />
+                        </ic:EventTriggerBehavior>
+                    </i:Interaction.Behaviors>
+                </Button>
+
+                <Grid VerticalAlignment="Top"
+                      HorizontalAlignment="Center">
+                    <StackPanel labs:TransitionHelper.Id="desc"
+                                Margin="0 , 100, 0 , 0"
+                                Spacing="20">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="10">
+                            <Grid Width="50" Height="50"
+                                  HorizontalAlignment="Left">
+                                <wuc:Gravatar Id="{Binding ElementName=UsernameBox, Path=Text}" />
+                            </Grid>
+                            <TextBox VerticalAlignment="Center"
+                                     HorizontalAlignment="Center"
+                                     Text="{Binding ElementName=UsernameBox, Path=Text}"
+                                     IsEnabled="False"
+                                     MinWidth="400" MaxWidth="450">
+                            </TextBox>
+                        </StackPanel>
+                        <PasswordBox Header="Password" PlaceholderText="Enter your password." />
+                        <PasswordBox Header="Confirm Password" PlaceholderText="Enter your password again." />
+                        <StackPanel>
+                            <CheckBox Content="Accept term and service" />
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
-            </StackPanel>
+            </Grid>
         </Grid>
+
+        <!-- LoginPanel -->
         <Grid x:Name="LoginPanel"
               Margin="0,30"
               HorizontalAlignment="Center"

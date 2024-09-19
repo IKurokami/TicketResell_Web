@@ -1,38 +1,23 @@
 ﻿using System;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
+using WinUICommunity;
 
 namespace App
 {
     public partial class App : Application
     {
-        public IHost Host
-        {
-            get;
-        }
-
-        public static T GetService<T>()
-            where T : class
-        {
-            if ((Current as App)!.Host.Services.GetService(typeof(T)) is not T service)
-            {
-                throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.");
-            }
-
-            return service;
-        }
-
         public App()
         {
             this.InitializeComponent();
             UnhandledException += App_UnhandledException;
-
-            Host = Microsoft.Extensions.Hosting.Host
-                .CreateDefaultBuilder()
-                .UseContentRoot(AppContext.BaseDirectory)
-                .ConfigureServices((context, services) =>
-                {
-                }).Build();
+            
+            Ioc.Default.ConfigureServices(new ServiceCollection()
+                .InstallServices().BuildServiceProvider());
+            
+            Startup.InstallFrame();
         }
 
         private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
@@ -42,10 +27,12 @@ namespace App
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            MainWindow = new MainWindow();
+            MainWindow = Ioc.Default.GetService<MainWindow>();
             MainWindow.Activate();
         }
 
-        public WindowEx MainWindow;
+        public static WindowEx MainWindow { get; set; }
+
+        public static UIElement? AppTitlebar { get; set; }
     }
 }

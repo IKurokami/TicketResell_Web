@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Page
+    x:Class="App.MVVMs.Views.Home.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:entities="using:Backend.Core.Entities"
+    xmlns:converter="using:App.Converters"
+    xmlns:marqueeText="using:CommunityToolkit.Labs.WinUI.MarqueeTextRns">
+
+    <Page.Resources>
+        <converter:DateTimeConverter x:Key="DateTimeConverter" />
+        <converter:CurrencyConverter x:Key="CurrencyConverter" />
+        <converter:StatusToColorConverter x:Key="StatusToColorConverter" />
+        <converter:EventInfoConverter x:Key="EventInfoConverter" />
+
+        <DataTemplate x:Key="SelectedTagsTemplate" x:DataType="x:String">
+            <TextBlock Text="{Binding}" Margin="0,5,0,5" />
+        </DataTemplate>
+        <DataTemplate x:Key="TicketTemplate" x:DataType="entities:Ticket">
+            <Border CornerRadius="5" Padding="10" Margin="5">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="5"
+                           Source="{x:Bind TicketImage}"
+                           Width="120" Height="120"
+                           Stretch="Uniform"
+                           Margin="0,0,10,0" />
+
+                    <TextBlock Grid.Row="0" Grid.Column="1"
+                               Text="{x:Bind Name}"
+                               FontSize="18" FontWeight="Bold" />
+
+
+                    <marqueeText:MarqueeText
+                        Grid.Row="1" Grid.Column="1"
+                        Behavior="Ticker"
+                        Direction="Left"
+                        FontSize="18"
+                        RepeatBehavior="Forever"
+                        Speed="40"
+                        Text="{x:Bind Converter={StaticResource EventInfoConverter}}">
+                    </marqueeText:MarqueeText>
+                    
+                    <TextBlock Grid.Row="2" Grid.Column="1"
+                               Text="{x:Bind EventLocation}" />
+
+                    <StackPanel Grid.Row="3" Grid.Column="1"
+                                Orientation="Horizontal"
+                                Margin="0,5,0,0">
+                        <TextBlock Text="Price: " />
+                        <TextBlock Text="{x:Bind ResalePrice, Converter={StaticResource CurrencyConverter}}"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text=" (Original: " Margin="5,0,0,0" />
+                        <TextBlock Text="{x:Bind OriginalPrice, Converter={StaticResource CurrencyConverter}}" />
+                        <TextBlock Text=")" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Grid.Column="1"
+                                Orientation="Horizontal"
+                                Margin="0,5,0,0">
+                        <TextBlock Text="Status: " />
+                        <TextBlock Text="{x:Bind TicketStatus}"
+                                   Foreground="{x:Bind TicketStatus, Converter={StaticResource StatusToColorConverter}}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+    <TabView
+        x:Name="MainTabView"
+        TabWidthMode="Equal"
+        IsAddTabButtonVisible="False"
+        CloseButtonOverlayMode="OnPointerOver"
+        TabCloseRequested="TabView_TabCloseRequested">
+        <TabView.TabItems>
+            <TabViewItem x:Name="HomeView" Header="Home" IsClosable="False">
+                <TabViewItem.IconSource>
+                    <SymbolIconSource Symbol="Shop" />
+                </TabViewItem.IconSource>
+                <Grid Margin="10, 0, 10, 0" VerticalAlignment="Top">
+                    <controls:TokenizingTextBox x:Name="TokenBox"
+                                                VerticalAlignment="Top"
+                                                Height="50"
+                                                Margin="50, 0, 50, 0"
+                                                PlaceholderText="Search for keywork...."
+                                                ItemsSource="{x:Bind SelectedTags, Mode=TwoWay}">
+                    </controls:TokenizingTextBox>
+                    <ScrollView VerticalAlignment="Top" Margin="0, 60, 0, 0">
+                        <StackPanel Margin="10, 0">
+                            <RefreshContainer x:Name="rc"
+                                              RefreshRequested="Rc_OnRefreshRequested"
+                                              MinHeight="600">
+                                <GridView x:Name="TicketView"
+                                          ItemsSource="{x:Bind ViewModel.tickets}"
+                                          ItemTemplate="{StaticResource TicketTemplate}"
+                                          IsItemClickEnabled="True"
+                                          ItemClick="TicketView_OnItemClick"
+                                          CanDrag="True"
+                                          CanReorderItems="True">
+                                    <GridView.ItemContainerTransitions>
+                                        <TransitionCollection>
+                                            <ContentThemeTransition />
+                                        </TransitionCollection>
+                                    </GridView.ItemContainerTransitions>
+                                </GridView>
+                            </RefreshContainer>
+                        </StackPanel>
+                    </ScrollView>
+                </Grid>
+            </TabViewItem>
+        </TabView.TabItems>
+    </TabView>
+</Page>

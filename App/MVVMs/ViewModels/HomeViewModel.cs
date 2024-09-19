@@ -1,13 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using WinUICommunity;
 
 namespace App.MVVMs.ViewModels
 {
-    public partial class HomeViewModel : ObservableObject
+    public partial class HomeViewModel : ObservableRecipient
     {
+        public ObservableCollection<Ticket> tickets { get; } = new ObservableCollection<Ticket>();
+
+        public HomeViewModel()
+        {
+            ReloadData();
+        }
+
+        public void ReloadData()
+        {
+            tickets.Clear();
+            GC.Collect();
+            tickets.AddRange(SampleData.AllData.Tickets);
+        }
+
+        public void FindWithTag(IList<string> tags)
+        {
+            ReloadData();
+
+            foreach (var tag in tags)
+            {
+                var removed = tickets.ToList().Where(t => !t.Name.ToLower().Contains(tag.ToLower()));
+
+                foreach (var t in removed)
+                    tickets.Remove(t);
+            }
+        }
     }
 }

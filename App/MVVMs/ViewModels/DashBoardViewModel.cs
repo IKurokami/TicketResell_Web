@@ -2,11 +2,10 @@
 
 namespace App.MVVMs.ViewModels
 {
-    public partial class LoginViewModel : ObservableRecipient
+    public partial class DashBoardViewModel : ObservableRecipient
     {
-        public LoginViewModel()
+        public DashBoardViewModel()
         {
-            
         }
     }
 }

@@ -1,22 +1,24 @@
 ﻿using System;
+using App.Contracts.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 
 namespace App.MVVMs.ViewModels
 {
-    public partial class MainWindowViewModel : ObservableObject
+    public partial class MainWindowViewModel : ObservableRecipient
     {
         public MainWindowViewModel()
         {
         }
 
-
-        private Grid? MainGrid { get; set; }
-        private Grid? RootFrameGrid { get; set; }
-        private Frame? RootFrame { get; set; }
-        private Frame? OverlayFrame { get; set; }
-
+        public Grid? MainGrid { get; set; }
+        public Grid? RootFrameGrid { get; set; }
+        public Frame? RootFrame { get; set; }
+        public Frame? OverlayFrame { get; set; }
+        public DispatcherQueue? TheDispatcherQueue { get; set; }
         public void NavigateRootFrame(Type type)
         {
             RootFrame?.Navigate(type, null, new ContinuumNavigationTransitionInfo());
@@ -25,6 +27,12 @@ namespace App.MVVMs.ViewModels
         public void NavigateOverlayFrame(Type type)
         {
             OverlayFrame?.Navigate(type, null, new ContinuumNavigationTransitionInfo());
+        }
+
+        public void NavigateRootGrid(UIElement content)
+        {
+            RootFrameGrid?.Children.Clear();
+            RootFrameGrid?.Children.Add(content);
         }
     }
 }
