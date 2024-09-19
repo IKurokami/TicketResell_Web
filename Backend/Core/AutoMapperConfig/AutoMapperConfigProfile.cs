@@ -6,9 +6,9 @@ namespace Backend.Core.AutoMapperConfig
 {
     public class AutoMapperConfigProfile : Profile
     {
-        public AutoMapperConfigProfile()
+        public AutoMapperConfigProfile() 
         {
-            CreateMap<UserCreateDto, User>();
+            CreateMap<UserCreateDto, User>();  
         }
     }
 }

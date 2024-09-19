@@ -55,6 +55,8 @@ public partial class TicketResellManagementContext : DbContext
 
             entity.ToTable("Order");
 
+            entity.HasIndex(e => e.BuyerId, "IX_Order_BuyerId");
+
             entity.Property(e => e.OrderId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -72,6 +74,10 @@ public partial class TicketResellManagementContext : DbContext
             entity.HasKey(e => e.OrderDetailId).HasName("PK__OrderDet__D3B9D36C61677EDA");
 
             entity.ToTable("OrderDetail");
+
+            entity.HasIndex(e => e.OrderId, "IX_OrderDetail_OrderId");
+
+            entity.HasIndex(e => e.TicketId, "IX_OrderDetail_TicketId");
 
             entity.Property(e => e.OrderDetailId)
                 .HasMaxLength(50)
@@ -97,6 +103,8 @@ public partial class TicketResellManagementContext : DbContext
             entity.HasKey(e => e.RevenueId).HasName("PK__Revenue__275F16DD1765A79B");
 
             entity.ToTable("Revenue");
+
+            entity.HasIndex(e => e.SellerId, "IX_Revenue_SellerId");
 
             entity.Property(e => e.RevenueId)
                 .HasMaxLength(50)
@@ -146,6 +154,8 @@ public partial class TicketResellManagementContext : DbContext
 
             entity.ToTable("Ticket");
 
+            entity.HasIndex(e => e.SellerId, "IX_Ticket_SellerId");
+
             entity.Property(e => e.TicketId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -177,6 +187,7 @@ public partial class TicketResellManagementContext : DbContext
                     {
                         j.HasKey("TicketId", "CategoryId").HasName("PK__TicketCa__D0BC55A783CF062B");
                         j.ToTable("TicketCategory");
+                        j.HasIndex(new[] { "CategoryId" }, "IX_TicketCategory_CategoryId");
                         j.IndexerProperty<string>("TicketId")
                             .HasMaxLength(50)
                             .IsUnicode(false);
@@ -191,6 +202,8 @@ public partial class TicketResellManagementContext : DbContext
             entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4CA0A0D49E");
 
             entity.ToTable("User");
+
+            entity.HasIndex(e => e.SellConfigId, "IX_User_SellConfigId");
 
             entity.Property(e => e.UserId)
                 .HasMaxLength(50)
@@ -244,6 +257,7 @@ public partial class TicketResellManagementContext : DbContext
                     {
                         j.HasKey("UserId", "RoleId").HasName("PK__UserRole__AF2760AD6F602E5A");
                         j.ToTable("UserRole");
+                        j.HasIndex(new[] { "RoleId" }, "IX_UserRole_RoleId");
                         j.IndexerProperty<string>("UserId")
                             .HasMaxLength(50)
                             .IsUnicode(false);
