@@ -4,6 +4,7 @@ using Backend.Utils;
 using DotNetEnv;
 using Backend.Core.Context;
 using Backend.Repositories;
+using Backend.Repositories.SellConfig_Repository;
 
 Env.Load();
 
@@ -16,6 +17,8 @@ builder.Services.AddDbContext<TicketResellManagementContext>();
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<ISellConfigRepository, SellConfigRepository>();
 
 // Add services to the container.
 builder.Services.AddControllers();
