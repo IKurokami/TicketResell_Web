@@ -2,7 +2,6 @@ using AutoMapper;
 using Backend.Core.Entities;
 using Backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using Backend.Core.Dtos.User;
 
 namespace Backend.Controllers
