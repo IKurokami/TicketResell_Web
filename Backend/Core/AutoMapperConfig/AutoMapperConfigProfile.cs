@@ -13,10 +13,8 @@ namespace Backend.Core.AutoMapperConfig
             CreateMap<UserCreateDto, User>();
             
             //Order
-            CreateMap<OrderCreateDto, Order>();
-            CreateMap<OrderUpdateDto, Order>();
-            CreateMap<Order, OrderReadDto>();
-            
+            CreateMap<OrderDto, Order>();
+
             //OrderDetail
             CreateMap<OrderDetailCreateDto, OrderDetail>();
             CreateMap<OrderDetailUpdateDto, OrderDetail>();

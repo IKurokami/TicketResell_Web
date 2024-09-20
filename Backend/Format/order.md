@@ -10,10 +10,7 @@
   ```json
   {
     "OrderId": "ORD1",
-    "BuyerId": "BUY1",
-    "Total": 100.50,
-    "Date": "2024-09-20T10:00:00Z",
-    "Status": 1
+    "BuyerId": "BUY1"
   }
   ```
 
@@ -101,8 +98,8 @@
 - **Input:**   
   ```json
   {
-  "Min": 50.00,
-  "Max": 200.00
+    "StartDate": "2024-09-20T00:00:00",
+    "EndDate": "2024-09-21T23:59:59"
   }
   ```
 - **Output:**
@@ -130,7 +127,13 @@
 ### **Get Orders by Total Price Range (`api/order/pricerange`)**
 
 - **Method:** `GET`
-- **Input:** Query parameters: minPrice, maxPrice
+- **Input:**   
+  ```json
+  {
+  "Min": 50.00,
+  "Max": 200.00
+  }
+  ```
 - **Output:**
   ```json
   [

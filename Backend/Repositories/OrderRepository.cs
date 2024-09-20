@@ -26,17 +26,18 @@ namespace Backend.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(Core.Helper.DateRange dateRange)
         {
+            var x = dateRange;
             return await context.Orders
-                .Where(o => o != null && o.Date >= startDate && o.Date <= endDate)
+                .Where(o => o != null && o.Date >= dateRange.StartDate && o.Date <= dateRange.EndDate)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(double minPrice, double maxPrice)
+        public async Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(Core.Helper.DoubleRange priceDoubleRange)
         {
             return await context.Orders
-                .Where(o => o != null && o.Total >= minPrice && o.Total <= maxPrice)
+                .Where(o => o != null && o.Total >= priceDoubleRange.Min && o.Total <= priceDoubleRange.Max)
                 .ToListAsync();
         }
 

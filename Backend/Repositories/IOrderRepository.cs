@@ -9,8 +9,8 @@ public interface IOrderRepository
     Task<Order?> GetOrderByIdAsync(string orderId);
     Task<IEnumerable<Order?>> GetAllOrdersAsync();
     Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId);
-    Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateTime startDate, DateTime endDate);
-    Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(double minPrice, double maxPrice);
+    Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(Core.Helper.DateRange dateRange);
+    Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(Core.Helper.DoubleRange priceDoubleRange);
 
     Task UpdateOrderAsync(Order? order);
 
