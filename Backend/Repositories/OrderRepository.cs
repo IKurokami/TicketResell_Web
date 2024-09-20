@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Core.Context;
 using Backend.Core.Entities;
+using Backend.Core.Helper;
 
 namespace Backend.Repositories
 {
@@ -12,36 +13,35 @@ namespace Backend.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<Order?> GetOrderByIdAsync(string orderId) => await context.Orders.FirstOrDefaultAsync(o => o != null && o.OrderId == orderId);
+        public async Task<Order> GetOrderByIdAsync(string orderId) => (await context.Orders.FirstOrDefaultAsync(o => o != null && o.OrderId == orderId))!;
 
-        public async Task<IEnumerable<Order?>> GetAllOrdersAsync()
+        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
         {
-            return await context.Orders.ToListAsync();
+            return (await context.Orders.ToListAsync())!;
         }
 
-        public async Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId)
+        public async Task<IEnumerable<Order>> GetOrdersByBuyerIdAsync(string buyerId)
         {
-            return await context.Orders
+            return (await context.Orders
                 .Where(o => o != null && o.BuyerId == buyerId)
-                .ToListAsync();
+                .ToListAsync())!;
         }
 
-        public async Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(Core.Helper.DateRange dateRange)
+        public async Task<IEnumerable<Order>> GetOrdersByDateRangeAsync(DateRange dateRange)
         {
-            var x = dateRange;
-            return await context.Orders
+            return (await context.Orders
                 .Where(o => o != null && o.Date >= dateRange.StartDate && o.Date <= dateRange.EndDate)
-                .ToListAsync();
+                .ToListAsync())!;
         }
 
-        public async Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(Core.Helper.DoubleRange priceDoubleRange)
+        public async Task<IEnumerable<Order>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceDoubleRange)
         {
-            return await context.Orders
+            return (await context.Orders
                 .Where(o => o != null && o.Total >= priceDoubleRange.Min && o.Total <= priceDoubleRange.Max)
-                .ToListAsync();
+                .ToListAsync())!;
         }
 
-        public async Task UpdateOrderAsync(Order? order)
+        public async Task UpdateOrderAsync(Order order)
         {
             context.Orders.Update(order);
             await context.SaveChangesAsync();

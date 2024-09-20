@@ -60,14 +60,14 @@ namespace Backend.Controllers
             return Ok(orders);
         }
 
-        [HttpGet("daterange")]
+        [HttpPost("daterange")]
         public async Task<IActionResult> GetOrdersByDateRange(Core.Helper.DateRange dateRange)
         {
             var orders = await _orderRepository.GetOrdersByDateRangeAsync(dateRange);
             return Ok(orders);
         }
 
-        [HttpGet("pricerange")]
+        [HttpPost("pricerange")]
         public async Task<IActionResult> GetOrdersByTotalPriceRange([FromBody] Core.Helper.DoubleRange priceDoubleRange)
         {
             var orders = await _orderRepository.GetOrdersByTotalPriceRangeAsync(priceDoubleRange);

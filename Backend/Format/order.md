@@ -94,7 +94,7 @@
 
 ### **Get Orders by Date Range (`api/order/daterange`)**
 
-- **Method:** `GET`
+- **Method:** `POST`
 - **Input:**   
   ```json
   {
@@ -126,7 +126,7 @@
 
 ### **Get Orders by Total Price Range (`api/order/pricerange`)**
 
-- **Method:** `GET`
+- **Method:** `POST`
 - **Input:**   
   ```json
   {
