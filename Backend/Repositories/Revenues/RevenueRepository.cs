@@ -1,11 +1,11 @@
 using Backend.Core.Context;
 using Microsoft.EntityFrameworkCore;
-using Revenue= Backend.Core.Entities.Revenue;
-namespace Backend.Repositories.Revenues;
+using Backend.Core.Entities;
+namespace Backend.Repositories;
 
 public class RevenueRepository(TicketResellManagementContext context) : IRevenueRepository
 {
-    
+
     public async Task CreateRevenue(Revenue revenue)
     {
         await context.Revenues.AddAsync(revenue);
@@ -24,7 +24,7 @@ public class RevenueRepository(TicketResellManagementContext context) : IRevenue
 
     public async Task<List<Revenue>> GetRevenuesBySellerId_Month(string sellerId, string month)
     {
-        
+
         return await context.Revenues.Where(r => r.SellerId == sellerId && r.Type == month).ToListAsync();
     }
 
@@ -41,8 +41,8 @@ public class RevenueRepository(TicketResellManagementContext context) : IRevenue
         return await context.Revenues.Where(x => x.SellerId == id).ToListAsync();
     }
 
-    
-    
+
+
     public async Task DeleteRevenue(Revenue revenue)
     {
         context.Revenues.Remove(revenue);

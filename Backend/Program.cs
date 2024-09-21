@@ -4,7 +4,6 @@ using Backend.Utils;
 using DotNetEnv;
 using Backend.Core.Context;
 using Backend.Repositories;
-using Backend.Repositories.Revenues;
 
 Env.Load();
 
