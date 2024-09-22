@@ -16,9 +16,7 @@ namespace Backend.Core.AutoMapperConfig
             CreateMap<OrderDto, Order>();
 
             //OrderDetail
-            CreateMap<OrderDetailCreateDto, OrderDetail>();
-            CreateMap<OrderDetailUpdateDto, OrderDetail>();
-            CreateMap<OrderDetail, OrderDetailReadDto>();
+            CreateMap<OrderDetail, OrderDetailDto>();
         }
     }
 }

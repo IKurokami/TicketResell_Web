@@ -7,11 +7,11 @@ public interface IOrderRepository
 {
     Task CreateOrderAsync(Order order);
 
-    Task<Order> GetOrderByIdAsync(string orderId);
-    Task<IEnumerable<Order>> GetAllOrdersAsync();
-    Task<IEnumerable<Order>> GetOrdersByBuyerIdAsync(string buyerId);
-    Task<IEnumerable<Order>> GetOrdersByDateRangeAsync(DateRange dateRange);
-    Task<IEnumerable<Order>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceDoubleRange);
+    Task<Order?> GetOrderByIdAsync(string orderId);
+    Task<IEnumerable<Order?>> GetAllOrdersAsync();
+    Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId);
+    Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateRange dateRange);
+    Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceDoubleRange);
 
     Task UpdateOrderAsync(Order order);
 

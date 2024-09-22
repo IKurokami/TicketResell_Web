@@ -22,7 +22,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrderDetail([FromBody] OrderDetailCreateDto dto)
+        public async Task<IActionResult> CreateOrderDetail([FromBody] OrderDetailDto dto)
         {
             if (dto.OrderId == null)
             {
@@ -36,13 +36,11 @@ namespace Backend.Controllers
 
             var orderDetail = _mapper.Map<OrderDetail>(dto);
             await _orderDetailRepository.CreateOrderDetailAsync(orderDetail);
-            
-            var readDto = _mapper.Map<OrderDetailReadDto>(orderDetail);
-            return CreatedAtAction(nameof(GetOrderDetail), new { id = orderDetail.OrderDetailId }, readDto);
+            return Ok(new { message = $"Successfully created orderDetail: {orderDetail.OrderDetailId}" });
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDetailReadDto>> GetOrderDetail(string id)
+        public async Task<ActionResult<OrderDetailDto>> GetOrderDetail(string id)
         {
             var orderDetail = await _orderDetailRepository.GetOrderDetailByIdAsync(id);
             if (orderDetail == null)
@@ -50,7 +48,7 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<OrderDetailReadDto>(orderDetail));
+            return Ok(_mapper.Map<OrderDetailDto>(orderDetail));
         }
 
         [HttpGet]
@@ -74,10 +72,13 @@ namespace Backend.Controllers
             return Ok(orderDetails);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateOrderDetail(string id, [FromBody] OrderDetailUpdateDto dto)
+        [HttpPut]
+        public async Task<IActionResult> UpdateOrderDetail([FromBody] OrderDetailDto dto)
         {
-            var existingOrderDetail = await _orderDetailRepository.GetOrderDetailByIdAsync(id);
+            if(dto.OrderDetailId == null)
+                return BadRequest(new { message = "Body data required" });
+
+            var existingOrderDetail = await _orderDetailRepository.GetOrderDetailByIdAsync(dto.OrderDetailId);
             if (existingOrderDetail == null)
             {
                 return NotFound();

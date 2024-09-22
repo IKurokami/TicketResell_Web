@@ -12,12 +12,9 @@ public class ApiRepository : IApiRepository
 {
     private readonly HttpClient _httpClient;
 
-    public ApiRepository()
+    public ApiRepository(HttpClient httpClient)
     {
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(Configuration.APIUrl)
-        };
+        _httpClient = httpClient;
     }
 
     private string UrlBuilder(string endpoint, params string[] parameters)
@@ -31,20 +28,44 @@ public class ApiRepository : IApiRepository
         return url;
     }
 
-    public async Task<T> GetAsync<T>(string endpoint)
-    {
-        return await GetAsync<T>(endpoint, null);
-    }
-
-    public async Task<T> GetAsync<T>(string endpoint, params string[] parameters)
+    private async Task<T> HttpRequestAsync<T>(string endpoint, HttpMethod method, object data,
+        params string[] parameters)
     {
         T result = default(T);
         try
         {
-            var response = await _httpClient.GetAsync(UrlBuilder(endpoint, parameters));
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            result = await ToObjectAsync<T>(content);
+            HttpResponseMessage? response = null;
+
+            var json = await StringifyAsync(data);
+            var body = new StringContent(json, Encoding.UTF8, "application/json");
+
+            if (method == HttpMethod.Get)
+            {
+                response = await _httpClient.GetAsync(UrlBuilder(endpoint, parameters));
+            }
+            else if (method == HttpMethod.Post)
+            {
+                response = await _httpClient.PostAsync(UrlBuilder(endpoint, parameters), body);
+            }
+            else if (method == HttpMethod.Put)
+            {
+                response = await _httpClient.PutAsync(UrlBuilder(endpoint, parameters), body);
+            }
+            else if (method == HttpMethod.Delete)
+            {
+                response = await _httpClient.DeleteAsync(UrlBuilder(endpoint, parameters));
+            }
+            else
+            {
+                response = await _httpClient.PostAsync(UrlBuilder(endpoint, parameters), body);
+            }
+
+            if (response != null)
+            {
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                result = await ToObjectAsync<T>(content);
+            }
         }
         catch (HttpRequestException httpRequestException)
         {
@@ -54,6 +75,16 @@ public class ApiRepository : IApiRepository
         }
 
         return result;
+    }
+
+    public async Task<T> GetAsync<T>(string endpoint)
+    {
+        return await GetAsync<T>(endpoint, null);
+    }
+
+    public async Task<T> GetAsync<T>(string endpoint, params string[] parameters)
+    {
+        return await HttpRequestAsync<T>(endpoint, HttpMethod.Get, null, parameters);
     }
 
     public async Task<T> PostAsync<T>(string endpoint, object data)
@@ -63,25 +94,8 @@ public class ApiRepository : IApiRepository
 
     public async Task<T> PostAsync<T>(string endpoint, object data, params string[] parameters)
     {
-        T result = default(T);
+        return await HttpRequestAsync<T>(endpoint, HttpMethod.Post, data, parameters);
 
-        try
-        {
-            var json = await StringifyAsync(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(UrlBuilder(endpoint, parameters), content);
-            response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            result = await ToObjectAsync<T>(responseContent);
-        }
-        catch (HttpRequestException httpRequestException)
-        {
-        }
-        catch (Exception exception)
-        {
-        }
-
-        return result;
     }
 
     public async Task<T> PutAsync<T>(string endpoint, object data)
@@ -91,24 +105,8 @@ public class ApiRepository : IApiRepository
 
     public async Task<T> PutAsync<T>(string endpoint, object data, params string[] parameters)
     {
-        T result = default(T);
-        try
-        {
-            var json = JsonConvert.SerializeObject(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync(UrlBuilder(endpoint, parameters), content);
-            response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            result = await ToObjectAsync<T>(responseContent);
-        }
-        catch (HttpRequestException httpRequestException)
-        {
-        }
-        catch (Exception exception)
-        {
-        }
+        return await HttpRequestAsync<T>(endpoint, HttpMethod.Put, data, parameters);
 
-        return result;
     }
 
     public async Task<T> DeleteAsync<T>(string endpoint)
@@ -118,21 +116,7 @@ public class ApiRepository : IApiRepository
 
     public async Task<T> DeleteAsync<T>(string endpoint, params string[] parameters)
     {
-        T result = default(T);
-        try
-        {
-            var response = await _httpClient.DeleteAsync(UrlBuilder(endpoint, parameters));
-            response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            result = await ToObjectAsync<T>(responseContent);
-        }
-        catch (HttpRequestException httpRequestException)
-        {
-        }
-        catch (Exception exception)
-        {
-        }
+        return await HttpRequestAsync<T>(endpoint, HttpMethod.Delete, null, parameters);
 
-        return result;
     }
 }
