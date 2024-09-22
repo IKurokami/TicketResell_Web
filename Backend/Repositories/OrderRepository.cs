@@ -43,7 +43,7 @@ namespace Backend.Repositories
 
         public async Task UpdateOrderAsync(Order order)
         {
-            context.Orders.Update(order);
+            context.Orders.Entry(order).State = EntityState.Modified;
             await context.SaveChangesAsync();
         }
 
