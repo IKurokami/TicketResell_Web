@@ -3,7 +3,7 @@
 using AutoMapper;
 using Backend.Core.Dtos.SellConfig;
 using Backend.Core.Entities;
-using Backend.Repositories.SellConfig_Repository;
+using Backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers
@@ -44,7 +44,7 @@ namespace Backend.Controllers
         [Route("update/{sellConfigId}")]
         public async Task<IActionResult> updateSellConfig(string sellConfigId, [FromBody] SellConfigUpdateDto dto )
         {
-            var sellConfig = await _sellConfigRepository.getSellConfigById(sellConfigId);
+            var sellConfig = await _sellConfigRepository.getSellConfigByIdAsync(sellConfigId);
             if (sellConfig == null)
             {
                 return NotFound($"SellConfig with ID {sellConfigId} not exist");
@@ -59,7 +59,7 @@ namespace Backend.Controllers
         [Route("delete/{sellConfigId}")]
         public async Task<ActionResult<SellConfig>> deleteSellConfig(string sellConfigId)
         {
-            var sellConfig = await _sellConfigRepository.getSellConfigById(sellConfigId);
+            var sellConfig = await _sellConfigRepository.getSellConfigByIdAsync(sellConfigId);
             if (sellConfig == null)
             {
                 return NotFound($"SellConfig with ID {sellConfigId} not exist");

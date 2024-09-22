@@ -4,7 +4,6 @@ using Backend.Utils;
 using DotNetEnv;
 using Backend.Core.Context;
 using Backend.Repositories;
-using Backend.Repositories.SellConfig_Repository;
 
 Env.Load();
 
@@ -19,6 +18,7 @@ builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<ISellConfigRepository, SellConfigRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
 // Add services to the container.
 builder.Services.AddControllers();

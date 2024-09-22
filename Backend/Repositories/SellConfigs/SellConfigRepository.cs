@@ -3,7 +3,7 @@ using Backend.Core.Context;
 using Backend.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Repositories.SellConfig_Repository
+namespace Backend.Repositories
 {
     public class SellConfigRepository: ISellConfigRepository
     {
@@ -25,7 +25,7 @@ namespace Backend.Repositories.SellConfig_Repository
             IEnumerable<SellConfig> sellConfigs = await _context.SellConfigs.ToListAsync();
             return sellConfigs;
         }
-        public async Task<SellConfig?> getSellConfigById(string sellConfigId)
+        public async Task<SellConfig?> getSellConfigByIdAsync(string sellConfigId)
         {
             return await _context.SellConfigs.FindAsync(sellConfigId);
         }
