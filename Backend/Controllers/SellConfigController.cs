@@ -21,8 +21,7 @@ namespace Backend.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost]
-        [Route("create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateSellConfig([FromBody] SellConfigCreateDto dto)
         {
             SellConfig sellConfig = _mapper.Map<SellConfig>(dto);
@@ -30,8 +29,7 @@ namespace Backend.Controllers
             return Ok(new { message = $"Successfully created SellConfig: {dto.SellConfigId}"});
         }
 
-        [HttpGet]
-        [Route("read")]
+        [HttpGet("read")]
         public async Task<ActionResult<IEnumerable<SellConfig>>> ReadSellConfig()
         {
             var sellConfigs = await _sellConfigRepository.ReadSellConfigAsync();
@@ -40,8 +38,7 @@ namespace Backend.Controllers
                     
         }
 
-        [HttpPut]
-        [Route("update/{sellConfigId}")]
+        [HttpPut("update/{sellConfigId}")]
         public async Task<IActionResult> UpdateSellConfig(string sellConfigId, [FromBody] SellConfigUpdateDto dto )
         {
             var sellConfig = await _sellConfigRepository.GetSellConfigByIdAsync(sellConfigId);
@@ -55,8 +52,7 @@ namespace Backend.Controllers
 
         }
 
-        [HttpDelete]
-        [Route("delete/{sellConfigId}")]
+        [HttpDelete("delete/{sellConfigId}")]
         public async Task<ActionResult<SellConfig>> DeleteSellConfig(string sellConfigId)
         {
             var sellConfig = await _sellConfigRepository.GetSellConfigByIdAsync(sellConfigId);
