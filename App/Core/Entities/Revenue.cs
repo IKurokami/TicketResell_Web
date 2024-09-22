@@ -5,11 +5,17 @@ namespace Backend.Core.Entities;
 
 public partial class Revenue
 {
-    public int? UserId { get; set; }
+    public string RevenueId { get; set; } = null!;
 
-    public decimal? TotalIncome { get; set; }
+    public string? SellerId { get; set; }
 
-    public DateTime LastUpdated { get; set; }
+    public DateTime? StartDate { get; set; }
 
-    public virtual User? User { get; set; }
+    public DateTime? EndDate { get; set; }
+
+    public double? Revenue1 { get; set; }
+
+    public string? Type { get; set; }
+
+    public virtual User? Seller { get; set; }
 }

@@ -38,7 +38,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="5"
-                           Source="{x:Bind TicketImage}"
+                           Source="{x:Bind Image}"
                            Width="120" Height="120"
                            Stretch="Uniform"
                            Margin="0,0,10,0" />
@@ -59,25 +59,22 @@
                     </marqueeText:MarqueeText>
                     
                     <TextBlock Grid.Row="2" Grid.Column="1"
-                               Text="{x:Bind EventLocation}" />
+                               Text="{x:Bind Location}" />
 
                     <StackPanel Grid.Row="3" Grid.Column="1"
                                 Orientation="Horizontal"
                                 Margin="0,5,0,0">
                         <TextBlock Text="Price: " />
-                        <TextBlock Text="{x:Bind ResalePrice, Converter={StaticResource CurrencyConverter}}"
+                        <TextBlock Text="{x:Bind Cost, Converter={StaticResource CurrencyConverter}}"
                                    FontWeight="SemiBold" />
-                        <TextBlock Text=" (Original: " Margin="5,0,0,0" />
-                        <TextBlock Text="{x:Bind OriginalPrice, Converter={StaticResource CurrencyConverter}}" />
-                        <TextBlock Text=")" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="4" Grid.Column="1"
                                 Orientation="Horizontal"
                                 Margin="0,5,0,0">
                         <TextBlock Text="Status: " />
-                        <TextBlock Text="{x:Bind TicketStatus}"
-                                   Foreground="{x:Bind TicketStatus, Converter={StaticResource StatusToColorConverter}}" />
+                        <TextBlock Text="{x:Bind Status}"
+                                   Foreground="{x:Bind Status, Converter={StaticResource StatusToColorConverter}}" />
                     </StackPanel>
                 </Grid>
             </Border>
