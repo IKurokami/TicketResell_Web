@@ -11,12 +11,12 @@ namespace Backend.Controllers
     [ApiController]
     public class RevenueController : ControllerBase
     {
-        private readonly IRevenueRepository _repository;
+        private readonly IRevenueRepository _revenueRepository;
         private readonly IMapper _mapper;
 
-        public RevenueController(IRevenueRepository repository, IMapper mapper)
+        public RevenueController(IRevenueRepository revenueRepository, IMapper mapper)
         {
-            _repository = repository;
+            _revenueRepository = revenueRepository;
             _mapper = mapper;
         }
 
@@ -28,7 +28,7 @@ namespace Backend.Controllers
             newRevenue.StartDate = DateTime.UtcNow;
             newRevenue.EndDate = newRevenue.StartDate.Value.AddMonths(1);
             newRevenue.Type = RevenueConstant.MONTH_TYPE;
-            await _repository.CreateRevenue(newRevenue);
+            await _revenueRepository.CreateRevenueAsync(newRevenue);
             return Ok(new { message = "Successfully created Revenue" });
         }
 
@@ -36,17 +36,17 @@ namespace Backend.Controllers
         [Route("read")]
         public async Task<ActionResult<IEnumerable<RevenueReadDto>>> GetRevenues()
         {
-            var revenues = await _repository.GetRevenues();
+            var revenues = await _revenueRepository.GetRevenuesAsync();
 
             var revenueDtos = _mapper.Map<IEnumerable<RevenueReadDto>>(revenues);
             return Ok(revenueDtos);
         }
 
         [HttpGet]
-        [Route("read/{id}")]
+        [Route("readbyid/{id}")]
         public async Task<ActionResult<RevenueReadDto>> GetRevenuesById(string id)
         {
-            var revenues = await _repository.GetRevenuesById(id);
+            var revenues = await _revenueRepository.GetRevenuesByIdAsync(id);
 
             if (revenues == null)
             {
@@ -58,10 +58,10 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        [Route("read/revenue/{id}")]
+        [Route("readbysellerid/{id}")]
         public async Task<ActionResult<IEnumerable<RevenueReadDto>>> GetRevenuesBySellerId(string id)
         {
-            var revenues = await _repository.GetRevenuesBySellerId(id);
+            var revenues = await _revenueRepository.GetRevenuesBySellerIdAsync(id);
 
             if (!revenues.Any())
             {
@@ -73,10 +73,11 @@ namespace Backend.Controllers
         }
 
         [HttpPut]
-        [Route("update/{id}/{type}")]
-        public async Task<IActionResult> UpdateRevenue(string id, string type, [FromBody] RevenueUpdateDto dto)
+        [Route("update/{id}")]
+        public async Task<IActionResult> UpdateRevenue(string id, [FromBody] RevenueUpdateDto dto)
         {
-            var revenues = await _repository.GetRevenuesBySellerId_Month(id, type);
+            string type = RevenueConstant.MONTH_TYPE;
+            var revenues = await _revenueRepository.GetRevenuesBySellerId_MonthAsync(id, type);
 
             if (!revenues.Any())
             {
@@ -89,7 +90,7 @@ namespace Backend.Controllers
                 if (revenue.StartDate <= date && date <= revenue.EndDate)
                 {
                     _mapper.Map(dto, revenue);
-                    await _repository.UpdateRevenue(revenue);
+                    await _revenueRepository.UpdateRevenueAsync(revenue);
                 }
             }
 
@@ -101,13 +102,13 @@ namespace Backend.Controllers
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteRevenues(string id)
         {
-            var revenue = await _repository.GetRevenuesById(id);
+            var revenue = await _revenueRepository.GetRevenuesByIdAsync(id);
 
             if (revenue == null)
             {
                 return NotFound($"Revenue with SellerID {id} not found.");
             }
-            await _repository.DeleteRevenue(revenue);
+            await _revenueRepository.DeleteRevenueAsync(revenue);
             return Ok(new { message = $"Successfully deleted Revenue(s) with id: {id}" });
         }
 
@@ -117,7 +118,7 @@ namespace Backend.Controllers
         [Route("delete/revenue/{id}")]
         public async Task<IActionResult> DeleteRevenuesBySellerId(string id)
         {
-            var revenues = await _repository.GetRevenuesBySellerId(id);
+            var revenues = await _revenueRepository.GetRevenuesBySellerIdAsync(id);
 
             if (!revenues.Any())
             {
@@ -126,7 +127,7 @@ namespace Backend.Controllers
 
             foreach (var revenueItem in revenues)
             {
-                await _repository.DeleteRevenue(revenueItem);
+                await _revenueRepository.DeleteRevenueAsync(revenueItem);
             }
 
             return Ok(new { message = $"Successfully deleted Revenue(s) with SellerID: {id}" });

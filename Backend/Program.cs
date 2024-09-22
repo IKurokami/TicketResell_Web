@@ -4,6 +4,8 @@ using Backend.Utils;
 using DotNetEnv;
 using Backend.Core.Context;
 using Backend.Repositories;
+using Backend.Repositories.Categories;
+using Backend.Repositories.Tickets;
 
 Env.Load();
 
@@ -14,9 +16,10 @@ JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", Env
 builder.Services.AddDbContext<TicketResellManagementContext>();
 // Automapper configuration
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
-
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRevenueRepository, RevenueRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 // Add services to the container.
 builder.Services.AddControllers();
 
