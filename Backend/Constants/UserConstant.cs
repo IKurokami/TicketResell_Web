@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Backend.Constants
 {
-    public class UserConstant
+    public static class UserConstant
     {
-        public const string username = "ASVBASD";
+        public static readonly string username = "ASVBASD";
     }
 }

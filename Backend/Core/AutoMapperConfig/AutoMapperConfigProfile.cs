@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Backend.Core.Dtos.Revenue;
 using Backend.Core.Dtos.Order;
 using Backend.Core.Dtos.OrderDetail;
 using Backend.Core.Entities;
@@ -10,9 +11,16 @@ namespace Backend.Core.AutoMapperConfig
 {
     public class AutoMapperConfigProfile : Profile
     {
-        public AutoMapperConfigProfile() 
+        public AutoMapperConfigProfile()
         {
             CreateMap<UserCreateDto, User>();
+            CreateMap<UserUpdateDto, User>();
+            CreateMap<User, UserReadDto>();
+
+            //Revenue
+            CreateMap<RevenueCreateDto, Revenue>();
+            CreateMap<Revenue, RevenueReadDto>();
+            CreateMap<RevenueUpdateDto, Revenue>();
             //Order
             CreateMap<OrderDto, Order>();
 
