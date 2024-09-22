@@ -9,7 +9,7 @@ public class EventInfoConverter : IValueConverter
     {
         if (value is Ticket ticket)
         {
-            return $"Event: {ticket.EventName} - {ticket.EventDate:MMM dd, yyyy HH:mm}";
+            return $"Event: {ticket.Name} - {ticket.StartDate:MMM dd, yyyy HH:mm}";
         }
 
         return string.Empty;

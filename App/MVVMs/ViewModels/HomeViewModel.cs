@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
-using WinUICommunity;
 
 namespace App.MVVMs.ViewModels
 {
@@ -20,7 +19,6 @@ namespace App.MVVMs.ViewModels
         {
             tickets.Clear();
             GC.Collect();
-            tickets.AddRange(SampleData.AllData.Tickets);
         }
 
         public void FindWithTag(IList<string> tags)

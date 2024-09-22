@@ -5,37 +5,29 @@ namespace Backend.Core.Entities;
 
 public partial class Ticket
 {
-    public int TicketId { get; set; }
+    public string TicketId { get; set; } = null!;
 
-    public int? SellerId { get; set; }
+    public string? SellerId { get; set; }
 
     public string? Name { get; set; }
 
-    public string? EventName { get; set; }
+    public double? Cost { get; set; }
 
-    public DateTime? EventDate { get; set; }
+    public string? Location { get; set; }
 
-    public string? EventLocation { get; set; }
+    public DateTime? StartDate { get; set; }
 
-    public string? TicketImage { get; set; }
+    public DateTime? CreateDate { get; set; }
 
-    public string? Description { get; set; }
+    public DateTime? ModifyDate { get; set; }
 
-    public string? TicketType { get; set; }
+    public int? Status { get; set; }
 
-    public decimal? OriginalPrice { get; set; }
+    public string? Image { get; set; }
 
-    public decimal? ResalePrice { get; set; }
-
-    public string? PaymentMethod { get; set; }
-
-    public string? TicketStatus { get; set; }
-
-    public DateTime PostedAt { get; set; }
-
-    public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual User? Seller { get; set; }
 
-    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
 }

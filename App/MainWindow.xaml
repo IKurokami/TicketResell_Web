@@ -32,7 +32,7 @@
                    Opacity="1">
                 <Frame.ContentTransitions>
                     <TransitionCollection>
-                        <NavigationThemeTransition />
+                        <ContentThemeTransition />
                     </TransitionCollection>
                 </Frame.ContentTransitions>
             </Frame>
@@ -41,7 +41,7 @@
                    Opacity="1">
                 <Frame.ContentTransitions>
                     <TransitionCollection>
-                        <NavigationThemeTransition />
+                        <ContentThemeTransition />
                     </TransitionCollection>
                 </Frame.ContentTransitions>
             </Frame>
