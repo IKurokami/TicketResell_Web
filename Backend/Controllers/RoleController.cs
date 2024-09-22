@@ -23,18 +23,18 @@ namespace Backend.Controllers
 
         [HttpPost]
         [Route("create")]
-        public async Task<IActionResult> createRole([FromBody] RoleCreateDto dto)
+        public async Task<IActionResult> CreateRole([FromBody] RoleCreateDto dto)
         {
             Role role = _mapper.Map<Role>(dto);
-            await _roleRepository.createRoleAsync(role);
+            await _roleRepository.CreateRoleAsync(role);
             return Ok(new { message = $"Successfully created role: {dto.Rolename}" });
         }
 
         [HttpGet]
         [Route("read")]
-        public async Task<ActionResult<IEnumerable<Role>>> readRole()
+        public async Task<ActionResult<IEnumerable<Role>>> ReadRole()
         {
-            var roles = await _roleRepository.readRoleAsync();
+            var roles = await _roleRepository.ReadRoleAsync();
             var convertedRoles = _mapper.Map<IEnumerable<RoleReadDto>>(roles);
             return Ok(convertedRoles);
 
@@ -42,28 +42,28 @@ namespace Backend.Controllers
 
         [HttpPut]
         [Route("update/{roleId}")]
-        public async Task<IActionResult> updateRole(string roleId, [FromBody] RoleUpdateDto dto)
+        public async Task<IActionResult> UpdateRole(string roleId, [FromBody] RoleUpdateDto dto)
         {
-            var role = await _roleRepository.getRoleByIdAsync(roleId);
+            var role = await _roleRepository.GetRoleByIdAsync(roleId);
             if (role == null)
             {
                 return NotFound($"SellConfig with ID {roleId} not exist");
             }
             _mapper.Map(dto, role);
-            await _roleRepository.updateRoleAsync(role);
+            await _roleRepository.UpdateRoleAsync(role);
             return Ok(new { message = $"Successfully update sell config: {roleId}" });
         }
 
         [HttpDelete]
         [Route("delete/{roleId}")]
-        public async Task<ActionResult<Role>> deleteSellConfig(string roleId)
+        public async Task<ActionResult<Role>> DeleteSellConfig(string roleId)
         {
-            var role = await _roleRepository.getRoleByIdAsync(roleId);
+            var role = await _roleRepository.GetRoleByIdAsync(roleId);
             if (role == null)
             {
                 return NotFound($"SellConfig with ID {roleId} not exist");
             }
-            await _roleRepository.deleteRoleAsync(role);
+            await _roleRepository.DeleteRoleAsync(role);
             return Ok(role);
         }
 

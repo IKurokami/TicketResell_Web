@@ -13,30 +13,30 @@ namespace Backend.Repositories
             _context = context;
         }
 
-        public async Task createRoleAsync(Role role)
+        public async Task CreateRoleAsync(Role role)
         {
             await _context.Roles.AddAsync(role);
             await _context.SaveChangesAsync();
         }
-        public async Task<IEnumerable<Role>> readRoleAsync()
+        public async Task<IEnumerable<Role>> ReadRoleAsync()
         {
             var roles = await _context.Roles.ToListAsync();
             return roles;
         }
 
-        public async Task<Role?> getRoleByIdAsync(string roleId)
+        public async Task<Role?> GetRoleByIdAsync(string roleId)
         {
             return await _context.Roles.FindAsync(roleId);
         }
 
-        public async Task<Role> updateRoleAsync(Role roleUpdate)
+        public async Task<Role> UpdateRoleAsync(Role roleUpdate)
         {
             _context.Entry(roleUpdate).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return roleUpdate;
         }
 
-        public async Task<Role> deleteRoleAsync(Role roleDelete)
+        public async Task<Role> DeleteRoleAsync(Role roleDelete)
         {
             _context.Roles.Remove(roleDelete);
             await _context.SaveChangesAsync();
