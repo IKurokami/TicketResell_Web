@@ -21,6 +21,7 @@ namespace Backend.Core.AutoMapperConfig
             CreateMap<RevenueCreateDto, Revenue>();
             CreateMap<Revenue, RevenueReadDto>();
             CreateMap<RevenueUpdateDto, Revenue>();
+            
             //Order
             CreateMap<OrderDto, Order>();
 

@@ -13,11 +13,14 @@ namespace Backend.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<Order?> GetOrderByIdAsync(string orderId) => (await context.Orders.FirstOrDefaultAsync(o => o != null && o.OrderId == orderId))!;
+        public async Task<Order?> GetOrderByIdAsync(string orderId)
+        {
+            return await context.Orders.FindAsync(orderId);
+        }
 
         public async Task<IEnumerable<Order?>> GetAllOrdersAsync()
         {
-            return (await context.Orders.ToListAsync())!;
+            return await context.Orders.ToListAsync();
         }
 
         public async Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId)
@@ -66,7 +69,7 @@ namespace Backend.Repositories
 
         public async Task<bool> HasOrder(string orderId)
         {
-            return await context.Orders.AnyAsync(o => o != null && o.OrderId == orderId); 
+            return await context.Orders.AnyAsync(o => o != null && o.OrderId == orderId);
         }
     }
 }

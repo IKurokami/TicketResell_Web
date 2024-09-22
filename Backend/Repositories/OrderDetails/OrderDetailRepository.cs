@@ -14,13 +14,12 @@ namespace Backend.Repositories
 
         public async Task<OrderDetail?> GetOrderDetailByIdAsync(string orderDetailId)
         {
-            return (await context.OrderDetails.FirstOrDefaultAsync(
-                od => od != null && od.OrderDetailId == orderDetailId));
+            return await context.OrderDetails.FindAsync(orderDetailId);
         }
 
         public async Task<IEnumerable<OrderDetail?>> GetAllOrderDetailsAsync()
         {
-            return (await context.OrderDetails.ToListAsync())!;
+            return await context.OrderDetails.ToListAsync();
         }
 
         public async Task UpdateOrderDetailAsync(OrderDetail orderDetail)

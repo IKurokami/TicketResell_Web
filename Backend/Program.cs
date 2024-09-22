@@ -6,7 +6,6 @@ using Backend.Core.Context;
 using Backend.Repositories;
 using Backend.Middlewares;
 using Backend.Core.Validators;
-using Backend.Validators;
 using FluentValidation;
 Env.Load();
 
@@ -33,6 +32,8 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<UserValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<OrderValidator>();
+
 builder.Services.AddScoped<Backend.Core.Validators.IValidatorFactory, ValidatorFactory>();
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();

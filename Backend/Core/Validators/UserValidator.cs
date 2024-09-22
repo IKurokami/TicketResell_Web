@@ -1,7 +1,7 @@
 using Backend.Core.Entities;
 using FluentValidation;
 
-namespace Backend.Validators
+namespace Backend.Core.Validators
 {
     public class UserValidator : AbstractValidator<User>
     {

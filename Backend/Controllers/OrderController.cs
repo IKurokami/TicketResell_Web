@@ -4,6 +4,7 @@ using Backend.Core.Entities;
 using Backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Core.Helper;
+using Backend.Core.Validators;
 
 namespace Backend.Controllers
 {
@@ -13,30 +14,35 @@ namespace Backend.Controllers
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
+        private IValidatorFactory _validatorFactory;
 
-        public OrderController(IOrderRepository orderRepository, IMapper mapper)
+        public OrderController(IOrderRepository orderRepository, IMapper mapper, IValidatorFactory validatorFactory)
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
+            _validatorFactory = validatorFactory;
         }
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
         {
-            if (dto.OrderId == null || dto.BuyerId == null)
-                return BadRequest(new { message = "Body data required" });
-            
-            bool usernameExists = await _orderRepository.HasOrder(dto.OrderId);
-
-            if (usernameExists)
-            {
-                return BadRequest(new { message = "OrderId already exists" });
-            }
-
             var order = _mapper.Map<Order>(dto);
             order.Date = DateTime.Now;
             order.Total = 0;
             order.Status = (int)OrderStatus.Pending;
+            
+            var validator = _validatorFactory.GetValidator<Order>();
+            var validationResult = await validator.ValidateAsync(order);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
+            if (await _orderRepository.HasOrder(order.OrderId))
+            {
+                return Ok(new { message = $"Duplicated orderId: {order.OrderId}" });
+            }
+            
             await _orderRepository.CreateOrderAsync(order);
             return Ok(new { message = $"Successfully created order: {order.OrderId}" });
         }
@@ -67,8 +73,10 @@ namespace Backend.Controllers
         }
 
         [HttpPost("daterange")]
-        public async Task<IActionResult> GetOrdersByDateRange(DateRange dateRange)
+        public async Task<IActionResult> GetOrdersByDateRange([FromBody]DateRange dateRange)
         {
+            dateRange.StartDate = dateRange.StartDate ?? new DateTime(0);
+            dateRange.EndDate = dateRange.EndDate ?? DateTime.Now;
             var orders = await _orderRepository.GetOrdersByDateRangeAsync(dateRange);
             return Ok(orders);
         }
@@ -83,6 +91,13 @@ namespace Backend.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateOrder([FromBody] Order order)
         {
+            var validator = _validatorFactory.GetValidator<Order>();
+            var validationResult = await validator.ValidateAsync(order);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+            
             await _orderRepository.UpdateOrderAsync(order);
             return Ok(new { message = $"Successfully updated order: {order.OrderId}" });
         }
