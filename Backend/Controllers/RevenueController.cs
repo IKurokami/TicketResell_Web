@@ -14,9 +14,9 @@ namespace Backend.Controllers
         private readonly IRevenueRepository _repository;
         private readonly IMapper _mapper;
 
-        public RevenueController(IRevenueRepository repository, IMapper mapper)
+        public RevenueController(IRevenueRepository revenueRepository, IMapper mapper)
         {
-            _repository = repository;
+            _repository = revenueRepository;
             _mapper = mapper;
         }
 
