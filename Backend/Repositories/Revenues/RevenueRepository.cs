@@ -19,7 +19,8 @@ public class RevenueRepository(TicketResellManagementContext context) : IRevenue
 
     public async Task<Revenue?> GetRevenuesByIdAsync(string id)
     {
-        return await context.Revenues.Where(x => x.RevenueId == id).FirstOrDefaultAsync();
+        Revenue? revenue = await context.Revenues.Where(x => x.RevenueId == id).FirstOrDefaultAsync();
+        return revenue;
     }
 
     public async Task<List<Revenue>> GetRevenuesBySellerId_MonthAsync(string sellerId, string month)

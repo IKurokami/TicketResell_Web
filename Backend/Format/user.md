@@ -19,5 +19,5 @@
     "message": "Username already exists"
   }
   ```
-  
+
 ---
