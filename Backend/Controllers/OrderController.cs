@@ -20,8 +20,7 @@ namespace Backend.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost]
-        [Route("create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
         {
             if (dto.OrderId == null || dto.BuyerId == null)
@@ -37,6 +36,7 @@ namespace Backend.Controllers
             var order = _mapper.Map<Order>(dto);
             order.Date = DateTime.Now;
             order.Total = 0;
+            order.Status = (int)OrderStatus.Pending;
             await _orderRepository.CreateOrderAsync(order);
             return Ok(new { message = $"Successfully created order: {order.OrderId}" });
         }
