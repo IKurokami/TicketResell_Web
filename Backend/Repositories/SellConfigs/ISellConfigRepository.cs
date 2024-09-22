@@ -3,11 +3,11 @@ namespace Backend.Repositories
 {
     public interface ISellConfigRepository
     {
-        Task createSellConfigAsync(SellConfig sellConfig);
-        Task<IEnumerable<SellConfig>> readSellConfigAsync();
-        Task<SellConfig?> getSellConfigByIdAsync(string sellConfigId);
-        Task<SellConfig> updateSellConfigAsync(SellConfig sellConfigUpdate);
-        Task<SellConfig> deleteSellConfigAsync(SellConfig sellConfigDelete);
+        Task CreateSellConfigAsync(SellConfig sellConfig);
+        Task<IEnumerable<SellConfig>> ReadSellConfigAsync();
+        Task<SellConfig?> GetSellConfigByIdAsync(string sellConfigId);
+        Task<SellConfig> UpdateSellConfigAsync(SellConfig sellConfigUpdate);
+        Task<SellConfig> DeleteSellConfigAsync(SellConfig sellConfigDelete);
         
     }
 }
