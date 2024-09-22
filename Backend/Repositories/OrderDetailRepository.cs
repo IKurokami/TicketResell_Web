@@ -14,7 +14,8 @@ namespace Backend.Repositories
 
         public async Task<OrderDetail?> GetOrderDetailByIdAsync(string orderDetailId)
         {
-            return (await context.OrderDetails.FirstOrDefaultAsync(od => od != null && od.OrderDetailId == orderDetailId));
+            return (await context.OrderDetails.FirstOrDefaultAsync(
+                od => od != null && od.OrderDetailId == orderDetailId));
         }
 
         public async Task<IEnumerable<OrderDetail?>> GetAllOrderDetailsAsync()
@@ -24,7 +25,7 @@ namespace Backend.Repositories
 
         public async Task UpdateOrderDetailAsync(OrderDetail orderDetail)
         {
-            context.OrderDetails.Update(orderDetail);
+            context.OrderDetails.Entry(orderDetail).State = EntityState.Modified;
             await context.SaveChangesAsync();
         }
 
@@ -40,26 +41,19 @@ namespace Backend.Repositories
 
         public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsByUsernameAsync(string username)
         {
-            return await context.OrderDetails
-                .Include(od => od.Order)
-                .ThenInclude(o => o.Buyer)
-                .Where(od => od.Order.Buyer.Username == username)
+            return await context.OrderDetails.Where(od => od.Order.Buyer.Username == username)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsByBuyerIdAsync(string userId)
         {
-            return (await context.OrderDetails
-                .Include(od => od.Order)
-                .Where(od => od.Order.BuyerId == userId)
+            return (await context.OrderDetails.Where(od => od.Order.BuyerId == userId)
                 .ToListAsync());
         }
 
         public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsBySellerIdAsync(string sellerId)
         {
-            return await context.OrderDetails
-                .Include(od => od.Ticket)
-                .Where(od => od.Ticket.SellerId == sellerId)
+            return await context.OrderDetails.Where(od => od.Ticket.SellerId == sellerId)
                 .ToListAsync();
         }
     }

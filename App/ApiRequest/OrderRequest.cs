@@ -20,27 +20,27 @@ public class OrderRequest : IOrderRequest
         return _apiRepository.PutAsync<Message>(endPoint, order);
     }
 
-    public Task<Order> GetOrderByIdAsync(string orderId)
+    public Task<Order?> GetOrderByIdAsync(string orderId)
     {
         return _apiRepository.GetAsync<Order>(endPoint, orderId);
     }
 
-    public Task<IEnumerable<Order>> GetAllOrdersAsync()
+    public Task<IEnumerable<Order?>> GetAllOrdersAsync()
     {
         return _apiRepository.GetAsync<IEnumerable<Order>>(endPoint);
     }
 
-    public Task<IEnumerable<Order>> GetOrdersByBuyerIdAsync(string buyerId)
+    public Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId)
     {
         return _apiRepository.GetAsync<IEnumerable<Order>>(endPoint, "buyer", buyerId);
     }
 
-    public Task<IEnumerable<Order>> GetOrdersByDateRangeAsync(DateRange dateRange)
+    public Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateRange dateRange)
     {
         return _apiRepository.PostAsync<IEnumerable<Order>>(endPoint, dateRange, "daterange");
     }
 
-    public Task<IEnumerable<Order>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceRange)
+    public Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceRange)
     {
         return _apiRepository.PostAsync<IEnumerable<Order>>(endPoint, priceRange, "pricerange");
     }

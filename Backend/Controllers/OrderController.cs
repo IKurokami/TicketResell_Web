@@ -37,6 +37,7 @@ namespace Backend.Controllers
             var order = _mapper.Map<Order>(dto);
             order.Date = DateTime.Now;
             order.Total = 0;
+            order.Status = 0;
             await _orderRepository.CreateOrderAsync(order);
             return Ok(new { message = $"Successfully created order: {order.OrderId}" });
         }
