@@ -19,7 +19,7 @@ namespace App.MVVMs.Views.Login
             this.InitializeComponent();
         }
 
-        private async void Register_Click(object sender, RoutedEventArgs e)
+        private void Register_Click(object sender, RoutedEventArgs e)
         {
         }
 

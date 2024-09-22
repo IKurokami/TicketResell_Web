@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Backend.Core.Context;
 using Backend.Core.Entities;
@@ -17,15 +14,15 @@ namespace Backend.Repositories
 
         public async Task<OrderDetail?> GetOrderDetailByIdAsync(string orderDetailId)
         {
-            return await context.OrderDetails.FirstOrDefaultAsync(od => od != null && od.OrderDetailId == orderDetailId);
+            return (await context.OrderDetails.FirstOrDefaultAsync(od => od != null && od.OrderDetailId == orderDetailId));
         }
 
         public async Task<IEnumerable<OrderDetail?>> GetAllOrderDetailsAsync()
         {
-            return await context.OrderDetails.ToListAsync();
+            return (await context.OrderDetails.ToListAsync())!;
         }
 
-        public async Task UpdateOrderDetailAsync(OrderDetail? orderDetail)
+        public async Task UpdateOrderDetailAsync(OrderDetail orderDetail)
         {
             context.OrderDetails.Update(orderDetail);
             await context.SaveChangesAsync();
@@ -41,7 +38,7 @@ namespace Backend.Repositories
             }
         }
 
-        public async Task<IEnumerable<OrderDetail>> GetOrderDetailsByUsernameAsync(string username)
+        public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsByUsernameAsync(string username)
         {
             return await context.OrderDetails
                 .Include(od => od.Order)
@@ -50,7 +47,7 @@ namespace Backend.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<OrderDetail>> GetOrderDetailsByBuyerIdAsync(string userId)
+        public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsByBuyerIdAsync(string userId)
         {
             return (await context.OrderDetails
                 .Include(od => od.Order)
@@ -58,7 +55,7 @@ namespace Backend.Repositories
                 .ToListAsync());
         }
 
-        public async Task<IEnumerable<OrderDetail>> GetOrderDetailsBySellerIdAsync(string sellerId)
+        public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsBySellerIdAsync(string sellerId)
         {
             return await context.OrderDetails
                 .Include(od => od.Ticket)

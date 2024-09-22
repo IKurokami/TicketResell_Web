@@ -1,7 +1,3 @@
-# Order Controller API Documentation
-
----
-
 ### **Create Order (`api/order/create`)**
 
 - **Method:** `POST`
@@ -130,8 +126,8 @@
 - **Input:**   
   ```json
   {
-  "Min": 50.00,
-  "Max": 200.00
+    "Min": 50.00,
+    "Max": 200.00
   }
   ```
 - **Output:**

@@ -3,6 +3,7 @@ using Backend.Core.Dtos.Order;
 using Backend.Core.Entities;
 using Backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Core.Helper;
 
 namespace Backend.Controllers
 {
@@ -23,6 +24,9 @@ namespace Backend.Controllers
         [Route("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
         {
+            if (dto.OrderId == null || dto.BuyerId == null)
+                return BadRequest(new { message = "Body data required" });
+            
             bool usernameExists = await _orderRepository.HasOrder(dto.OrderId);
 
             if (usernameExists)
@@ -41,8 +45,10 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetOrderById(string orderId)
         {
             var order = await _orderRepository.GetOrderByIdAsync(orderId);
+            
             if (order == null)
                 return NotFound();
+            
             return Ok(order);
         }
 
@@ -61,14 +67,14 @@ namespace Backend.Controllers
         }
 
         [HttpPost("daterange")]
-        public async Task<IActionResult> GetOrdersByDateRange(Core.Helper.DateRange dateRange)
+        public async Task<IActionResult> GetOrdersByDateRange(DateRange dateRange)
         {
             var orders = await _orderRepository.GetOrdersByDateRangeAsync(dateRange);
             return Ok(orders);
         }
 
         [HttpPost("pricerange")]
-        public async Task<IActionResult> GetOrdersByTotalPriceRange([FromBody] Core.Helper.DoubleRange priceDoubleRange)
+        public async Task<IActionResult> GetOrdersByTotalPriceRange([FromBody] DoubleRange priceDoubleRange)
         {
             var orders = await _orderRepository.GetOrdersByTotalPriceRangeAsync(priceDoubleRange);
             return Ok(orders);

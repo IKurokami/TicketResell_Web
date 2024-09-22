@@ -1,4 +1,5 @@
-﻿using App.ApiRequest;
+﻿using System;
+using App.ApiRequest;
 using App.Contracts.Services;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Home;
@@ -15,7 +16,13 @@ namespace App
         public static IServiceCollection InstallServices(this IServiceCollection services)
         {
             //Http
-            services.AddSingleton<IApiRepository, ApiRepository>();
+            var httpBuilder = services.AddHttpClient<IApiRepository, ApiRepository>(configureClient: static client =>
+            {
+                client.BaseAddress = new(Configuration.APIUrl);
+            });
+            httpBuilder.SetHandlerLifetime(TimeSpan.FromMinutes(5));
+            httpBuilder.AddStandardResilienceHandler();
+            
             services.AddSingleton<IOrderRequest, OrderRequest>();
             
             //ViewModels
