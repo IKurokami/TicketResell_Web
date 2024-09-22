@@ -19,6 +19,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 
+builder.Services.AddScoped<ISellConfigRepository, SellConfigRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+
 // Add services to the container.
 builder.Services.AddControllers();
 
