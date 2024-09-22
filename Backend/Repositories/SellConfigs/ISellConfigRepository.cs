@@ -8,6 +8,5 @@ namespace Backend.Repositories
         Task<SellConfig?> GetSellConfigByIdAsync(string sellConfigId);
         Task<SellConfig> UpdateSellConfigAsync(SellConfig sellConfigUpdate);
         Task<SellConfig> DeleteSellConfigAsync(SellConfig sellConfigDelete);
-        
     }
 }
