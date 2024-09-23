@@ -32,16 +32,16 @@ namespace Backend.Repositories
 
         public async Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateRange dateRange)
         {
-            return (await context.Orders
+            return await context.Orders
                 .Where(o => o != null && o.Date >= dateRange.StartDate && o.Date <= dateRange.EndDate)
-                .ToListAsync());
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceDoubleRange)
         {
-            return (await context.Orders
+            return await context.Orders
                 .Where(o => o != null && o.Total >= priceDoubleRange.Min && o.Total <= priceDoubleRange.Max)
-                .ToListAsync());
+                .ToListAsync();
         }
 
         public async Task UpdateOrderAsync(Order order)
@@ -69,7 +69,7 @@ namespace Backend.Repositories
 
         public async Task<bool> HasOrder(string orderId)
         {
-            return await context.Orders.AnyAsync(o => o != null && o.OrderId == orderId);
+            return await context.Orders.FindAsync(orderId) != null;
         }
     }
 }
