@@ -1,8 +1,5 @@
 using Backend.Core.Context;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 using Backend.Core.Entities;
-using System.Runtime.InteropServices;
 
 namespace Backend.Repositories
 {

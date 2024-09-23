@@ -16,9 +16,9 @@ namespace App
             ViewModel.MainGrid = MainGrid;
             ViewModel.RootFrame = rootFrame;
             ViewModel.OverlayFrame = overlayFrame;
-            ViewModel.TheDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();;
-            
-            rootFrame.Navigate(typeof(LoginPage), Ioc.Default.GetService<DrillInNavigationTransitionInfo>());
+            ViewModel.TheDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread(); ;
+
+            rootFrame.Navigate(typeof(LoginPage), Ioc.Default.GetService<ContinuumNavigationTransitionInfo>());
         }
     }
 }

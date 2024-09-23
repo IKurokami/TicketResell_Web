@@ -26,9 +26,21 @@ builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRevenueRepository, RevenueRepository>();
 
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+
+builder.Services.AddScoped<ISellConfigRepository, SellConfigRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<UserValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<OrderValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<OrderDetailValidator>();
+
 builder.Services.AddValidatorsFromAssemblyContaining<TicketValidator>();
 builder.Services.AddScoped<Backend.Core.Validators.IValidatorFactory, ValidatorFactory>();
 var app = builder.Build();

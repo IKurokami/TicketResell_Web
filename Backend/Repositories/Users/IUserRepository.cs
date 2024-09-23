@@ -1,5 +1,4 @@
 using Backend.Core.Entities;
-using System.Threading.Tasks;
 
 namespace Backend.Repositories
 {

@@ -1,4 +1,6 @@
-﻿using App.Contracts.Services;
+﻿using System;
+using App.ApiRequest;
+using App.Contracts.Services;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Home;
 using App.MVVMs.Views.Login;
@@ -13,20 +15,34 @@ namespace App
     {
         public static IServiceCollection InstallServices(this IServiceCollection services)
         {
+            //Http
+            var httpBuilder = services.AddHttpClient<IApiRepository, ApiRepository>(configureClient: static client =>
+            {
+                client.BaseAddress = new(Configuration.APIUrl);
+            });
+            httpBuilder.SetHandlerLifetime(TimeSpan.FromMinutes(5));
+            httpBuilder.AddStandardResilienceHandler();
+            
+            services.AddSingleton<IOrderRequest, OrderRequest>();
+            
+            //ViewModels
             services.AddSingleton<LoginViewModel>();
             services.AddSingleton<ShellViewModel>();
             services.AddSingleton<HomeViewModel>();
             services.AddSingleton<DashBoardViewModel>();
             services.AddScoped<TicketDetailViewModel>();
-
             services.AddSingleton<MainWindowViewModel>();
+            
+            //MainWindow
             services.AddSingleton<MainWindow>();
 
+            //Services
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<INavigationViewService, NavigationViewService>();
             services.AddSingleton<IFileServices, FileService>();
 
+            //TransitionInfo
             services.AddSingleton<ContinuumNavigationTransitionInfo>();
             services.AddSingleton<DrillInNavigationTransitionInfo>();
             
@@ -41,8 +57,6 @@ namespace App
             pageService?.Configure<ShellViewModel, ShellPage>();
             pageService?.Configure<HomeViewModel, HomePage>();
             pageService?.Configure<DashBoardViewModel, DashBoardPage>();
-
-            SampleData.AllData.LoadSampleData();
         }
     }
 }
