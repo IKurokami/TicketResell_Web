@@ -1,6 +1,7 @@
 using AutoMapper;
 using Backend.Core.Dtos.Ticket;
 using Backend.Core.Entities;
+using Backend.Core.Validators;
 using Backend.Repositories.Tickets;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +13,13 @@ namespace Backend.Controllers
     {
         private readonly ITicketRepository _ticketRepository;
         private readonly IMapper _mapper;
+        private readonly IValidatorFactory _validatorFactory;
 
-        public TicketController(ITicketRepository ticketRepository, IMapper mapper)
+        public TicketController(ITicketRepository ticketRepository, IMapper mapper, IValidatorFactory validatorFactory)
         {
             _ticketRepository = ticketRepository;
             _mapper = mapper;
+            _validatorFactory = validatorFactory;
         }
 
         [HttpPost]
@@ -24,7 +27,14 @@ namespace Backend.Controllers
 
         public async Task<ActionResult<Ticket>> CreateTicket([FromBody] TicketCreateDto dto)
         {
+            var validator = _validatorFactory.GetValidator<Ticket>();
             Ticket newTicket = _mapper.Map<Ticket>(dto);
+
+            var validationResult = validator.Validate(newTicket);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
             newTicket.CreateDate = DateTime.UtcNow;
             newTicket.ModifyDate = DateTime.UtcNow;
             await _ticketRepository.CreateTicketAsync(newTicket, dto.CategoryIds);
@@ -98,6 +108,14 @@ namespace Backend.Controllers
             }
             ticket.ModifyDate = DateTime.UtcNow;
             _mapper.Map(dto, ticket);
+            
+            var validator = _validatorFactory.GetValidator<Ticket>();
+
+            var validationResult = validator.Validate(ticket);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
             await _ticketRepository.UpdateTicketAsync(ticket);
             return Ok(new { message = "Successfully updated Ticket" });
         }
