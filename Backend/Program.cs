@@ -39,7 +39,7 @@ builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<UserValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<OrderValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<OrderDetailValidator>();
-
+builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<TicketValidator>();
 builder.Services.AddScoped<Backend.Core.Validators.IValidatorFactory, ValidatorFactory>();
 var app = builder.Build();

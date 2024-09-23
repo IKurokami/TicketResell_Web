@@ -38,7 +38,7 @@ public class TicketRepository : ITicketRepository
     {
         foreach (var x in categoryList)
         {
-            var category = await _context.Categories.FindAsync(x);
+            Category? category = await _context.Categories.FindAsync(x);
             if (category != null)
             {
                 ticket.Categories.Add(category);
@@ -57,7 +57,7 @@ public class TicketRepository : ITicketRepository
 
     public async Task DeleteTicketAsync(Ticket ticket)
     {
-          _context.Tickets.Remove(ticket);
-          await _context.SaveChangesAsync();
+        _context.Tickets.Remove(ticket);
+        await _context.SaveChangesAsync();
     }
 }

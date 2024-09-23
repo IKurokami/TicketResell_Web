@@ -1,4 +1,3 @@
-using Backend.Core.Entities;
 
 namespace Backend.Core.Dtos.Ticket;
 
@@ -20,5 +19,5 @@ public class TicketCreateDto
 
     public string? Image { get; set; }
 
-    public List<String> CategoryIds { get; set; }
+    public List<string> CategoriesId { get; set; }
 }

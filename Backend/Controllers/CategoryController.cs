@@ -1,6 +1,7 @@
 using AutoMapper;
 using Backend.Core.Dtos.Category;
 using Backend.Core.Entities;
+using Backend.Core.Validators;
 using Backend.Repositories;
 namespace Backend.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,13 @@ public class CategoryController : ControllerBase
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IMapper _mapper;
+    private readonly IValidatorFactory _validatorFactory;
 
-    public CategoryController(ICategoryRepository categoryRepository, IMapper mapper)
+    public CategoryController(ICategoryRepository categoryRepository, IMapper mapper, IValidatorFactory validatorFactory)
     {
         _categoryRepository = categoryRepository;
         _mapper = mapper;
+        _validatorFactory = validatorFactory;
     }
     
     [HttpGet]
@@ -47,7 +50,13 @@ public class CategoryController : ControllerBase
     [HttpPost("create")]
     public async Task<ActionResult<Category>> CreateCategory([FromBody] CategoryCreateDto dto)
     {
+        var validator = _validatorFactory.GetValidator<Category>();
         var newCate = _mapper.Map<Category>(dto);
+        var validationResult = validator.Validate(newCate);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
         await _categoryRepository.AddCategoryAsync(newCate);
         return Ok(new { message = "Successfully created Category" });
     }
@@ -61,7 +70,12 @@ public class CategoryController : ControllerBase
         {
             return NotFound($"Category with Id {id} not found.");
         }
-
+        var validator = _validatorFactory.GetValidator<Category>();
+        var validationResult = validator.Validate(category);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
         _mapper.Map(dto, category);
         await _categoryRepository.UpdateCategoryAsync(category);
         return Ok(new { message = $"Successfully update category with id: {id}" });
