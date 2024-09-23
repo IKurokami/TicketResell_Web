@@ -1,16 +1,16 @@
 using Backend.Core.Entities;
 
-using FluentValidation;
+namespace Backend.Core.Validators;
 
-namespace Backend.Validators;
-
-public class TicketValidator : AbstractValidator<Ticket>
+public class TicketValidator : Validators<Ticket>
 {
     public TicketValidator()
     {
-        RuleFor(ticket => ticket.Name).NotEmpty().WithMessage("Name is required");
-        RuleFor(ticket => ticket.Cost).NotEmpty().WithMessage("Cost is required");
-        RuleFor(ticket => ticket.Location).NotEmpty().WithMessage("Location is required");
-        RuleFor(ticket => ticket.StartDate).NotEmpty().WithMessage("Start date is required");
+        AddRequired(ticket => ticket.TicketId);
+        AddRequired(ticket => ticket.SellerId);
+        AddRequired(ticket => ticket.Name);
+        AddEqualOrGreaterThan(ticket => ticket.Cost, 0);
+        AddRequired(ticket => ticket.Location);
+        AddEqualOrGreaterThan(ticket => ticket.StartDate, DateTime.Now);
     }
 }

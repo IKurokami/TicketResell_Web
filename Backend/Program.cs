@@ -9,7 +9,6 @@ using Backend.Middlewares;
 using Backend.Core.Validators;
 using Backend.Repositories.Categories;
 using Backend.Repositories.Tickets;
-using Backend.Validators;
 using FluentValidation;
 Env.Load();
 
