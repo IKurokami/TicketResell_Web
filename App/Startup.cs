@@ -4,6 +4,7 @@ using App.Contracts.Services;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Home;
 using App.MVVMs.Views.Login;
+using App.MVVMs.Views.Setting;
 using App.Services;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,18 +21,20 @@ namespace App
             {
                 client.BaseAddress = new(Configuration.APIUrl);
             });
-            httpBuilder.SetHandlerLifetime(TimeSpan.FromMinutes(5));
+            httpBuilder.SetHandlerLifetime(TimeSpan.FromSeconds(10));
             httpBuilder.AddStandardResilienceHandler();
             
             services.AddSingleton<IOrderRequest, OrderRequest>();
+            services.AddSingleton<ITicketRequest, TicketRequest>();
             
             //ViewModels
             services.AddSingleton<LoginViewModel>();
             services.AddSingleton<ShellViewModel>();
             services.AddSingleton<HomeViewModel>();
             services.AddSingleton<DashBoardViewModel>();
-            services.AddScoped<TicketDetailViewModel>();
+            services.AddTransient<TicketDetailViewModel>();
             services.AddSingleton<MainWindowViewModel>();
+            services.AddSingleton<SettingViewModel>();
             
             //MainWindow
             services.AddSingleton<MainWindow>();
@@ -57,6 +60,7 @@ namespace App
             pageService?.Configure<ShellViewModel, ShellPage>();
             pageService?.Configure<HomeViewModel, HomePage>();
             pageService?.Configure<DashBoardViewModel, DashBoardPage>();
+            pageService?.Configure<SettingViewModel, SettingPage>();
         }
     }
 }

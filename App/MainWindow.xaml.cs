@@ -7,12 +7,13 @@ namespace App
 {
     public sealed partial class MainWindow
     {
-        private MainWindowViewModel ViewModel;
+        private readonly MainWindowViewModel? ViewModel;
 
         public MainWindow(MainWindowViewModel viewModel)
         {
             ViewModel = viewModel;
             this.InitializeComponent();
+
             ViewModel.MainGrid = MainGrid;
             ViewModel.RootFrame = rootFrame;
             ViewModel.OverlayFrame = overlayFrame;

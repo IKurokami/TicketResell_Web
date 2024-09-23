@@ -25,7 +25,7 @@ public class ApiRepository : IApiRepository
             url += "/" + string.Join("/", parameters);
         }
 
-        return url;
+        return _httpClient.BaseAddress + "/" + url;
     }
 
     private async Task<T> HttpRequestAsync<T>(string endpoint, HttpMethod method, object data,
@@ -36,12 +36,19 @@ public class ApiRepository : IApiRepository
         {
             HttpResponseMessage? response = null;
 
-            var json = await StringifyAsync(data);
-            var body = new StringContent(json, Encoding.UTF8, "application/json");
+            string json;
+            StringContent body = null;
+
+            if (data != null)
+            {
+                json = await StringifyAsync(data);
+                body = new StringContent(json, Encoding.UTF8, "application/json");
+            }
 
             if (method == HttpMethod.Get)
             {
-                response = await _httpClient.GetAsync(UrlBuilder(endpoint, parameters));
+                var url = UrlBuilder(endpoint, parameters);
+                response = await _httpClient.GetAsync(url);
             }
             else if (method == HttpMethod.Post)
             {
