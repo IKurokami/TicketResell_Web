@@ -33,6 +33,7 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<UserValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<OrderValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<OrderDetailValidator>();
 
 builder.Services.AddScoped<Backend.Core.Validators.IValidatorFactory, ValidatorFactory>();
 var app = builder.Build();

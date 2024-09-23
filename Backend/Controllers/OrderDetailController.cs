@@ -1,6 +1,7 @@
 using AutoMapper;
 using Backend.Core.Entities;
 using Backend.Core.Dtos.OrderDetail;
+using Backend.Core.Validators;
 using Backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,28 +14,35 @@ namespace Backend.Controllers
         private readonly IOrderDetailRepository _orderDetailRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
+        private IValidatorFactory _validatorFactory;
 
-        public OrderDetailController(IOrderDetailRepository orderDetailRepository, IMapper mapper, IOrderRepository orderRepository)
+        public OrderDetailController(IOrderDetailRepository orderDetailRepository, IMapper mapper,
+            IOrderRepository orderRepository, IValidatorFactory validatorFactory)
         {
             _orderDetailRepository = orderDetailRepository;
             _mapper = mapper;
             _orderRepository = orderRepository;
+            _validatorFactory = validatorFactory;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateOrderDetail([FromBody] OrderDetailDto dto)
         {
-            if (dto.OrderId == null)
+            var orderDetail = _mapper.Map<OrderDetail>(dto);
+            var validator = _validatorFactory.GetValidator<OrderDetail>();
+            var results = validator.Validate(orderDetail);
+
+            if (!results.IsValid)
             {
-                return BadRequest("OrderId is required.");
+                return BadRequest(results.Errors);
             }
+
             var order = await _orderRepository.HasOrder(dto.OrderId);
             if (order == false)
             {
                 return NotFound($"Order with ID {dto.OrderId} not found.");
             }
 
-            var orderDetail = _mapper.Map<OrderDetail>(dto);
             await _orderDetailRepository.CreateOrderDetailAsync(orderDetail);
             return Ok(new { message = $"Successfully created orderDetail: {orderDetail.OrderDetailId}" });
         }
@@ -75,14 +83,21 @@ namespace Backend.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateOrderDetail([FromBody] OrderDetailDto dto)
         {
-            if(dto.OrderDetailId == null)
-                return BadRequest(new { message = "Body data required" });
+            var orderDetail = _mapper.Map<OrderDetail>(dto);
+            var validator = _validatorFactory.GetValidator<OrderDetail>();
+            var results = await validator.ValidateAsync(orderDetail);
 
-            var existingOrderDetail = await _orderDetailRepository.GetOrderDetailByIdAsync(dto.OrderDetailId);
+            if (!results.IsValid)
+            {
+                return BadRequest(results.Errors);
+            }
+
+            var existingOrderDetail = await _orderDetailRepository.GetOrderDetailByIdAsync(orderDetail.OrderDetailId);
             if (existingOrderDetail == null)
             {
                 return NotFound();
             }
+
             _mapper.Map(dto, existingOrderDetail);
             await _orderDetailRepository.UpdateOrderDetailAsync(existingOrderDetail);
             return Ok(new { message = $"Successfully updated orderDetail: {existingOrderDetail.OrderDetailId}" });
@@ -96,6 +111,7 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
+
             await _orderDetailRepository.DeleteOrderDetailAsync(id);
             return Ok(new { message = $"Successfully deleted orderDetail: {existingOrderDetail.OrderDetailId}" });
         }
