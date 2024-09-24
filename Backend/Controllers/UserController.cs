@@ -36,7 +36,7 @@ namespace Backend.Controllers
                 return BadRequest(validationResult.Errors);
             }
             newUser.CreateDate = DateTime.UtcNow;
-            await _userRepository.CreateUserAsync(newUser);
+            await _userRepository.CreateAsync(newUser);
 
             return Ok(new { message = $"Successfully created user: {dto.Username}" });
         }
@@ -45,7 +45,7 @@ namespace Backend.Controllers
         [Route("read/{id}")]
         public async Task<IActionResult> GetUser(string id)
         {
-            User? user = await _userRepository.GetUserByIdAsync(id);
+            User? user = await _userRepository.GetByIdAsync(id);
 
             UserReadDto userDto = _mapper.Map<UserReadDto>(user);
             return Ok(userDto);
@@ -55,7 +55,7 @@ namespace Backend.Controllers
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDto dto)
         {
-            User? user = await _userRepository.GetUserByIdAsync(id);
+            User? user = await _userRepository.GetByIdAsync(id);
             _mapper.Map(dto, user);
 
             var validator = _validatorFactory.GetValidator<User>();
@@ -65,7 +65,7 @@ namespace Backend.Controllers
             {
                 return BadRequest(validationResult.Errors);
             }
-            await _userRepository.UpdateUserAsync(user);
+            await _userRepository.UpdateAsync(user);
 
             return Ok(new { message = $"Successfully updated user: {user.Username}" });
         }
@@ -74,9 +74,9 @@ namespace Backend.Controllers
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            User? user = await _userRepository.GetUserByIdAsync(id);
+            User? user = await _userRepository.GetByIdAsync(id);
 
-            await _userRepository.DeleteUserAsync(user);
+            await _userRepository.DeleteAsync(user);
 
             return Ok(new { message = $"Successfully deleted user: {user.Username}" });
         }

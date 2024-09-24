@@ -10,9 +10,9 @@ namespace Backend.Controllers
 {
     [Route("/api/[controller]")]
     [ApiController]
-    public class SellConfigController: ControllerBase
+    public class SellConfigController : ControllerBase
     {
-        private ISellConfigRepository _sellConfigRepository {  get; }
+        private ISellConfigRepository _sellConfigRepository { get; }
         private IMapper _mapper { get; }
 
         public SellConfigController(ISellConfigRepository sellConfigRepository, IMapper mapper)
@@ -25,29 +25,26 @@ namespace Backend.Controllers
         public async Task<IActionResult> CreateSellConfig([FromBody] SellConfigCreateDto dto)
         {
             SellConfig sellConfig = _mapper.Map<SellConfig>(dto);
-            await _sellConfigRepository.CreateSellConfigAsync(sellConfig);
-            return Ok(new { message = $"Successfully created SellConfig: {dto.SellConfigId}"});
+            await _sellConfigRepository.CreateAsync(sellConfig);
+            return Ok(new { message = $"Successfully created SellConfig: {dto.SellConfigId}" });
         }
 
         [HttpGet("read")]
         public async Task<ActionResult<IEnumerable<SellConfig>>> ReadSellConfig()
         {
-            var sellConfigs = await _sellConfigRepository.ReadSellConfigAsync();
+            var sellConfigs = await _sellConfigRepository.GetAllAsync();
             var convertedSellConfigs = _mapper.Map<IEnumerable<SellConfigReadDto>>(sellConfigs);
             return Ok(convertedSellConfigs);
-                    
+
         }
 
         [HttpPut("update/{sellConfigId}")]
-        public async Task<IActionResult> UpdateSellConfig(string sellConfigId, [FromBody] SellConfigUpdateDto dto )
+        public async Task<IActionResult> UpdateSellConfig(string sellConfigId, [FromBody] SellConfigUpdateDto dto)
         {
-            var sellConfig = await _sellConfigRepository.GetSellConfigByIdAsync(sellConfigId);
-            if (sellConfig == null)
-            {
-                return NotFound($"SellConfig with ID {sellConfigId} not exist");
-            }
+            var sellConfig = await _sellConfigRepository.GetByIdAsync(sellConfigId);
+
             _mapper.Map(dto, sellConfig);
-            await _sellConfigRepository.UpdateSellConfigAsync(sellConfig);
+            await _sellConfigRepository.UpdateAsync(sellConfig);
             return Ok(new { message = $"Successfully update sell config: {sellConfigId}" });
 
         }
@@ -55,12 +52,9 @@ namespace Backend.Controllers
         [HttpDelete("delete/{sellConfigId}")]
         public async Task<ActionResult<SellConfig>> DeleteSellConfig(string sellConfigId)
         {
-            var sellConfig = await _sellConfigRepository.GetSellConfigByIdAsync(sellConfigId);
-            if (sellConfig == null)
-            {
-                return NotFound($"SellConfig with ID {sellConfigId} not exist");
-            }
-            await _sellConfigRepository.DeleteSellConfigAsync(sellConfig);
+            var sellConfig = await _sellConfigRepository.GetByIdAsync(sellConfigId);
+
+            await _sellConfigRepository.DeleteAsync(sellConfig);
             return Ok(sellConfig);
         }
 

@@ -5,24 +5,15 @@ namespace Backend.Repositories.Tickets;
 
 using Microsoft.EntityFrameworkCore;
 
-public class TicketRepository : ITicketRepository
+public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 {
     private readonly TicketResellManagementContext _context;
 
-    public TicketRepository(TicketResellManagementContext context)
+    public TicketRepository(TicketResellManagementContext context) : base(context)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<Ticket>> GetAllTicketsAsync()
-    {
-        return await _context.Tickets.ToListAsync();
-    }
-
-    public async Task<Ticket?> GetTicketByIdAsync(string id)
-    {
-        return await _context.Tickets.Where(x => x.TicketId == id).FirstOrDefaultAsync();
-    }
 
     public async Task<Ticket?> GetTicketByNameAsync(string name)
     {
@@ -49,15 +40,5 @@ public class TicketRepository : ITicketRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateTicketAsync(Ticket ticket)
-    {
-        _context.Entry(ticket).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-    }
 
-    public async Task DeleteTicketAsync(Ticket ticket)
-    {
-        _context.Tickets.Remove(ticket);
-        await _context.SaveChangesAsync();
-    }
 }

@@ -30,7 +30,7 @@ namespace Backend.Controllers
             order.Date = DateTime.Now;
             order.Total = 0;
             order.Status = (int)OrderStatus.Pending;
-            
+
             var validator = _validatorFactory.GetValidator<Order>();
             var validationResult = await validator.ValidateAsync(order);
             if (!validationResult.IsValid)
@@ -42,26 +42,26 @@ namespace Backend.Controllers
             {
                 return Ok(new { message = $"Duplicated orderId: {order.OrderId}" });
             }
-            
-            await _orderRepository.CreateOrderAsync(order);
+
+            await _orderRepository.CreateAsync(order);
             return Ok(new { message = $"Successfully created order: {order.OrderId}" });
         }
 
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(string orderId)
         {
-            var order = await _orderRepository.GetOrderByIdAsync(orderId);
-            
+            var order = await _orderRepository.GetByIdAsync(orderId);
+
             if (order == null)
                 return NotFound();
-            
+
             return Ok(order);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
-            var orders = await _orderRepository.GetAllOrdersAsync();
+            var orders = await _orderRepository.GetAllAsync();
             return Ok(orders);
         }
 
@@ -73,7 +73,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("daterange")]
-        public async Task<IActionResult> GetOrdersByDateRange([FromBody]DateRange dateRange)
+        public async Task<IActionResult> GetOrdersByDateRange([FromBody] DateRange dateRange)
         {
             dateRange.StartDate = dateRange.StartDate ?? new DateTime(0);
             dateRange.EndDate = dateRange.EndDate ?? DateTime.Now;
@@ -97,15 +97,15 @@ namespace Backend.Controllers
             {
                 return BadRequest(validationResult.Errors);
             }
-            
-            await _orderRepository.UpdateOrderAsync(order);
+
+            await _orderRepository.UpdateAsync(order);
             return Ok(new { message = $"Successfully updated order: {order.OrderId}" });
         }
 
         [HttpDelete("{orderId}")]
         public async Task<IActionResult> DeleteOrder(string orderId)
         {
-            await _orderRepository.DeleteOrderAsync(orderId);
+            await _orderRepository.DeleteByIdAsync(orderId);
             return Ok(new { message = $"Successfully deleted order: {orderId}" });
         }
 

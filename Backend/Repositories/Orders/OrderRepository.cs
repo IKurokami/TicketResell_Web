@@ -5,71 +5,48 @@ using Backend.Core.Helper;
 
 namespace Backend.Repositories
 {
-    public class OrderRepository(TicketResellManagementContext context) : IOrderRepository
+    public class OrderRepository : GenericRepository<Order>, IOrderRepository
     {
-        public async Task CreateOrderAsync(Order? order)
+        private readonly TicketResellManagementContext _context;
+
+        public OrderRepository(TicketResellManagementContext context) : base(context)
         {
-            await context.Orders.AddAsync(order);
-            await context.SaveChangesAsync();
+            _context = context;
         }
 
-        public async Task<Order?> GetOrderByIdAsync(string orderId)
-        {
-            return await context.Orders.FindAsync(orderId);
-        }
-
-        public async Task<IEnumerable<Order?>> GetAllOrdersAsync()
-        {
-            return await context.Orders.ToListAsync();
-        }
 
         public async Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId)
         {
-            return (await context.Orders
+            return await _context.Orders
                 .Where(o => o != null && o.BuyerId == buyerId)
-                .ToListAsync());
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateRange dateRange)
         {
-            return await context.Orders
+            return await _context.Orders
                 .Where(o => o != null && o.Date >= dateRange.StartDate && o.Date <= dateRange.EndDate)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceDoubleRange)
         {
-            return await context.Orders
+            return await _context.Orders
                 .Where(o => o != null && o.Total >= priceDoubleRange.Min && o.Total <= priceDoubleRange.Max)
                 .ToListAsync();
         }
 
-        public async Task UpdateOrderAsync(Order order)
-        {
-            context.Orders.Entry(order).State = EntityState.Modified;
-            await context.SaveChangesAsync();
-        }
-
-        public async Task DeleteOrderAsync(string orderId)
-        {
-            var order = await context.Orders.FindAsync(orderId);
-            if (order != null)
-            {
-                context.Orders.Remove(order);
-                await context.SaveChangesAsync();
-            }
-        }
 
         public async Task<double> CalculateTotalPriceForOrderAsync(string orderId)
         {
-            return await context.OrderDetails
+            return await _context.OrderDetails
                 .Where(od => od != null && od.OrderId == orderId)
                 .SumAsync(od => od!.Price * od.Quantity ?? 0);
         }
 
         public async Task<bool> HasOrder(string orderId)
         {
-            return await context.Orders.FindAsync(orderId) != null;
+            return await _context.Orders.FindAsync(orderId) != null;
         }
     }
 }

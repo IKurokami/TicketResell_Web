@@ -25,7 +25,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> CreateRole([FromBody] RoleCreateDto dto)
         {
             Role role = _mapper.Map<Role>(dto);
-            await _roleRepository.CreateRoleAsync(role);
+            await _roleRepository.CreateAsync(role);
             return Ok(new { message = $"Successfully created role: {dto.Rolename}" });
         }
 
@@ -33,7 +33,7 @@ namespace Backend.Controllers
         [Route("read")]
         public async Task<ActionResult<IEnumerable<Role>>> ReadRole()
         {
-            var roles = await _roleRepository.ReadRoleAsync();
+            var roles = await _roleRepository.GetAllAsync();
             var convertedRoles = _mapper.Map<IEnumerable<RoleReadDto>>(roles);
             return Ok(convertedRoles);
 
@@ -43,13 +43,10 @@ namespace Backend.Controllers
         [Route("update/{roleId}")]
         public async Task<IActionResult> UpdateRole(string roleId, [FromBody] RoleUpdateDto dto)
         {
-            var role = await _roleRepository.GetRoleByIdAsync(roleId);
-            if (role == null)
-            {
-                return NotFound($"SellConfig with ID {roleId} not exist");
-            }
+            var role = await _roleRepository.GetByIdAsync(roleId);
+
             _mapper.Map(dto, role);
-            await _roleRepository.UpdateRoleAsync(role);
+            await _roleRepository.UpdateAsync(role);
             return Ok(new { message = $"Successfully update sell config: {roleId}" });
         }
 
@@ -57,12 +54,9 @@ namespace Backend.Controllers
         [Route("delete/{roleId}")]
         public async Task<ActionResult<Role>> DeleteSellConfig(string roleId)
         {
-            var role = await _roleRepository.GetRoleByIdAsync(roleId);
-            if (role == null)
-            {
-                return NotFound($"SellConfig with ID {roleId} not exist");
-            }
-            await _roleRepository.DeleteRoleAsync(role);
+            var role = await _roleRepository.GetByIdAsync(roleId);
+
+            await _roleRepository.DeleteAsync(role);
             return Ok(role);
         }
 

@@ -22,31 +22,26 @@ public class CategoryController : ControllerBase
         _mapper = mapper;
         _validatorFactory = validatorFactory;
     }
-    
+
     [HttpGet]
     [Route("read")]
     public async Task<ActionResult<IEnumerable<CategoryReadDto>>> GetCategories()
     {
-        var categories = await _categoryRepository.GetAllCategoriesAsync();
+        var categories = await _categoryRepository.GetAllAsync();
         var categoryDto = _mapper.Map<IEnumerable<CategoryReadDto>>(categories);
         return Ok(categoryDto);
     }
 
-    
+
     [HttpGet("read/{id}")]
     public async Task<ActionResult<CategoryReadDto>> GetCategoryById(string id)
     {
-        var category = await _categoryRepository.GetCategoryByIdAsync(id);
-
-        if (category == null)
-        {
-            return NotFound($"Categories with ID {id} not found.");
-        }
+        var category = await _categoryRepository.GetByIdAsync(id);
 
         var categoryDto = _mapper.Map<CategoryReadDto>(category);
         return Ok(categoryDto);
     }
-    
+
     [HttpPost("create")]
     public async Task<ActionResult<Category>> CreateCategory([FromBody] CategoryCreateDto dto)
     {
@@ -57,19 +52,15 @@ public class CategoryController : ControllerBase
         {
             return BadRequest(validationResult.Errors);
         }
-        await _categoryRepository.AddCategoryAsync(newCate);
+        await _categoryRepository.CreateAsync(newCate);
         return Ok(new { message = "Successfully created Category" });
     }
-    
+
     [HttpPut("update/{id}")]
     public async Task<IActionResult> UpdateCategory(string id, [FromBody] CategoryUpdateDto dto)
     {
-        var category = await _categoryRepository.GetCategoryByIdAsync(id);
+        var category = await _categoryRepository.GetByIdAsync(id);
 
-        if (category == null)
-        {
-            return NotFound($"Category with Id {id} not found.");
-        }
         var validator = _validatorFactory.GetValidator<Category>();
         var validationResult = validator.Validate(category);
         if (!validationResult.IsValid)
@@ -77,21 +68,15 @@ public class CategoryController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
         _mapper.Map(dto, category);
-        await _categoryRepository.UpdateCategoryAsync(category);
+        await _categoryRepository.UpdateAsync(category);
         return Ok(new { message = $"Successfully update category with id: {id}" });
     }
-    
+
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> DeleteCategory(string id)
     {
-        var category = await _categoryRepository.GetCategoryByIdAsync(id);
 
-        if (category == null)
-        {
-            return NotFound($"Category with Id {id} not found.");
-        }
-        
-        await _categoryRepository.DeleteCategoryAsync(category);
+        await _categoryRepository.DeleteByIdAsync(id);
         return Ok(new { message = $"Successfully deleted Category with id: {id}" });
     }
 }
