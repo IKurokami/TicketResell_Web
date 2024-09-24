@@ -8,8 +8,6 @@ using Backend.Core.Dtos.User;
 using Backend.Core.Dtos.SellConfig;
 using Backend.Core.Dtos.Role;
 using Backend.Core.Dtos.Ticket;
-using Backend.Core.Entities;
-using Backend.Core.Dtos.User;
 using Category = Backend.Core.Entities.Category;
 
 namespace Backend.Core.AutoMapperConfig

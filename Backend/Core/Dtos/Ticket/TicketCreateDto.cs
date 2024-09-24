@@ -19,5 +19,5 @@ public class TicketCreateDto
 
     public string? Image { get; set; }
 
-    public List<string> CategoriesId { get; set; }
+    public List<string> CategoriesId { get; set; } = new();
 }

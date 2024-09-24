@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Core.Context;
 using Backend.Core.Entities;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Backend.Repositories
 {
@@ -13,22 +14,23 @@ namespace Backend.Repositories
             _context = context;
         }
 
-
-        public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsByUsernameAsync(string username)
+        public async Task<IEnumerable<OrderDetail>> GetOrderDetailsByUsernameAsync(string username)
         {
-            return await _context.OrderDetails.Where(od => od.Order.Buyer.Username == username)
+            return await _context.OrderDetails.Where(od =>
+                    od.Order != null && od.Order.Buyer != null && od.Order.Buyer.Username == username)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsByBuyerIdAsync(string userId)
+        public async Task<IEnumerable<OrderDetail>> GetOrderDetailsByBuyerIdAsync(string userId)
         {
-            return await _context.OrderDetails.Where(od => od.Order.BuyerId == userId)
+            return await _context.OrderDetails.Where(od => od.Order != null && od.Order.BuyerId == userId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsBySellerIdAsync(string sellerId)
+        public async Task<IEnumerable<OrderDetail>> GetOrderDetailsBySellerIdAsync(string sellerId)
         {
-            return await _context.OrderDetails.Where(od => od.Ticket.SellerId == sellerId)
+            return await _context.OrderDetails
+                .Where(od => od.Ticket != null && od.Ticket.SellerId == sellerId)
                 .ToListAsync();
         }
     }

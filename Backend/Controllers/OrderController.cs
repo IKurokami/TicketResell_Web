@@ -37,12 +37,7 @@ namespace Backend.Controllers
             {
                 return BadRequest(validationResult.Errors);
             }
-
-            if (await _orderRepository.HasOrder(order.OrderId))
-            {
-                return Ok(new { message = $"Duplicated orderId: {order.OrderId}" });
-            }
-
+            
             await _orderRepository.CreateAsync(order);
             return Ok(new { message = $"Successfully created order: {order.OrderId}" });
         }
@@ -51,10 +46,6 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetOrderById(string orderId)
         {
             var order = await _orderRepository.GetByIdAsync(orderId);
-
-            if (order == null)
-                return NotFound();
-
             return Ok(order);
         }
 
@@ -75,8 +66,8 @@ namespace Backend.Controllers
         [HttpPost("daterange")]
         public async Task<IActionResult> GetOrdersByDateRange([FromBody] DateRange dateRange)
         {
-            dateRange.StartDate = dateRange.StartDate ?? new DateTime(0);
-            dateRange.EndDate = dateRange.EndDate ?? DateTime.Now;
+            dateRange.StartDate ??= new DateTime(0);
+            dateRange.EndDate ??= DateTime.Now;
             var orders = await _orderRepository.GetOrdersByDateRangeAsync(dateRange);
             return Ok(orders);
         }

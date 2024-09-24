@@ -37,12 +37,6 @@ namespace Backend.Controllers
                 return BadRequest(results.Errors);
             }
 
-            var order = await _orderRepository.HasOrder(dto.OrderId);
-            if (order == false)
-            {
-                return NotFound($"Order with ID {dto.OrderId} not found.");
-            }
-
             await _orderDetailRepository.CreateAsync(orderDetail);
             return Ok(new { message = $"Successfully created orderDetail: {orderDetail.OrderDetailId}" });
         }
@@ -51,8 +45,6 @@ namespace Backend.Controllers
         public async Task<ActionResult<OrderDetailDto>> GetOrderDetail(string id)
         {
             var orderDetail = await _orderDetailRepository.GetByIdAsync(id);
-
-
             return Ok(_mapper.Map<OrderDetailDto>(orderDetail));
         }
 
@@ -90,8 +82,7 @@ namespace Backend.Controllers
             }
 
             var existingOrderDetail = await _orderDetailRepository.GetByIdAsync(orderDetail.OrderDetailId);
-
-
+            
             _mapper.Map(dto, existingOrderDetail);
             await _orderDetailRepository.UpdateAsync(existingOrderDetail);
             return Ok(new { message = $"Successfully updated orderDetail: {existingOrderDetail.OrderDetailId}" });

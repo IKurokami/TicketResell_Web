@@ -50,7 +50,11 @@ namespace Backend.Repositories
         }
         public async Task DeleteByIdAsync(string id)
         {
-            T entity = await GetByIdAsync(id);
+            T? entity = await _dbSet.FindAsync(id);
+            if (entity == null)
+            {
+                throw new KeyNotFoundException("Id not found");
+            }
             _context.Remove(entity);
             await _context.SaveChangesAsync();
         }

@@ -2,5 +2,5 @@ namespace App.ApiRequest;
 
 public class Message
 {
-    public string message { get; set; }
+    public string? message { get; set; }
 }

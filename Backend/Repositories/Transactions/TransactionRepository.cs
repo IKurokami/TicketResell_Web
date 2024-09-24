@@ -15,22 +15,39 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
         _context = context;
     }
 
-    public async Task<IEnumerable<OrderDetail?>> GetTransactionsByDateAsync(string sellerId, DateRange dateRange)
+    public async Task<IEnumerable<OrderDetail>> GetTransactionsByDateAsync(string sellerId, DateRange dateRange)
     {
-        return await _context.OrderDetails.Where(od => od != null && od.Ticket.SellerId == sellerId &&
+        return await _context.OrderDetails.Where(od => od.Ticket != null &&
+                                                       od.Ticket.SellerId == sellerId &&
+                                                       od.Order != null &&
                                                        od.Order.Date >= dateRange.StartDate &&
                                                        od.Order.Date <= dateRange.EndDate).ToListAsync();
     }
 
-    public async Task<double?> CalculatorTotal(string sellerId, DateRange dateRange)
+    public async Task<double> CalculatorTotal(string sellerId, DateRange dateRange)
     {
-        return await _context.OrderDetails.Where(od => od != null && od.Ticket.SellerId == sellerId &&
-                                                       od.Order.Date >= dateRange.StartDate &&
-                                                       od.Order.Date <= dateRange.EndDate).SumAsync(od => od.Price * od.Quantity);
+        var result = await _context.OrderDetails.Where(od => od.Ticket != null &&
+                                                             od.Ticket.SellerId == sellerId &&
+                                                             od.Order != null &&
+                                                             od.Order.Date >= dateRange.StartDate &&
+                                                             od.Order.Date <= dateRange.EndDate).SumAsync(od => od.Price * od.Quantity);
+        if (result.HasValue)
+        {
+            return result.Value;
+        }
+        
+        return 0;
     }
 
     public async Task<IEnumerable<User?>> GetUserBuyTicket(string sellerId)
     {
-        return await _context.OrderDetails.Where(od => od != null && od.Ticket.SellerId == sellerId).Select(od => od.Order.Buyer).ToListAsync();
+        var result = new List<User?>();
+
+        foreach (var item in await _context.OrderDetails.Where(od => od.Order != null && od.Ticket != null && od.Ticket.SellerId == sellerId).Select(od => od.Order.Buyer).ToListAsync())
+        {
+            result.Add(item);
+        }
+
+        return result;
     }
 }

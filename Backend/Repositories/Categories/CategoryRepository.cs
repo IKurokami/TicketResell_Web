@@ -12,5 +12,4 @@ public class CategoryRepository : GenericRepository<Category>, ICategoryReposito
     {
         _context = context;
     }
-
 }
