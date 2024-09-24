@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
-    xmlns:entities="using:Backend.Core.Entities"
+    xmlns:tickets="using:Backend.Core.Dtos"
     xmlns:converter="using:App.Converters"
     xmlns:marqueeText="using:CommunityToolkit.Labs.WinUI.MarqueeTextRns">
 
@@ -22,7 +22,7 @@
         <DataTemplate x:Key="SelectedTagsTemplate" x:DataType="x:String">
             <TextBlock Text="{Binding}" Margin="0,5,0,5" />
         </DataTemplate>
-        <DataTemplate x:Key="TicketTemplate" x:DataType="entities:Ticket">
+        <DataTemplate x:Key="TicketTemplate" x:DataType="tickets:TickerReadDto">
             <Border CornerRadius="5" Padding="10" Margin="5">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -38,15 +38,16 @@
                     </Grid.ColumnDefinitions>
 
                     <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="5"
-                           Source="{x:Bind TicketImage}"
+                           Source="ms-appx:///Assets/TicketLogo.png"
                            Width="120" Height="120"
                            Stretch="Uniform"
                            Margin="0,0,10,0" />
 
                     <TextBlock Grid.Row="0" Grid.Column="1"
+                               HorizontalAlignment="Center"
                                Text="{x:Bind Name}"
-                               FontSize="18" FontWeight="Bold" />
-
+                               FontSize="18" FontWeight="Bold" 
+                               MinWidth="200"/>
 
                     <marqueeText:MarqueeText
                         Grid.Row="1" Grid.Column="1"
@@ -55,29 +56,27 @@
                         FontSize="18"
                         RepeatBehavior="Forever"
                         Speed="40"
+                        MinWidth="200"
                         Text="{x:Bind Converter={StaticResource EventInfoConverter}}">
                     </marqueeText:MarqueeText>
-                    
+
                     <TextBlock Grid.Row="2" Grid.Column="1"
-                               Text="{x:Bind EventLocation}" />
+                               Text="{x:Bind Location}" />
 
                     <StackPanel Grid.Row="3" Grid.Column="1"
                                 Orientation="Horizontal"
                                 Margin="0,5,0,0">
                         <TextBlock Text="Price: " />
-                        <TextBlock Text="{x:Bind ResalePrice, Converter={StaticResource CurrencyConverter}}"
+                        <TextBlock Text="{x:Bind Cost, Converter={StaticResource CurrencyConverter}}"
                                    FontWeight="SemiBold" />
-                        <TextBlock Text=" (Original: " Margin="5,0,0,0" />
-                        <TextBlock Text="{x:Bind OriginalPrice, Converter={StaticResource CurrencyConverter}}" />
-                        <TextBlock Text=")" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="4" Grid.Column="1"
                                 Orientation="Horizontal"
                                 Margin="0,5,0,0">
                         <TextBlock Text="Status: " />
-                        <TextBlock Text="{x:Bind TicketStatus}"
-                                   Foreground="{x:Bind TicketStatus, Converter={StaticResource StatusToColorConverter}}" />
+                        <TextBlock Text="{x:Bind Status}"
+                                   Foreground="{x:Bind Status, Converter={StaticResource StatusToColorConverter}}" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -113,7 +112,8 @@
                                           IsItemClickEnabled="True"
                                           ItemClick="TicketView_OnItemClick"
                                           CanDrag="True"
-                                          CanReorderItems="True">
+                                          CanReorderItems="True"
+                                          AllowDrop="True">
                                     <GridView.ItemContainerTransitions>
                                         <TransitionCollection>
                                             <ContentThemeTransition />

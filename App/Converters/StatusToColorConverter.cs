@@ -9,15 +9,15 @@ public class StatusToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        if (value is string status)
+        if (value is int status)
         {
-            switch (status.ToLower())
+            switch (status)
             {
-                case "available":
+                case 1:
                     return new SolidColorBrush(Colors.Green);
-                case "sold":
+                case 2:
                     return new SolidColorBrush(Colors.Red);
-                case "pending":
+                case 3:
                     return new SolidColorBrush(Colors.Orange);
                 default:
                     return new SolidColorBrush(Colors.Gray);

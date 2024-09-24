@@ -9,68 +9,27 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     xmlns:helpers="using:App.Helpers"
-    Loaded="OnLoaded"
-    xmlns:labs="using:CommunityToolkit.Labs.WinUI"
-    xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
-    xmlns:ic="using:Microsoft.Xaml.Interactions.Core"
-    xmlns:i="using:Microsoft.Xaml.Interactivity">
-    <Page.Resources>
-        <labs:TransitionHelper x:Key="MyTransitionHelper">
-            <labs:TransitionConfig Id="titleBar"
-                                   EnableClipAnimation="True"
-                                   ScaleMode="Scale" />
-            <labs:TransitionConfig Id="logoImage"
-                                   EnableClipAnimation="True"
-                                   ScaleMode="Scale" />
-            <labs:TransitionConfig Id="logoText"
-                                   EnableClipAnimation="True"
-                                   ScaleMode="Scale" />
-            <labs:TransitionConfig Id="navView"
-                                   EnableClipAnimation="True"
-                                   ScaleMode="Scale" />
-            <labs:TransitionConfig Id="background"
-                                   EnableClipAnimation="True"
-                                   ScaleMode="Scale" />
-            <labs:TransitionConfig Id="ButtonIcon"
-                                   EnableClipAnimation="True"
-                                   ScaleMode="Scale" />
-        </labs:TransitionHelper>
-    </Page.Resources>
+    Loaded="OnLoaded">
     <Grid>
-        <Grid x:Name="HomeView" Visibility="Visible">
+        <Grid x:Name="HomeView">
             <Grid x:Name="AppTitleBar"
                   Canvas.ZIndex="1"
                   Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
                   IsHitTestVisible="True"
                   VerticalAlignment="Top">
                 <Image Source="/Assets/TicketLogo.png"
-                       labs:TransitionHelper.Id="logoImage"
                        HorizontalAlignment="Left"
                        Width="22"
                        Height="22" />
                 <TextBlock x:Name="AppTitleBarText"
-                           labs:TransitionHelper.Id="logoText"
                            VerticalAlignment="Center"
                            TextWrapping="NoWrap"
                            Style="{StaticResource CaptionTextBlockStyle}"
                            Margin="25,0,0,0"
                            FontSize="16" />
             </Grid>
-            <Grid
-                VerticalAlignment="Bottom"
-                HorizontalAlignment="Left">
-                <Border
-                    Canvas.ZIndex="0"
-                    x:Name="SettingButtonBackGround"
-                    labs:TransitionHelper.Id="background"
-                    Width="50"
-                    Height="50"
-                    Background="Transparent"
-                    IsHitTestVisible="False" />
-            </Grid>
             <NavigationView
                 x:Name="NavigationViewControl"
-                labs:TransitionHelper.Id="navView"
                 Canvas.ZIndex="0"
                 IsBackButtonVisible="Visible"
                 IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
@@ -98,61 +57,6 @@
                     <Frame x:Name="NavigationFrame" />
                 </Grid>
             </NavigationView>
-
-        </Grid>
-        <Grid x:Name="SettingViewCollapsed" Visibility="Collapsed">
-            <Grid
-                Width="{Binding ElementName=NavigationViewControl, Path=Width}"
-                Height="{Binding ElementName=NavigationViewControl, Path=Height}">
-                <Grid
-                    Margin="60,0,0,0"
-                    Canvas.ZIndex="1"
-                    Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
-                    IsHitTestVisible="True"
-                    VerticalAlignment="Top">
-                    <Image Source="/Assets/TicketLogo.png"
-                           labs:TransitionHelper.Id="logoImage"
-                           HorizontalAlignment="Left"
-                           Width="22"
-                           Height="22" />
-                    <TextBlock
-                        labs:TransitionHelper.Id="logoText"
-                        VerticalAlignment="Center"
-                        TextWrapping="NoWrap"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Margin="30,0,0,0"
-                        FontSize="16" />
-                </Grid>
-                <Border
-
-                    labs:TransitionHelper.Id="background"
-                    Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
-                    CornerRadius="8"
-                    IsHitTestVisible="False" />
-
-                <Button
-                    VerticalAlignment="Top"
-                    HorizontalAlignment="Left"
-                    Width="50"
-                    Background="OrangeRed"
-                    labs:TransitionHelper.Id="ButtonIcon">
-                    <AnimatedIcon>
-                        <AnimatedIcon.Source>
-                            <animatedvisuals:AnimatedAcceptVisualSource />
-                        </AnimatedIcon.Source>
-                        <AnimatedIcon.FallbackIconSource>
-                            <SymbolIconSource Symbol="Setting" />
-                        </AnimatedIcon.FallbackIconSource>
-                    </AnimatedIcon>
-                    <i:Interaction.Behaviors>
-                        <ic:EventTriggerBehavior EventName="Click">
-                            <labs:StartTransitionAction Source="{Binding ElementName=SettingViewCollapsed}"
-                                                        Target="{Binding ElementName=HomeView}"
-                                                        Transition="{StaticResource MyTransitionHelper}" />
-                        </ic:EventTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Button>
-            </Grid>
         </Grid>
     </Grid>
 </Page>

@@ -37,9 +37,9 @@
 
 ### **Get Revenue By Id,SellerId**
 
-**`api/Revenue/read/{id}`**
+**`api/Revenue/readbyid/{id}`**
 
-**`api/Revenue/read/revenue/{Sellerid}`**
+**`api/Revenue/readbysellerid/{Sellerid}`**
 
 - **Method:** `GET`
 - **Output:**
@@ -56,7 +56,8 @@
   ]
   ```
 
-### **Update Revenue By SellerId (`api/Rating/update/{id}/{type}`)**
+### **Update Revenue By SellerId** 
+(`api/Rating/update/{id}`)
 
 - **Method:** `PUT`
 - **Input:**

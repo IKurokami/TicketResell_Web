@@ -12,6 +12,7 @@ namespace App.MVVMs.Views.Detail
         {
             ViewModel = viewModel;
             this.InitializeComponent();
+            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
         }
 
         public void Dispose()

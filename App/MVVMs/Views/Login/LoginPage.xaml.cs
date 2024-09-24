@@ -16,10 +16,13 @@ namespace App.MVVMs.Views.Login
         public LoginPage()
         {
             ViewModel = Ioc.Default.GetService<LoginViewModel>();
+            
             this.InitializeComponent();
+            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled;
+
         }
 
-        private async void Register_Click(object sender, RoutedEventArgs e)
+        private void Register_Click(object sender, RoutedEventArgs e)
         {
         }
 

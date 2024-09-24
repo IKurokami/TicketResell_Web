@@ -67,6 +67,7 @@ namespace App.Services
         public bool GoBack()
         {
             GC.Collect();
+            GC.WaitForPendingFinalizers();
 
             if (CanGoBack)
             {
@@ -85,12 +86,25 @@ namespace App.Services
 
         public bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false)
         {
-            GC.Collect();
-
             var pageType = _pageService.GetPageType(pageKey);
 
             if (_frame != null && (_frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParameterUsed))))
             {
+                if (_frame.Content is IDisposable disposable)
+                {
+                    if(_frame.Content is Page page)
+                    {
+                        if(page.NavigationCacheMode == NavigationCacheMode.Disabled)
+                        {
+                            disposable.Dispose();
+                        }
+                    }
+                    else
+                    {
+                        disposable.Dispose();
+                    }
+                }
+
                 _frame.Tag = clearNavigation;
                 var vmBeforeNavigation = _frame.GetPageViewModel();
                 var navigated = _frame.Navigate(pageType, parameter, Ioc.Default.GetService<ContinuumNavigationTransitionInfo>());
@@ -102,6 +116,7 @@ namespace App.Services
                         navigationAware.OnNavigatedFrom();
                     }
                 }
+
                 return navigated;
             }
 
@@ -110,6 +125,9 @@ namespace App.Services
 
         private void OnNavigated(object sender, NavigationEventArgs e)
         {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
             if (sender is Frame frame)
             {
                 var clearNavigation = (bool)frame.Tag;
@@ -125,8 +143,6 @@ namespace App.Services
 
                 Navigated?.Invoke(sender, e);
             }
-
-            GC.Collect();
         }
 
         public void SetListDataItemForNextConnectedAnimation(object item) => Frame.SetListDataItemForNextConnectedAnimation(item);

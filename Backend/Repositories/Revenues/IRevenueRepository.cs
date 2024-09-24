@@ -2,18 +2,18 @@ namespace Backend.Repositories;
 using Backend.Core.Entities;
 public interface IRevenueRepository
 {
-    Task CreateRevenue(Revenue revenue);
+    Task CreateRevenueAsync(Revenue revenue);
 
-    Task<IEnumerable<Revenue>> GetRevenues();
+    Task<IEnumerable<Revenue>> GetRevenuesAsync();
 
-    Task<Revenue?> GetRevenuesById(string id);
+    Task<Revenue?> GetRevenuesByIdAsync(string id);
 
-    Task<List<Revenue>> GetRevenuesBySellerId_Month(string id, string type);
+    Task<List<Revenue>> GetRevenuesBySellerId_MonthAsync(string id, string type);
 
-    Task UpdateRevenue(Revenue revenue);
+    Task UpdateRevenueAsync(Revenue revenue);
 
-    Task<List<Revenue>> GetRevenuesBySellerId(string id);
+    Task<List<Revenue>> GetRevenuesBySellerIdAsync(string id);
 
-    Task DeleteRevenue(Revenue revenue);
+    Task DeleteRevenueAsync(Revenue revenue);
 
 }
