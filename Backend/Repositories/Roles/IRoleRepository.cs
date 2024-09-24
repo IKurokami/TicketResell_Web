@@ -2,12 +2,7 @@
 
 namespace Backend.Repositories
 {
-    public interface IRoleRepository
+    public interface IRoleRepository : IRepository<Role>
     {
-        Task CreateRoleAsync(Role role);
-        Task<IEnumerable<Role>> ReadRoleAsync();
-        Task<Role?> GetRoleByIdAsync(string roleId);
-        Task<Role> UpdateRoleAsync(Role roleUpdate);
-        Task<Role> DeleteRoleAsync(Role roleDelete);
     }
 }

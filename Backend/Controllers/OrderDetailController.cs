@@ -43,18 +43,15 @@ namespace Backend.Controllers
                 return NotFound($"Order with ID {dto.OrderId} not found.");
             }
 
-            await _orderDetailRepository.CreateOrderDetailAsync(orderDetail);
+            await _orderDetailRepository.CreateAsync(orderDetail);
             return Ok(new { message = $"Successfully created orderDetail: {orderDetail.OrderDetailId}" });
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDetailDto>> GetOrderDetail(string id)
         {
-            var orderDetail = await _orderDetailRepository.GetOrderDetailByIdAsync(id);
-            if (orderDetail == null)
-            {
-                return NotFound();
-            }
+            var orderDetail = await _orderDetailRepository.GetByIdAsync(id);
+
 
             return Ok(_mapper.Map<OrderDetailDto>(orderDetail));
         }
@@ -62,7 +59,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDetail>>> GetAllOrderDetails()
         {
-            var orderDetails = await _orderDetailRepository.GetAllOrderDetailsAsync();
+            var orderDetails = await _orderDetailRepository.GetAllAsync();
             return Ok(orderDetails);
         }
 
@@ -92,27 +89,20 @@ namespace Backend.Controllers
                 return BadRequest(results.Errors);
             }
 
-            var existingOrderDetail = await _orderDetailRepository.GetOrderDetailByIdAsync(orderDetail.OrderDetailId);
-            if (existingOrderDetail == null)
-            {
-                return NotFound();
-            }
+            var existingOrderDetail = await _orderDetailRepository.GetByIdAsync(orderDetail.OrderDetailId);
+
 
             _mapper.Map(dto, existingOrderDetail);
-            await _orderDetailRepository.UpdateOrderDetailAsync(existingOrderDetail);
+            await _orderDetailRepository.UpdateAsync(existingOrderDetail);
             return Ok(new { message = $"Successfully updated orderDetail: {existingOrderDetail.OrderDetailId}" });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrderDetail(string id)
         {
-            var existingOrderDetail = await _orderDetailRepository.GetOrderDetailByIdAsync(id);
-            if (existingOrderDetail == null)
-            {
-                return NotFound();
-            }
+            var existingOrderDetail = await _orderDetailRepository.GetByIdAsync(id);
 
-            await _orderDetailRepository.DeleteOrderDetailAsync(id);
+            await _orderDetailRepository.DeleteAsync(existingOrderDetail);
             return Ok(new { message = $"Successfully deleted orderDetail: {existingOrderDetail.OrderDetailId}" });
         }
     }

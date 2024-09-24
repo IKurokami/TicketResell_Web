@@ -28,7 +28,7 @@ namespace Backend.Controllers
             newRevenue.StartDate = DateTime.UtcNow;
             newRevenue.EndDate = newRevenue.StartDate.Value.AddMonths(1);
             newRevenue.Type = RevenueConstant.MONTH_TYPE;
-            await _revenueRepository.CreateRevenueAsync(newRevenue);
+            await _revenueRepository.CreateAsync(newRevenue);
             return Ok(new { message = "Successfully created Revenue" });
         }
 
@@ -36,7 +36,7 @@ namespace Backend.Controllers
         [Route("read")]
         public async Task<ActionResult<IEnumerable<RevenueReadDto>>> GetRevenues()
         {
-            var revenues = await _revenueRepository.GetRevenuesAsync();
+            var revenues = await _revenueRepository.GetAllAsync();
 
             var revenueDtos = _mapper.Map<IEnumerable<RevenueReadDto>>(revenues);
             return Ok(revenueDtos);
@@ -46,7 +46,7 @@ namespace Backend.Controllers
         [Route("readbyid/{id}")]
         public async Task<ActionResult<RevenueReadDto>> GetRevenuesById(string id)
         {
-            var revenues = await _revenueRepository.GetRevenuesByIdAsync(id);
+            var revenues = await _revenueRepository.GetByIdAsync(id);
 
             if (revenues == null)
             {
@@ -90,7 +90,7 @@ namespace Backend.Controllers
                 if (revenue.StartDate <= date && date <= revenue.EndDate)
                 {
                     _mapper.Map(dto, revenue);
-                    await _revenueRepository.UpdateRevenueAsync(revenue);
+                    await _revenueRepository.UpdateAsync(revenue);
                 }
             }
 
@@ -102,13 +102,9 @@ namespace Backend.Controllers
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteRevenues(string id)
         {
-            var revenue = await _revenueRepository.GetRevenuesByIdAsync(id);
+            var revenue = await _revenueRepository.GetByIdAsync(id);
 
-            if (revenue == null)
-            {
-                return NotFound($"Revenue with SellerID {id} not found.");
-            }
-            await _revenueRepository.DeleteRevenueAsync(revenue);
+            await _revenueRepository.DeleteAsync(revenue);
             return Ok(new { message = $"Successfully deleted Revenue(s) with id: {id}" });
         }
 
@@ -127,7 +123,7 @@ namespace Backend.Controllers
 
             foreach (var revenueItem in revenues)
             {
-                await _revenueRepository.DeleteRevenueAsync(revenueItem);
+                await _revenueRepository.DeleteAsync(revenueItem);
             }
 
             return Ok(new { message = $"Successfully deleted Revenue(s) with SellerID: {id}" });

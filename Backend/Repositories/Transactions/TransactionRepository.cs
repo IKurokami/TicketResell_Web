@@ -1,3 +1,4 @@
+using System.Transactions;
 using Backend.Core.Context;
 using Backend.Core.Entities;
 using Backend.Core.Helper;
@@ -5,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repositories;
 
-public class TransactionRepository : ITransactionRepository
+public class TransactionRepository : GenericRepository<Transaction>, ITransactionRepository
 {
     public readonly TicketResellManagementContext _context;
 
-    public TransactionRepository(TicketResellManagementContext context)
+    public TransactionRepository(TicketResellManagementContext context) : base(context)
     {
         _context = context;
     }

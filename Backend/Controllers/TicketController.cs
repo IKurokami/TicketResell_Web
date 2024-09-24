@@ -41,15 +41,15 @@ namespace Backend.Controllers
             {
                 foreach (var id in dto.CategoriesId)
                 {
-                    Category? category = await _categoryRepository.GetCategoryByIdAsync(id);
+                    Category? category = await _categoryRepository.GetByIdAsync(id);
 
                     if (category == null)
                     {
-                        return BadRequest(new {message = "category not found"});
+                        return BadRequest(new { message = "category not found" });
                     }
                 }
             }
-            
+
             newTicket.CreateDate = DateTime.UtcNow;
             newTicket.ModifyDate = DateTime.UtcNow;
             await _ticketRepository.CreateTicketAsync(newTicket, dto.CategoriesId);
@@ -60,7 +60,7 @@ namespace Backend.Controllers
         [Route("read")]
         public async Task<ActionResult<IEnumerable<TickerReadDto>>> GetTicket()
         {
-            var tickets = await _ticketRepository.GetAllTicketsAsync();
+            var tickets = await _ticketRepository.GetAllAsync();
 
             var ticketDtos = _mapper.Map<IEnumerable<TickerReadDto>>(tickets);
             return Ok(ticketDtos);
@@ -70,7 +70,7 @@ namespace Backend.Controllers
         [Route("readbyid/{id}")]
         public async Task<ActionResult<TickerReadDto>> GetRevenuesById(string id)
         {
-            var ticket = await _ticketRepository.GetTicketByIdAsync(id);
+            var ticket = await _ticketRepository.GetByIdAsync(id);
 
             if (ticket == null)
             {
@@ -102,10 +102,6 @@ namespace Backend.Controllers
         {
             var ticket = await _ticketRepository.GetTicketByDateAsync(date);
 
-            if (ticket == null)
-            {
-                return NotFound($"Ticket with Date {date} not found.");
-            }
 
             var ticketDtos = _mapper.Map<TickerReadDto>(ticket);
             return Ok(ticketDtos);
@@ -115,11 +111,8 @@ namespace Backend.Controllers
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketUpdateDto dto)
         {
-            var ticket = await _ticketRepository.GetTicketByIdAsync(id);
-            if (ticket == null)
-            {
-                return NotFound($"Ticket with Id {id} not found.");
-            }
+            var ticket = await _ticketRepository.GetByIdAsync(id);
+
 
             ticket.ModifyDate = DateTime.UtcNow;
             _mapper.Map(dto, ticket);
@@ -132,7 +125,7 @@ namespace Backend.Controllers
                 return BadRequest(validationResult.Errors);
             }
 
-            await _ticketRepository.UpdateTicketAsync(ticket);
+            await _ticketRepository.UpdateAsync(ticket);
             return Ok(new { message = "Successfully updated Ticket" });
         }
 
@@ -141,14 +134,10 @@ namespace Backend.Controllers
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteTicket(string id)
         {
-            var ticket = await _ticketRepository.GetTicketByIdAsync(id);
+            var ticket = await _ticketRepository.GetByIdAsync(id);
 
-            if (ticket == null)
-            {
-                return NotFound($"Ticket with ID {id} not found.");
-            }
 
-            await _ticketRepository.DeleteTicketAsync(ticket);
+            await _ticketRepository.DeleteAsync(ticket);
             return Ok(new { message = $"Successfully deleted Ticket(s) with id: {id}" });
         }
     }
