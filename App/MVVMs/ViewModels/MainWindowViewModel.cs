@@ -1,6 +1,7 @@
 ﻿using System;
 using App.Contracts.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -21,12 +22,12 @@ namespace App.MVVMs.ViewModels
         public DispatcherQueue? TheDispatcherQueue { get; set; }
         public void NavigateRootFrame(Type type)
         {
-            RootFrame?.Navigate(type, null, new ContinuumNavigationTransitionInfo());
+            RootFrame?.Navigate(type, null, Ioc.Default.GetService<ContinuumNavigationTransitionInfo>());
         }
 
         public void NavigateOverlayFrame(Type type)
         {
-            OverlayFrame?.Navigate(type, null, new ContinuumNavigationTransitionInfo());
+            OverlayFrame?.Navigate(type, null, Ioc.Default.GetService<ContinuumNavigationTransitionInfo>());
         }
 
         public void NavigateRootGrid(UIElement content)

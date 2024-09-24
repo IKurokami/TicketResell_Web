@@ -35,7 +35,6 @@
                 IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
                 SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}"
                 IsSettingsVisible="True"
-                ExpandedModeThresholdWidth="1280"
                 DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
                 ItemInvoked="NavigationViewControl_OnItemInvoked">
                 <NavigationView.MenuItems>
@@ -54,7 +53,13 @@
                     </NavigationViewItem>
                 </NavigationView.MenuItems>
                 <Grid>
-                    <Frame x:Name="NavigationFrame" />
+                    <Frame x:Name="NavigationFrame">
+                        <Frame.ContentTransitions>
+                            <TransitionCollection>
+                                <EdgeUIThemeTransition />
+                            </TransitionCollection>
+                        </Frame.ContentTransitions>
+                    </Frame>
                 </Grid>
             </NavigationView>
         </Grid>

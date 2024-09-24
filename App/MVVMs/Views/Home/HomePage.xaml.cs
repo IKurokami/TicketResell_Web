@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Detail;
 using Backend.Core.Dtos;
@@ -13,12 +15,12 @@ namespace App.MVVMs.Views.Home
     {
         private HomeViewModel? ViewModel;
         public ObservableCollection<string> SelectedTags { get; set; } = new ObservableCollection<string>();
-        
+
         public HomePage()
         {
             ViewModel = Ioc.Default.GetService<HomeViewModel>();
             this.InitializeComponent();
-            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
+            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
 
             SelectedTags.CollectionChanged += SelectedTags_CollectionChanged!;
         }
@@ -44,8 +46,13 @@ namespace App.MVVMs.Views.Home
 
         private void TabView_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
-            (args.Tab.Content as TicketDetail)?.ViewModel.Dispose();
-            args.Tab.Content = null;
+            var ticketDetail = (args.Tab.Content as TicketDetail);
+            if (ticketDetail != null)
+            {
+                tabDictioary.Remove(ticketDetail.ViewModel.Ticket.TicketId);
+                ticketDetail.ViewModel.Dispose();
+            }
+
             sender.TabItems.Remove(args.Tab);
 
             GC.Collect();
@@ -62,9 +69,25 @@ namespace App.MVVMs.Views.Home
             GC.WaitForPendingFinalizers();
         }
 
+        private Dictionary<string, TabViewItem> tabDictioary = new Dictionary<string, TabViewItem>();
+
         private void TicketView_OnItemClick(object sender, ItemClickEventArgs e)
         {
-            MainTabView.TabItems.Add(CreateNewTab((TickerReadDto)e.ClickedItem));
+            if (e.ClickedItem == null) return;
+
+            if (e.ClickedItem is TickerReadDto ticket)
+            {
+                if (tabDictioary.ContainsKey(ticket.TicketId))
+                {
+
+                }
+                else
+                {
+                    var newTab = CreateNewTab(ticket);
+                    tabDictioary.Add(ticket.TicketId, newTab);
+                    MainTabView.TabItems.Add(newTab);
+                }
+            }
         }
     }
 }

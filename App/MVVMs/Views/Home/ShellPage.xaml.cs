@@ -38,8 +38,7 @@ namespace App.MVVMs.Views.Home
             ViewModel?.NavigationService.NavigateTo(NavigationHelper.GetNavigateTo(HomeItem));
             TitleBarHelper.UpdateTitleBar(RequestedTheme);
 
-            KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
-            KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
+            KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Escape));
         }
 
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -79,9 +78,9 @@ namespace App.MVVMs.Views.Home
         {
             var navigationService = Ioc.Default.GetService<INavigationService>();
 
-            var result = navigationService.GoBack();
+            var result = navigationService?.GoBack();
 
-            args.Handled = result;
+            args.Handled = result ?? true;
         }
 
         private void NavigationViewControl_OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)

@@ -32,7 +32,7 @@
                    Opacity="1">
                 <Frame.ContentTransitions>
                     <TransitionCollection>
-                        <ContentThemeTransition />
+                        <ReorderThemeTransition />
                     </TransitionCollection>
                 </Frame.ContentTransitions>
             </Frame>

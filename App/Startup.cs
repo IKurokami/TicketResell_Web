@@ -20,8 +20,8 @@ namespace App
             var httpBuilder = services.AddHttpClient<IApiRepository, ApiRepository>(configureClient: static client =>
             {
                 client.BaseAddress = new(Configuration.APIUrl);
-            });
-            httpBuilder.SetHandlerLifetime(TimeSpan.FromSeconds(10));
+            }); 
+            httpBuilder.SetHandlerLifetime(TimeSpan.FromMinutes(1));
             httpBuilder.AddStandardResilienceHandler();
             
             services.AddSingleton<IOrderRequest, OrderRequest>();

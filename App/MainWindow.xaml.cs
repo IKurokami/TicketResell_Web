@@ -1,3 +1,4 @@
+using System.Threading;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Login;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -17,9 +18,11 @@ namespace App
             ViewModel.MainGrid = MainGrid;
             ViewModel.RootFrame = rootFrame;
             ViewModel.OverlayFrame = overlayFrame;
-            ViewModel.TheDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread(); ;
+            ViewModel.TheDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+           
+            rootFrame.Navigate(typeof(LoginPage));
 
-            rootFrame.Navigate(typeof(LoginPage), Ioc.Default.GetService<ContinuumNavigationTransitionInfo>());
+            Ioc.Default.GetService<HomeViewModel>();
         }
     }
 }

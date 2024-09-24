@@ -31,19 +31,25 @@ namespace App.MVVMs.ViewModels
         public async void ReloadData()
         {
             var query = await _ticketRequest.GetAllTicketsAsync();
+            
             if (query !=  null && query.Any())
             {
                 _ticketsRead.Clear();
                 _ticketsRead.AddRange(query);
             }
             
-            tickets.Clear();
-
-            var vm = Ioc.Default.GetService<MainWindowViewModel>()!;
-            foreach (var ticket in _ticketsRead)
+            var mvm = Ioc.Default.GetService<MainWindowViewModel>();
+            if(mvm != null)
             {
-                if (vm.TheDispatcherQueue != null)
-                    vm.TheDispatcherQueue.TryEnqueue(() => { tickets?.Add(ticket); });
+                mvm.TheDispatcherQueue?.TryEnqueue(() =>
+                {
+                    tickets.Clear();
+
+                    foreach (var ticket in _ticketsRead)
+                    {
+                        tickets?.Add(ticket);
+                    }
+                });
             }
 
             GC.Collect();

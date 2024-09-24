@@ -18,7 +18,7 @@ namespace App.MVVMs.Views.Login
             ViewModel = Ioc.Default.GetService<LoginViewModel>();
             
             this.InitializeComponent();
-            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled;
+            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
 
         }
 
