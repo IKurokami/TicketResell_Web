@@ -25,6 +25,10 @@ namespace Backend.Repositories
         public async Task<User> GetUserByIdAsync(string id)
         {
             User? user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"User with ID '{id}' was not found.");
+            }
             return user;
         }
 
