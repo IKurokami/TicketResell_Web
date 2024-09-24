@@ -1,51 +1,27 @@
 using Backend.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using Backend.Core.Entities;
+
 namespace Backend.Repositories;
 
-public class RevenueRepository(TicketResellManagementContext context) : IRevenueRepository
+public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
 {
+    private readonly TicketResellManagementContext _context;
 
-    public async Task CreateRevenue(Revenue revenue)
+    public RevenueRepository(TicketResellManagementContext context) : base(context)
     {
-        await context.Revenues.AddAsync(revenue);
-        await context.SaveChangesAsync();
+        _context = context;
     }
 
-    public async Task<IEnumerable<Revenue>> GetRevenues()
+    public async Task<List<Revenue>> GetRevenuesBySellerId_MonthAsync(string sellerId, string month)
     {
-        return await context.Revenues.ToListAsync();
+        return await _context.Revenues.Where(r => r.SellerId == sellerId && r.Type == month).ToListAsync();
     }
 
-    public async Task<Revenue?> GetRevenuesById(string id)
+    public async Task<List<Revenue>> GetRevenuesBySellerIdAsync(string id)
     {
-        return await context.Revenues.Where(x => x.RevenueId == id).FirstOrDefaultAsync();
-    }
-
-    public async Task<List<Revenue>> GetRevenuesBySellerId_Month(string sellerId, string month)
-    {
-
-        return await context.Revenues.Where(r => r.SellerId == sellerId && r.Type == month).ToListAsync();
+        return await _context.Revenues.Where(x => x.SellerId == id).ToListAsync();
     }
 
 
-    public async Task UpdateRevenue(Revenue revenue)
-    {
-        context.Entry(revenue).State = EntityState.Modified;
-        await context.SaveChangesAsync();
-    }
-
-
-    public async Task<List<Revenue>> GetRevenuesBySellerId(string id)
-    {
-        return await context.Revenues.Where(x => x.SellerId == id).ToListAsync();
-    }
-
-
-
-    public async Task DeleteRevenue(Revenue revenue)
-    {
-        context.Revenues.Remove(revenue);
-        await context.SaveChangesAsync();
-    }
 }

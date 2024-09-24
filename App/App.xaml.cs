@@ -14,6 +14,7 @@ namespace App
             this.InitializeComponent();
             UnhandledException += App_UnhandledException;
             
+            Configuration.APIUrl = "http://localhost:5296/api";
             Ioc.Default.ConfigureServices(new ServiceCollection()
                 .InstallServices().BuildServiceProvider());
             
@@ -27,8 +28,10 @@ namespace App
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            MainWindow = Ioc.Default.GetService<MainWindow>();
+            MainWindow = Ioc.Default.GetService<MainWindow>()!;
             MainWindow.Activate();
+            MainWindow.AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
+            MainWindow.AppWindow.TitleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
         }
 
         public static WindowEx MainWindow { get; set; }
