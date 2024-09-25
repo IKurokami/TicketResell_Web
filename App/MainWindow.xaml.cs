@@ -1,8 +1,7 @@
-using System.Threading;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Login;
+using CommunityToolkit.Common;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Media.Animation;
 
 namespace App
 {

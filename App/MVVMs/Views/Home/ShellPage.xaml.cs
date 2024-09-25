@@ -5,9 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using App.Helpers;
-using CommunityToolkit.Labs.WinUI;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Media;
 
 namespace App.MVVMs.Views.Home
 {
@@ -27,16 +25,18 @@ namespace App.MVVMs.Views.Home
                 ViewModel.NavigationViewService.Initialize(NavigationViewControl);
             }
             
-            App.MainWindow.SetTitleBar(AppTitleBar);
-            App.MainWindow.Activated += MainWindow_Activated;
+            App.MainWindow?.SetTitleBar(AppTitleBar);
+            App.MainWindow!.Activated += MainWindow_Activated;
+
             AppTitleBarText.Text = "TicketResell";
         }
 
-        private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private async void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             NavigationViewControl.SelectedItem = HomeItem;
             ViewModel?.NavigationService.NavigateTo(NavigationHelper.GetNavigateTo(HomeItem));
-            TitleBarHelper.UpdateTitleBar(RequestedTheme);
+
+            Ioc.Default.GetService<MainWindowViewModel>()?.StartupAsync();
 
             KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Escape));
         }

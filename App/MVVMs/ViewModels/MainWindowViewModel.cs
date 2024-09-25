@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using App.Contracts.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -11,8 +12,18 @@ namespace App.MVVMs.ViewModels
 {
     public partial class MainWindowViewModel : ObservableRecipient
     {
-        public MainWindowViewModel()
+        private readonly IThemeSelectorService _themeSelectorService;
+
+        public MainWindowViewModel(IThemeSelectorService themeSelectorService)
         {
+            _themeSelectorService = themeSelectorService;
+        }
+
+        public async Task StartupAsync()
+        {
+            await _themeSelectorService.InitializeAsync().ConfigureAwait(false);
+            await _themeSelectorService.SetRequestedThemeAsync();
+            await Task.CompletedTask;
         }
 
         public Grid? MainGrid { get; set; }
@@ -20,6 +31,7 @@ namespace App.MVVMs.ViewModels
         public Frame? RootFrame { get; set; }
         public Frame? OverlayFrame { get; set; }
         public DispatcherQueue? TheDispatcherQueue { get; set; }
+
         public void NavigateRootFrame(Type type)
         {
             RootFrame?.Navigate(type, null, Ioc.Default.GetService<ContinuumNavigationTransitionInfo>());

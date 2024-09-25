@@ -8,10 +8,11 @@ namespace App.MVVMs.ViewModels
 {
     public partial class TicketDetailViewModel : ObservableRecipient, IDisposable
     {
-        public TickerReadDto Ticket { get; set; }
+        public TickerReadDto? Ticket { get; set; }
 
-        public TicketDetailViewModel()
+        public TicketDetailViewModel(TickerReadDto? ticket)
         {
+            Ticket = ticket;
         }
 
         public void Dispose()

@@ -7,6 +7,7 @@ using App.MVVMs.Views.Login;
 using App.MVVMs.Views.Setting;
 using App.Services;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Media.Animation;
 
@@ -14,7 +15,7 @@ namespace App
 {
     public static class Startup
     {
-        public static IServiceCollection InstallServices(this IServiceCollection services)
+        public static IServiceCollection InstallServices(this IServiceCollection services, IConfigurationRoot configuration)
         {
             //Http
             var httpBuilder = services.AddHttpClient<IApiRepository, ApiRepository>(configureClient: static client =>
@@ -24,6 +25,7 @@ namespace App
             httpBuilder.SetHandlerLifetime(TimeSpan.FromMinutes(1));
             httpBuilder.AddStandardResilienceHandler();
             
+            //Request
             services.AddSingleton<IOrderRequest, OrderRequest>();
             services.AddSingleton<ITicketRequest, TicketRequest>();
             
@@ -39,7 +41,12 @@ namespace App
             //MainWindow
             services.AddSingleton<MainWindow>();
 
+            //Setting Services
+            services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
+            services.Configure<LocalSettingsOptions>(configuration.GetSection(nameof(LocalSettingsOptions)));
+
             //Services
+            services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<INavigationViewService, NavigationViewService>();
@@ -62,5 +69,11 @@ namespace App
             pageService?.Configure<DashBoardViewModel, DashBoardPage>();
             pageService?.Configure<SettingViewModel, SettingPage>();
         }
+    }
+
+    public class LocalSettingsOptions
+    {
+        public string? ApplicationDataFolder { get; set; }
+        public string? LocalSettingsFile { get; set; }
     }
 }

@@ -30,10 +30,9 @@ namespace App.MVVMs.Views.Home
             ViewModel?.FindWithTag(SelectedTags);
         }
 
-        private TabViewItem CreateNewTab(TickerReadDto ticket)
+        private TabViewItem CreateNewTab(TickerReadDto? ticket)
         {
-            var ticketViewModel = new TicketDetailViewModel();
-            ticketViewModel.Ticket = ticket;
+            var ticketViewModel = new TicketDetailViewModel(ticket);
 
             TabViewItem newItem = new TabViewItem();
             newItem.IconSource = new Microsoft.UI.Xaml.Controls.SymbolIconSource() { Symbol = Symbol.Document };

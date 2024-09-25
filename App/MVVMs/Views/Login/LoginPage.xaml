@@ -196,7 +196,6 @@
                                 <FontIcon Glyph="&#xF0D5;" />
                                 <TextBlock>Go Back</TextBlock>
                             </StackPanel>
-
                             <i:Interaction.Behaviors>
                                 <ic:EventTriggerBehavior EventName="Click">
                                     <labs:StartTransitionAction Source="{Binding ElementName=RegisterPanel}"
@@ -230,20 +229,13 @@
                                  HorizontalAlignment="Left"
                                  Height="50"
                                  Margin="20,0, 0, 20"
-                                 CornerRadius="16">
+                                 CornerRadius="16"
+                                 Click="Back_Click">
                     <StackPanel Orientation="Horizontal"
                                 Spacing="10">
                         <FontIcon Glyph="&#xF0D5;" />
                         <TextBlock>Go Back</TextBlock>
                     </StackPanel>
-
-                    <i:Interaction.Behaviors>
-                        <ic:EventTriggerBehavior EventName="Click">
-                            <labs:StartTransitionAction Source="{Binding ElementName=RegiserFull}"
-                                                        Target="{Binding ElementName=Select}"
-                                                        Transition="{StaticResource MyTransitionHelper}" />
-                        </ic:EventTriggerBehavior>
-                    </i:Interaction.Behaviors>
                 </HyperlinkButton>
 
                 <Button labs:TransitionHelper.Id="buttonReg"
@@ -332,19 +324,12 @@
                     <HyperlinkButton VerticalAlignment="Bottom" HorizontalAlignment="Left"
                                      Height="40"
                                      Margin="100, 0, 0, 0"
-                                     CornerRadius="20">
+                                     CornerRadius="20"
+                                     Click="Back_Click">
                         <StackPanel Orientation="Horizontal" Spacing="10" labs:TransitionHelper.Id="customText">
                             <FontIcon Glyph="&#xF0D5;" />
                             <TextBlock>Go Back</TextBlock>
                         </StackPanel>
-
-                        <i:Interaction.Behaviors>
-                            <ic:EventTriggerBehavior EventName="Click">
-                                <labs:StartTransitionAction Source="{Binding ElementName=LoginPanel}"
-                                                            Target="{Binding ElementName=Select}"
-                                                            Transition="{StaticResource MyTransitionHelper}" />
-                            </ic:EventTriggerBehavior>
-                        </i:Interaction.Behaviors>
                     </HyperlinkButton>
                 </Grid>
             </StackPanel>

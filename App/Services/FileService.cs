@@ -7,7 +7,7 @@ namespace App.Services
 {
     public class FileService : IFileServices
     {
-        public T Read<T>(string folderPath, string fileName)
+        public T? Read<T>(string folderPath, string fileName)
         {
             var path = Path.Combine(folderPath, fileName);
             if (File.Exists(path))
@@ -30,7 +30,7 @@ namespace App.Services
             File.WriteAllText(Path.Combine(folderPath, fileName), fileContent, Encoding.UTF8);
         }
 
-        public void Delete(string folderPath, string fileName)
+        public void Delete(string folderPath, string? fileName)
         {
             if (fileName != null && File.Exists(Path.Combine(folderPath, fileName)))
             {
