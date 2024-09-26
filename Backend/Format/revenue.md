@@ -57,7 +57,7 @@
   ```
 
 ### **Update Revenue By SellerId** 
-(`api/Rating/update/{id}`)
+(`api/Revenue/update/{id}`)
 
 - **Method:** `PUT`
 - **Input:**
@@ -77,14 +77,14 @@
 
 **`api/Revenue/delete/{id}`**
 
-**`api/Revenue/delete/revenue/{Sellerid}`**
+**`api/Revenue/deletebysellerid/{Sellerid}`**
 
 - **Method:** `DELETE`
 - **Output:**
 
   ```json
   {
-    "message": "Successfully delete rating with id: 4"
+    "message": "Successfully delete Revenue with id: 4"
   }
   ```
 

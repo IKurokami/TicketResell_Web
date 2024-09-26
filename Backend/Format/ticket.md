@@ -14,7 +14,7 @@
       "startDate": "2024-09-25T19:30:00",
       "status": 1,
       "image": "https://example.com/image.jpg",
-      "CategoryIds": ["CAT01","CAT02"]
+      "CategoriesId": ["CAT01","CAT02"]
     }
     ```
 - **Output:**

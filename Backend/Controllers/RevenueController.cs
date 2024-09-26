@@ -48,11 +48,6 @@ namespace Backend.Controllers
         {
             var revenues = await _revenueRepository.GetByIdAsync(id);
 
-            if (revenues == null)
-            {
-                return NotFound($"Revenue with ID {id} not found.");
-            }
-
             var revenueDtos = _mapper.Map<RevenueReadDto>(revenues);
             return Ok(revenueDtos);
         }
@@ -62,11 +57,6 @@ namespace Backend.Controllers
         public async Task<ActionResult<IEnumerable<RevenueReadDto>>> GetRevenuesBySellerId(string id)
         {
             var revenues = await _revenueRepository.GetRevenuesBySellerIdAsync(id);
-
-            if (!revenues.Any())
-            {
-                return NotFound($"Revenue with SellerID {id} not found.");
-            }
 
             var revenueDtos = _mapper.Map<IEnumerable<RevenueReadDto>>(revenues);
             return Ok(revenueDtos);
@@ -78,12 +68,6 @@ namespace Backend.Controllers
         {
             string type = RevenueConstant.MONTH_TYPE;
             var revenues = await _revenueRepository.GetRevenuesBySellerId_MonthAsync(id, type);
-
-            if (!revenues.Any())
-            {
-                return NotFound($"Revenue with SellerId {id} not found.");
-            }
-
             DateTime date = DateTime.UtcNow;
             foreach (var revenue in revenues)
             {
@@ -107,20 +91,14 @@ namespace Backend.Controllers
             await _revenueRepository.DeleteAsync(revenue);
             return Ok(new { message = $"Successfully deleted Revenue(s) with id: {id}" });
         }
-
-
+        
 
         [HttpDelete]
-        [Route("delete/revenue/{id}")]
+        [Route("deletebysellerid/{id}")]
         public async Task<IActionResult> DeleteRevenuesBySellerId(string id)
         {
             var revenues = await _revenueRepository.GetRevenuesBySellerIdAsync(id);
-
-            if (!revenues.Any())
-            {
-                return NotFound($"Revenue with SellerID {id} not found.");
-            }
-
+            
             foreach (var revenueItem in revenues)
             {
                 await _revenueRepository.DeleteAsync(revenueItem);

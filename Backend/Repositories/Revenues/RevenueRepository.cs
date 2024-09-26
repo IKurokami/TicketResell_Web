@@ -15,12 +15,23 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
 
     public async Task<List<Revenue>> GetRevenuesBySellerId_MonthAsync(string sellerId, string month)
     {
-        return await _context.Revenues.Where(r => r.SellerId == sellerId && r.Type == month).ToListAsync();
+        var revenues =  await _context.Revenues.Where(r => r.SellerId == sellerId && r.Type == month).ToListAsync();
+        if (revenues == null)
+        {
+            throw new KeyNotFoundException("id is not existed");
+        }
+        return revenues;
     }
 
     public async Task<List<Revenue>> GetRevenuesBySellerIdAsync(string id)
     {
-        return await _context.Revenues.Where(x => x.SellerId == id).ToListAsync();
+        var revenues = await _context.Revenues.Where(x => x.SellerId == id).ToListAsync();
+        if (revenues == null)
+        {
+            throw new KeyNotFoundException("id is not existed");
+        }
+
+        return revenues;
     }
 
 

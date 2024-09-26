@@ -41,15 +41,10 @@ namespace Backend.Controllers
             {
                 foreach (var id in dto.CategoriesId)
                 {
-                    Category? category = await _categoryRepository.GetByIdAsync(id);
-
-                    if (category == null)
-                    {
-                        return BadRequest(new { message = "category not found" });
-                    }
+                     await _categoryRepository.GetByIdAsync(id);
                 }
             }
-
+            
             newTicket.CreateDate = DateTime.UtcNow;
             newTicket.ModifyDate = DateTime.UtcNow;
             await _ticketRepository.CreateTicketAsync(newTicket, dto.CategoriesId);
@@ -72,11 +67,6 @@ namespace Backend.Controllers
         {
             var ticket = await _ticketRepository.GetByIdAsync(id);
 
-            if (ticket == null)
-            {
-                return NotFound($"Ticket with ID {id} not found.");
-            }
-
             var ticketDtos = _mapper.Map<TickerReadDto>(ticket);
             return Ok(ticketDtos);
         }
@@ -86,13 +76,8 @@ namespace Backend.Controllers
         public async Task<ActionResult<TickerReadDto>> GetRevenuesByName(string name)
         {
             var ticket = await _ticketRepository.GetTicketByNameAsync(name);
-
-            if (ticket == null)
-            {
-                return NotFound($"Ticket with Name {name} not found.");
-            }
-
-            var ticketDtos = _mapper.Map<TickerReadDto>(ticket);
+            
+            var ticketDtos = _mapper.Map<List<TickerReadDto>>(ticket);
             return Ok(ticketDtos);
         }
 
@@ -101,9 +86,8 @@ namespace Backend.Controllers
         public async Task<ActionResult<TickerReadDto>> GetRevenuesByDate(DateTime date)
         {
             var ticket = await _ticketRepository.GetTicketByDateAsync(date);
-
-
-            var ticketDtos = _mapper.Map<TickerReadDto>(ticket);
+            
+            var ticketDtos = _mapper.Map<List<TickerReadDto>>(ticket);
             return Ok(ticketDtos);
         }
 
@@ -112,8 +96,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketUpdateDto dto)
         {
             var ticket = await _ticketRepository.GetByIdAsync(id);
-
-
+            
             ticket.ModifyDate = DateTime.UtcNow;
             _mapper.Map(dto, ticket);
 
@@ -134,10 +117,7 @@ namespace Backend.Controllers
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteTicket(string id)
         {
-            var ticket = await _ticketRepository.GetByIdAsync(id);
-
-
-            await _ticketRepository.DeleteAsync(ticket);
+            await _ticketRepository.DeleteTicketAsync(id);
             return Ok(new { message = $"Successfully deleted Ticket(s) with id: {id}" });
         }
     }
