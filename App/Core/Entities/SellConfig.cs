@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Backend.Core.Entities;
+namespace Api.Core.Entities;
 
 public partial class SellConfig
 {

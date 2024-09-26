@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using App.Contracts.Services;
-using Backend.Core.Helper;
+using Api.Core.Helper;
 
 namespace App.ApiRequest;
 
@@ -9,7 +9,7 @@ public class OrderRequest : IOrderRequest
 {
     private readonly IApiRepository _apiRepository;
     private readonly string _endPoint = "order";
-    
+
     public OrderRequest(IApiRepository apiRepository)
     {
         _apiRepository = apiRepository;

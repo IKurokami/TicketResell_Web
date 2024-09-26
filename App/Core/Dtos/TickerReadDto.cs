@@ -1,6 +1,6 @@
 using System;
 
-namespace Backend.Core.Dtos;
+namespace Api.Core.Dtos;
 
 public class TickerReadDto
 {

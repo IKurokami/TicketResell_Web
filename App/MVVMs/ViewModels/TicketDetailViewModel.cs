@@ -2,7 +2,7 @@
 using App.Contracts.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Windows.Graphics.Printing.PrintTicket;
-using Backend.Core.Dtos;
+using Api.Core.Dtos;
 
 namespace App.MVVMs.ViewModels
 {

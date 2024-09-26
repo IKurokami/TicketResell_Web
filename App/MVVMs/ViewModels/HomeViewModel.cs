@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Windows.Foundation;
 using App.ApiRequest;
-using Backend.Core.Dtos;
+using Api.Core.Dtos;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using WinUICommunity;
@@ -31,12 +31,12 @@ namespace App.MVVMs.ViewModels
         public async void ReloadData()
         {
             var query = await _ticketRequest.GetAllTicketsAsync();
-            if (query !=  null && query.Any())
+            if (query != null && query.Any())
             {
                 _ticketsRead.Clear();
                 _ticketsRead.AddRange(query);
             }
-            
+
             tickets.Clear();
 
             var vm = Ioc.Default.GetService<MainWindowViewModel>()!;
@@ -49,7 +49,7 @@ namespace App.MVVMs.ViewModels
             GC.Collect();
 
             if (this.RefreshCompletionDeferral == null) return;
-            
+
             this.RefreshCompletionDeferral.Complete();
             this.RefreshCompletionDeferral.Dispose();
             this.RefreshCompletionDeferral = null;

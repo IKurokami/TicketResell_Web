@@ -2,7 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Detail;
-using Backend.Core.Dtos;
+using Api.Core.Dtos;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using WinUICommunity;
@@ -13,7 +13,7 @@ namespace App.MVVMs.Views.Home
     {
         private HomeViewModel? ViewModel;
         public ObservableCollection<string> SelectedTags { get; set; } = new ObservableCollection<string>();
-        
+
         public HomePage()
         {
             ViewModel = Ioc.Default.GetService<HomeViewModel>();

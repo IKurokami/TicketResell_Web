@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using App.Contracts.Services;
-using Backend.Core.Dtos;
+using Api.Core.Dtos;
 
 namespace App.ApiRequest;
 
