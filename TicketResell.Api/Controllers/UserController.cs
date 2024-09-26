@@ -29,16 +29,16 @@ namespace Repositories.Controllers
         {
             var response = await _userService.CreateUserAsync(dto);
 
-            return response;
+            return ResponseParser.Result(response);
         }
 
         [HttpGet]
         [Route("read/{id}")]
         public async Task<IActionResult> GetUser(string id)
         {
-            UserReadDto? userDto = await _userService.GetUserByIdAsync(id);
+            var response = await _userService.GetUserByIdAsync(id);
 
-            return Ok(userDto);
+            return ResponseParser.Result(response);
         }
 
         [HttpPut]
@@ -48,7 +48,7 @@ namespace Repositories.Controllers
 
             var response = await _userService.UpdateUserAsync(id, dto);
 
-            return response;
+            return ResponseParser.Result(response);
         }
 
         [HttpDelete]
@@ -57,7 +57,7 @@ namespace Repositories.Controllers
         {
             var response = await _userService.DeleteUserAsync(id);
 
-            return response;
+            return ResponseParser.Result(response);
         }
     }
 }

@@ -1,10 +1,7 @@
 ﻿using AutoMapper;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Validators;
-using Repositories.Repositories;
 using Repositories.Core.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using TicketResell.Repositories.UnitOfWork;
 
 namespace TicketResell.Services.Services
@@ -23,31 +20,31 @@ namespace TicketResell.Services.Services
             _validatorFactory = validatorFactory;
         }
 
-        public async Task<IActionResult> CreateUserAsync(UserCreateDto dto)
+        public async Task<ResponseModel> CreateUserAsync(UserCreateDto dto)
         {
             var validator = _validatorFactory.GetValidator<User>();
             User newUser = _mapper.Map<User>(dto);
             var validationResult = validator.Validate(newUser);
             if (!validationResult.IsValid)
             {
-                return new ObjectResult(validationResult.Errors);
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
             }
             newUser.CreateDate = DateTime.UtcNow;
             await _unitOfWork.UserRepository.CreateAsync(newUser);
 
             await _unitOfWork.CompleteAsync();
-            return new ObjectResult(new { message = $"Successfully created user: {dto.Username}" });
+            return ResponseModel.Success($"Successfully created user: {dto.Username}");
         }
 
-        public async Task<UserReadDto> GetUserByIdAsync(string id)
+        public async Task<ResponseModel> GetUserByIdAsync(string id)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
 
             UserReadDto userDto = _mapper.Map<UserReadDto>(user);
-            return userDto;
+            return ResponseModel.Success($"Successfully get user: {userDto.Username}", userDto);
         }
 
-        public async Task<IActionResult> UpdateUserAsync(string id, UserUpdateDto dto)
+        public async Task<ResponseModel> UpdateUserAsync(string id, UserUpdateDto dto)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
             _mapper.Map(dto, user);
@@ -57,21 +54,21 @@ namespace TicketResell.Services.Services
             var validationResult = validator.Validate(user);
             if (!validationResult.IsValid)
             {
-                return new ObjectResult(validationResult.Errors.ToString());
+                return ResponseModel.BadRequest("Validation error", validationResult.Errors.ToString());
             }
             _unitOfWork.UserRepository.Update(user);
 
             await _unitOfWork.CompleteAsync();
-            return new ObjectResult($"Successfully updated user: {user.Username}");
+            return ResponseModel.Success($"Successfully updated user: {user.Username}");
         }
 
-        public async Task<IActionResult> DeleteUserAsync(string id)
+        public async Task<ResponseModel> DeleteUserAsync(string id)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
             _unitOfWork.UserRepository.Delete(user);
 
             await _unitOfWork.CompleteAsync();
-            return new ObjectResult($"Successfully deleted user: {user.Username}");
+            return ResponseModel.Success($"Successfully deleted user: {user.Username}");
         }
     }
 }

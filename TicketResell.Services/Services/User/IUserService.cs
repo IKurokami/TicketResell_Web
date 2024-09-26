@@ -10,13 +10,13 @@ namespace TicketResell.Services.Services
 {
     public interface IUserService
     {
-        public Task<IActionResult> CreateUserAsync(UserCreateDto dto);
+        public Task<ResponseModel> CreateUserAsync(UserCreateDto dto);
 
-        public Task<UserReadDto> GetUserByIdAsync(string id);
+        public Task<ResponseModel> GetUserByIdAsync(string id);
 
-        public Task<IActionResult> UpdateUserAsync(string id, UserUpdateDto dto);
+        public Task<ResponseModel> UpdateUserAsync(string id, UserUpdateDto dto);
 
 
-        public Task<IActionResult> DeleteUserAsync(string id);
+        public Task<ResponseModel> DeleteUserAsync(string id);
     }
 }
