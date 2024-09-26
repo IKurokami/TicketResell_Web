@@ -13,9 +13,12 @@ namespace App.MVVMs.ViewModels
 {
     public partial class HomeViewModel : ObservableRecipient
     {
-        public ObservableCollection<TickerReadDto> tickets { get; } = new();
+        public ObservableCollection<TickerReadDto> Tickets { get; } = new();
+        public List<Category> Categories { get; } = new();
+
         private List<TickerReadDto> _ticketsRead = new();
         private ITicketRequest _ticketRequest;
+
         public Deferral? RefreshCompletionDeferral
         {
             get;
@@ -43,11 +46,11 @@ namespace App.MVVMs.ViewModels
             {
                 mvm.TheDispatcherQueue?.TryEnqueue(() =>
                 {
-                    tickets.Clear();
+                    Tickets.Clear();
 
                     foreach (var ticket in _ticketsRead)
                     {
-                        tickets?.Add(ticket);
+                        Tickets?.Add(ticket);
                     }
                 });
             }
@@ -63,14 +66,14 @@ namespace App.MVVMs.ViewModels
 
         public void FindWithTag(IList<string> tags)
         {
-            tickets.Clear();
-            tickets.AddRange(_ticketsRead);
+            Tickets.Clear();
+            Tickets.AddRange(_ticketsRead);
             foreach (var tag in tags)
             {
                 var removed = _ticketsRead.Where(t => t.Name == null || !t.Name.Contains(tag, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
                 foreach (var t in removed)
-                    tickets.Remove(t);
+                    Tickets.Remove(t);
             }
         }
     }

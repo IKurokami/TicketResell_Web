@@ -7,7 +7,7 @@ public class CurrencyConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        if (value is decimal amount)
+        if (value is double amount)
         {
             return $"${amount:N2}";
         }

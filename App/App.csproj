@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Labs.WinUI.MarqueeText" Version="1.0.0" />
+    <PackageReference Include="CommunityToolkit.Labs.WinUI.TokenView" Version="1.0.0" />
     <PackageReference Include="CommunityToolkit.Labs.WinUI.TransitionHelper" Version="1.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="CommunityToolkit.WinUI.Animations" Version="8.1.240916" />
@@ -135,5 +136,8 @@
     <Page Update="MVVMs\Views\Setting\SettingPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controls\" />
   </ItemGroup>
 </Project>

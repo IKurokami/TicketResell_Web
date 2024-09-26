@@ -5,6 +5,7 @@ using System.Linq;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Detail;
 using Backend.Core.Dtos;
+using CommunityToolkit.Labs.WinUI;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using WinUICommunity;
@@ -14,7 +15,10 @@ namespace App.MVVMs.Views.Home
     public sealed partial class HomePage : Page
     {
         private HomeViewModel? ViewModel;
+
         public ObservableCollection<string> SelectedTags { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> Categories { get; set; } = new ObservableCollection<string>();
+
 
         public HomePage()
         {

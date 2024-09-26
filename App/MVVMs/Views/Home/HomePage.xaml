@@ -11,7 +11,8 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:tickets="using:Backend.Core.Dtos"
     xmlns:converter="using:App.Converters"
-    xmlns:marqueeText="using:CommunityToolkit.Labs.WinUI.MarqueeTextRns">
+    xmlns:marqueeText="using:CommunityToolkit.Labs.WinUI.MarqueeTextRns"
+    xmlns:labs="using:CommunityToolkit.Labs.WinUI">
 
     <Page.Resources>
         <converter:DateTimeConverter x:Key="DateTimeConverter" />
@@ -94,11 +95,33 @@
                     <SymbolIconSource Symbol="Shop" />
                 </TabViewItem.IconSource>
                 <Grid Margin="10, 0, 10, 0" VerticalAlignment="Top">
+                   
+                    <controls:SettingsExpander x:Name="FilterCard"
+                                               VerticalAlignment="Top"
+                                               Margin="10, 0, 10, 0">
+                       <TextBlock>Filter</TextBlock>
+                        <controls:SettingsExpander.Items>
+                            <labs:TokenView x:Name="ChooseCategories"
+                                            SelectionMode="Multiple"
+                                            ItemsSource="{x:Bind Categories}">
+                                <labs:TokenView.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <Grid>
+                                            <TextBlock Margin="16,0,16,0"
+                                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                                       Text="{Binding}" />
+                                        </Grid>
+                                    </DataTemplate>
+
+                                </labs:TokenView.ItemTemplate>
+                            </labs:TokenView>
+                        </controls:SettingsExpander.Items>
+                    </controls:SettingsExpander>
                     <controls:TokenizingTextBox x:Name="TokenBox"
                                                 VerticalAlignment="Top"
                                                 Height="50"
-                                                Margin="50, 0, 50, 0"
-                                                PlaceholderText="Search for keywork...."
+                                                Margin="50, 0, 150, 0"
+                                                PlaceholderText="Search for keyword...."
                                                 ItemsSource="{x:Bind SelectedTags, Mode=TwoWay}">
                     </controls:TokenizingTextBox>
                     <ScrollView VerticalAlignment="Top" Margin="0, 60, 0, 0">
@@ -107,7 +130,7 @@
                                               RefreshRequested="Rc_OnRefreshRequested"
                                               MinHeight="600">
                                 <GridView x:Name="TicketView"
-                                          ItemsSource="{x:Bind ViewModel.tickets}"
+                                          ItemsSource="{x:Bind ViewModel.Tickets}"
                                           ItemTemplate="{StaticResource TicketTemplate}"
                                           IsItemClickEnabled="True"
                                           ItemClick="TicketView_OnItemClick"
