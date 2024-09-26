@@ -38,7 +38,16 @@ namespace Repositories.Controllers
             dto.UserId = "USERS5145";
             dto.Username = ""; // lỗi vì username ko đc trống
             var response2 = await _userService.CreateUserAsync(dto);
-            var response = ResponseList.AggregateResponses(new List<ResponseModel> { response1, response2 });
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { response1, response2 }, nameof(CreateTwoUser));
+            return ResponseParser.Result(response);
+        }
+
+        [Route("createdelete")]
+        public async Task<IActionResult> CreateDeleteUser([FromBody] UserCreateDto dto)
+        {
+            var response1 = await _userService.CreateUserAsync(dto, false);
+            var response2 = await _userService.DeleteUserByIdAsync(dto.UserId);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { response1, response2 }, nameof(CreateTwoUser));
             return ResponseParser.Result(response);
         }
 
@@ -57,7 +66,7 @@ namespace Repositories.Controllers
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDto dto)
         {
 
-            var response = await _userService.UpdateUserAsync(id, dto);
+            var response = await _userService.UpdateUserByIdAsync(id, dto);
 
             return ResponseParser.Result(response);
         }
@@ -66,7 +75,7 @@ namespace Repositories.Controllers
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            var response = await _userService.DeleteUserAsync(id);
+            var response = await _userService.DeleteUserByIdAsync(id);
 
             return ResponseParser.Result(response);
         }
