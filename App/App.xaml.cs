@@ -36,8 +36,6 @@ namespace App
         {
             MainWindow = Ioc.Default.GetService<MainWindow>()!;
             MainWindow.Activate();
-            MainWindow.AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-            MainWindow.AppWindow.TitleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
         }
 
         public static WindowEx MainWindow { get; set; }
