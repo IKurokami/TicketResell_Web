@@ -28,9 +28,20 @@ namespace Repositories.Controllers
         public async Task<IActionResult> CreateUser([FromBody] UserCreateDto dto)
         {
             var response = await _userService.CreateUserAsync(dto);
-
             return ResponseParser.Result(response);
         }
+
+        [Route("createtwo")]
+        public async Task<IActionResult> CreateTwoUser([FromBody] UserCreateDto dto)
+        {
+            var response1 = await _userService.CreateUserAsync(dto, false);
+            dto.UserId = "USERS5145";
+            dto.Username = ""; // lỗi vì username ko đc trống
+            var response2 = await _userService.CreateUserAsync(dto);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { response1, response2 });
+            return ResponseParser.Result(response);
+        }
+
 
         [HttpGet]
         [Route("read/{id}")]
