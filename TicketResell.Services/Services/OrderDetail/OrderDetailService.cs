@@ -19,7 +19,7 @@ public class OrderDetailService : IOrderDetailService
         _validatorFactory = validatorFactory;
     }
 
-    public async Task<ResponseModel> CreateOrderDetail(OrderDetailDto dto)
+    public async Task<ResponseModel> CreateOrderDetail(OrderDetailDto dto, bool saveAll = true)
     {
         var orderDetail = _mapper.Map<OrderDetail>(dto);
 
@@ -37,7 +37,8 @@ public class OrderDetailService : IOrderDetailService
         }
 
         await _unitOfWork.OrderDetailRepository.CreateAsync(orderDetail);
-        await _unitOfWork.CompleteAsync();
+        if (saveAll)
+            await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully created order detail: {orderDetail.OrderDetailId}", orderDetail);
     }
 
@@ -65,7 +66,7 @@ public class OrderDetailService : IOrderDetailService
         return ResponseModel.Success($"Successfully get order detail by sellderId: {sellerId}", orderDetails);
     }
 
-    public async Task<ResponseModel> UpdateOrderDetail(OrderDetailDto dto)
+    public async Task<ResponseModel> UpdateOrderDetail(OrderDetailDto dto, bool saveAll = true)
     {
         var orderDetail = _mapper.Map<OrderDetail>(dto);
 
@@ -75,17 +76,19 @@ public class OrderDetailService : IOrderDetailService
         {
             return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
         }
-        
+
         _unitOfWork.OrderDetailRepository.Update(orderDetail);
-        await _unitOfWork.CompleteAsync();
+        if (saveAll)
+            await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully updated order detail: {orderDetail.OrderDetailId}", orderDetail);
     }
 
-    public async Task<ResponseModel> DeleteOrderDetail(string id)
+    public async Task<ResponseModel> DeleteOrderDetail(string id, bool saveAll = true)
     {
         var orderDetail = await _unitOfWork.OrderDetailRepository.GetByIdAsync(id);
         _unitOfWork.OrderDetailRepository.Delete(orderDetail);
-        await _unitOfWork.CompleteAsync();
+        if (saveAll)
+            await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully deleted order detail: {id}");
     }
 }

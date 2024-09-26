@@ -20,7 +20,7 @@ public class OrderService : IOrderService
         _validatorFactory = validatorFactory;
     }
 
-    public async Task<ResponseModel> CreateOrder(OrderDto dto)
+    public async Task<ResponseModel> CreateOrder(OrderDto dto, bool saveAll = true)
     {
         var order = _mapper.Map<Order>(dto);
         order.Date = DateTime.Now;
@@ -35,7 +35,9 @@ public class OrderService : IOrderService
         }
 
         await _unitOfWork.OrderRepository.CreateAsync(order);
-        await _unitOfWork.CompleteAsync();
+
+        if (saveAll)
+            await _unitOfWork.CompleteAsync();
 
         return ResponseModel.Success($"Successfully created order: {dto.OrderId}", order);
     }
@@ -82,7 +84,7 @@ public class OrderService : IOrderService
         return ResponseModel.Success($"Successfully get total price for order: {orderId}", total);
     }
 
-    public async Task<ResponseModel> UpdateOrder(Order order)
+    public async Task<ResponseModel> UpdateOrder(Order order, bool saveAll = true)
     {
         var validator = _validatorFactory.GetValidator<Order>();
         var validationResult = await validator.ValidateAsync(order);
@@ -92,17 +94,20 @@ public class OrderService : IOrderService
         }
 
         _unitOfWork.OrderRepository.Update(order);
-        await _unitOfWork.CompleteAsync();
-        
+
+        if (saveAll)
+            await _unitOfWork.CompleteAsync();
+
         return ResponseModel.Success($"Successfully updated order: {order.OrderId}", order);
     }
 
-    public async Task<ResponseModel> DeleteOrder(string orderId)
+    public async Task<ResponseModel> DeleteOrder(string orderId, bool saveAll = true)
     {
         Order order = await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
         _unitOfWork.OrderRepository.Delete(order);
 
-        await _unitOfWork.CompleteAsync();
+        if (saveAll)
+            await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully deleted: {order.OrderId}");
     }
 }
