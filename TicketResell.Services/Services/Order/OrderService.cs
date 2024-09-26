@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Repositories.Core.Dtos.Order;
-using Repositories.Core.Dtos.User;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
 using Repositories.Core.Validators;
@@ -61,6 +60,8 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> GetOrdersByDateRange(DateRange dateRange)
     {
+        dateRange.StartDate ??= new DateTime(0);
+        dateRange.EndDate ??= DateTime.Now;
         var orders = await _unitOfWork.OrderRepository.GetOrdersByDateRangeAsync(dateRange);
         return ResponseModel.Success($"Successfully get order from {dateRange.StartDate} to {dateRange.EndDate}",
             orders);
@@ -68,6 +69,8 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> GetOrdersByTotalPriceRange(DoubleRange priceDoubleRange)
     {
+        priceDoubleRange.Min ??= 0;
+        priceDoubleRange.Max ??= double.MaxValue;
         var orders = await _unitOfWork.OrderRepository.GetOrdersByTotalPriceRangeAsync(priceDoubleRange);
         return ResponseModel.Success(
             $"Successfully get order with price from {priceDoubleRange.Min} to {priceDoubleRange.Max}", orders);

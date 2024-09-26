@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using FluentValidation;
 using Repositories.Core.Dtos.OrderDetail;
 using Repositories.Core.Entities;
+using Repositories.Core.Validators;
 using TicketResell.Repositories.UnitOfWork;
 
 namespace TicketResell.Services.Services;
