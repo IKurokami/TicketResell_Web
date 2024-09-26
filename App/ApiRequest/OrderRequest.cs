@@ -20,7 +20,7 @@ public class OrderRequest : IOrderService
         _apiRepository = apiRepository;
     }
 
-    public async Task<ResponseModel> CreateOrder(OrderDto dto)
+    public async Task<ResponseModel> CreateOrder(OrderDto dto, bool saveAll = true)
     {
         return await _apiRepository.PostAsync<ResponseModel>(_endPoint, dto, "create");
     }
@@ -55,12 +55,12 @@ public class OrderRequest : IOrderService
         return await _apiRepository.GetAsync<ResponseModel>(_endPoint, "totalprice", orderId);
     }
 
-    public async Task<ResponseModel> UpdateOrder(Order order)
+    public async Task<ResponseModel> UpdateOrder(Order order, bool saveAll = true)
     {
         return await _apiRepository.PutAsync<ResponseModel>(_endPoint, order);
     }
 
-    public async Task<ResponseModel> DeleteOrder(string orderId)
+    public async Task<ResponseModel> DeleteOrder(string orderId, bool saveAll = true)
     {
         return await _apiRepository.DeleteAsync<ResponseModel>(_endPoint, orderId);
     }

@@ -1,4 +1,6 @@
 ﻿namespace Repositories.Core.Entities;
+using System;
+using System.Collections.Generic;
 
 public partial class Order
 {
