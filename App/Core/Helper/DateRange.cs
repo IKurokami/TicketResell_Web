@@ -1,6 +1,6 @@
 using System;
 
-namespace Backend.Core.Helper;
+namespace Api.Core.Helper;
 
 public class DateRange
 {

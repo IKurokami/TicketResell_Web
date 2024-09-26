@@ -19,11 +19,14 @@ namespace App.MVVMs.Views.Home
         {
             ViewModel = Ioc.Default.GetService<ShellViewModel>();
             this.InitializeComponent();
-            App.MainWindow.AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-            App.MainWindow.AppWindow.TitleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled;
 
-            ViewModel.NavigationService.Frame = NavigationFrame;
-            ViewModel.NavigationViewService.Initialize(NavigationViewControl);
+            if (ViewModel != null)
+            {
+                ViewModel.NavigationService.Frame = NavigationFrame;
+                ViewModel.NavigationViewService.Initialize(NavigationViewControl);
+            }
+            
             App.MainWindow.SetTitleBar(AppTitleBar);
             App.MainWindow.Activated += MainWindow_Activated;
             AppTitleBarText.Text = "TicketResell";
@@ -32,8 +35,8 @@ namespace App.MVVMs.Views.Home
         private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             NavigationViewControl.SelectedItem = HomeItem;
-            ViewModel.NavigationService.NavigateTo(NavigationHelper.GetNavigateTo(HomeItem));
-            Helpers.TitleBarHelper.UpdateTitleBar(RequestedTheme);
+            ViewModel?.NavigationService.NavigateTo(NavigationHelper.GetNavigateTo(HomeItem));
+            TitleBarHelper.UpdateTitleBar(RequestedTheme);
 
             KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
             KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
@@ -85,15 +88,7 @@ namespace App.MVVMs.Views.Home
         {
             if (args.IsSettingsInvoked)
             {
-                var backgroundBrush = (SolidColorBrush)Application.Current.Resources["SystemControlBackgroundChromeMediumBrush"];
-                SettingButtonBackGround.Background = backgroundBrush;
-                var startTransitionAction = new StartTransitionAction();
-                startTransitionAction.Source = HomeView;
-                startTransitionAction.Target = SettingViewCollapsed;
-                startTransitionAction.Transition = (TransitionHelper)Resources["MyTransitionHelper"];
-
-                // Execute the transition
-                startTransitionAction.Execute(null, null);
+                ViewModel?.NavigationService.NavigateTo("App.MVVMs.ViewModels.SettingViewModel");
             }
         }
     }

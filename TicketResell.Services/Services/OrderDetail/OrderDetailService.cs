@@ -1,0 +1,91 @@
+﻿using AutoMapper;
+using FluentValidation;
+using Repositories.Core.Dtos.OrderDetail;
+using Repositories.Core.Entities;
+using TicketResell.Repositories.UnitOfWork;
+
+namespace TicketResell.Services.Services;
+
+public class OrderDetailService : IOrderDetailService
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private IMapper _mapper;
+    private IValidatorFactory _validatorFactory;
+
+    public OrderDetailService(IUnitOfWork unitOfWork, IMapper mapper, IValidatorFactory validatorFactory)
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _validatorFactory = validatorFactory;
+    }
+
+    public async Task<ResponseModel> CreateOrderDetail(OrderDetailDto dto)
+    {
+        var orderDetail = _mapper.Map<OrderDetail>(dto);
+
+        var validator = _validatorFactory.GetValidator<OrderDetail>();
+        var validationResult = await validator.ValidateAsync(orderDetail);
+        if (!validationResult.IsValid)
+        {
+            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+        }
+
+        var order = await _unitOfWork.OrderRepository.HasOrder(dto.OrderId);
+        if (order == false)
+        {
+            return ResponseModel.NotFound("Not found id");
+        }
+
+        await _unitOfWork.OrderDetailRepository.CreateAsync(orderDetail);
+        await _unitOfWork.CompleteAsync();
+        return ResponseModel.Success($"Successfully created order detail: {orderDetail.OrderDetailId}", orderDetail);
+    }
+
+    public async Task<ResponseModel> GetOrderDetail(string id)
+    {
+        var orderDetail = await _unitOfWork.OrderDetailRepository.GetByIdAsync(id);
+        return ResponseModel.Success($"Successfully get order detail: {orderDetail.OrderDetailId}", orderDetail);
+    }
+
+    public async Task<ResponseModel> GetAllOrderDetails()
+    {
+        var orderDetails = await _unitOfWork.OrderDetailRepository.GetAllAsync();
+        return ResponseModel.Success($"Successfully get all order detail", orderDetails);
+    }
+
+    public async Task<ResponseModel> GetOrderDetailsByBuyerId(string buyerId)
+    {
+        var orderDetails = await _unitOfWork.OrderDetailRepository.GetOrderDetailsByBuyerIdAsync(buyerId);
+        return ResponseModel.Success($"Successfully get order detail by buyerId: {buyerId}", orderDetails);
+    }
+
+    public async Task<ResponseModel> GetOrderDetailsBySellerId(string sellerId)
+    {
+        var orderDetails = await _unitOfWork.OrderDetailRepository.GetOrderDetailsBySellerIdAsync(sellerId);
+        return ResponseModel.Success($"Successfully get order detail by sellderId: {sellerId}", orderDetails);
+    }
+
+    public async Task<ResponseModel> UpdateOrderDetail(OrderDetailDto dto)
+    {
+        var orderDetail = _mapper.Map<OrderDetail>(dto);
+
+        var validator = _validatorFactory.GetValidator<OrderDetail>();
+        var validationResult = await validator.ValidateAsync(orderDetail);
+        if (!validationResult.IsValid)
+        {
+            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+        }
+        
+        _unitOfWork.OrderDetailRepository.Update(orderDetail);
+        await _unitOfWork.CompleteAsync();
+        return ResponseModel.Success($"Successfully updated order detail: {orderDetail.OrderDetailId}", orderDetail);
+    }
+
+    public async Task<ResponseModel> DeleteOrderDetail(string id)
+    {
+        var orderDetail = await _unitOfWork.OrderDetailRepository.GetByIdAsync(id);
+        _unitOfWork.OrderDetailRepository.Delete(orderDetail);
+        await _unitOfWork.CompleteAsync();
+        return ResponseModel.Success($"Successfully deleted order detail: {id}");
+    }
+}

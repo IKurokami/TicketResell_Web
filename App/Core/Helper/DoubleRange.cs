@@ -1,4 +1,4 @@
-namespace Backend.Core.Helper;
+namespace Api.Core.Helper;
 
 public class DoubleRange
 {
