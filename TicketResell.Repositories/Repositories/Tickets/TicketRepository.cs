@@ -14,15 +14,26 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         _context = context;
     }
 
-
-    public async Task<Ticket?> GetTicketByNameAsync(string name)
+    public async Task<List<Ticket>> GetTicketByNameAsync(string name)
     {
-        return await _context.Tickets.Where(x => x.Name == name).FirstOrDefaultAsync();
+        var tickets = await _context.Tickets.Where(x => x.Name == name).ToListAsync();
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("Name is not found");
+        }
+
+        return tickets;
     }
 
-    public async Task<Ticket?> GetTicketByDateAsync(DateTime date)
+    public async Task<List<Ticket>> GetTicketByDateAsync(DateTime date)
     {
-        return await _context.Tickets.Where(x => x.StartDate == date).FirstOrDefaultAsync();
+        var tickets = await _context.Tickets.Where(x => x.StartDate == date).ToListAsync();
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("Don't have ticket in this date");
+        }
+
+        return tickets;
     }
 
     public async Task CreateTicketAsync(Ticket ticket, List<string> categoryList)
@@ -38,4 +49,23 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
         await _context.Tickets.AddAsync(ticket);
     }
+
+    public async Task DeleteTicketAsync(string id)
+    {
+        var ticket = await _context.Tickets
+            .Include(t => t.Categories) 
+            .FirstOrDefaultAsync(t => t.TicketId == id);
+
+        if (ticket == null)
+        {
+            throw new KeyNotFoundException("Ticket not found");
+        }
+        
+        ticket.Categories.Clear();
+        
+        _context.Tickets.Remove(ticket);
+        
+        await _context.SaveChangesAsync();
+    }
+
 }

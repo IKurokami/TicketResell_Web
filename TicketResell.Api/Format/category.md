@@ -23,26 +23,17 @@
 - **Output:**
     ```json
     [
-       {
-        "categoryId": "CAT01",
-        "name": "Music",
-        "description": "All music events and concerts"
-    },
-    {
-        "categoryId": "CAT02",
-        "name": "Sports",
-        "description": "All sports-related events"
-    },
-    {
-        "categoryId": "CAT03",
-        "name": "Technology",
-        "description": "Tech conferences and events"
-    },
-    {
-        "categoryId": "CAT04",
-        "name": "Movie",
-        "description": "The movie you can see"
-    }
+      {
+        "statusCode": 200,
+        "status": "Success",
+        "message": "Successfully get categories",
+        "data": 
+          {
+            "categoryId": "CAT01",
+            "name": "Music",
+            "description": "All music events and concerts"
+          }
+       } 
     ]
     ```
 ### **Get Category By Id**
@@ -53,10 +44,15 @@
 - **Output:**
     ```json
     [
-      {
-        "CategoryId" : "CAT04",
-        "Name" : "Movie",
-        "Description" : "The movie you can see"
+     {
+      "statusCode": 200,
+      "status": "Success",
+      "message": "Successfully get categories",
+      "data": {
+                "categoryId": "CAT01",
+                "name": "Music",
+                "description": "All music events and concerts"
+              }
       }
     ]
     ```
@@ -75,8 +71,11 @@
 - **Output:**
     ```json
     {
-        "message": "Successfully updated Category"
-    }
+      "statusCode": 200,
+      "status": "Success",
+      "message": "Successfully updated Category: CAT04",
+      "data": null
+  }
     ```
 
 ### **Delete Category by Id**
@@ -88,7 +87,10 @@
 
     ```json
     {
-       "message": "Successfully deleted Category with id: CAT04"
+      "statusCode": 200,
+      "status": "Success",
+      "message": "Successfully deleted Category with id: CAT04",
+      "data": null
     }
     ```
 ---

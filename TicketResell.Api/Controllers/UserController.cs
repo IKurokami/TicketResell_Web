@@ -9,14 +9,10 @@ namespace Repositories.Controllers
     public class UserController : ControllerBase
     {
         private IUserService _userService;
-        private IMapper _mapper;
-        private IValidatorFactory _validatorFactory;
 
-        public UserController(IServiceProvider serviceProvider, IMapper mapper, IValidatorFactory validatorFactory)
+        public UserController(IServiceProvider serviceProvider)
         {
             _userService = serviceProvider.GetRequiredService<IUserService>();
-            _mapper = mapper;
-            _validatorFactory = validatorFactory;
         }
 
         [HttpPost]
