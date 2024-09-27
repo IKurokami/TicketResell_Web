@@ -5,8 +5,8 @@
 
 ```json
 {
-	"RoleId": "R001",
-	"Rolename": "admin"
+	"RoleId": "R002",
+	"Rolename": "admin",
 	"Description": "Control System"
 }
 ```
@@ -15,7 +15,15 @@
 
 ```json
 {
-	"message": "Successfully created role: {roleId}"
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully create sell config",
+    "data": {
+        "roleId": "R002",
+        "rolename": "admin",
+        "description": "Control System",
+        "users": []
+    }
 }
 ```
 
@@ -28,10 +36,46 @@
 
 ```json
 {
-	"RoleId": "R001",
-	"Rolename": "admin",
-	"Description": "Control system"
-	...
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully read sell config",
+    "data": [
+        {
+            "roleId": "R001",
+            "rolename": "admin",
+            "description": null
+        },
+        {
+            "roleId": "R002",
+            "rolename": "admin",
+            "description": "Control System"
+        },
+        {
+            "roleId": "R003",
+            "rolename": "buyer",
+            "description": null
+        },
+        {
+            "roleId": "R004",
+            "rolename": "seller",
+            "description": null
+        },
+        {
+            "roleId": "ROLE001",
+            "rolename": "Admin",
+            "description": "System Administrator with full permissions"
+        },
+        {
+            "roleId": "ROLE002",
+            "rolename": "Seller",
+            "description": "Ticket seller with restricted permissions"
+        },
+        {
+            "roleId": "ROLE003",
+            "rolename": "Buyer",
+            "description": "User who can buy tickets"
+        }
+    ]
 }
 ```
 ---
@@ -52,7 +96,15 @@
 
 ```json
 {
-	Successfully update role:{roleId}
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Success update sell config",
+    "data": {
+        "roleId": "R002",
+        "rolename": "staff",
+        "description": "User Manager",
+        "users": []
+    }
 }
 ```
 ---
@@ -64,8 +116,14 @@
 
 ```json
 {
-    "RoleId": "R001",
-    "Rolename": "admin",
-    "Description": "Control system"
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully delete sell config",
+    "data": {
+        "roleId": "R002",
+        "rolename": "staff",
+        "description": "User Manager",
+        "users": []
+    }
 }
 ```

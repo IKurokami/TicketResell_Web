@@ -1,0 +1,58 @@
+﻿using AutoMapper;
+using Repositories.Core.Dtos.Role;
+using Repositories.Core.Dtos.SellConfig;
+using Repositories.Core.Entities;
+using TicketResell.Repositories.UnitOfWork;
+
+namespace TicketResell.Services.Services
+{
+    public class RoleService : IRoleService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private IMapper _mapper;
+
+        public RoleService(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
+
+        public async Task<ResponseModel> CreateRoleAsync(RoleCreateDto dto)
+        {
+            Role role = _mapper.Map<Role>(dto);
+            await _unitOfWork.RoleRepository.CreateAsync(role);
+            await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully create sell config", role);
+        }
+
+        public async Task<ResponseModel> DeleteRoleAsync(string id)
+        {
+            Role? role = await _unitOfWork.RoleRepository.GetByIdAsync(id);
+            _unitOfWork.RoleRepository.Delete(role);
+            await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully delete sell config", role);
+        }
+
+        public async Task<ResponseModel> GetAllRoleAsync()
+        {
+            var roleList = await _unitOfWork.RoleRepository.GetAllAsync();
+            var convertedRoles = _mapper.Map<IEnumerable<RoleReadDto>>(roleList);
+            return ResponseModel.Success($"Successfully read sell config", convertedRoles);
+        }
+
+        public async Task<ResponseModel> GetRoleByIdAsync(string id)
+        {
+            Role? role = await _unitOfWork.RoleRepository.GetByIdAsync(id);
+            return ResponseModel.Success($"Successfully get sell config", role);
+        }
+
+        public async Task<ResponseModel> UpdateRoleAsync(string id, RoleUpdateDto dto)
+        {
+            Role? role = await _unitOfWork.RoleRepository.GetByIdAsync(id);
+            _mapper.Map(dto, role);
+            _unitOfWork.RoleRepository.Update(role);
+            await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Success update sell config", role);
+        }
+    }
+}

@@ -1,0 +1,58 @@
+﻿using AutoMapper;
+using Repositories.Core.Dtos.SellConfig;
+using Repositories.Core.Entities;
+using TicketResell.Repositories.UnitOfWork;
+
+
+namespace TicketResell.Services.Services
+{
+    public class SellConfigService : ISellConfigService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private IMapper _mapper;
+
+        public SellConfigService(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
+
+        public async Task<ResponseModel> CreateSellConfigAsync(SellConfigCreateDto dto)
+        {
+            SellConfig sellConfig = _mapper.Map<SellConfig>(dto);
+            await _unitOfWork.SellConfigRepository.CreateAsync(sellConfig);
+            await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully create sell config", sellConfig);
+        }
+
+        public async Task<ResponseModel> DeleteSellConfigAsync(string id)
+        {
+            SellConfig? sellConfig = await _unitOfWork.SellConfigRepository.GetByIdAsync(id);
+            _unitOfWork.SellConfigRepository.Delete(sellConfig);
+            await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully delete sell config", sellConfig);
+        }
+        public async Task<ResponseModel> GetAllSellConfigAsync()
+        {
+            var sellConfigList = await _unitOfWork.SellConfigRepository.GetAllAsync();
+            var convertedSellConfigs = _mapper.Map<IEnumerable<SellConfigReadDto>>(sellConfigList);
+            return ResponseModel.Success($"Successfully read sell config", convertedSellConfigs);
+        }
+
+        public async Task<ResponseModel> GetSellConfigByIdAsync(string id)
+        {
+            SellConfig? sellConfig = await _unitOfWork.SellConfigRepository.GetByIdAsync(id);
+            return ResponseModel.Success($"Successfully get sell config", sellConfig);
+        }
+
+
+        public async Task<ResponseModel> UpdateSellConfigAsync(string id, SellConfigUpdateDto dto)
+        {
+            SellConfig? sellConfig = await _unitOfWork.SellConfigRepository.GetByIdAsync(id);
+            _mapper.Map(dto, sellConfig);
+            _unitOfWork.SellConfigRepository.Update(sellConfig);
+            await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Success update sell config", sellConfig);
+        }
+    }
+}

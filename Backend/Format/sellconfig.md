@@ -5,7 +5,7 @@
 
 ```json
 {
-	"SellConfigId": "SeCo001",
+	"SellConfigId": "SeCo003",
 	"Commision"	  : "0.1"
 }
 ```
@@ -14,7 +14,14 @@
 
 ```json
 {
-	"message": "Successfully created sellconfig: ..."
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully create sell config",
+    "data": {
+        "sellConfigId": "SeCo003",
+        "commision": 0.1,
+        "users": []
+    }
 }
 ```
 
@@ -27,9 +34,23 @@
 
 ```json
 {
-	"SellConfigId": "SeCo001",
-	"Commision"	  : "0.1"
-	...
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully read sell config",
+    "data": [
+        {
+            "sellConfigId": "S1",
+            "commision": 0.1
+        },
+        {
+            "sellConfigId": "SC001",
+            "commision": 5
+        },
+        {
+            "sellConfigId": "SC002",
+            "commision": 7.5
+        }
+    ]
 }
 ```
 ---
@@ -39,7 +60,7 @@
 - **Input:**
 ```json
 {
-	"Commision"	  : "0.2""
+	"Commision"	  : "0.5""
 
 }
 ```
@@ -49,7 +70,14 @@
 
 ```json
 {
-	Successfully update sell config:{sellConfigId}
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Success update sell config",
+    "data": {
+        "sellConfigId": "SeCo002",
+        "commision": 0.5,
+        "users": []
+    }
 }
 ```
 ---
@@ -61,8 +89,13 @@
 
 ```json
 {
-    "sellConfigId": "SeCo001",
-    "commision": 0.2,
-    "users": []
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully delete sell config",
+    "data": {
+        "sellConfigId": "SeCo002",
+        "commision": 0.5,
+        "users": []
+    }
 }
 ```
