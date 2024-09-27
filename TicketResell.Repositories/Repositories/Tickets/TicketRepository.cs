@@ -38,6 +38,4 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
         await _context.Tickets.AddAsync(ticket);
     }
-
-
 }

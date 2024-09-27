@@ -2,9 +2,9 @@ using System;
 using System.Collections.ObjectModel;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Detail;
-using Api.Core.Dtos;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
+using Repositories.Core.Dtos.Ticket;
 using WinUICommunity;
 
 namespace App.MVVMs.Views.Home
@@ -12,7 +12,8 @@ namespace App.MVVMs.Views.Home
     public sealed partial class HomePage : Page
     {
         private HomeViewModel? ViewModel;
-        public ObservableCollection<string> SelectedTags { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> SelectedTags { get; set; } = new();
+        public ObservableCollection<string> Categories { get; set; } = new();
 
         public HomePage()
         {
@@ -21,6 +22,9 @@ namespace App.MVVMs.Views.Home
             NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
 
             SelectedTags.CollectionChanged += SelectedTags_CollectionChanged!;
+            
+            Categories.Add("Hello");
+            Categories.Add("World");
         }
 
         private void SelectedTags_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -65,6 +69,11 @@ namespace App.MVVMs.Views.Home
         private void TicketView_OnItemClick(object sender, ItemClickEventArgs e)
         {
             MainTabView.TabItems.Add(CreateNewTab((TickerReadDto)e.ClickedItem));
+        }
+
+        private void CategoriesChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

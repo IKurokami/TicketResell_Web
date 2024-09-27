@@ -1,23 +1,20 @@
 ﻿using System;
-using App.Contracts.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Windows.Graphics.Printing.PrintTicket;
-using Api.Core.Dtos;
+using Repositories.Core.Dtos.Ticket;
 
-namespace App.MVVMs.ViewModels
+namespace App.MVVMs.ViewModels;
+
+public partial class TicketDetailViewModel : ObservableRecipient, IDisposable
 {
-    public partial class TicketDetailViewModel : ObservableRecipient, IDisposable
+    public TickerReadDto Ticket { get; set; }
+
+    public TicketDetailViewModel()
     {
-        public TickerReadDto Ticket { get; set; }
+    }
 
-        public TicketDetailViewModel()
-        {
-        }
-
-        public void Dispose()
-        {
-            Ticket = null;
-            GC.Collect();
-        }
+    public void Dispose()
+    {
+        Ticket = null;
+        GC.Collect();
     }
 }

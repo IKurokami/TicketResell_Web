@@ -2,24 +2,23 @@
 using System.Collections.Generic;
 using Microsoft.UI.Xaml.Controls;
 
-namespace App.Contracts.Services
+namespace App.Contracts.Services;
+
+public interface INavigationViewService
 {
-    public interface INavigationViewService
+    IList<object>? MenuItems
     {
-        IList<object>? MenuItems
-        {
-            get;
-        }
-
-        object? SettingsItem
-        {
-            get;
-        }
-
-        void Initialize(NavigationView navigationView);
-
-        void UnregisterEvents();
-
-        NavigationViewItem? GetSelectedItem(Type pageType);
+        get;
     }
+
+    object? SettingsItem
+    {
+        get;
+    }
+
+    void Initialize(NavigationView navigationView);
+
+    void UnregisterEvents();
+
+    NavigationViewItem? GetSelectedItem(Type pageType);
 }
