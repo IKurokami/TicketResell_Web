@@ -17,19 +17,21 @@ namespace TicketResell.Services.Services
             _mapper = mapper;
         }
 
-        public async Task<ResponseModel> CreateSellConfigAsync(SellConfigCreateDto dto)
+        public async Task<ResponseModel> CreateSellConfigAsync(SellConfigCreateDto dto, bool saveAll)
         {
             SellConfig sellConfig = _mapper.Map<SellConfig>(dto);
             await _unitOfWork.SellConfigRepository.CreateAsync(sellConfig);
-            await _unitOfWork.CompleteAsync();
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully create sell config", sellConfig);
         }
 
-        public async Task<ResponseModel> DeleteSellConfigAsync(string id)
+        public async Task<ResponseModel> DeleteSellConfigAsync(string id, bool saveAll)
         {
             SellConfig? sellConfig = await _unitOfWork.SellConfigRepository.GetByIdAsync(id);
             _unitOfWork.SellConfigRepository.Delete(sellConfig);
-            await _unitOfWork.CompleteAsync();
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully delete sell config", sellConfig);
         }
         public async Task<ResponseModel> GetAllSellConfigAsync()
@@ -46,12 +48,13 @@ namespace TicketResell.Services.Services
         }
 
 
-        public async Task<ResponseModel> UpdateSellConfigAsync(string id, SellConfigUpdateDto dto)
+        public async Task<ResponseModel> UpdateSellConfigAsync(string id, SellConfigUpdateDto dto, bool saveAll)
         {
             SellConfig? sellConfig = await _unitOfWork.SellConfigRepository.GetByIdAsync(id);
             _mapper.Map(dto, sellConfig);
             _unitOfWork.SellConfigRepository.Update(sellConfig);
-            await _unitOfWork.CompleteAsync();
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Success update sell config", sellConfig);
         }
     }
