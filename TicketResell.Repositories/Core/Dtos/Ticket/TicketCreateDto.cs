@@ -1,10 +1,9 @@
-
 namespace Repositories.Core.Dtos.Ticket;
 
 public class TicketCreateDto
 {
     public string? TicketId { get; set; }
-    
+
     public string? SellerId { get; set; }
 
     public string? Name { get; set; }

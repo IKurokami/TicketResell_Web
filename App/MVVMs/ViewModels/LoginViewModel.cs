@@ -1,12 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using TicketResell.Services.Services;
 
-namespace App.MVVMs.ViewModels
+namespace App.MVVMs.ViewModels;
+
+public partial class LoginViewModel : ObservableRecipient
 {
-    public partial class LoginViewModel : ObservableRecipient
+    IAuthenticationService _authenticationService;
+    public LoginViewModel(IAuthenticationService authenticationService)
     {
-        public LoginViewModel()
-        {
-            
-        }
+        _authenticationService = authenticationService;
     }
 }

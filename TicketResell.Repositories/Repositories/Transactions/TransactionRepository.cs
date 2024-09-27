@@ -29,7 +29,7 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
                                                        od.Order.Date <= dateRange.EndDate).SumAsync(od => od.Price * od.Quantity);
     }
 
-    public async Task<IEnumerable<User?>> GetUserBuyTicket(string sellerId)
+    public async Task<IEnumerable<User>> GetUserBuyTicket(string sellerId)
     {
         return await _context.OrderDetails.Where(od => od != null && od.Ticket.SellerId == sellerId).Select(od => od.Order.Buyer).ToListAsync();
     }

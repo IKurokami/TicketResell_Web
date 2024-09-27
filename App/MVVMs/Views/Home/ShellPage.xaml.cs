@@ -26,10 +26,6 @@ namespace App.MVVMs.Views.Home
                 ViewModel.NavigationService.Frame = NavigationFrame;
                 ViewModel.NavigationViewService.Initialize(NavigationViewControl);
             }
-            
-            App.MainWindow.SetTitleBar(AppTitleBar);
-            App.MainWindow.Activated += MainWindow_Activated;
-            AppTitleBarText.Text = "TicketResell";
         }
 
         private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -40,23 +36,6 @@ namespace App.MVVMs.Views.Home
 
             KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
             KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
-        }
-
-        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
-        {
-            App.AppTitlebar = AppTitleBarText as UIElement;
-        }
-
-        private void NavigationViewControl_DisplayModeChanged(NavigationView sender,
-            NavigationViewDisplayModeChangedEventArgs args)
-        {
-            AppTitleBar.Margin = new Thickness()
-            {
-                Left = sender.CompactPaneLength * (sender.DisplayMode == NavigationViewDisplayMode.Minimal ? 2 : 1),
-                Top = AppTitleBar.Margin.Top,
-                Right = AppTitleBar.Margin.Right,
-                Bottom = AppTitleBar.Margin.Bottom
-            };
         }
 
         private static KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key,

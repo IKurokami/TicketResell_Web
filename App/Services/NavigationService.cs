@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using App.Contracts.Services;
-using App.MVVMs.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Animations;
 using Microsoft.UI.Xaml.Controls;
@@ -9,142 +8,141 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using WinUICommunity;
 
-namespace App.Services
+namespace App.Services;
+
+public class NavigationService : INavigationService
 {
-    public class NavigationService : INavigationService
+    private readonly IPageService _pageService;
+    private object? _lastParameterUsed;
+    private Frame? _frame;
+
+    public event NavigatedEventHandler? Navigated;
+
+    public Frame? Frame
     {
-        private readonly IPageService _pageService;
-        private object? _lastParameterUsed;
-        private Frame? _frame;
-
-        public event NavigatedEventHandler? Navigated;
-
-        public Frame? Frame
+        get
         {
-            get
+            if (_frame == null)
             {
-                if (_frame == null)
-                {
-                    _frame = App.MainWindow.Content as Frame;
-                    RegisterFrameEvents();
-                }
-
-                return _frame;
-            }
-
-            set
-            {
-                UnregisterFrameEvents();
-                _frame = value;
+                _frame = App.MainWindow.Content as Frame;
                 RegisterFrameEvents();
             }
+
+            return _frame;
         }
 
-        [MemberNotNullWhen(true, nameof(Frame), nameof(_frame))]
-        public bool CanGoBack => Frame != null && Frame.CanGoBack;
-
-        public NavigationService(IPageService pageService)
+        set
         {
-            _pageService = pageService;
+            UnregisterFrameEvents();
+            _frame = value;
+            RegisterFrameEvents();
         }
+    }
 
-        private void RegisterFrameEvents()
+    [MemberNotNullWhen(true, nameof(Frame), nameof(_frame))]
+    public bool CanGoBack => Frame != null && Frame.CanGoBack;
+
+    public NavigationService(IPageService pageService)
+    {
+        _pageService = pageService;
+    }
+
+    private void RegisterFrameEvents()
+    {
+        if (_frame != null)
         {
-            if (_frame != null)
+            _frame.Navigated += OnNavigated;
+        }
+    }
+
+    private void UnregisterFrameEvents()
+    {
+        if (_frame != null)
+        {
+            _frame.Navigated -= OnNavigated;
+        }
+    }
+
+    public bool GoBack()
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+
+        if (CanGoBack)
+        {
+            var vmBeforeNavigation = _frame.GetPageViewModel();
+            _frame.GoBack(Ioc.Default.GetService<DrillInNavigationTransitionInfo>());
+            if (vmBeforeNavigation is INavigationAware navigationAware)
             {
-                _frame.Navigated += OnNavigated;
+                navigationAware.OnNavigatedFrom();
             }
+
+            return true;
         }
 
-        private void UnregisterFrameEvents()
-        {
-            if (_frame != null)
-            {
-                _frame.Navigated -= OnNavigated;
-            }
-        }
+        return false;
+    }
 
-        public bool GoBack()
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+    public bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false)
+    {
+        var pageType = _pageService.GetPageType(pageKey);
 
-            if (CanGoBack)
+        if (_frame != null && (_frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParameterUsed))))
+        {
+            if (_frame.Content is IDisposable disposable)
             {
-                var vmBeforeNavigation = _frame.GetPageViewModel();
-                _frame.GoBack(Ioc.Default.GetService<DrillInNavigationTransitionInfo>());
-                if (vmBeforeNavigation is INavigationAware navigationAware)
+                if(_frame.Content is Page page)
                 {
-                    navigationAware.OnNavigatedFrom();
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false)
-        {
-            var pageType = _pageService.GetPageType(pageKey);
-
-            if (_frame != null && (_frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParameterUsed))))
-            {
-                if (_frame.Content is IDisposable disposable)
-                {
-                    if(_frame.Content is Page page)
-                    {
-                        if(page.NavigationCacheMode == NavigationCacheMode.Disabled)
-                        {
-                            disposable.Dispose();
-                        }
-                    }
-                    else
+                    if(page.NavigationCacheMode == NavigationCacheMode.Disabled)
                     {
                         disposable.Dispose();
                     }
                 }
-
-                _frame.Tag = clearNavigation;
-                var vmBeforeNavigation = _frame.GetPageViewModel();
-                var navigated = _frame.Navigate(pageType, parameter, Ioc.Default.GetService<ContinuumNavigationTransitionInfo>());
-                if (navigated)
+                else
                 {
-                    _lastParameterUsed = parameter;
-                    if (vmBeforeNavigation is INavigationAware navigationAware)
-                    {
-                        navigationAware.OnNavigatedFrom();
-                    }
+                    disposable.Dispose();
                 }
-
-                return navigated;
             }
 
-            return false;
-        }
-
-        private void OnNavigated(object sender, NavigationEventArgs e)
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            if (sender is Frame frame)
+            _frame.Tag = clearNavigation;
+            var vmBeforeNavigation = _frame.GetPageViewModel();
+            var navigated = _frame.Navigate(pageType, parameter, Ioc.Default.GetService<ContinuumNavigationTransitionInfo>());
+            if (navigated)
             {
-                var clearNavigation = (bool)frame.Tag;
-                if (clearNavigation)
+                _lastParameterUsed = parameter;
+                if (vmBeforeNavigation is INavigationAware navigationAware)
                 {
-                    frame.BackStack.Clear();
+                    navigationAware.OnNavigatedFrom();
                 }
-
-                if (frame.GetPageViewModel() is INavigationAware navigationAware)
-                {
-                    navigationAware.OnNavigatedTo(e.Parameter);
-                }
-
-                Navigated?.Invoke(sender, e);
             }
+
+            return navigated;
         }
 
-        public void SetListDataItemForNextConnectedAnimation(object item) => Frame.SetListDataItemForNextConnectedAnimation(item);
+        return false;
     }
+
+    private void OnNavigated(object sender, NavigationEventArgs e)
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+
+        if (sender is Frame frame)
+        {
+            var clearNavigation = (bool)frame.Tag;
+            if (clearNavigation)
+            {
+                frame.BackStack.Clear();
+            }
+
+            if (frame.GetPageViewModel() is INavigationAware navigationAware)
+            {
+                navigationAware.OnNavigatedTo(e.Parameter);
+            }
+
+            Navigated?.Invoke(sender, e);
+        }
+    }
+
+    public void SetListDataItemForNextConnectedAnimation(object item) => Frame.SetListDataItemForNextConnectedAnimation(item);
 }

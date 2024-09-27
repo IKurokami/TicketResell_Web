@@ -23,6 +23,30 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
+        <Grid x:Name="AppTitleBar"
+              Canvas.ZIndex="1"
+              Grid.Row="0"
+              Height="48"
+              Margin="48,0,0,0"
+              VerticalAlignment="Top"
+              Padding="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Image x:Name="AppFontIcon"
+                   Width="16"
+                   Height="16"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Source="/Assets/TicketLogo.png" />
+            <TextBlock x:Name="TitleTextBlock"
+                       Grid.Column="1"
+                       Margin="12,0,0,0"
+                       VerticalAlignment="Center"
+                       Style="{StaticResource CaptionTextBlockStyle}"
+                       Text="TicketResell" />
+        </Grid>
         <Grid x:Name="RootFrameGrid"
               Grid.Row="0"
               Grid.RowSpan="3"
