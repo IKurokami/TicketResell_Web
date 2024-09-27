@@ -1,0 +1,347 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff00;
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+  flex-wrap: nowrap; /* Ngăn xuống dòng */
+}
+
+.resell {
+  color: white;
+}
+
+.navbar.scrolled {
+  background-color: #f7f9fa; /* Change this to your desired color */
+  color: black;
+}
+
+.navbar.scrolled .resell,
+.navbar.scrolled .nav-links ul li a,
+.navbar.scrolled .icon-link {
+  color: black; /* Change text color to black when scrolled */
+}
+
+.navbar.scrolled .search-input {
+  background-color: rgba(75, 66, 66, 0.3);
+}
+
+
+
+
+/* Thêm vào file CSS của bạn */
+
+.navbar.scrolled {
+  background-color: #ffffff; /* Màu nền sáng */
+  color: black; /* Màu chữ đen */
+}
+
+.navbar.scrolled .nav-links ul li a {
+  color: black; /* Đổi màu chữ của các liên kết */
+}
+
+.navbar.scrolled .resell {
+  color: black; /* Đổi màu chữ cho phần resell */
+}
+
+/* Để phần icon vẫn trắng trên nền sáng */
+.navbar.scrolled .icon-link {
+  color: black; /* Đổi màu icon */
+}
+
+
+.navbar-brand .logo {
+  font-size: 2rem; /* Increase logo size */
+  font-weight: 700;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-family: 'Poppins', sans-serif; /* Sử dụng Poppins */
+  
+}
+
+.logo-green {
+  color: #27ae60; /* Custom green color */
+}
+
+.nav-links ul {
+  list-style: none;
+  display: flex;
+  gap: 2rem; /* Điều chỉnh khoảng cách giữa các mục navlink */
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links ul li a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1.1rem; /* Increase text size */
+  font-weight: 500;
+  padding: 0.5rem 0; /* Add padding to the link items */
+  transition: color 0.3s ease, transform 0.3s ease;
+  font-family: 'Poppins', sans-serif; /* Sử dụng Poppins */
+}
+
+.nav-links ul li a:hover,
+.nav-links ul li a:focus {
+  color: #27ae60; /* Hover color */
+  transform: translateY(-3px); /* Lift effect on hover */
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Additional Styles for Navbar icons */
+.icon-link {
+  color: #f0eeee; /* Dark color */
+  font-size: 1.5rem; /* Adjust size */
+  margin-left: 1rem; /* Điều chỉnh khoảng cách giữa các icon */
+  transition: transform 0.3s ease;
+}
+
+.icon-link:hover {
+  color: #27ae60; /* Green on hover */
+  transform: scale(1.1); /* Slight scale on hover */
+}
+
+.user-icon {
+  width: 30px; /* Increase size of user icon */
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.user-icon:hover {
+  transform: scale(1.1);
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 200px;
+}
+
+.user-dropdown a {
+  color: #333333;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.user-dropdown a:hover,
+.user-dropdown a:focus {
+  color: #27ae60; /* Hover color inside dropdown */
+}
+
+.user-dropdown.visible {
+  display: flex;
+}
+
+/* Menu Toggle for mobile */
+.menu-toggle {
+  display: none;
+  color: #333;
+  font-size: 1.8rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* Styles for the Sign In button */
+.sign-in-btn {
+  background-color: #27ae60; /* Màu xanh lá cây */
+  color: white; /* Màu chữ trắng */
+  border: none;
+  padding: 0.5rem 1.5rem; /* Padding bên trong nút */
+  border-radius: 20px; /* Bo tròn góc */
+  font-size: 1rem; /* Kích thước chữ */
+  font-weight: 600; /* Độ đậm của chữ */
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-right: 20px; 
+}
+
+.sign-in-btn:hover {
+  background-color: #2ecc71; /* Màu xanh sáng hơn khi hover */
+  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+}
+
+.sign-in-btn:focus {
+  outline: none;
+  box-shadow: 0 0 5px #27ae60; /* Hiệu ứng khi nút được chọn */
+}
+
+/* Enhanced search form with OpenSea-like style */
+.search-form {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: 1.5rem; /* Điều chỉnh khoảng cách giữa navlinks và ô tìm kiếm */
+  margin-right: 1.5rem; /* Điều chỉnh khoảng cách giữa ô tìm kiếm và icon */
+}
+
+.search-input {
+  width: 240px;
+  padding: 10px 20px;
+  border: none; /* No border */
+  border-radius: 20px; /* Rounded corners */
+  font-size: 16px;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.2); /* Transparent with opacity */
+  backdrop-filter: blur(10px); /* Blurred background effect */
+  color: white; /* White text for contrast */
+  transition: width 0.4s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease; /* Added transition for background */
+  box-shadow: none; /* Remove shadow initially */
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7); /* Lighter placeholder */
+}
+
+.search-input:focus {
+  width: 320px; /* Expand on focus */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Add shadow on focus */
+}
+
+.search-input:hover {
+  background-color: rgba(75, 66, 66, 0.3); /* Slightly lighter on hover */
+}
+
+.search-button {
+  background-color: transparent;
+  border: none;
+  color: white; /* White icon */
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  transition: color 0.3s ease-in-out;
+}
+
+.search-button:hover {
+  color: #eaeaea; /* Lighter hover effect */
+}
+
+.search-button i {
+  font-size: 18px;
+}
+/* Notification Icon Styling */
+
+.noti-icon {
+  position: relative;
+  color: #f0eeee;
+  font-size: 1.5rem;
+  margin-left: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.noti-icon:hover {
+  color: #27ae60;
+  transform: scale(1.1);
+}
+
+/* Notification Badge Styling */
+.noti-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  display: inline-block;
+  text-align: center;
+  min-width: 20px;
+  
+}
+
+
+/* Responsive adjustments */
+
+@media screen and (max-width: 768px) {
+  .nav-container {
+    display: flex;
+    justify-content: flex-end; /* Push icons to the right */
+    align-items: center;
+  }
+
+  .nav-links ul {
+    display: none; /* Hide the nav links by default */
+    flex-direction: column;
+    background-color: #fff;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .nav-links.active ul {
+    display: flex; /* Show the menu when active */
+  }
+
+  .menu-toggle {
+    display: block; /* Show the toggle button */
+    font-size: 1.5rem;
+    color: #333;
+  }
+
+  .sign-in-btn {
+    display: inline-block; /* Show login button */
+    margin-left: 1rem; /* Add space between icons */
+  
+  }
+
+  .search-form {
+    display: inline-block;
+    margin-left: 1rem; /* Add space between icons */
+   
+  }
+
+  .search-form .search-button {
+    font-size: 1.5rem;
+    color: #333;
+  }
+
+  /* Hide unnecessary icons in responsive mode */
+  .icon-link, .noti-icon {
+    display: none;
+  }
+
+  .user-icon {
+    display: none;
+  }
+  .nav-container {
+    display: flex;
+    justify-content: space-between; /* Giữ logo ở trái, icon ở phải */
+    align-items: center;
+    flex-wrap: nowrap; /* Ngăn các phần tử xuống hàng */
+  }
+  .logo, .sign-in-btn {
+    flex-shrink: 0; /* Ngăn không cho logo và nút co lại */
+  }
+  
+}
