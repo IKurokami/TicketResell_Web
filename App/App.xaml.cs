@@ -1,9 +1,8 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
-using WinUICommunity;
 
 namespace App
 {
@@ -15,8 +14,15 @@ namespace App
             UnhandledException += App_UnhandledException;
             
             Configuration.APIUrl = "http://localhost:5296/api";
+            
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+            
             Ioc.Default.ConfigureServices(new ServiceCollection()
-                .InstallServices().BuildServiceProvider());
+                .AddSingleton<IConfiguration>(configuration)
+                .InstallServices(configuration).BuildServiceProvider());
             
             Startup.InstallFrame();
         }

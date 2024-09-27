@@ -1,10 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
 using Repositories.Core.Dtos.User;
-using Repositories.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TicketResell.Services.Services
 {
@@ -13,6 +7,7 @@ namespace TicketResell.Services.Services
         public Task<ResponseModel> CreateUserAsync(UserCreateDto dto, bool saveAll = true);
 
         public Task<ResponseModel> GetUserByIdAsync(string id);
+        public Task<ResponseModel> GetUserByEmailAsync(string email);
 
         public Task<ResponseModel> UpdateUserByIdAsync(string id, UserUpdateDto dto, bool saveAll = true);
 

@@ -1,6 +1,6 @@
 using System;
-using Api.Core.Dtos;
 using Microsoft.UI.Xaml.Data;
+using Repositories.Core.Dtos.Ticket;
 
 namespace App.Converters;
 
