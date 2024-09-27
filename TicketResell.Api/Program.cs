@@ -22,6 +22,8 @@ builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ISellConfigService, SellConfigService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);
 
 // Add services to the container.
