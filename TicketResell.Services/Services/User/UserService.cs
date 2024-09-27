@@ -20,7 +20,7 @@ namespace TicketResell.Services.Services
             _validatorFactory = validatorFactory;
         }
 
-        public async Task<ResponseModel> CreateUserAsync(UserCreateDto dto)
+        public async Task<ResponseModel> CreateUserAsync(UserCreateDto dto, bool saveAll)
         {
             var validator = _validatorFactory.GetValidator<User>();
             User newUser = _mapper.Map<User>(dto);
@@ -31,8 +31,8 @@ namespace TicketResell.Services.Services
             }
             newUser.CreateDate = DateTime.UtcNow;
             await _unitOfWork.UserRepository.CreateAsync(newUser);
-
-            await _unitOfWork.CompleteAsync();
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully created user: {dto.Username}");
         }
 
@@ -44,7 +44,7 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get user: {userDto.Username}", userDto);
         }
 
-        public async Task<ResponseModel> UpdateUserAsync(string id, UserUpdateDto dto)
+        public async Task<ResponseModel> UpdateUserByIdAsync(string id, UserUpdateDto dto, bool saveAll)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
             _mapper.Map(dto, user);
@@ -57,17 +57,18 @@ namespace TicketResell.Services.Services
                 return ResponseModel.BadRequest("Validation error", validationResult.Errors.ToString());
             }
             _unitOfWork.UserRepository.Update(user);
-
-            await _unitOfWork.CompleteAsync();
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully updated user: {user.Username}");
         }
 
-        public async Task<ResponseModel> DeleteUserAsync(string id)
+        public async Task<ResponseModel> DeleteUserByIdAsync(string id, bool saveAll)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
             _unitOfWork.UserRepository.Delete(user);
 
-            await _unitOfWork.CompleteAsync();
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully deleted user: {user.Username}");
         }
     }

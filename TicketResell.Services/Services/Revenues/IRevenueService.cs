@@ -4,7 +4,7 @@ namespace TicketResell.Services.Services.Revenues;
 
 public interface IRevenueService
 {
-    public Task<ResponseModel> CreateRevenueAsync(RevenueCreateDto dto);
+    public Task<ResponseModel> CreateRevenueAsync(RevenueCreateDto dto,bool saveAll=true);
 
     public Task<ResponseModel> GetRevenuesAsync();
 
@@ -12,9 +12,9 @@ public interface IRevenueService
 
     public Task<ResponseModel> GetRevenuesBySellerIdAsync(string id);
 
-    public Task<ResponseModel> UpdateRevenueAsync(string id, RevenueUpdateDto dto);
+    public Task<ResponseModel> UpdateRevenueAsync(string id, RevenueUpdateDto dto,bool saveAll=true);
 
-    public Task<ResponseModel> DeleteRevenuesAsync(string id);
+    public Task<ResponseModel> DeleteRevenuesAsync(string id,bool saveAll=true);
 
-    public Task<ResponseModel> DeleteRevenuesBySellerIdAsync(string id);
+    public Task<ResponseModel> DeleteRevenuesBySellerIdAsync(string id,bool saveAll=true);
 }

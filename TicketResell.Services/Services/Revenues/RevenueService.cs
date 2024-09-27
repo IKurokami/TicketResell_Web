@@ -17,14 +17,14 @@ public class RevenueService : IRevenueService
         _mapper = mapper;
     }
 
-    public async Task<ResponseModel> CreateRevenueAsync(RevenueCreateDto dto)
+    public async Task<ResponseModel> CreateRevenueAsync(RevenueCreateDto dto,bool saveAll)
     {
         Revenue newRevenue = _mapper.Map<Revenue>(dto);
         newRevenue.StartDate = DateTime.UtcNow;
         newRevenue.EndDate = newRevenue.StartDate.Value.AddMonths(1);
         newRevenue.Type = RevenueConstant.MONTH_TYPE;
         await _unitOfWork.RevenueRepository.CreateAsync(newRevenue);
-        await _unitOfWork.CompleteAsync();
+        if(saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success("Successfully created Revenue");
     }
 
@@ -50,7 +50,7 @@ public class RevenueService : IRevenueService
         return ResponseModel.Success($"Successfully get revenues with sellerId ", revenueDtos);
     }
 
-    public async Task<ResponseModel> UpdateRevenueAsync(string id, RevenueUpdateDto dto)
+    public async Task<ResponseModel> UpdateRevenueAsync(string id, RevenueUpdateDto dto,bool saveAll)
     {
         string type = RevenueConstant.MONTH_TYPE;
         var revenues = await  _unitOfWork.RevenueRepository.GetRevenuesBySellerId_MonthAsync(id, type);
@@ -62,7 +62,7 @@ public class RevenueService : IRevenueService
             {
                 _mapper.Map(dto, revenue);
                 _unitOfWork.RevenueRepository.Update(revenue);
-                await _unitOfWork.CompleteAsync();
+                if(saveAll)  await _unitOfWork.CompleteAsync();
             }
             
         }
@@ -70,21 +70,21 @@ public class RevenueService : IRevenueService
         return ResponseModel.Success($"Successfully update revenue with id: {id}");
     }
 
-    public async Task<ResponseModel> DeleteRevenuesAsync(string id)
+    public async Task<ResponseModel> DeleteRevenuesAsync(string id,bool saveAll)
     {
         await _unitOfWork.RevenueRepository.DeleteByIdAsync(id);
-        await _unitOfWork.CompleteAsync();
+        if(saveAll)  await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully deleted Revenue(s) with id: {id}");
     }
 
-    public async Task<ResponseModel> DeleteRevenuesBySellerIdAsync(string id)
+    public async Task<ResponseModel> DeleteRevenuesBySellerIdAsync(string id,bool saveAll)
     {
         var revenues = await _unitOfWork.RevenueRepository.GetRevenuesBySellerIdAsync(id);
         
         foreach (var revenueItem in revenues)
         {
              _unitOfWork.RevenueRepository.Delete(revenueItem);
-             await _unitOfWork.CompleteAsync();
+             if(saveAll) await _unitOfWork.CompleteAsync();
         }
         
         return ResponseModel.Success($"Successfully deleted Revenue(s) with SellerID: {id}");

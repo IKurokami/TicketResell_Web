@@ -22,7 +22,7 @@ namespace TicketResell.Services.Services
         }
 
 
-        public async Task<ResponseModel> CreateTicketAsync(TicketCreateDto dto)
+        public async Task<ResponseModel> CreateTicketAsync(TicketCreateDto dto, bool saveAll)
         {
             var validatorTicket = _validatorFactory.GetValidator<Ticket>();
             Ticket newTicket = _mapper.Map<Ticket>(dto);
@@ -48,7 +48,7 @@ namespace TicketResell.Services.Services
             newTicket.CreateDate = DateTime.UtcNow;
             newTicket.ModifyDate = DateTime.UtcNow;
             await _unitOfWork.TicketRepository.CreateTicketAsync(newTicket, dto.CategoriesId);
-            await _unitOfWork.CompleteAsync();
+            if(saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success("Successfully created Ticket");
         }
 
@@ -86,7 +86,7 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto dto)
+        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto dto,bool saveAll)
         {
             var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
 
@@ -103,14 +103,14 @@ namespace TicketResell.Services.Services
             }
 
             _unitOfWork.TicketRepository.Update(ticket);
-            await _unitOfWork.CompleteAsync();
+            if(saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully updated ticket: {ticket.TicketId}");
         }
 
-        public async Task<ResponseModel> DeleteTicketAsync(string id)
+        public async Task<ResponseModel> DeleteTicketAsync(string id, bool saveAll)
         {
             await _unitOfWork.TicketRepository.DeleteTicketAsync(id);
-            await _unitOfWork.CompleteAsync();
+            if(saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully deleted Ticket(s) with id: {id}" );
         }
     }

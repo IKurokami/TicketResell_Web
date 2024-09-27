@@ -7,6 +7,7 @@ namespace TicketResell.Services.Services
 {
     public class ResponseModel
     {
+        public int Id { get; set; } = 1;
         public int StatusCode { get; set; }
         public string Status { get; set; } = null!;
         public string Message { get; set; } = null!;
