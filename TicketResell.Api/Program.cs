@@ -8,8 +8,13 @@ using Repositories.Core.Context;
 using Repositories.Repositories;
 using Repositories.Core.Validators;
 using Api.Middlewares;
+using Repositories.Core.Entities;
 using TicketResell.Services.Services;
 using TicketResell.Repositories.UnitOfWork;
+using TicketResell.Services.Services.Categories;
+using TicketResell.Services.Services.Revenues;
+using TicketResell.Services.Services.Tickets;
+
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +25,10 @@ builder.Services.AddDbContext<TicketResellManagementContext>();
 // Automapper configuration
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 
+
+builder.Services.AddScoped<IRevenueService, RevenueService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);

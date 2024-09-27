@@ -14,7 +14,10 @@
 - **Output:**
   ```json
   {
-    "message": "Successfully created Revenue"
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully created Revenue",
+    "data": null
   }
   ```
 
@@ -24,14 +27,30 @@
 - **Output:**
   ```json
   [
-    {
-      "revenueId": "R01",
-      "sellerId": "USER01",
-      "startDate": "2024-09-20T02:33:44.5644136",
-      "endDate": "2024-10-20T02:33:44.5644136",
-      "revenue1": 100000,
-      "type": "month"
-    }
+  {
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully get revenues",
+    "data": [
+        
+        {
+            "revenueId": "R01",
+            "sellerId": "USER01",
+            "startDate": "2024-09-26T13:55:28.8415778",
+            "endDate": "2024-10-26T13:55:28.8415778",
+            "revenue1": 100000,
+            "type": "Monthly"
+        },
+        {
+            "revenueId": "R02",
+            "sellerId": "USER01",
+            "startDate": "2024-09-26T13:56:21.9403544",
+            "endDate": "2024-10-26T13:56:21.9403544",
+            "revenue1": 100000,
+            "type": "Monthly"
+        }
+      ]
+  }
   ]
   ```
 
@@ -46,18 +65,23 @@
   ```json
   [
     {
-      "revenueId": "R01",
-      "sellerId": "USER01",
-      "startDate": "2024-09-20T02:33:44.5644136",
-      "endDate": "2024-10-20T02:33:44.5644136",
-      "revenue1": 100000,
-      "type": "month"
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully get revenues with id",
+    "data": {
+        "revenueId": "R01",
+        "sellerId": "USER01",
+        "startDate": "2024-09-26T13:55:28.8415778",
+        "endDate": "2024-10-26T13:55:28.8415778",
+        "revenue1": 100000,
+        "type": "Monthly"
     }
+  }
   ]
   ```
 
 ### **Update Revenue By SellerId** 
-(`api/Rating/update/{id}`)
+(`api/Revenue/update/{id}`)
 
 - **Method:** `PUT`
 - **Input:**
@@ -77,14 +101,17 @@
 
 **`api/Revenue/delete/{id}`**
 
-**`api/Revenue/delete/revenue/{Sellerid}`**
+**`api/Revenue/deletebysellerid/{Sellerid}`**
 
 - **Method:** `DELETE`
 - **Output:**
 
   ```json
   {
-    "message": "Successfully delete rating with id: 4"
+    "statusCode": 200,
+    "status": "Success",
+    "message": "Successfully deleted Revenue(s) with id: R02",
+    "data": null
   }
   ```
 

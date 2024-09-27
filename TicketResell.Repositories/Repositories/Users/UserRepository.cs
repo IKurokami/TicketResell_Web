@@ -11,8 +11,6 @@ namespace Repositories.Repositories
         {
             _context = context;
         }
-
-
-
+        
     }
 }
