@@ -43,6 +43,17 @@ namespace TicketResell.Services.Services
             UserReadDto userDto = _mapper.Map<UserReadDto>(user);
             return ResponseModel.Success($"Successfully get user: {userDto.Username}", userDto);
         }
+        
+        public async Task<ResponseModel> GetUserByEmailAsync(string email)
+        {
+            User? user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                return ResponseModel.NotFound($"User with email {email} not found");
+            }
+            UserReadDto userDto = _mapper.Map<UserReadDto>(user);
+            return ResponseModel.Success($"Successfully get user: {userDto.Username}", userDto);
+        }
 
         public async Task<ResponseModel> UpdateUserByIdAsync(string id, UserUpdateDto dto, bool saveAll)
         {

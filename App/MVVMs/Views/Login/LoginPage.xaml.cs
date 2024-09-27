@@ -28,9 +28,11 @@ namespace App.MVVMs.Views.Login
 
         private async void Login_Click(object sender, RoutedEventArgs e)
         {
-            var result = await CredentialHelper.PickCredential("Register", "Register for this username and password");
+            var result = await CredentialHelper.PickCredential("Login", "Login with Email and Password");
+            
             if (string.IsNullOrEmpty(result.CredentialUserName) || string.IsNullOrEmpty(result.CredentialPassword))
                 return;
+            
             var mainViewModel = Ioc.Default.GetService<MainWindowViewModel>();
             mainViewModel?.TheDispatcherQueue?.TryEnqueue(() =>
             {

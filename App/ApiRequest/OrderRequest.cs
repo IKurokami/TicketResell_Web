@@ -1,11 +1,16 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using App.Contracts.Services;
-using Api.Core.Helper;
+using Microsoft.UI.Xaml.Controls;
+using Repositories.Core.Dtos.Order;
+using Repositories.Core.Dtos.Ticket;
+using Repositories.Core.Entities;
+using Repositories.Core.Helper;
+using TicketResell.Services.Services;
 
 namespace App.ApiRequest;
 
-public class OrderRequest : IOrderRequest
+public class OrderRequest : IOrderService
 {
     private readonly IApiRepository _apiRepository;
     private readonly string _endPoint = "order";
@@ -15,53 +20,48 @@ public class OrderRequest : IOrderRequest
         _apiRepository = apiRepository;
     }
 
-    public Task<Message?> CreateOrderAsync(Order order)
+    public async Task<ResponseModel> CreateOrder(OrderDto dto, bool saveAll = true)
     {
-        return _apiRepository.PutAsync<Message>(_endPoint, order);
+        return await _apiRepository.PostAsync<ResponseModel>(_endPoint, dto, "create");
     }
 
-    public Task<Order?> GetOrderByIdAsync(string orderId)
+    public async Task<ResponseModel> GetOrderById(string id)
     {
-        return _apiRepository.GetAsync<Order?>(_endPoint, orderId);
+        return await _apiRepository.GetAsync<ResponseModel>(_endPoint, id);
     }
 
-    public Task<IEnumerable<Order>?> GetAllOrdersAsync()
+    public async Task<ResponseModel> GetAllOrders()
     {
-        return _apiRepository.GetAsync<IEnumerable<Order>?>(_endPoint);
+        return await _apiRepository.GetAsync<ResponseModel>(_endPoint);
     }
 
-    public Task<IEnumerable<Order>?> GetOrdersByBuyerIdAsync(string buyerId)
+    public async Task<ResponseModel> GetOrdersByBuyerId(string buyerId)
     {
-        return _apiRepository.GetAsync<IEnumerable<Order>?>(_endPoint, "buyer", buyerId);
+        return await _apiRepository.GetAsync<ResponseModel>(_endPoint, "buyer", buyerId);
     }
 
-    public Task<IEnumerable<Order>?> GetOrdersByDateRangeAsync(DateRange dateRange)
+    public async Task<ResponseModel> GetOrdersByDateRange(DateRange dateRange)
     {
-        return _apiRepository.PostAsync<IEnumerable<Order>?>(_endPoint, dateRange, "daterange");
+        return await _apiRepository.PostAsync<ResponseModel>(_endPoint, dateRange, "daterange");
     }
 
-    public Task<IEnumerable<Order>?> GetOrdersByTotalPriceRangeAsync(DoubleRange priceRange)
+    public async Task<ResponseModel> GetOrdersByTotalPriceRange(DoubleRange priceDoubleRange)
     {
-        return _apiRepository.PostAsync<IEnumerable<Order>?>(_endPoint, priceRange, "pricerange");
+        return await _apiRepository.PostAsync<ResponseModel>(_endPoint, priceDoubleRange, "pricerange");
     }
 
-    public Task<Message?> UpdateOrderAsync(Order order)
+    public async Task<ResponseModel> CalculateTotalPriceForOrder(string orderId)
     {
-        return _apiRepository.PutAsync<Message?>(_endPoint, order);
+        return await _apiRepository.GetAsync<ResponseModel>(_endPoint, "totalprice", orderId);
     }
 
-    public Task<Message?> DeleteOrderAsync(string orderId)
+    public async Task<ResponseModel> UpdateOrder(Order order, bool saveAll = true)
     {
-        return _apiRepository.DeleteAsync<Message?>(_endPoint, orderId);
+        return await _apiRepository.PutAsync<ResponseModel>(_endPoint, order);
     }
 
-    public Task<double?> CalculateTotalPriceForOrderAsync(string orderId)
+    public async Task<ResponseModel> DeleteOrder(string orderId, bool saveAll = true)
     {
-        return _apiRepository.GetAsync<double?>(_endPoint, "totalprice", orderId);
-    }
-
-    public Task<bool?> HasOrder(string orderId)
-    {
-        throw new System.NotImplementedException();
+        return await _apiRepository.DeleteAsync<ResponseModel>(_endPoint, orderId);
     }
 }

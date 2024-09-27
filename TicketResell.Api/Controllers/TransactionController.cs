@@ -1,35 +1,32 @@
-//using Api.Core.Helper;
-//using Api.Repositories;
-//using Microsoft.AspNetCore.Mvc;
+namespace Api.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TransactionController : ControllerBase
+    {
+        private readonly ITransactionService _transactionService;
 
-//namespace Api.Controllers;
+        public TransactionController(ITransactionService transactionService)
+        {
+            _transactionService = transactionService;
+        }
 
-//[Route("/api/[controller]")]
-//[ApiController]
-//public class TransactionController : ControllerBase
-//{
-//    private readonly ITransactionRepository _transactionRepository;
+        [HttpPost("orderdetails/{sellerId}")]
+        public async Task<IActionResult> GetOrderDetailByDate(string sellerId, [FromBody] DateRange dateRange)
+        {
+            return ResponseParser.Result(await _transactionService.GetOrderDetailByDate(sellerId, dateRange));
+        }
 
-//    public TransactionController(ITransactionRepository transactionRepository)
-//    {
-//        _transactionRepository = transactionRepository;
-//    }
+        [HttpPost("total/{sellerId}")]
+        public async Task<IActionResult> CalculatorTotal(string sellerId, [FromBody] DateRange dateRange)
+        {
+            return ResponseParser.Result(await _transactionService.CalculatorTotal(sellerId, dateRange));
+        }
 
-//    [HttpPost("getbydate/{sellerId}")]
-//    public async Task<IActionResult> GetOrderDetailByDate(string sellerId, [FromBody] DateRange dateRange)
-//    {
-//        return Ok(await _transactionRepository.GetTransactionsByDateAsync(sellerId, dateRange));
-//    }
-
-//    [HttpPost("calculatortotal/{sellerId}")]
-//    public async Task<IActionResult> CalculatorTotal(string sellerId, [FromBody] DateRange dateRange)
-//    {
-//        return Ok(await _transactionRepository.CalculatorTotal(sellerId, dateRange));
-//    }
-
-//    [HttpGet("getbuyer/{sellerId}")]
-//    public async Task<IActionResult> GetBuyer(string sellerId)
-//    {
-//        return Ok(await _transactionRepository.GetUserBuyTicket(sellerId));
-//    }
-//}
+        [HttpGet("buyers/{sellerId}")]
+        public async Task<IActionResult> GetBuyer(string sellerId)
+        {
+            return ResponseParser.Result(await _transactionService.GetBuyer(sellerId));
+        }
+    }
+}

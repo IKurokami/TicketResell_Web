@@ -12,22 +12,6 @@
     Loaded="OnLoaded">
     <Grid>
         <Grid x:Name="HomeView">
-            <Grid x:Name="AppTitleBar"
-                  Canvas.ZIndex="1"
-                  Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
-                  IsHitTestVisible="True"
-                  VerticalAlignment="Top">
-                <Image Source="/Assets/TicketLogo.png"
-                       HorizontalAlignment="Left"
-                       Width="22"
-                       Height="22" />
-                <TextBlock x:Name="AppTitleBarText"
-                           VerticalAlignment="Center"
-                           TextWrapping="NoWrap"
-                           Style="{StaticResource CaptionTextBlockStyle}"
-                           Margin="25,0,0,0"
-                           FontSize="16" />
-            </Grid>
             <NavigationView
                 x:Name="NavigationViewControl"
                 Canvas.ZIndex="0"
@@ -36,7 +20,6 @@
                 SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}"
                 IsSettingsVisible="True"
                 ExpandedModeThresholdWidth="1280"
-                DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
                 ItemInvoked="NavigationViewControl_OnItemInvoked">
                 <NavigationView.MenuItems>
                     <NavigationViewItem x:Name="HomeItem"

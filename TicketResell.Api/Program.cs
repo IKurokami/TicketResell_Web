@@ -1,36 +1,36 @@
-
 using Api.Utils;
 using DotNetEnv;
 
 using FluentValidation;
 using Repositories.Core.AutoMapperConfig;
 using Repositories.Core.Context;
-using Repositories.Repositories;
 using Repositories.Core.Validators;
 using Api.Middlewares;
-using Repositories.Core.Entities;
-using TicketResell.Services.Services;
+using StackExchange.Redis;
 using TicketResell.Repositories.UnitOfWork;
-using TicketResell.Services.Services.Categories;
-using TicketResell.Services.Services.Revenues;
-using TicketResell.Services.Services.Tickets;
 
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", Environment.GetEnvironmentVariable("SQLServer"));
 
+
+
+
+
 // Dbcontext configuration
 builder.Services.AddDbContext<TicketResellManagementContext>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"));
+
 // Automapper configuration
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 
-
-builder.Services.AddScoped<IRevenueService, RevenueService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);
 
 // Add services to the container.
@@ -41,6 +41,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<OrderDetailValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<TicketValidator>();
 builder.Services.AddScoped<Repositories.Core.Validators.IValidatorFactory, ValidatorFactory>();
+
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();

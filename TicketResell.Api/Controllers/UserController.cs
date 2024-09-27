@@ -1,10 +1,6 @@
 using AutoMapper;
-using Repositories.Core.Entities;
-using Repositories.Repositories;
-using Microsoft.AspNetCore.Mvc;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Validators;
-using TicketResell.Services.Services;
 
 namespace Repositories.Controllers
 {
