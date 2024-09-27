@@ -1,10 +1,9 @@
-
-namespace TicketResell.Repository.Core.Dtos.Ticket;
+namespace Repositories.Core.Dtos.Ticket;
 
 public class TicketCreateDto
 {
     public string? TicketId { get; set; }
-    
+
     public string? SellerId { get; set; }
 
     public string? Name { get; set; }
@@ -19,5 +18,5 @@ public class TicketCreateDto
 
     public string? Image { get; set; }
 
-    public List<string> CategoriesId { get; set; } = new();
+    public List<string> CategoriesId { get; set; }
 }

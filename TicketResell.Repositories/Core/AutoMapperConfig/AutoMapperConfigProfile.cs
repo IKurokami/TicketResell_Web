@@ -1,16 +1,17 @@
 ﻿using AutoMapper;
-using TicketResell.Repository.Core.Dtos.Category;
-using TicketResell.Repository.Core.Dtos.Order;
-using TicketResell.Repository.Core.Dtos.OrderDetail;
-using TicketResell.Repository.Core.Dtos.Revenue;
-using TicketResell.Repository.Core.Dtos.Role;
-using TicketResell.Repository.Core.Dtos.SellConfig;
-using TicketResell.Repository.Core.Dtos.Ticket;
-using TicketResell.Repository.Core.Dtos.User;
-using TicketResell.Repository.Core.Entities;
-using Category = TicketResell.Repository.Core.Entities.Category;
+using Repositories.Core.Dtos.Category;
+using Repositories.Core.Dtos.Revenue;
+using Repositories.Core.Dtos.Order;
+using Repositories.Core.Dtos.OrderDetail;
+using Repositories.Core.Entities;
+using Repositories.Core.Dtos.User;
+using Repositories.Core.Dtos.SellConfig;
+using Repositories.Core.Dtos.Role;
+using Repositories.Core.Dtos.Ticket;
+using TicketResell.Repositories.Core.Dtos.Authentication;
+using Category = Repositories.Core.Entities.Category;
 
-namespace TicketResell.Repository.Core.AutoMapperConfig
+namespace Repositories.Core.AutoMapperConfig
 {
     public class AutoMapperConfigProfile : Profile
     {
@@ -47,6 +48,10 @@ namespace TicketResell.Repository.Core.AutoMapperConfig
             CreateMap<CategoryCreateDto, Category>();
             CreateMap< Category,CategoryReadDto>();
             CreateMap<CategoryUpdateDto, Category>();
+            
+            //Authentication
+            CreateMap<LoginDto, User>();
+            CreateMap<RegisterDto, User>();
         }
     }
 }

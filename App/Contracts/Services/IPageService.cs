@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace App.Contracts.Services
+namespace App.Contracts.Services;
+
+public interface IPageService
 {
-    public interface IPageService
-    {
-        Type GetPageType(string key);
-    }
+    Type GetPageType(string key);
 }

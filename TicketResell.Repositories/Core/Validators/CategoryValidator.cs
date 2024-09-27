@@ -1,6 +1,6 @@
-using TicketResell.Repository.Core.Entities;
+using Repositories.Core.Entities;
 
-namespace TicketResell.Repository.Core.Validators;
+namespace Repositories.Core.Validators;
 
 public class CategoryValidator : Validators<Category>
 {

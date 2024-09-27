@@ -1,12 +1,12 @@
 using System.Transactions;
-using TicketResell.Repository.Core.Entities;
-using TicketResell.Repository.Core.Helper;
+using Repositories.Core.Entities;
+using Repositories.Core.Helper;
 
-namespace TicketResell.Repository.Repositories;
+namespace Repositories.Repositories;
 
 public interface ITransactionRepository : IRepository<Transaction>
 {
     Task<IEnumerable<OrderDetail>> GetTransactionsByDateAsync(string sellerId, DateRange dateRange);
-    Task<double> CalculatorTotal(string sellerId, DateRange dateRange);
-    Task<IEnumerable<User?>> GetUserBuyTicket(string sellerId);
+    Task<double?> CalculatorTotal(string sellerId, DateRange dateRange);
+    Task<IEnumerable<User>> GetUserBuyTicket(string sellerId);
 }

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Windows.AI.MachineLearning;
+using System.Threading.Tasks;
 using App.Contracts.Services;
 using Microsoft.UI.Xaml;
 using System;

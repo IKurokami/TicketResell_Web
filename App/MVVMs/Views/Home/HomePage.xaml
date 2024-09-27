@@ -9,10 +9,10 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
-    xmlns:tickets="using:Backend.Core.Dtos"
     xmlns:converter="using:App.Converters"
     xmlns:marqueeText="using:CommunityToolkit.Labs.WinUI.MarqueeTextRns"
-    xmlns:labs="using:CommunityToolkit.Labs.WinUI">
+    xmlns:labs="using:CommunityToolkit.Labs.WinUI"
+    xmlns:tickets="using:Repositories.Core.Dtos.Ticket">
 
     <Page.Resources>
         <converter:DateTimeConverter x:Key="DateTimeConverter" />
@@ -47,8 +47,8 @@
                     <TextBlock Grid.Row="0" Grid.Column="1"
                                HorizontalAlignment="Center"
                                Text="{x:Bind Name}"
-                               FontSize="18" FontWeight="Bold" 
-                               MinWidth="200"/>
+                               FontSize="18" FontWeight="Bold"
+                               MinWidth="200" />
 
                     <marqueeText:MarqueeText
                         Grid.Row="1" Grid.Column="1"
@@ -95,42 +95,52 @@
                     <SymbolIconSource Symbol="Shop" />
                 </TabViewItem.IconSource>
                 <Grid Margin="10, 0, 10, 0" VerticalAlignment="Top">
-                   
-                    <controls:SettingsExpander x:Name="FilterCard"
-                                               VerticalAlignment="Top"
-                                               Margin="10, 0, 10, 0">
-                       <TextBlock>Filter</TextBlock>
-                        <controls:SettingsExpander.Items>
-                            <labs:TokenView x:Name="ChooseCategories"
-                                            SelectionMode="Multiple"
-                                            ItemsSource="{x:Bind Categories}">
-                                <labs:TokenView.ItemTemplate>
-                                    <DataTemplate x:DataType="x:String">
-                                        <Grid>
-                                            <TextBlock Margin="16,0,16,0"
-                                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                                       Text="{Binding}" />
-                                        </Grid>
-                                    </DataTemplate>
+                    <Grid Canvas.ZIndex="1">
+                        <controls:SettingsExpander x:Name="FilterCard"
+                                                   VerticalAlignment="Top"
+                                                   Margin="10, 0, 10, 0">
+                            <TextBlock>Filter</TextBlock>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard Header="Event start day">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TimePicker MinuteIncrement="15" />
+                                        <CalendarDatePicker PlaceholderText="Pick a date"/>
+                                    </StackPanel>
+                                </controls:SettingsCard>
+                                <controls:SettingsCard Header="Categories"
+                                                       ContentAlignment="Vertical"
+                                                       HorizontalContentAlignment="Center">
+                                    <labs:TokenView SelectionChanged="CategoriesChanged"
+                                                    IsWrapped="True"
+                                                    SelectionMode="Multiple"
+                                                    ItemsSource="{x:Bind Categories, Mode=OneWay}">
+                                        <labs:TokenView.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Grid>
+                                                    <TextBlock Margin="16,0,16,0"
+                                                               Style="{StaticResource CaptionTextBlockStyle}"
+                                                               Text="{Binding}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </labs:TokenView.ItemTemplate>
 
-                                </labs:TokenView.ItemTemplate>
-                            </labs:TokenView>
-                        </controls:SettingsExpander.Items>
-                    </controls:SettingsExpander>
-                    <controls:TokenizingTextBox x:Name="TokenBox"
-                                                VerticalAlignment="Top"
-                                                Height="50"
-                                                Margin="50, 0, 150, 0"
-                                                PlaceholderText="Search for keyword...."
-                                                ItemsSource="{x:Bind SelectedTags, Mode=TwoWay}">
-                    </controls:TokenizingTextBox>
+                                    </labs:TokenView>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+                        <controls:TokenizingTextBox x:Name="TokenBox"
+                                                    VerticalAlignment="Top"
+                                                    Height="50"
+                                                    Margin="50, 0, 150, 0"
+                                                    PlaceholderText="Search for keyword...."
+                                                    ItemsSource="{x:Bind SelectedTags, Mode=TwoWay}">
+                        </controls:TokenizingTextBox>
+                    </Grid>
                     <ScrollView VerticalAlignment="Top" Margin="0, 60, 0, 0">
                         <StackPanel Margin="10, 0">
-                            <RefreshContainer x:Name="rc"
-                                              RefreshRequested="Rc_OnRefreshRequested"
+                            <RefreshContainer RefreshRequested="Rc_OnRefreshRequested"
                                               MinHeight="600">
-                                <GridView x:Name="TicketView"
-                                          ItemsSource="{x:Bind ViewModel.Tickets}"
+                                <GridView ItemsSource="{x:Bind ViewModel.Tickets}"
                                           ItemTemplate="{StaticResource TicketTemplate}"
                                           IsItemClickEnabled="True"
                                           ItemClick="TicketView_OnItemClick"

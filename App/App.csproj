@@ -15,12 +15,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Models\**" />
-    <EmbeddedResource Remove="Models\**" />
-    <None Remove="Models\**" />
-    <Page Remove="Models\**" />
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="MVVMs\Views\Detail\TicketDetail.xaml" />
     <None Remove="MVVMs\Views\Home\DashBoardPage.xaml" />
     <None Remove="MVVMs\Views\Home\HomePage.xaml" />
@@ -30,6 +24,9 @@
     <None Remove="Styles\FontSizes.xaml" />
     <None Remove="Styles\TextBlock.xaml" />
     <None Remove="Styles\Thickness.xaml" />
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -90,14 +87,6 @@
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
   <ItemGroup>
-    <PRIResource Remove="Models\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="MVVMs\Views\Home\DashBoardPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -138,6 +127,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Controls\" />
+    <ProjectReference Include="..\TicketResell.Repositories\TicketResell.Repositories.csproj" />
+    <ProjectReference Include="..\TicketResell.Services\TicketResell.Services.csproj" />
   </ItemGroup>
 </Project>

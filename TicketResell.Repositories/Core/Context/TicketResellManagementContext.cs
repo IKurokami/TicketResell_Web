@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TicketResell.Repository.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
+using Repositories.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
-namespace TicketResell.Repository.Core.Context;
+namespace Repositories.Core.Context;
 
 public partial class TicketResellManagementContext : DbContext
 {
@@ -16,9 +18,9 @@ public partial class TicketResellManagementContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<Order> Orders { get; set; }
+    public virtual DbSet<Order?> Orders { get; set; }
 
-    public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+    public virtual DbSet<OrderDetail?> OrderDetails { get; set; }
 
     public virtual DbSet<Revenue> Revenues { get; set; }
 

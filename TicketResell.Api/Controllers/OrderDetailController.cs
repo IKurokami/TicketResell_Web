@@ -1,100 +1,59 @@
-using AutoMapper;
-using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
-using TicketResell.Repository.Core.Dtos.OrderDetail;
-using TicketResell.Repository.Core.Entities;
-using TicketResell.Repository.Repositories;
+using Repositories.Core.Dtos.OrderDetail;
 
-namespace Backend.Controllers
+namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class OrderDetailController : ControllerBase
     {
-        private readonly IOrderDetailRepository _orderDetailRepository;
-        private readonly IOrderRepository _orderRepository;
-        private readonly IMapper _mapper;
-        private IValidatorFactory _validatorFactory;
+        private readonly IOrderDetailService _orderDetailService;
 
-        public OrderDetailController(IOrderDetailRepository orderDetailRepository, IMapper mapper,
-            IOrderRepository orderRepository, IValidatorFactory validatorFactory)
+        public OrderDetailController(IOrderDetailService orderDetailService)
         {
-            _orderDetailRepository = orderDetailRepository;
-            _mapper = mapper;
-            _orderRepository = orderRepository;
-            _validatorFactory = validatorFactory;
+            _orderDetailService = orderDetailService;
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> CreateOrderDetail([FromBody] OrderDetailDto dto)
         {
-            var orderDetail = _mapper.Map<OrderDetail>(dto);
-            var validator = _validatorFactory.GetValidator<OrderDetail>();
-            var results = validator.Validate(orderDetail);
-
-            if (!results.IsValid)
-            {
-                return BadRequest(results.Errors);
-            }
-
-            await _orderDetailRepository.CreateAsync(orderDetail);
-            return Ok(new { message = $"Successfully created orderDetail: {orderDetail.OrderDetailId}" });
+            return ResponseParser.Result(await _orderDetailService.CreateOrderDetail(dto));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDetailDto>> GetOrderDetail(string id)
+        public async Task<IActionResult> GetOrderDetail(string id)
         {
-            var orderDetail = await _orderDetailRepository.GetByIdAsync(id);
-            return Ok(_mapper.Map<OrderDetailDto>(orderDetail));
+            return ResponseParser.Result(await _orderDetailService.GetOrderDetail(id));
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderDetail>>> GetAllOrderDetails()
+        public async Task<IActionResult> GetAllOrderDetails()
         {
-            var orderDetails = await _orderDetailRepository.GetAllAsync();
-            return Ok(orderDetails);
+            return ResponseParser.Result(await _orderDetailService.GetAllOrderDetails());
         }
 
         [HttpGet("buyer/{buyerId}")]
-        public async Task<ActionResult<IEnumerable<OrderDetail>>> GetOrderDetailsByBuyerId(string buyerId)
+        public async Task<IActionResult> GetOrderDetailsByBuyerId(string buyerId)
         {
-            var orderDetails = await _orderDetailRepository.GetOrderDetailsByBuyerIdAsync(buyerId);
-            return Ok(orderDetails);
+            return ResponseParser.Result(await _orderDetailService.GetOrderDetailsByBuyerId(buyerId));
+
         }
 
         [HttpGet("seller/{sellerId}")]
-        public async Task<ActionResult<IEnumerable<OrderDetail>>> GetOrderDetailsBySellerId(string sellerId)
+        public async Task<IActionResult> GetOrderDetailsBySellerId(string sellerId)
         {
-            var orderDetails = await _orderDetailRepository.GetOrderDetailsBySellerIdAsync(sellerId);
-            return Ok(orderDetails);
+            return ResponseParser.Result(await _orderDetailService.GetOrderDetailsBySellerId(sellerId));
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateOrderDetail([FromBody] OrderDetailDto dto)
         {
-            var orderDetail = _mapper.Map<OrderDetail>(dto);
-            var validator = _validatorFactory.GetValidator<OrderDetail>();
-            var results = await validator.ValidateAsync(orderDetail);
-
-            if (!results.IsValid)
-            {
-                return BadRequest(results.Errors);
-            }
-
-            var existingOrderDetail = await _orderDetailRepository.GetByIdAsync(orderDetail.OrderDetailId);
-            
-            _mapper.Map(dto, existingOrderDetail);
-            await _orderDetailRepository.UpdateAsync(existingOrderDetail);
-            return Ok(new { message = $"Successfully updated orderDetail: {existingOrderDetail.OrderDetailId}" });
+            return ResponseParser.Result(await _orderDetailService.UpdateOrderDetail(dto));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrderDetail(string id)
         {
-            var existingOrderDetail = await _orderDetailRepository.GetByIdAsync(id);
-
-            await _orderDetailRepository.DeleteAsync(existingOrderDetail);
-            return Ok(new { message = $"Successfully deleted orderDetail: {existingOrderDetail.OrderDetailId}" });
+            return ResponseParser.Result(await _orderDetailService.DeleteOrderDetail(id));
         }
     }
 }

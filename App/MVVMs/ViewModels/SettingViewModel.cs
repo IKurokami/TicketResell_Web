@@ -1,6 +1,4 @@
 using System;
-using System.Diagnostics.Metrics;
-using System.Windows.Input;
 using App.Contracts.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;

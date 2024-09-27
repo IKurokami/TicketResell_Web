@@ -12,22 +12,6 @@
     Loaded="OnLoaded">
     <Grid>
         <Grid x:Name="HomeView">
-            <Grid x:Name="AppTitleBar"
-                  Canvas.ZIndex="1"
-                  Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
-                  IsHitTestVisible="True"
-                  VerticalAlignment="Top">
-                <Image Source="/Assets/TicketLogo.png"
-                       HorizontalAlignment="Left"
-                       Width="22"
-                       Height="22" />
-                <TextBlock x:Name="AppTitleBarText"
-                           VerticalAlignment="Center"
-                           TextWrapping="NoWrap"
-                           Style="{StaticResource CaptionTextBlockStyle}"
-                           Margin="25,0,0,0"
-                           FontSize="16" />
-            </Grid>
             <NavigationView
                 x:Name="NavigationViewControl"
                 Canvas.ZIndex="0"
@@ -35,7 +19,7 @@
                 IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
                 SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}"
                 IsSettingsVisible="True"
-                DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
+                ExpandedModeThresholdWidth="1280"
                 ItemInvoked="NavigationViewControl_OnItemInvoked">
                 <NavigationView.MenuItems>
                     <NavigationViewItem x:Name="HomeItem"
@@ -53,13 +37,7 @@
                     </NavigationViewItem>
                 </NavigationView.MenuItems>
                 <Grid>
-                    <Frame x:Name="NavigationFrame">
-                        <Frame.ContentTransitions>
-                            <TransitionCollection>
-                                <EdgeUIThemeTransition />
-                            </TransitionCollection>
-                        </Frame.ContentTransitions>
-                    </Frame>
+                    <Frame x:Name="NavigationFrame" />
                 </Grid>
             </NavigationView>
         </Grid>

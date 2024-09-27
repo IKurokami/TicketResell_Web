@@ -1,7 +1,8 @@
-﻿using TicketResell.Repository.Core.Context;
-using TicketResell.Repository.Core.Entities;
+﻿using Repositories.Core.Context;
+using Repositories.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
-namespace TicketResell.Repository.Repositories
+namespace Repositories.Repositories
 {
     public class RoleRepository : GenericRepository<Role>, IRoleRepository
     {

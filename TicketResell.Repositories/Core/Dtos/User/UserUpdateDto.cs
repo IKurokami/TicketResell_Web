@@ -1,4 +1,9 @@
-namespace TicketResell.Repository.Core.Dtos.User
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Repositories.Core.Dtos.User
 {
     public class UserUpdateDto
     {

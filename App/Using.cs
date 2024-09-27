@@ -1,2 +1,2 @@
 ﻿global using WinUIEx;
-global using Backend.Core.Entities;
+global using Repositories.Core.Entities;

@@ -1,4 +1,4 @@
-namespace Backend.Utils
+namespace Api.Utils
 {
     using System;
     using System.IO;

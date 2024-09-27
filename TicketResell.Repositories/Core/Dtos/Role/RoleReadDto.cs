@@ -1,4 +1,4 @@
-﻿namespace TicketResell.Repository.Core.Dtos.Role
+﻿namespace Repositories.Core.Dtos.Role
 {
     public class RoleReadDto
     {

@@ -5,7 +5,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using App.Helpers;
+using CommunityToolkit.Labs.WinUI;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml.Media;
 
 namespace App.MVVMs.Views.Home
 {
@@ -24,38 +26,16 @@ namespace App.MVVMs.Views.Home
                 ViewModel.NavigationService.Frame = NavigationFrame;
                 ViewModel.NavigationViewService.Initialize(NavigationViewControl);
             }
-            
-            App.MainWindow?.SetTitleBar(AppTitleBar);
-            App.MainWindow!.Activated += MainWindow_Activated;
-
-            AppTitleBarText.Text = "TicketResell";
         }
 
-        private async void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             NavigationViewControl.SelectedItem = HomeItem;
             ViewModel?.NavigationService.NavigateTo(NavigationHelper.GetNavigateTo(HomeItem));
+            TitleBarHelper.UpdateTitleBar(RequestedTheme);
 
-            Ioc.Default.GetService<MainWindowViewModel>()?.StartupAsync();
-
-            KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Escape));
-        }
-
-        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
-        {
-            App.AppTitlebar = AppTitleBarText as UIElement;
-        }
-
-        private void NavigationViewControl_DisplayModeChanged(NavigationView sender,
-            NavigationViewDisplayModeChangedEventArgs args)
-        {
-            AppTitleBar.Margin = new Thickness()
-            {
-                Left = sender.CompactPaneLength * (sender.DisplayMode == NavigationViewDisplayMode.Minimal ? 2 : 1),
-                Top = AppTitleBar.Margin.Top,
-                Right = AppTitleBar.Margin.Right,
-                Bottom = AppTitleBar.Margin.Bottom
-            };
+            KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
+            KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
         }
 
         private static KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key,
@@ -78,9 +58,9 @@ namespace App.MVVMs.Views.Home
         {
             var navigationService = Ioc.Default.GetService<INavigationService>();
 
-            var result = navigationService?.GoBack();
+            var result = navigationService.GoBack();
 
-            args.Handled = result ?? true;
+            args.Handled = result;
         }
 
         private void NavigationViewControl_OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)

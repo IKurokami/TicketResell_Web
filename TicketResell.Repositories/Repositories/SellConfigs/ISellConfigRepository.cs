@@ -1,6 +1,5 @@
-﻿using TicketResell.Repository.Core.Entities;
-
-namespace TicketResell.Repository.Repositories
+﻿using Repositories.Core.Entities;
+namespace Repositories.Repositories
 {
     public interface ISellConfigRepository : IRepository<SellConfig>
     {

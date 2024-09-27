@@ -1,7 +1,7 @@
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Login;
-using CommunityToolkit.Common;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml.Media.Animation;
 
 namespace App
 {
@@ -12,16 +12,20 @@ namespace App
         public MainWindow(MainWindowViewModel viewModel)
         {
             ViewModel = viewModel;
+            
             this.InitializeComponent();
 
             ViewModel.MainGrid = MainGrid;
             ViewModel.RootFrame = rootFrame;
             ViewModel.OverlayFrame = overlayFrame;
             ViewModel.TheDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
-           
-            rootFrame.Navigate(typeof(LoginPage));
+            
+            ExtendsContentIntoTitleBar = true;
+            SetTitleBar(AppTitleBar);
 
-            Ioc.Default.GetService<HomeViewModel>();
+            App.AppTitlebar = TitleTextBlock;
+            
+            ViewModel.InitializeAsync();
         }
     }
 }

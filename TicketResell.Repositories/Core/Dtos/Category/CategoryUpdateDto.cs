@@ -1,4 +1,4 @@
-namespace TicketResell.Repository.Core.Dtos.Category;
+namespace Repositories.Core.Dtos.Category;
 
 public class CategoryUpdateDto
 {

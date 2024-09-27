@@ -1,8 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using TicketResell.Repository.Core.Context;
-using TicketResell.Repository.Core.Entities;
+using Repositories.Core.Context;
+using Repositories.Core.Entities;
 
-namespace TicketResell.Repository.Repositories;
+namespace Repositories.Repositories;
+
+using Microsoft.EntityFrameworkCore;
 
 public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 {
@@ -36,8 +37,5 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         }
 
         await _context.Tickets.AddAsync(ticket);
-        await _context.SaveChangesAsync();
     }
-
-
 }

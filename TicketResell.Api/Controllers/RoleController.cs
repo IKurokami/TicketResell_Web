@@ -1,64 +1,64 @@
 ﻿
-using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using TicketResell.Repository.Core.Dtos.Role;
-using TicketResell.Repository.Core.Entities;
-using TicketResell.Repository.Repositories;
+//using AutoMapper;
+//using Api.Core.Dtos.Role;
+//using Api.Core.Entities;
+//using Api.Repositories;
+//using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers
-{
-    [Route("/api/[controller]")]
-    [ApiController]
-    public class RoleController : ControllerBase
-    {
-        private IRoleRepository _roleRepository { get; }
-        private IMapper _mapper { get; }
+//namespace Api.Controllers
+//{
+//    [Route("/api/[controller]")]
+//    [ApiController]
+//    public class RoleController : ControllerBase
+//    {
+//        private IRoleRepository _roleRepository { get; }
+//        private IMapper _mapper { get; }
 
-        public RoleController(IRoleRepository roleRepository, IMapper mapper)
-        {
-            _roleRepository = roleRepository;
-            _mapper = mapper;
-        }
+//        public RoleController(IRoleRepository roleRepository, IMapper mapper)
+//        {
+//            _roleRepository = roleRepository;
+//            _mapper = mapper;
+//        }
 
-        [HttpPost]
-        [Route("create")]
-        public async Task<IActionResult> CreateRole([FromBody] RoleCreateDto dto)
-        {
-            Role role = _mapper.Map<Role>(dto);
-            await _roleRepository.CreateAsync(role);
-            return Ok(new { message = $"Successfully created role: {dto.Rolename}" });
-        }
+//        [HttpPost]
+//        [Route("create")]
+//        public async Task<IActionResult> CreateRole([FromBody] RoleCreateDto dto)
+//        {
+//            Role role = _mapper.Map<Role>(dto);
+//            await _roleRepository.CreateAsync(role);
+//            return Ok(new { message = $"Successfully created role: {dto.Rolename}" });
+//        }
 
-        [HttpGet]
-        [Route("read")]
-        public async Task<ActionResult<IEnumerable<Role>>> ReadRole()
-        {
-            var roles = await _roleRepository.GetAllAsync();
-            var convertedRoles = _mapper.Map<IEnumerable<RoleReadDto>>(roles);
-            return Ok(convertedRoles);
+//        [HttpGet]
+//        [Route("read")]
+//        public async Task<ActionResult<IEnumerable<Role>>> ReadRole()
+//        {
+//            var roles = await _roleRepository.GetAllAsync();
+//            var convertedRoles = _mapper.Map<IEnumerable<RoleReadDto>>(roles);
+//            return Ok(convertedRoles);
 
-        }
+//        }
 
-        [HttpPut]
-        [Route("update/{roleId}")]
-        public async Task<IActionResult> UpdateRole(string roleId, [FromBody] RoleUpdateDto dto)
-        {
-            var role = await _roleRepository.GetByIdAsync(roleId);
+//        [HttpPut]
+//        [Route("update/{roleId}")]
+//        public async Task<IActionResult> UpdateRole(string roleId, [FromBody] RoleUpdateDto dto)
+//        {
+//            var role = await _roleRepository.GetByIdAsync(roleId);
 
-            _mapper.Map(dto, role);
-            await _roleRepository.UpdateAsync(role);
-            return Ok(new { message = $"Successfully update sell config: {roleId}" });
-        }
+//            _mapper.Map(dto, role);
+//            await _roleRepository.UpdateAsync(role);
+//            return Ok(new { message = $"Successfully update sell config: {roleId}" });
+//        }
 
-        [HttpDelete]
-        [Route("delete/{roleId}")]
-        public async Task<ActionResult<Role>> DeleteSellConfig(string roleId)
-        {
-            var role = await _roleRepository.GetByIdAsync(roleId);
+//        [HttpDelete]
+//        [Route("delete/{roleId}")]
+//        public async Task<ActionResult<Role>> DeleteSellConfig(string roleId)
+//        {
+//            var role = await _roleRepository.GetByIdAsync(roleId);
 
-            await _roleRepository.DeleteAsync(role);
-            return Ok(role);
-        }
+//            await _roleRepository.DeleteAsync(role);
+//            return Ok(role);
+//        }
 
-    }
-}
+//    }
+//}

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using FluentValidation;
 
-namespace TicketResell.Repository.Core.Validators;
+namespace Repositories.Core.Validators;
 
 public class Validators<T> : AbstractValidator<T>
 {

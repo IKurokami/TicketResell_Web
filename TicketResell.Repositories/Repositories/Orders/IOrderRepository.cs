@@ -1,13 +1,14 @@
-using TicketResell.Repository.Core.Entities;
-using TicketResell.Repository.Core.Helper;
+using Repositories.Core.Entities;
+using Repositories.Core.Helper;
 
-namespace TicketResell.Repository.Repositories;
+namespace Repositories.Repositories;
 
 public interface IOrderRepository : IRepository<Order>
 {
 
-    Task<IEnumerable<Order>> GetOrdersByBuyerIdAsync(string buyerId);
-    Task<IEnumerable<Order>> GetOrdersByDateRangeAsync(DateRange dateRange);
-    Task<IEnumerable<Order>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceDoubleRange);
+    Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId);
+    Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateRange dateRange);
+    Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceDoubleRange);
     Task<double> CalculateTotalPriceForOrderAsync(string orderId);
+    Task<bool> HasOrder(string orderId);
 }

@@ -1,8 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 
-namespace Backend.Middlewares
+namespace Api.Middlewares
 {
     public class ExceptionHandlingMiddleware
     {

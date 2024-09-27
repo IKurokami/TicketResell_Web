@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using ABI.Microsoft.Graphics.Canvas.Brushes;
 using App.MVVMs.ViewModels;
 using App.MVVMs.Views.Home;
 using CommunityToolkit.Labs.WinUI;
@@ -7,7 +5,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Windows.System;
 using WinUICommunity;
 
 namespace App.MVVMs.Views.Login
@@ -19,27 +16,23 @@ namespace App.MVVMs.Views.Login
         public LoginPage()
         {
             ViewModel = Ioc.Default.GetService<LoginViewModel>();
-
+            
             this.InitializeComponent();
-            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
-            KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Escape));
+            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled;
+
         }
 
-        private async void Back_Click(object sender, RoutedEventArgs e)
+        private void Register_Click(object sender, RoutedEventArgs e)
         {
-            await ((TransitionHelper)Resources["MyTransitionHelper"]).ReverseAsync();
-        }
-
-        private async void Register_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private async void Login_Click(object sender, RoutedEventArgs e)
         {
-            var result = await CredentialHelper.PickCredential("Register", "Register for this username and password");
+            var result = await CredentialHelper.PickCredential("Login", "Login with Email and Password");
+            
             if (string.IsNullOrEmpty(result.CredentialUserName) || string.IsNullOrEmpty(result.CredentialPassword))
                 return;
+            
             var mainViewModel = Ioc.Default.GetService<MainWindowViewModel>();
             mainViewModel?.TheDispatcherQueue?.TryEnqueue(() =>
             {
@@ -70,25 +63,5 @@ namespace App.MVVMs.Views.Login
             Source = RegisterPanel,
             Target = RegiserFull
         }.Execute(null, parameter: null);
-
-        private KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key,
-            VirtualKeyModifiers? modifiers = null)
-        {
-            var keyboardAccelerator = new KeyboardAccelerator() { Key = key };
-
-            if (modifiers.HasValue)
-            {
-                keyboardAccelerator.Modifiers = modifiers.Value;
-            }
-
-            keyboardAccelerator.Invoked += KeyboardAccelerator_Invoked; ;
-
-            return keyboardAccelerator;
-        }
-
-        private void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-        {
-            Back_Click(null, null);
-        }
     }
 }

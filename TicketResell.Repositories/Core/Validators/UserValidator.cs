@@ -1,7 +1,7 @@
+using Repositories.Core.Entities;
 using FluentValidation;
-using TicketResell.Repository.Core.Entities;
 
-namespace TicketResell.Repository.Core.Validators
+namespace Repositories.Core.Validators
 {
     public class UserValidator : Validators<User>
     {

@@ -1,4 +1,4 @@
-namespace TicketResell.Repository.Core.Dtos.Ticket;
+namespace Repositories.Core.Dtos.Ticket;
 
 public class TicketUpdateDto
 {
@@ -7,7 +7,7 @@ public class TicketUpdateDto
     public double? Cost { get; set; }
 
     public string? Location { get; set; }
-    
+
     public int? Status { get; set; }
 
     public string? Image { get; set; }

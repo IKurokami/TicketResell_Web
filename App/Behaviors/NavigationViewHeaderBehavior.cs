@@ -53,7 +53,7 @@ namespace App.Behaviors
             base.OnAttached();
 
             var navigationService = Ioc.Default.GetService<INavigationService>();
-            navigationService!.Navigated += OnNavigated;
+            navigationService.Navigated += OnNavigated;
 
             _current = this;
         }
@@ -63,7 +63,7 @@ namespace App.Behaviors
             base.OnDetaching();
 
             var navigationService = Ioc.Default.GetService<INavigationService>();
-            navigationService!.Navigated -= OnNavigated;
+            navigationService.Navigated -= OnNavigated;
         }
 
         private void OnNavigated(object sender, NavigationEventArgs e)

@@ -1,4 +1,4 @@
-namespace TicketResell.Repository.Core.Dtos.Order;
+namespace Repositories.Core.Dtos.Order;
 
 public class OrderDto
 {

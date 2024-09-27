@@ -1,15 +1,18 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TicketResell.Repository.Core.Context;
+using Repositories.Core.Context;
 
-namespace TicketResell.Repository.Repositories
+namespace Repositories.Repositories
 {
     public class GenericRepository<T> : IRepository<T> where T : class
     {
-        private readonly TicketResellManagementContext _context;
         private readonly DbSet<T> _dbSet;
+
         public GenericRepository(TicketResellManagementContext context)
         {
-            _context = context;
             _dbSet = context.Set<T>();
         }
 
@@ -17,6 +20,7 @@ namespace TicketResell.Repository.Repositories
         {
             return await _dbSet.ToListAsync();
         }
+
         public async Task<T> GetByIdAsync(string id)
         {
             T? entity = await _dbSet.FindAsync(id);
@@ -26,32 +30,26 @@ namespace TicketResell.Repository.Repositories
             }
             return entity;
         }
+
         public async Task CreateAsync(T entity)
         {
-            await _context.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            await _dbSet.AddAsync(entity);
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity)
         {
-            _context.Update(entity);
-            await _context.SaveChangesAsync();
+            _dbSet.Update(entity);
         }
 
-        public async Task DeleteAsync(T entity)
+        public void Delete(T entity)
         {
-            _context.Remove(entity);
-            await _context.SaveChangesAsync();
+            _dbSet.Remove(entity);
         }
+
         public async Task DeleteByIdAsync(string id)
         {
-            T? entity = await _dbSet.FindAsync(id);
-            if (entity == null)
-            {
-                throw new KeyNotFoundException("Id not found");
-            }
-            _context.Remove(entity);
-            await _context.SaveChangesAsync();
+            T entity = await GetByIdAsync(id);
+            _dbSet.Remove(entity);
         }
     }
 }

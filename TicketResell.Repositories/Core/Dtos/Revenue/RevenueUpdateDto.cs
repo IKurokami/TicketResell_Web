@@ -1,4 +1,4 @@
-namespace TicketResell.Repository.Core.Dtos.Revenue;
+namespace Repositories.Core.Dtos.Revenue;
 
 public class RevenueUpdateDto
 {

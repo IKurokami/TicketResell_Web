@@ -1,36 +1,32 @@
-
-using Microsoft.AspNetCore.Mvc;
-using TicketResell.Repository.Core.Helper;
-using TicketResell.Repository.Repositories;
-
-namespace Backend.Controllers;
-
-[Route("/api/[controller]")]
-[ApiController]
-public class TransactionController : ControllerBase
+namespace Api.Controllers
 {
-    private readonly ITransactionRepository _transactionRepository;
-
-    public TransactionController(ITransactionRepository transactionRepository)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TransactionController : ControllerBase
     {
-        _transactionRepository = transactionRepository;
-    }
+        private readonly ITransactionService _transactionService;
 
-    [HttpPost("getbydate/{sellerId}")]
-    public async Task<IActionResult> GetOrderDetailByDate(string sellerId, [FromBody] DateRange dateRange)
-    {
-        return Ok(await _transactionRepository.GetTransactionsByDateAsync(sellerId, dateRange));
-    }
+        public TransactionController(ITransactionService transactionService)
+        {
+            _transactionService = transactionService;
+        }
 
-    [HttpPost("calculatortotal/{sellerId}")]
-    public async Task<IActionResult> CalculatorTotal(string sellerId, [FromBody] DateRange dateRange)
-    {
-        return Ok(await _transactionRepository.CalculatorTotal(sellerId, dateRange));
-    }
+        [HttpPost("orderdetails/{sellerId}")]
+        public async Task<IActionResult> GetOrderDetailByDate(string sellerId, [FromBody] DateRange dateRange)
+        {
+            return ResponseParser.Result(await _transactionService.GetOrderDetailByDate(sellerId, dateRange));
+        }
 
-    [HttpGet("getbuyer/{sellerId}")]
-    public async Task<IActionResult> GetBuyer(string sellerId)
-    {
-        return Ok(await _transactionRepository.GetUserBuyTicket(sellerId));
+        [HttpPost("total/{sellerId}")]
+        public async Task<IActionResult> CalculatorTotal(string sellerId, [FromBody] DateRange dateRange)
+        {
+            return ResponseParser.Result(await _transactionService.CalculatorTotal(sellerId, dateRange));
+        }
+
+        [HttpGet("buyers/{sellerId}")]
+        public async Task<IActionResult> GetBuyer(string sellerId)
+        {
+            return ResponseParser.Result(await _transactionService.GetBuyer(sellerId));
+        }
     }
 }

@@ -1,19 +1,18 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 
-namespace App.Contracts.Services
+namespace App.Contracts.Services;
+
+public interface IThemeSelectorService
 {
-    public interface IThemeSelectorService
+    ElementTheme Theme
     {
-        ElementTheme Theme
-        {
-            get;
-        }
-
-        Task InitializeAsync();
-
-        Task SetThemeAsync(ElementTheme theme);
-
-        Task SetRequestedThemeAsync();
+        get;
     }
+
+    Task InitializeAsync();
+
+    Task SetThemeAsync(ElementTheme theme);
+
+    Task SetRequestedThemeAsync();
 }

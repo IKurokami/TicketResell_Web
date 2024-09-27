@@ -1,4 +1,6 @@
-namespace TicketResell.Repository.Core.Dtos.Ticket;
+namespace Repositories.Core.Dtos.Ticket;
+
+using System;
 
 public class TickerReadDto
 {

@@ -1,4 +1,6 @@
-﻿namespace TicketResell.Repository.Core.Entities;
+﻿using System.Collections.Generic;
+
+namespace Repositories.Core.Entities;
 
 public partial class User
 {

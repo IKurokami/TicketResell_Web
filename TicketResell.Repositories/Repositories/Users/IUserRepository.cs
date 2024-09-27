@@ -1,8 +1,9 @@
-using TicketResell.Repository.Core.Entities;
+using Repositories.Core.Entities;
 
-namespace TicketResell.Repository.Repositories
+namespace Repositories.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
+        public Task<User?> GetUserByEmailAsync(string email);
     }
 }

@@ -7,7 +7,7 @@ namespace App.MVVMs.Views.Home
         public DashBoardPage()
         {
             this.InitializeComponent();
-            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
+            NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
 
         }
     }

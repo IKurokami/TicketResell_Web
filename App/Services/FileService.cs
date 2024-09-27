@@ -3,39 +3,38 @@ using System.Text;
 using App.Contracts.Services;
 using Newtonsoft.Json;
 
-namespace App.Services
+namespace App.Services;
+
+public class FileService : IFileServices
 {
-    public class FileService : IFileServices
+    public T Read<T>(string folderPath, string fileName)
     {
-        public T? Read<T>(string folderPath, string fileName)
+        var path = Path.Combine(folderPath, fileName);
+        if (File.Exists(path))
         {
-            var path = Path.Combine(folderPath, fileName);
-            if (File.Exists(path))
-            {
-                var json = File.ReadAllText(path);
-                return JsonConvert.DeserializeObject<T>(json);
-            }
-
-            return default;
+            var json = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<T>(json);
         }
 
-        public void Save<T>(string folderPath, string fileName, T content)
-        {
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
+        return default;
+    }
 
-            var fileContent = JsonConvert.SerializeObject(content);
-            File.WriteAllText(Path.Combine(folderPath, fileName), fileContent, Encoding.UTF8);
+    public void Save<T>(string folderPath, string fileName, T content)
+    {
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
         }
 
-        public void Delete(string folderPath, string? fileName)
+        var fileContent = JsonConvert.SerializeObject(content);
+        File.WriteAllText(Path.Combine(folderPath, fileName), fileContent, Encoding.UTF8);
+    }
+
+    public void Delete(string folderPath, string fileName)
+    {
+        if (fileName != null && File.Exists(Path.Combine(folderPath, fileName)))
         {
-            if (fileName != null && File.Exists(Path.Combine(folderPath, fileName)))
-            {
-                File.Delete(Path.Combine(folderPath, fileName));
-            }
+            File.Delete(Path.Combine(folderPath, fileName));
         }
     }
 }

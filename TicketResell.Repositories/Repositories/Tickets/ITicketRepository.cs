@@ -1,6 +1,6 @@
-using TicketResell.Repository.Core.Entities;
+namespace Repositories.Repositories;
 
-namespace TicketResell.Repository.Repositories;
+using global::Repositories.Core.Entities;
 
 public interface ITicketRepository : IRepository<Ticket>
 {

@@ -1,4 +1,4 @@
-﻿namespace TicketResell.Repository.Core.Entities;
+﻿namespace Repositories.Core.Entities;
 
 public partial class SellConfig
 {

@@ -1,9 +1,8 @@
-﻿namespace App.Contracts.Services
-{
-    public interface INavigationAware
-    {
-        void OnNavigatedTo(object parameter);
+﻿namespace App.Contracts.Services;
 
-        void OnNavigatedFrom();
-    }
+public interface INavigationAware
+{
+    void OnNavigatedTo(object parameter);
+
+    void OnNavigatedFrom();
 }

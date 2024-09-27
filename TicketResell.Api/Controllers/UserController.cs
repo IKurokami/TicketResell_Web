@@ -1,25 +1,20 @@
 using AutoMapper;
-using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
-using TicketResell.Repository.Core.Dtos.User;
-using TicketResell.Repository.Core.Entities;
-using TicketResell.Repository.Repositories;
+using Repositories.Core.Dtos.User;
+using Repositories.Core.Validators;
 
-
-namespace Backend.Controllers
+namespace Repositories.Controllers
 {
     [Route("/api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private IUserRepository _userRepository;
+        private IUserService _userService;
         private IMapper _mapper;
-
         private IValidatorFactory _validatorFactory;
 
-        public UserController(IUserRepository userRepository, IMapper mapper, IValidatorFactory validatorFactory)
+        public UserController(IServiceProvider serviceProvider, IMapper mapper, IValidatorFactory validatorFactory)
         {
-            _userRepository = userRepository;
+            _userService = serviceProvider.GetRequiredService<IUserService>();
             _mapper = mapper;
             _validatorFactory = validatorFactory;
         }
@@ -28,58 +23,57 @@ namespace Backend.Controllers
         [Route("create")]
         public async Task<IActionResult> CreateUser([FromBody] UserCreateDto dto)
         {
-            var validator = _validatorFactory.GetValidator<User>();
-            User newUser = _mapper.Map<User>(dto);
-
-            var validationResult = validator.Validate(newUser);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-            newUser.CreateDate = DateTime.UtcNow;
-            await _userRepository.CreateAsync(newUser);
-
-            return Ok(new { message = $"Successfully created user: {dto.Username}" });
+            var response = await _userService.CreateUserAsync(dto);
+            return ResponseParser.Result(response);
         }
+
+        [Route("createtwo")]
+        public async Task<IActionResult> CreateTwoUser([FromBody] UserCreateDto dto)
+        {
+            var response1 = await _userService.CreateUserAsync(dto, false);
+            dto.UserId = "USERS5145";
+            dto.Username = ""; // lỗi vì username ko đc trống
+            var response2 = await _userService.CreateUserAsync(dto);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { response1, response2 }, nameof(CreateTwoUser));
+            return ResponseParser.Result(response);
+        }
+
+        [Route("createdelete")]
+        public async Task<IActionResult> CreateDeleteUser([FromBody] UserCreateDto dto)
+        {
+            var response1 = await _userService.CreateUserAsync(dto, false);
+            var response2 = await _userService.DeleteUserByIdAsync(dto.UserId);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { response1, response2 }, nameof(CreateTwoUser));
+            return ResponseParser.Result(response);
+        }
+
 
         [HttpGet]
         [Route("read/{id}")]
         public async Task<IActionResult> GetUser(string id)
         {
-            User? user = await _userRepository.GetByIdAsync(id);
+            var response = await _userService.GetUserByIdAsync(id);
 
-            UserReadDto userDto = _mapper.Map<UserReadDto>(user);
-            return Ok(userDto);
+            return ResponseParser.Result(response);
         }
 
         [HttpPut]
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDto dto)
         {
-            User? user = await _userRepository.GetByIdAsync(id);
-            _mapper.Map(dto, user);
 
-            var validator = _validatorFactory.GetValidator<User>();
+            var response = await _userService.UpdateUserByIdAsync(id, dto);
 
-            var validationResult = validator.Validate(user);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-            await _userRepository.UpdateAsync(user);
-
-            return Ok(new { message = $"Successfully updated user: {user.Username}" });
+            return ResponseParser.Result(response);
         }
 
         [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            User? user = await _userRepository.GetByIdAsync(id);
+            var response = await _userService.DeleteUserByIdAsync(id);
 
-            await _userRepository.DeleteAsync(user);
-
-            return Ok(new { message = $"Successfully deleted user: {user.Username}" });
+            return ResponseParser.Result(response);
         }
     }
 }

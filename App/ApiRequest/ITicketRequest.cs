@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Backend.Core.Dtos;
+using Repositories.Core.Dtos.Ticket;
 
 namespace App.ApiRequest;
 

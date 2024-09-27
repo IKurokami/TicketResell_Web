@@ -1,8 +1,8 @@
+using Repositories.Core.Context;
 using Microsoft.EntityFrameworkCore;
-using TicketResell.Repository.Core.Context;
-using TicketResell.Repository.Core.Entities;
+using Repositories.Core.Entities;
 
-namespace TicketResell.Repository.Repositories;
+namespace Repositories.Repositories;
 
 public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
 {

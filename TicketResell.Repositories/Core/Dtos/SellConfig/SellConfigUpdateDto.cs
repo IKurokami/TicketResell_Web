@@ -1,4 +1,4 @@
-﻿namespace TicketResell.Repository.Core.Dtos.SellConfig
+﻿namespace Repositories.Core.Dtos.SellConfig
 {
     public class SellConfigUpdateDto
     {

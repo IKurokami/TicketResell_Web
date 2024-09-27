@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-
-namespace TicketResell.Repository.Core.Validators
+namespace Repositories.Core.Validators
 {
 
     public class ValidatorFactory : IValidatorFactory

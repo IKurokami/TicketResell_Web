@@ -1,4 +1,9 @@
-namespace TicketResell.Repository.Constants
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Repositories.Constants
 {
     public static class UserConstant
     {

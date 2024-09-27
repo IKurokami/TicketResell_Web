@@ -1,4 +1,4 @@
-namespace TicketResell.Repository.Core.Helper;
+namespace Repositories.Core.Helper;
 
 public class DateRange
 {

@@ -1,7 +1,8 @@
-using TicketResell.Repository.Core.Context;
-using TicketResell.Repository.Core.Entities;
+using Microsoft.EntityFrameworkCore;
+using Repositories.Core.Context;
+using Repositories.Core.Entities;
 
-namespace TicketResell.Repository.Repositories
+namespace Repositories.Repositories
 {
     public class UserRepository : GenericRepository<User>, IUserRepository
     {
@@ -11,8 +12,10 @@ namespace TicketResell.Repository.Repositories
         {
             _context = context;
         }
-
-
-
+        
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Gmail == email);
+        }
     }
 }
