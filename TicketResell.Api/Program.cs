@@ -31,6 +31,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ISellConfigService, SellConfigService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);
 
 // Add services to the container.

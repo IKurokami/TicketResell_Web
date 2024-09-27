@@ -1,62 +1,54 @@
 ﻿
 
-//using AutoMapper;
-//using Api.Core.Dtos.SellConfig;
-//using Api.Core.Entities;
-//using Api.Repositories;
-//using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using TicketResell.Services.Services;
+using Repositories.Core.Dtos.SellConfig;
 
-//namespace Api.Controllers
-//{
-//    [Route("/api/[controller]")]
-//    [ApiController]
-//    public class SellConfigController : ControllerBase
-//    {
-//        private ISellConfigRepository _sellConfigRepository { get; }
-//        private IMapper _mapper { get; }
+namespace Api.Controllers
+{
+    [Route("/api/[controller]")]
+    [ApiController]
+    public class SellConfigController : ControllerBase
+    {
+        private ISellConfigService _sellConfigService;
+        private IMapper _mapper;
 
-//        public SellConfigController(ISellConfigRepository sellConfigRepository, IMapper mapper)
-//        {
-//            _sellConfigRepository = sellConfigRepository;
-//            _mapper = mapper;
-//        }
+        public SellConfigController(IServiceProvider serviceProvider, IMapper mapper)
+        {
+            _sellConfigService = serviceProvider.GetRequiredService<ISellConfigService>();
+            _mapper = mapper;
+        }
 
-//        [HttpPost("create")]
-//        public async Task<IActionResult> CreateSellConfig([FromBody] SellConfigCreateDto dto)
-//        {
-//            SellConfig sellConfig = _mapper.Map<SellConfig>(dto);
-//            await _sellConfigRepository.CreateAsync(sellConfig);
-//            return Ok(new { message = $"Successfully created SellConfig: {dto.SellConfigId}" });
-//        }
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateSellConfig([FromBody] SellConfigCreateDto dto)
+        {
+            var response = await _sellConfigService.CreateSellConfigAsync(dto);
+            return ResponseParser.Result(response);
+        }
 
-//        [HttpGet("read")]
-//        public async Task<ActionResult<IEnumerable<SellConfig>>> ReadSellConfig()
-//        {
-//            var sellConfigs = await _sellConfigRepository.GetAllAsync();
-//            var convertedSellConfigs = _mapper.Map<IEnumerable<SellConfigReadDto>>(sellConfigs);
-//            return Ok(convertedSellConfigs);
+        [HttpGet("read")]
+        public async Task<IActionResult> ReadSellConfig()
+        {
+            var response = await _sellConfigService.GetAllSellConfigAsync();
+            return ResponseParser.Result(response);
 
-//        }
+        }
 
-//        [HttpPut("update/{sellConfigId}")]
-//        public async Task<IActionResult> UpdateSellConfig(string sellConfigId, [FromBody] SellConfigUpdateDto dto)
-//        {
-//            var sellConfig = await _sellConfigRepository.GetByIdAsync(sellConfigId);
+        [HttpPut("update/{sellConfigId}")]
+        public async Task<IActionResult> UpdateSellConfig(string sellConfigId, [FromBody] SellConfigUpdateDto dto)
+        {
+            var response = await _sellConfigService.UpdateSellConfigAsync(sellConfigId, dto);
+            return ResponseParser.Result(response);
 
-//            _mapper.Map(dto, sellConfig);
-//            await _sellConfigRepository.UpdateAsync(sellConfig);
-//            return Ok(new { message = $"Successfully update sell config: {sellConfigId}" });
+        }
 
-//        }
+        [HttpDelete("delete/{sellConfigId}")]
+        public async Task<IActionResult> DeleteSellConfig(string sellConfigId)
+        {
+            var response = await _sellConfigService.DeleteSellConfigAsync(sellConfigId);
+            return ResponseParser.Result(response);
+        }
 
-//        [HttpDelete("delete/{sellConfigId}")]
-//        public async Task<ActionResult<SellConfig>> DeleteSellConfig(string sellConfigId)
-//        {
-//            var sellConfig = await _sellConfigRepository.GetByIdAsync(sellConfigId);
-
-//            await _sellConfigRepository.DeleteAsync(sellConfig);
-//            return Ok(sellConfig);
-//        }
-
-//    }
-//}
+    }
+}
