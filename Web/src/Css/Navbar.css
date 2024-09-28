@@ -28,6 +28,12 @@
 .navbar.scrolled .icon-link {
   color: black;
 }
+.navbar.scrolled .menu-toggle{
+  color: black;
+}
+.navbar.scrolled .search-button{
+  color: black;
+}
 
 .navbar.scrolled .search-input {
   background-color: rgba(75, 66, 66, 0.3);
@@ -130,7 +136,7 @@
 
 .menu-toggle {
   display: none;
-  color: #333;
+  color: #ffffff;
   font-size: 1.8rem;
   cursor: pointer;
   background: none;
@@ -312,7 +318,7 @@
   }
 
   .search-button {
-    color: #333;
+    color: #ffffff;
   }
 
   .search-button:hover {
@@ -325,7 +331,12 @@
 
   .nav-links.active ul {
     display: flex;
+
   }
+.nav-links ul li a{
+  color: black;
+}
+
 
   .sign-in-btn {
     background-color: #28a745;
