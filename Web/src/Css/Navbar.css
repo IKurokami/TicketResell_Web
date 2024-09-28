@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff00;
+  background-color: rgba(255, 255, 255, 0);
   padding: 1rem 2rem;
   position: fixed;
   top: 0;
@@ -11,70 +11,44 @@
   z-index: 1000;
   transition: background-color 0.3s ease;
   font-family: 'Poppins', sans-serif;
-  flex-wrap: nowrap; /* Ngăn xuống dòng */
 }
 
 .resell {
   color: white;
+  flex-shrink: 0;
 }
 
 .navbar.scrolled {
-  background-color: #f7f9fa; /* Change this to your desired color */
+  background-color: #f7f9fa;
   color: black;
 }
 
 .navbar.scrolled .resell,
 .navbar.scrolled .nav-links ul li a,
 .navbar.scrolled .icon-link {
-  color: black; /* Change text color to black when scrolled */
+  color: black;
 }
 
 .navbar.scrolled .search-input {
   background-color: rgba(75, 66, 66, 0.3);
 }
 
-
-
-
-/* Thêm vào file CSS của bạn */
-
-.navbar.scrolled {
-  background-color: #ffffff; /* Màu nền sáng */
-  color: black; /* Màu chữ đen */
-}
-
-.navbar.scrolled .nav-links ul li a {
-  color: black; /* Đổi màu chữ của các liên kết */
-}
-
-.navbar.scrolled .resell {
-  color: black; /* Đổi màu chữ cho phần resell */
-}
-
-/* Để phần icon vẫn trắng trên nền sáng */
-.navbar.scrolled .icon-link {
-  color: black; /* Đổi màu icon */
-}
-
-
 .navbar-brand .logo {
-  font-size: 2rem; /* Increase logo size */
+  font-size: 2rem;
   font-weight: 700;
   color: #333;
   text-decoration: none;
   transition: color 0.3s ease;
-  font-family: 'Poppins', sans-serif; /* Sử dụng Poppins */
-  
 }
 
 .logo-green {
-  color: #27ae60; /* Custom green color */
+  color: #27ae60;
 }
 
 .nav-links ul {
   list-style: none;
   display: flex;
-  gap: 2rem; /* Điều chỉnh khoảng cách giữa các mục navlink */
+  gap: 2rem;
   margin: 0;
   padding: 0;
 }
@@ -82,17 +56,16 @@
 .nav-links ul li a {
   color: #ffffff;
   text-decoration: none;
-  font-size: 1.1rem; /* Increase text size */
+  font-size: 1.1rem;
   font-weight: 500;
-  padding: 0.5rem 0; /* Add padding to the link items */
+  padding: 0.5rem 0;
   transition: color 0.3s ease, transform 0.3s ease;
-  font-family: 'Poppins', sans-serif; /* Sử dụng Poppins */
 }
 
 .nav-links ul li a:hover,
 .nav-links ul li a:focus {
-  color: #27ae60; /* Hover color */
-  transform: translateY(-3px); /* Lift effect on hover */
+  color: #27ae60;
+  transform: translateY(-3px);
 }
 
 .user-section {
@@ -101,21 +74,20 @@
   position: relative;
 }
 
-/* Additional Styles for Navbar icons */
 .icon-link {
-  color: #f0eeee; /* Dark color */
-  font-size: 1.5rem; /* Adjust size */
-  margin-left: 1rem; /* Điều chỉnh khoảng cách giữa các icon */
+  color: #f0eeee;
+  font-size: 1.5rem;
+  margin-left: 1rem;
   transition: transform 0.3s ease;
 }
 
 .icon-link:hover {
-  color: #27ae60; /* Green on hover */
-  transform: scale(1.1); /* Slight scale on hover */
+  color: #27ae60;
+  transform: scale(1.1);
 }
 
 .user-icon {
-  width: 30px; /* Increase size of user icon */
+  width: 30px;
   height: 30px;
   border-radius: 50%;
   cursor: pointer;
@@ -149,14 +121,13 @@
 
 .user-dropdown a:hover,
 .user-dropdown a:focus {
-  color: #27ae60; /* Hover color inside dropdown */
+  color: #27ae60;
 }
 
 .user-dropdown.visible {
   display: flex;
 }
 
-/* Menu Toggle for mobile */
 .menu-toggle {
   display: none;
   color: #333;
@@ -166,87 +137,78 @@
   border: none;
 }
 
-/* Styles for the Sign In button */
 .sign-in-btn {
-  background-color: #27ae60; /* Màu xanh lá cây */
-  color: white; /* Màu chữ trắng */
+  background-color: #27ae60;
+  color: white;
   border: none;
-  padding: 0.5rem 1.5rem; /* Padding bên trong nút */
-  border-radius: 20px; /* Bo tròn góc */
-  font-size: 1rem; /* Kích thước chữ */
-  font-weight: 600; /* Độ đậm của chữ */
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 600;
   text-decoration: none;
   transition: background-color 0.3s ease, transform 0.3s ease;
-  margin-right: 20px; 
+  margin-right: 20px;
 }
 
 .sign-in-btn:hover {
-  background-color: #2ecc71; /* Màu xanh sáng hơn khi hover */
-  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  background-color: #2ecc71;
+  transform: scale(1.05);
 }
 
 .sign-in-btn:focus {
   outline: none;
-  box-shadow: 0 0 5px #27ae60; /* Hiệu ứng khi nút được chọn */
+  box-shadow: 0 0 5px #27ae60;
 }
 
-/* Enhanced search form with OpenSea-like style */
 .search-form {
   display: flex;
   align-items: center;
   position: relative;
-  margin-left: 1.5rem; /* Điều chỉnh khoảng cách giữa navlinks và ô tìm kiếm */
-  margin-right: 1.5rem; /* Điều chỉnh khoảng cách giữa ô tìm kiếm và icon */
+  margin: 0 1.5rem;
 }
 
 .search-input {
   width: 240px;
   padding: 10px 20px;
-  border: none; /* No border */
-  border-radius: 20px; /* Rounded corners */
+  border: none;
+  border-radius: 20px;
   font-size: 16px;
   outline: none;
-  background-color: rgba(255, 255, 255, 0.2); /* Transparent with opacity */
-  backdrop-filter: blur(10px); /* Blurred background effect */
-  color: white; /* White text for contrast */
-  transition: width 0.4s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease; /* Added transition for background */
-  box-shadow: none; /* Remove shadow initially */
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  transition: width 0.4s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: none;
 }
 
 .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.7); /* Lighter placeholder */
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .search-input:focus {
-  width: 320px; /* Expand on focus */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Add shadow on focus */
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .search-input:hover {
-  background-color: rgba(75, 66, 66, 0.3); /* Slightly lighter on hover */
+  background-color: rgba(75, 66, 66, 0.3);
 }
 
 .search-button {
   background-color: transparent;
   border: none;
-  color: white; /* White icon */
+  color: white;
   cursor: pointer;
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
-  transition: color 0.3s ease-in-out;
 }
 
 .search-button:hover {
-  color: #eaeaea; /* Lighter hover effect */
+  color: #eaeaea;
 }
-
-.search-button i {
-  font-size: 18px;
-}
-/* Notification Icon Styling */
 
 .noti-icon {
   position: relative;
@@ -261,7 +223,6 @@
   transform: scale(1.1);
 }
 
-/* Notification Badge Styling */
 .noti-badge {
   position: absolute;
   top: -8px;
@@ -275,21 +236,37 @@
   display: inline-block;
   text-align: center;
   min-width: 20px;
-  
 }
 
+.logo,
+.sign-in-btn,
+.logo-green,
+.resell {
+  flex-shrink: 0;
+}
 
 /* Responsive adjustments */
+.nav-links {
+  flex-shrink: 0;
+}
 
-@media screen and (max-width: 768px) {
+.navbar-brand {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
   .nav-container {
     display: flex;
-    justify-content: flex-end; /* Push icons to the right */
+    justify-content: space-between;
     align-items: center;
   }
 
+  .nav-links {
+    flex-shrink: 0;
+  }
+
   .nav-links ul {
-    display: none; /* Hide the nav links by default */
+    display: none;
     flex-direction: column;
     background-color: #fff;
     position: absolute;
@@ -300,48 +277,76 @@
   }
 
   .nav-links.active ul {
-    display: flex; /* Show the menu when active */
+    display: flex;
   }
 
   .menu-toggle {
-    display: block; /* Show the toggle button */
-    font-size: 1.5rem;
-    color: #333;
+    display: block;
   }
 
-  .sign-in-btn {
-    display: inline-block; /* Show login button */
-    margin-left: 1rem; /* Add space between icons */
-  
-  }
-
+  .sign-in-btn,
   .search-form {
     display: inline-block;
-    margin-left: 1rem; /* Add space between icons */
-   
+    margin-left: 1rem;
   }
 
-  .search-form .search-button {
-    font-size: 1.5rem;
-    color: #333;
-  }
-
-  /* Hide unnecessary icons in responsive mode */
-  .icon-link, .noti-icon {
-    display: none;
-  }
-
+  .icon-link,
+  .noti-icon,
   .user-icon {
     display: none;
   }
-  .nav-container {
+
+  .nav-buttons {
     display: flex;
-    justify-content: space-between; /* Giữ logo ở trái, icon ở phải */
     align-items: center;
-    flex-wrap: nowrap; /* Ngăn các phần tử xuống hàng */
+    gap: 10px;
   }
-  .logo, .sign-in-btn {
-    flex-shrink: 0; /* Ngăn không cho logo và nút co lại */
+}
+
+@media (max-width: 550px) {
+  .search-form {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    width: 200px;
+
   }
-  
+
+  .search-button {
+    color: #333;
+  }
+
+  .search-button:hover {
+    color: #333;
+  }
+
+  .search-input {
+    display: none;
+  }
+
+  .nav-links.active ul {
+    display: flex;
+  }
+
+  .sign-in-btn {
+    background-color: #28a745;
+    padding: 0.4rem 0.3rem;
+    /* Adjust padding for smaller width */
+    font-size: 1rem;
+    /* Keep font size consistent */
+    border-radius: 15px;
+    /* Optional: add border radius for rounded corners */
+    cursor: pointer;
+    /* Change cursor to pointer for better UX */
+
+  }
+
+
+
+  .menu-toggle,
+  .navbar-search-icon {
+    position: relative;
+    /* Ensure they stay in their positions */
+    margin: 0 15px;
+    /* Adjust margins as needed */
+  }
 }
