@@ -52,39 +52,47 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter(); // Initialize router
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
-    } else {
-      fetch("http://localhost:5296/api/Authentication/login", {
+    }
+  
+    try {
+      const response = await fetch("http://localhost:5296/api/Authentication/login", {
         method: "POST",
         headers: {
-          "Content-type": "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           Gmail: email,
           Password: password,
         }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data.message);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
-
-    // Simulate a sign-in process
-    // Replace with actual sign-in logic
-    if (email === "admin" && password === "1") {
-      setError(null); // Clear error if login is successful
-      router.push("/"); // Redirect to the home page
-    } else {
-      setError("Invalid email or password.");
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        console.error("Login error:", data);
+        setError(data.message || "Invalid email or password.");
+      } else {
+        console.log("Login successful:", data.message);
+        router.push("/");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      setError("An error occurred. Please try again later.");
     }
   };
+    // Simulate a sign-in process
+    // Replace with actual sign-in logic
+    // if (email === "admin" && password === "1") {
+    //   setError(null); // Clear error if login is successful
+    //   router.push("/"); // Redirect to the home page
+    // } else {
+    //   setError("Invalid email or password.");
+    // }
+  
 
   const handleSignUp = () => {
     if (!username || !name || !email || !password || !role) {
