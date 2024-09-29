@@ -7,7 +7,12 @@ public interface IAuthenticationService
     Task<ResponseModel> RegisterAsync(RegisterDto registerDto);
     Task<ResponseModel> LoginAsync(LoginDto loginDto);
     Task<ResponseModel> LogoutAsync(string userId);
-    Task<bool> ValidateAccessKeyAsync(string userId, string accessKey);
+    
     
     Task<ResponseModel> LoginWithAccessKeyAsync(string userId, string accessKey);
+    Task<ResponseModel> LoginWithAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto);
+    
+    
+    Task<bool> ValidateAccessKeyAsync(string userId, string accessKey);
+    Task<bool> ValidateAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto);
 }
