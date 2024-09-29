@@ -53,7 +53,6 @@ public class AuthenticationService : IAuthenticationService
 
         return ResponseModel.Success("User registered successfully", registerDto);
     }
-
     public async Task<ResponseModel> LoginAsync(LoginDto loginDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(loginDto.Gmail);
@@ -66,31 +65,28 @@ public class AuthenticationService : IAuthenticationService
         {
             return ResponseModel.BadRequest("Login failed", "Password wrong");
         }
-
-        var accessKey = GenerateAccessKey();
-        await CacheAccessKeyAsync(user.UserId, accessKey);
+        
+        var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
+        if (cachedAccessKey.IsNullOrEmpty)
+        {
+            cachedAccessKey = GenerateAccessKey();
+        }
+        
+        await CacheAccessKeyAsync(user.UserId, cachedAccessKey!);
 
         var response = new LoginInfoDto()
         {
             User = _mapper.Map<UserReadDto>(user),
-            AccessKey = accessKey
+            AccessKey = cachedAccessKey!
         };
 
         return ResponseModel.Success("Login successful", response);
     }
-
     public async Task<ResponseModel> LogoutAsync(string userId)
     {
         await RemoveCachedAccessKeyAsync(userId);
         return ResponseModel.Success("Logout successful");
     }
-
-    public async Task<bool> ValidateAccessKeyAsync(string userId, string accessKey)
-    {
-        var cachedAccessKey = await GetCachedAccessKeyAsync(userId);
-        return cachedAccessKey == accessKey;
-    }
-
     public async Task<ResponseModel> LoginWithAccessKeyAsync(string userId, string accessKey)
     {
         if (!await ValidateAccessKeyAsync(userId, accessKey))
@@ -115,7 +111,25 @@ public class AuthenticationService : IAuthenticationService
 
         return ResponseModel.Success("Login successful", user);
     }
-
+    public async Task<ResponseModel> LoginWithAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto)
+    {
+        return await LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
+    }
+    public async Task<bool> ValidateAccessKeyAsync(string userId, string accessKey)
+    {
+        var cachedAccessKey = await GetCachedAccessKeyAsync(userId);
+        
+        if (cachedAccessKey.IsNullOrEmpty || !cachedAccessKey.HasValue)
+            return false;
+        
+        return cachedAccessKey == accessKey;
+    }
+    public async Task<bool> ValidateAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto)
+    {
+        return await ValidateAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
+    }
+    
+    
     private string GenerateAccessKey()
     {
         var key = new byte[32];
@@ -126,19 +140,16 @@ public class AuthenticationService : IAuthenticationService
 
         return Convert.ToBase64String(key);
     }
-
     private async Task CacheAccessKeyAsync(string userId, string accessKey)
     {
         var db = _redis.GetDatabase();
         await db.StringSetAsync($"access_key:{userId}", accessKey, TimeSpan.FromHours(24));
     }
-
-    private async Task<string> GetCachedAccessKeyAsync(string userId)
+    private async Task<RedisValue> GetCachedAccessKeyAsync(string userId)
     {
         var db = _redis.GetDatabase();
         return await db.StringGetAsync($"access_key:{userId}");
     }
-
     private async Task RemoveCachedAccessKeyAsync(string userId)
     {
         var db = _redis.GetDatabase();

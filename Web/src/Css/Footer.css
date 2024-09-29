@@ -115,14 +115,14 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .footer-top, .footer-middle, .footer-bottom {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
   }
 
   .footer-subscribe, .footer-community, .footer-help, .footer-section {
       margin: 20px 0;
-      width: 100%;
+      width: 48%;
   }
 
   .subscribe-form {
