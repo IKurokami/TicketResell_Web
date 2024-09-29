@@ -64,7 +64,7 @@ namespace TicketResell.Services.Services
         {
             var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
 
-            var ticketDtos = _mapper.Map<IEnumerable<TickerReadDto>>(tickets);
+            var ticketDtos = _mapper.Map<List<TickerReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get ticket", ticketDtos);
         }
 

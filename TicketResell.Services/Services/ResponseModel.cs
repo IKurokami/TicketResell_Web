@@ -4,8 +4,8 @@ namespace TicketResell.Services.Services
     {
         public int Id { get; set; } = 1;
         public int StatusCode { get; set; }
-        public string Status { get; set; } = null!;
-        public string Message { get; set; } = null!;
+        public string? Status { get; set; }
+        public string? Message { get; set; }
         public object? Data { get; set; }
 
         public ResponseModel()

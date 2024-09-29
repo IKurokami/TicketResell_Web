@@ -67,12 +67,12 @@ public class AuthenticationService : IAuthenticationService
         }
         
         var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
+
         if (cachedAccessKey.IsNullOrEmpty)
         {
             cachedAccessKey = GenerateAccessKey();
         }
-        
-        await CacheAccessKeyAsync(user.UserId, cachedAccessKey!);
+        await CacheAccessKeyAsync(user.UserId, cachedAccessKey);
 
         var response = new LoginInfoDto()
         {
@@ -100,16 +100,21 @@ public class AuthenticationService : IAuthenticationService
             return ResponseModel.NotFound("User not found.");
         }
 
-        var newAccessKey = GenerateAccessKey();
-        await CacheAccessKeyAsync(user.UserId, newAccessKey);
+        var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
+
+        if (cachedAccessKey.IsNullOrEmpty)
+        {
+            cachedAccessKey = GenerateAccessKey();
+        }
+        await CacheAccessKeyAsync(user.UserId, cachedAccessKey);
 
         var response = new LoginInfoDto()
         {
             User = _mapper.Map<UserReadDto>(user),
-            AccessKey = newAccessKey
+            AccessKey = cachedAccessKey!
         };
 
-        return ResponseModel.Success("Login successful", user);
+        return ResponseModel.Success("Login successful", response);
     }
     public async Task<ResponseModel> LoginWithAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto)
     {
