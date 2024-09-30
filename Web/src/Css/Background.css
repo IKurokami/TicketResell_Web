@@ -12,6 +12,7 @@ body {
 }
 
 .Background {
+    position: absolute;
     height: 100vh; /* Full viewport height */
     width: 100vw;  /* Full viewport width */
     background-image: url('../img/Background-default.jpg'); /* Set the background image */
@@ -20,7 +21,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
+    position: fixed;
     overflow: hidden; /* Ensure no scrollbars appear */
     z-index: -3;
     filter: blur(30px);
