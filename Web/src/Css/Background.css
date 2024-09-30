@@ -17,11 +17,10 @@ body {
     background-image: url('../img/Background-default.jpg'); /* Set the background image */
     background-size: cover; /* Make sure the image covers the entire viewport */
     background-position: center; /* Center the background image */
-    background-attachment: fixed; /* Keep the background fixed during scrolling */
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
+    position: absolute;
     overflow: hidden; /* Ensure no scrollbars appear */
     z-index: -3;
     filter: blur(30px);
