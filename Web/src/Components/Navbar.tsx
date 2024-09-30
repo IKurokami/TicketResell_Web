@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { useRouter } from "next/navigation";  // Import useRouter from next/router
 import React, { useState } from "react";
 import "@/Css/Navbar.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -12,11 +12,11 @@ const Navbar: React.FC = () => {
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
   const isScrolled = useScroll();
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
+  const router = useRouter();  // Initialize useRouter
 
-const handleSearchIconClick = () => {
-  setIsSearchVisible(!isSearchVisible);
-};
-
+  const handleSearchIconClick = () => {
+    setIsSearchVisible(!isSearchVisible);
+  };
 
   const handleMenuToggle = () => {
     setMenuActive(!menuActive);
@@ -28,7 +28,9 @@ const handleSearchIconClick = () => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Tìm kiếm:", searchTerm);
+    if (searchTerm.trim()) {
+      router.push(`/search?query=${searchTerm}`);  // Use router.push to navigate programmatically
+    }
   };
 
   const toggleDropdown = () => {
@@ -38,21 +40,20 @@ const handleSearchIconClick = () => {
   const handleMenuItemClick = (e: React.MouseEvent, route: string) => {
     e.preventDefault();
     console.log("Redirecting to:", route);
-    // Implement routing logic here
+    router.push(route);  // Handle menu item click with router.push
   };
 
   const handleCartClick = () => {
     console.log("Cart clicked");
-    // Implement cart handling logic here
   };
 
   return (
     <header className={`navbar ${isScrolled ? "scrolled" : ""}`}>
       <div className="navbar-brand">
-        <Link href="/" className="logo">
-          <span className="logo-green">Ticket</span>{" "}
+        <a href="/" className="logo">
+          <span className="logo-green">Ticket</span> 
           <span className="resell">Resell</span>
-        </Link>
+        </a>
       </div>
 
       {/* Toggle Menu Button */}
@@ -64,17 +65,18 @@ const handleSearchIconClick = () => {
       <nav className={`nav-links ${menuActive ? "active" : ""}`}>
         <ul>
           <li>
-            <Link href="/">Home</Link>
+            <a href="/">Home</a>
           </li>
           <li>
-            <Link href="/sell">Sell</Link>
+            <a href="/sell">Sell</a>
           </li>
           <li>
-            <Link href="/contact">Contact Us</Link>
+            <a href="/contact">Contact Us</a>
           </li>
         </ul>
       </nav>
 
+      {/* Search Form */}
       <form className={`search-form ${isSearchVisible ? "visible" : ""}`} onSubmit={handleSearchSubmit}>
         <input
           type="text"
@@ -83,16 +85,16 @@ const handleSearchIconClick = () => {
           onChange={handleSearchChange}
           className="search-input"
         />
-        <button type="button" className="search-button" onClick={handleSearchIconClick}>
+        <button type="submit" className="search-button">
           <i className="fas fa-search"></i>
         </button>
       </form>
 
       <div className="user-section">
         {!isLoggedIn && (
-          <Link href="/login" className="sign-in-btn">
+          <a href="/login" className="sign-in-btn">
             Sign in
-          </Link>
+          </a>
         )}
 
         <div className="user-dropdown-wrapper">
@@ -154,7 +156,6 @@ const handleSearchIconClick = () => {
           )}
         </div>
 
-
         {/* Cart and Notifications */}
         <a
           href="#"
@@ -167,7 +168,7 @@ const handleSearchIconClick = () => {
 
         <a href="#" className="icon-link noti-icon" aria-label="Notifications">
           <i className="fas fa-bell"></i>
-          <span className="noti-badge">3</span> {/* Notification count */}
+          <span className="noti-badge">3</span>
         </a>
       </div>
     </header>

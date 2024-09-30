@@ -21,6 +21,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: fixed;
     overflow: hidden; /* Ensure no scrollbars appear */
     z-index: -3;
     filter: blur(30px);
