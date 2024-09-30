@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"; // For Next.js 13+
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import "@/Css/Login.css"; // Import your CSS file
 
+
 interface TabProps {
   isActive: boolean;
   onClick: () => void;
@@ -57,7 +58,9 @@ const Login: React.FC = () => {
       setError("Please fill in all fields.");
       return;
     }
-  
+    
+
+
     try {
       const response = await fetch("http://localhost:5296/api/Authentication/login", {
         method: "POST", 
@@ -77,6 +80,8 @@ const Login: React.FC = () => {
         setError(data.message || "Invalid email or password.");
       } else {
         console.log("Login successful:", data.message);
+        console.log(data);
+        
         router.push("/");
       }
     } catch (error) {
@@ -107,7 +112,7 @@ const Login: React.FC = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            UserId: "USER050000",
+            UserId: email,
             Username: username,
             Password: password,
             Gmail: email,
@@ -115,7 +120,8 @@ const Login: React.FC = () => {
         });
     
         const data = await response.json();
-    
+        console.log(data);
+        
         if (!response.ok) {
           // Handle error from the server
           setError(data.message || "Something went wrong.");

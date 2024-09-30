@@ -7,89 +7,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretRight, faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import "@/Css/Banner.css";
 import Link from "next/link";
+type Ticket = {
+  ticketId: string;
+  name: string;
+  cost: number;
+  location: string;
+  startDate: string;
+  image: string;
+  seller: {
+    username: string;
+  };
+};
 
-const BannerItemCards: ItemCard[] = [
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC01"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC02"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC03"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC04"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC05"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC06"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC07"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC08"
-  },
-];
 
 const Categories = [
   "All",
@@ -105,6 +34,40 @@ const Banner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animationClass, setAnimationClass] = useState(""); // For sliding effect
   const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Store timeout reference
+  const [BannerItemCards, setBannerItemCards] = useState<ItemCard[]>([]);
+  const apiUrl = 'http://localhost:5296/api/Ticket/read';
+  
+// Function to fetch data from the API
+  async function fetchTickets() {
+    try {
+      const response = await fetch(apiUrl);
+      const result = await response.json();
+      
+      if (result.statusCode === 200 && result.data) {
+        // Map API response data to your BannerItemCards structure
+        const BannerItemCards = result.data.map((ticket: Ticket) => ({
+          imageUrl: ticket.image,
+          name: ticket.name,
+          date: new Date(ticket.startDate).toLocaleDateString(), // Format date as needed
+          author: ticket.seller.username,
+          description: `Event at ${ticket.location}`,
+          price: `${ticket.cost}k`,
+          id: ticket.ticketId
+        }));
+
+        setBannerItemCards(BannerItemCards);
+        // Here you can use BannerItemCards to render the items on the page
+      } else {
+        console.error('Failed to fetch tickets:', result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  // Call the function to fetch and process the data
+  fetchTickets();
+
 
   // Function to move to the next product
   const nextProduct = () => {
