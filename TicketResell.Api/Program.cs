@@ -8,15 +8,12 @@ using Repositories.Core.Validators;
 using Api.Middlewares;
 using StackExchange.Redis;
 using TicketResell.Repositories.UnitOfWork;
+using TicketResell.Services.Services.Tickets;
 
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", Environment.GetEnvironmentVariable("SQLServer"));
-
-
-
-
 
 // Dbcontext configuration
 builder.Services.AddDbContext<TicketResellManagementContext>();
@@ -25,7 +22,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 
 // Automapper configuration
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
-
+builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
