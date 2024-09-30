@@ -52,70 +52,97 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter(); // Initialize router
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
-    } else {
-      fetch("http://localhost:5296/api/Authentication/login", {
+    }
+  
+    try {
+      const response = await fetch("http://localhost:5296/api/Authentication/login", {
         method: "POST",
         headers: {
-          "Content-type": "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           Gmail: email,
           Password: password,
         }),
+<<<<<<< HEAD
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        console.error("Login error:", data);
+        setError(data.message || "Invalid email or password.");
+      } else {
+        console.log("Login successful:", data.message);
+        router.push("/");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      setError("An error occurred. Please try again later.");
+=======
       })
         .then((response) => response.json())
         .then((data) => {
           console.log(data.message);
+          
         })
         .catch((error) => {
           console.error(error);
         });
+>>>>>>> 044ad8372d1d80213ef43b6b92ce0d47f49e6c75
     }
-
+  };
     // Simulate a sign-in process
     // Replace with actual sign-in logic
-    if (email === "admin" && password === "1") {
-      setError(null); // Clear error if login is successful
-      router.push("/"); // Redirect to the home page
-    } else {
-      setError("Invalid email or password.");
-    }
-  };
+    // if (email === "admin" && password === "1") {
+    //   setError(null); // Clear error if login is successful
+    //   router.push("/"); // Redirect to the home page
+    // } else {
+    //   setError("Invalid email or password.");
+    // }
+  
 
-  const handleSignUp = () => {
-    if (!username || !name || !email || !password || !role) {
-      setError("Please fill in all fields and choose a role.");
-      return;
-    } else {
-      fetch("http://localhost:5296/api/Authentication/register", {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          UserId: "USER050000",
-          Username: username,
-          Password: password,
-          Gmail: email,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-        })
-        .catch((error) => {
-          console.error(error);
+    const handleSignUp = async () => {
+      if (!username || !name || !email || !password || !role) {
+        setError("Please fill in all fields and choose a role.");
+        return;
+      }
+    
+      try {
+        const response = await fetch("http://localhost:5296/api/Authentication/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            UserId: "USER050000",
+            Username: username,
+            Password: password,
+            Gmail: email,
+          }),
         });
-    }
-    // Add logic for sign-up
-    setError(null); // Clear error if sign-up is successful
-    console.log("Signed up as:", role); // Log the chosen role
-    router.push("/"); // Redirect to home or another page after sign-up
-  };
+    
+        const data = await response.json();
+    
+        if (!response.ok) {
+          // Handle error from the server
+          setError(data.message || "Something went wrong.");
+          return;
+        }
+    
+        // Clear error if sign-up is successful
+        setError(null);
+        console.log("Signed up as:", role); // Log the chosen role
+        router.push("/"); // Redirect to home or another page after sign-up
+      } catch (error) {
+        console.error("Sign up error:", error);
+        setError("An error occurred during sign-up. Please try again.");
+      }
+    };
 
   return (
     <div className="container">

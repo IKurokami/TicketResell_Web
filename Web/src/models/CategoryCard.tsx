@@ -7,7 +7,7 @@ export interface BannerItemCard {
   author: string;
   description: string;
   price: string;
-
+  id:string;
 }
 
 const BannerItemCard = ({ itemCart }: { itemCart: BannerItemCard }) => {
