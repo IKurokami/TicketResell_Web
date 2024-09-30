@@ -9,7 +9,7 @@ const TicketDetail = (props: TicketDetailProps) => {
   console.log("Check", props);
   return (
     <div
-      style={{
+      style={{  
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
