@@ -12,16 +12,15 @@ body {
 }
 
 .Background {
+    position: absolute;
     height: 100vh; /* Full viewport height */
     width: 100vw;  /* Full viewport width */
     background-image: url('../img/Background-default.jpg'); /* Set the background image */
     background-size: cover; /* Make sure the image covers the entire viewport */
     background-position: center; /* Center the background image */
-    background-attachment: fixed; /* Keep the background fixed during scrolling */
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
     overflow: hidden; /* Ensure no scrollbars appear */
     z-index: -3;
     filter: blur(30px);
