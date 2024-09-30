@@ -13,7 +13,7 @@ public interface ITicketService
     public Task<ResponseModel> GetTicketByDateAsync(DateTime date);
     public Task<ResponseModel> GetTicketByIdAsync(string id);
 
-    public Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto dto,bool saveAll = true);
+    public Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto,bool saveAll = true);
     
     public Task<ResponseModel> DeleteTicketAsync(string id,bool saveAll = true);
 }

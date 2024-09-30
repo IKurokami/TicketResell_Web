@@ -1,3 +1,6 @@
+
+using Repositories.Core.Dtos.User;
+
 namespace Repositories.Core.Dtos.Ticket;
 
 using System;
@@ -22,5 +25,7 @@ public class TickerReadDto
 
     public int? Status { get; set; }
 
+    public virtual SellerTicketReadDto Seller { get; set; }
+    
     public string? Image { get; set; }
 }

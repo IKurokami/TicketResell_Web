@@ -1,4 +1,4 @@
-### **Create OrderDetail (`api/OrderDetail`)**
+### **Create OrderDetail (`api/OrderDetail/create`)**
 
 - **Method:** `POST`
 - **Input:**

@@ -13,7 +13,7 @@ namespace Api.Controllers
             _orderDetailService = orderDetailService;
         }
         
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateOrderDetail([FromBody] OrderDetailDto dto)
         {
             return ResponseParser.Result(await _orderDetailService.CreateOrderDetail(dto));

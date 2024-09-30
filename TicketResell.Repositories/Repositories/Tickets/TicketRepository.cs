@@ -14,6 +14,17 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         _context = context;
     }
 
+    public async Task<List<Ticket>> GetAllAsync()
+    {
+        var tickets = await _context.Tickets.Include(x=>x.Seller).ToListAsync();
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("Don't have ticket in this date");
+        }
+
+        return tickets;
+    }
+
     public async Task<List<Ticket>> GetTicketByNameAsync(string name)
     {
         var tickets = await _context.Tickets.Where(x => x.Name == name).ToListAsync();
