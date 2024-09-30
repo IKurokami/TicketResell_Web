@@ -13,10 +13,9 @@ const Navbar: React.FC = () => {
   const isScrolled = useScroll();
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
 
-const handleSearchIconClick = () => {
-  setIsSearchVisible(!isSearchVisible);
-};
-
+  const handleSearchIconClick = () => {
+    setIsSearchVisible(!isSearchVisible);
+  };
 
   const handleMenuToggle = () => {
     setMenuActive(!menuActive);
@@ -47,8 +46,8 @@ const handleSearchIconClick = () => {
   };
 
   return (
-    <header className={`navbar ${isScrolled ? "scrolled" : ""}`}>
-      <div className="navbar-brand">
+    <header className={`navbarr ${isScrolled ? "scrolled" : ""}`}>
+      <div className="navbarr-brand">
         <Link href="/" className="logo">
           <span className="logo-green">Ticket</span>{" "}
           <span className="resell">Resell</span>
@@ -75,7 +74,10 @@ const handleSearchIconClick = () => {
         </ul>
       </nav>
 
-      <form className={`search-form ${isSearchVisible ? "visible" : ""}`} onSubmit={handleSearchSubmit}>
+      <form
+        className={`search-form ${isSearchVisible ? "visible" : ""}`}
+        onSubmit={handleSearchSubmit}
+      >
         <input
           type="text"
           placeholder="Search..."
@@ -83,7 +85,11 @@ const handleSearchIconClick = () => {
           onChange={handleSearchChange}
           className="search-input"
         />
-        <button type="button" className="search-button" onClick={handleSearchIconClick}>
+        <button
+          type="button"
+          className="search-button"
+          onClick={handleSearchIconClick}
+        >
           <i className="fas fa-search"></i>
         </button>
       </form>
@@ -153,7 +159,6 @@ const handleSearchIconClick = () => {
             </div>
           )}
         </div>
-
 
         {/* Cart and Notifications */}
         <a
