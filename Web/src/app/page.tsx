@@ -8,15 +8,14 @@ import Banner from "@/Components/Banner";
 import Topticket from "@/Components/Topticket";
 import Product from "@/Components/Product";
 
-
 const Home = () => {
   return (
     <div className="home">
       <Navbar />
       {/* <Announce/> */}
-      
+
       <Background test={<Banner />} />
-{/*     
+      {/*     
       <Topticket />
       <Product /> */}
 
