@@ -103,11 +103,18 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> DeleteOrder(string orderId, bool saveAll = true)
     {
-        Order order = await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
+        Order? order = await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
+
+        if (order == null)
+        {
+            return ResponseModel.NotFound($"Order not found");
+        }
+        
         _unitOfWork.OrderRepository.Delete(order);
 
         if (saveAll)
             await _unitOfWork.CompleteAsync();
+        
         return ResponseModel.Success($"Successfully deleted: {order.OrderId}");
     }
 }

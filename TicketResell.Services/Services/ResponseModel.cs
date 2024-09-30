@@ -20,35 +20,31 @@ namespace TicketResell.Services.Services
             Data = data;
         }
 
-        public static ResponseModel Success(string message, object? data)
+        public static ResponseModel Success(string message, object? data = null)
         {
             return new ResponseModel(200, "Success", message, data);
         }
-        public static ResponseModel Success(string message)
+
+
+        public static ResponseModel Error(string message, object? data = null)
         {
-            return new ResponseModel(200, "Success", message, null);
+            return new ResponseModel(500, "Error", message, data);
         }
 
-
-        public static ResponseModel Error(string message)
+        public static ResponseModel NotFound(string message, object? data = null)
         {
-            return new ResponseModel(500, "Error", message, null);
+            return new ResponseModel(404, "Not Found", message, data);
         }
 
-        public static ResponseModel NotFound(string message)
-        {
-            return new ResponseModel(404, "Not Found", message, null);
-        }
-
-
-        public static ResponseModel BadRequest(string message)
-        {
-            return new ResponseModel(400, "Bad Request", message, null);
-        }
-
-        public static ResponseModel BadRequest(string message, object? data)
+        public static ResponseModel BadRequest(string message, object? data = null)
         {
             return new ResponseModel(400, "Bad Request", message, data);
+        }
+
+
+        public static ResponseModel Unauthorized(string message, object? data = null)
+        {
+            return new ResponseModel(401, "Unauthorized", message, data);
         }
     }
 }

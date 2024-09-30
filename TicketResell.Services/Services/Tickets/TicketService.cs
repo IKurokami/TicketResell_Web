@@ -86,7 +86,7 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto dto,bool saveAll)
+        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto,bool saveAll)
         {
             var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
 
