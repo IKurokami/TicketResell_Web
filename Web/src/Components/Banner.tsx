@@ -6,6 +6,7 @@ import BannerItemCard, {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretRight, faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import "@/Css/Banner.css";
+import Link from "next/link";
 
 const BannerItemCards: ItemCard[] = [
   {
@@ -16,6 +17,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
+    id : "TIC01"
   },
   {
     imageUrl:
@@ -25,6 +27,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
+    id : "TIC02"
   },
   {
     imageUrl:
@@ -34,6 +37,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
+    id : "TIC03"
   },
   {
     imageUrl:
@@ -43,6 +47,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
+    id : "TIC04"
   },
   {
     imageUrl:
@@ -52,6 +57,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
+    id : "TIC05"
   },
   {
     imageUrl:
@@ -61,6 +67,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
+    id : "TIC06"
   },
   {
     imageUrl:
@@ -70,6 +77,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
+    id : "TIC07"
   },
   {
     imageUrl:
@@ -79,6 +87,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
+    id : "TIC08"
   },
 ];
 
@@ -113,7 +122,9 @@ const Banner = () => {
     setAnimationClass("slide-out-right");
     setTimeout(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex - 4 >= 0 ? prevIndex - 4 : BannerItemCards.length - (BannerItemCards.length % 4 || 4)
+        prevIndex - 4 >= 0
+          ? prevIndex - 4
+          : BannerItemCards.length - (BannerItemCards.length % 4 || 4)
       );
       setAnimationClass("slide-in-left");
     }, 300); // Match the duration of the animation
@@ -155,9 +166,13 @@ const Banner = () => {
         />
         <div className={`category-items ${animationClass}`}>
           {/* Display four items based on the currentIndex */}
-          {BannerItemCards.slice(currentIndex, currentIndex + 4).map((item, index) => (
-            <BannerItemCard key={index} itemCart={item} />
-          ))}
+          {BannerItemCards.slice(currentIndex, currentIndex + 4).map(
+            (item, index) => (
+              <Link href={`/ticket/${item.id}`} key={index}>
+              <BannerItemCard itemCart={item} />
+          </Link>
+            )
+          )}
         </div>
         <FontAwesomeIcon
           className="caret"

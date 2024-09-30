@@ -336,7 +336,10 @@
 .nav-links ul li a{
   color: black;
 }
-
+.nav-links ul{
+  background-color: rgb(255, 255, 255);
+  
+}
 
   .sign-in-btn {
     background-color: #28a745;
