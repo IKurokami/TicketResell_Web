@@ -60,7 +60,7 @@ const Login: React.FC = () => {
   
     try {
       const response = await fetch("http://localhost:5296/api/Authentication/login", {
-        method: "POST",
+        method: "POST", 
         headers: {
           "Content-Type": "application/json",
         },
@@ -68,7 +68,6 @@ const Login: React.FC = () => {
           Gmail: email,
           Password: password,
         }),
-<<<<<<< HEAD
       });
   
       const data = await response.json();
@@ -83,17 +82,6 @@ const Login: React.FC = () => {
     } catch (error) {
       console.error("Network error:", error);
       setError("An error occurred. Please try again later.");
-=======
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data.message);
-          
-        })
-        .catch((error) => {
-          console.error(error);
-        });
->>>>>>> 044ad8372d1d80213ef43b6b92ce0d47f49e6c75
     }
   };
     // Simulate a sign-in process
