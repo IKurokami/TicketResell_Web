@@ -10,13 +10,12 @@ import SearchPage from "@/Components/Search";
 const Search = () => {
     return (
         <div className="home">
-            <Navbar />
+           
 
             <Background test={<Ads />} />
             <SearchPage />
 
 
-            <Footer />
             <div></div>
         </div>
     );

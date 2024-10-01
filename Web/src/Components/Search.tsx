@@ -11,7 +11,7 @@ const Search: React.FC = () => {
     const [selectedLocation, setSelectedLocation] = useState(''); // Location filter
     const [filteredImages, setFilteredImages] = useState([]); // Store filtered images
     
-    const itemsPerPage = 10;
+    const itemsPerPage = 15;
     
     // Generate 20 images with varying prices and genres
     const images = Array.from({ length: 20 }, (_, index) => ({
