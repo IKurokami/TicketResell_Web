@@ -64,7 +64,7 @@ namespace TicketResell.Services.Services
         {
             var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
 
-            var ticketDtos = _mapper.Map<IEnumerable<TickerReadDto>>(tickets);
+            var ticketDtos = _mapper.Map<List<TickerReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get ticket", ticketDtos);
         }
 
@@ -86,7 +86,7 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto dto,bool saveAll)
+        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto,bool saveAll)
         {
             var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
 

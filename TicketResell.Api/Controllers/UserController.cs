@@ -30,7 +30,7 @@ namespace Repositories.Controllers
             dto.UserId = "USERS5145";
             dto.Username = ""; // lỗi vì username ko đc trống
             var response2 = await _userService.CreateUserAsync(dto);
-            var response = ResponseList.AggregateResponses(new List<ResponseModel> { response1, response2 }, nameof(CreateTwoUser));
+            var response = ResponseList.AggregateResponses(new List<ResponseModel?> { response1, response2 }, nameof(CreateTwoUser));
             return ResponseParser.Result(response);
         }
 
@@ -39,7 +39,7 @@ namespace Repositories.Controllers
         {
             var response1 = await _userService.CreateUserAsync(dto, false);
             var response2 = await _userService.DeleteUserByIdAsync(dto.UserId);
-            var response = ResponseList.AggregateResponses(new List<ResponseModel> { response1, response2 }, nameof(CreateTwoUser));
+            var response = ResponseList.AggregateResponses(new List<ResponseModel?> { response1, response2 }, nameof(CreateTwoUser));
             return ResponseParser.Result(response);
         }
 

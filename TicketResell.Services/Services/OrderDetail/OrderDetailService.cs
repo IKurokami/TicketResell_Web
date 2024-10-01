@@ -19,7 +19,7 @@ public class OrderDetailService : IOrderDetailService
         _validatorFactory = validatorFactory;
     }
 
-    public async Task<ResponseModel> CreateOrderDetail(OrderDetailDto dto, bool saveAll = true)
+    public async Task<ResponseModel> CreateOrderDetail(OrderDetailDto? dto, bool saveAll = true)
     {
         var orderDetail = _mapper.Map<OrderDetail>(dto);
 
@@ -66,7 +66,7 @@ public class OrderDetailService : IOrderDetailService
         return ResponseModel.Success($"Successfully get order detail by sellderId: {sellerId}", orderDetails);
     }
 
-    public async Task<ResponseModel> UpdateOrderDetail(OrderDetailDto dto, bool saveAll = true)
+    public async Task<ResponseModel> UpdateOrderDetail(OrderDetailDto? dto, bool saveAll = true)
     {
         var orderDetail = _mapper.Map<OrderDetail>(dto);
 
