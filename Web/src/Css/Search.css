@@ -1,3 +1,4 @@
+
 /* Main container */
 .search-ticket-container {
     display: flex;
@@ -281,7 +282,10 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
-
+.slide-show{
+    width: 100vw;
+ 
+}
 /* Responsiveness */
 @media (max-width: 768px) {
     .search-header {
@@ -289,7 +293,11 @@
         align-items: stretch;
         
     }
-
+    .slide-show{
+        width: 770px;
+       height: 500px;
+      
+    }
 
     .search-ticket-bar {
         order: 1;
@@ -311,5 +319,9 @@
 @media (max-width: 480px) {
     .ticket-search-results {
         grid-template-columns: 1fr;
+    }
+    .slide-show{
+        width: 480px;
+        height: 500px;
     }
 }
