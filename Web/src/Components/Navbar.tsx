@@ -1,18 +1,21 @@
 "use client";
-import { useRouter } from "next/navigation";  // Import useRouter from next/router
+import Link from "next/link";
 import React, { useState } from "react";
 import "@/Css/Navbar.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import useScroll from "@/Hooks/useScroll";
-
+import { checkAccessKey } from "./Cookie";
+// import { removeAllCookies } from "./Cookie";
+// import { removeCookie  } from "./Cookie";
+import { useRouter } from "next/navigation";
 const Navbar: React.FC = () => {
   const [menuActive, setMenuActive] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
   const isScrolled = useScroll();
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
-  const router = useRouter();  // Initialize useRouter
+  const router = useRouter();
 
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
@@ -28,9 +31,7 @@ const Navbar: React.FC = () => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      router.push(`/search?query=${searchTerm}`);  // Use router.push to navigate programmatically
-    }
+    console.log("Tìm kiếm:", searchTerm);
   };
 
   const toggleDropdown = () => {
@@ -40,20 +41,45 @@ const Navbar: React.FC = () => {
   const handleMenuItemClick = (e: React.MouseEvent, route: string) => {
     e.preventDefault();
     console.log("Redirecting to:", route);
-    router.push(route);  // Handle menu item click with router.push
+    // Implement routing logic here
   };
 
   const handleCartClick = () => {
     console.log("Cart clicked");
+    // Implement cart handling logic here
+  };
+
+  const handleSignInClick = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault(); // Ngăn chặn việc chuyển hướng mặc định
+    console.log("handleSignInClick is called");
+    // Kiểm tra accessKey
+    const isValid = await checkAccessKey();
+
+    // removeAllCookies();
+    // removeCookie('id');
+
+
+    if (isValid) {
+      // Nếu accessKey hợp lệ, chỉ chuyển hướng nếu không ở trang login
+      console.log("login success");
+      router.push("/");
+      
+    } else {
+      // Nếu không hợp lệ, chuyển đến trang login
+        router.push("/login");
+      
+    }
   };
 
   return (
-    <header className={`navbar ${isScrolled ? "scrolled" : ""}`}>
-      <div className="navbar-brand">
-        <a href="/" className="logo">
-          <span className="logo-green">Ticket</span> 
+    <header className={`navbarr ${isScrolled ? "scrolled" : ""}`}>
+      <div className="navbarr-brand">
+        <Link href="/" className="logo">
+          <span className="logo-green">Ticket</span>{" "}
           <span className="resell">Resell</span>
-        </a>
+        </Link>
       </div>
 
       {/* Toggle Menu Button */}
@@ -65,19 +91,21 @@ const Navbar: React.FC = () => {
       <nav className={`nav-links ${menuActive ? "active" : ""}`}>
         <ul>
           <li>
-            <a href="/">Home</a>
+            <Link href="/">Home</Link>
           </li>
           <li>
-            <a href="/sell">Sell</a>
+            <Link href="/sell">Sell</Link>
           </li>
           <li>
-            <a href="/contact">Contact Us</a>
+            <Link href="/contact">Contact Us</Link>
           </li>
         </ul>
       </nav>
 
-      {/* Search Form */}
-      <form className={`search-form ${isSearchVisible ? "visible" : ""}`} onSubmit={handleSearchSubmit}>
+      <form
+        className={`search-form ${isSearchVisible ? "visible" : ""}`}
+        onSubmit={handleSearchSubmit}
+      >
         <input
           type="text"
           placeholder="Search..."
@@ -85,16 +113,23 @@ const Navbar: React.FC = () => {
           onChange={handleSearchChange}
           className="search-input"
         />
-        <button type="submit" className="search-button">
+        <button
+          type="button"
+          className="search-button"
+          onClick={handleSearchIconClick}
+        >
           <i className="fas fa-search"></i>
         </button>
       </form>
 
       <div className="user-section">
         {!isLoggedIn && (
-          <a href="/login" className="sign-in-btn">
+          // <Link href="/login" onClick={handleSignInClick} className="sign-in-btn">
+          //   Sign in
+          // </Link>
+          <button onClick={handleSignInClick} className="sign-in-btn">
             Sign in
-          </a>
+          </button>
         )}
 
         <div className="user-dropdown-wrapper">
@@ -168,7 +203,7 @@ const Navbar: React.FC = () => {
 
         <a href="#" className="icon-link noti-icon" aria-label="Notifications">
           <i className="fas fa-bell"></i>
-          <span className="noti-badge">3</span>
+          <span className="noti-badge">3</span> {/* Notification count */}
         </a>
       </div>
     </header>

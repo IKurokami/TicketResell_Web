@@ -66,7 +66,9 @@ const Banner = () => {
   }
 
   // Call the function to fetch and process the data
-  fetchTickets();
+  useEffect(() => {
+    fetchTickets(); // Gọi hàm fetchTickets để lấy dữ liệu
+  }, []);
 
 
   // Function to move to the next product

@@ -1,0 +1,57 @@
+.container {
+  margin-top: 15vh;
+  padding-top: 5vh;
+  background: white;
+}
+.ticket--detail {
+  margin-bottom: 10vh;
+}
+.ticket--info {
+  color: black;
+  margin-left: 3vw;
+}
+.ticket--price {
+  color: black;
+}
+.ticket--desc {
+  padding-bottom: 10vh;
+}
+.ticket--img--list {
+  padding-top: 2vh;
+  padding-left: 0.75vw;
+}
+
+.ticket--img--list .col-lg-3 {
+  box-sizing: border-box;
+  padding: 0;
+  border-left: 2px solid #27ae60;
+  border-right: 2px solid #27ae60;
+}
+
+.ticket--img {
+  object-fit: contain;
+}
+.desc--list {
+  margin-top: 10px;
+  list-style-type: none;
+  display: flex;
+  justify-content: center;
+}
+.desc--item {
+  color: black;
+  text-decoration: none;
+  padding: 10px;
+  background: white;
+}
+
+.desc--item:hover {
+  background: #27ae60;
+}
+
+.desc--item.active {
+  border-bottom: 2px solid #27ae60;
+}
+.ticket--title {
+  margin-bottom: 5vh;
+}
+
