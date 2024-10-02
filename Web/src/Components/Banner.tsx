@@ -1,95 +1,16 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import BannerItemCard, {
-  BannerItemCard as ItemCard,
-} from "@/models/CategoryCard";
+import { BannerItemCard as ItemCard } from "@/models/CategoryCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretRight, faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import "@/Css/Banner.css";
+import useShowItem from "@/Hooks/useShowItem";
 import Link from "next/link";
-
-const BannerItemCards: ItemCard[] = [
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC01"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC02"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC03"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC04"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC05"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC06"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC07"
-  },
-  {
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: "Football Ticket",
-    date: "24/06/2025",
-    author: "Vkev",
-    description: "Description of a football event",
-    price: "160k",
-    id : "TIC08"
-  },
-];
+import {
+  fetchBannerItems,
+  CategoriesPage,
+  BannerItemCard,
+} from "@/models/CategoryCard";
 
 const Categories = [
   "All",
@@ -104,27 +25,41 @@ const Categories = [
 const Banner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animationClass, setAnimationClass] = useState(""); // For sliding effect
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Store timeout reference
+  const [bannerItems, setBannerItems] = useState<BannerItemCard[]>([]);
+  const itemsToShow = useShowItem();
 
+  // Fetch banner items when the component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await fetchBannerItems();
+      setBannerItems(data);
+    };
+
+    fetchData();
+  }, []);
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Store timeout reference
   // Function to move to the next product
   const nextProduct = () => {
     setAnimationClass("slide-out-left");
     setTimeout(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex + 4 < BannerItemCards.length ? prevIndex + 4 : 0
+        prevIndex + itemsToShow < bannerItems.length
+          ? prevIndex + itemsToShow
+          : 0
       );
       setAnimationClass("slide-in-right");
     }, 300); // Match the duration of the animation
   };
 
-  // Function to move to the previous product
   const prevProduct = () => {
     setAnimationClass("slide-out-right");
     setTimeout(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex - 4 >= 0
-          ? prevIndex - 4
-          : BannerItemCards.length - (BannerItemCards.length % 4 || 4)
+        prevIndex - itemsToShow >= 0
+          ? prevIndex - itemsToShow
+          : bannerItems.length -
+            (bannerItems.length % itemsToShow || itemsToShow)
       );
       setAnimationClass("slide-in-left");
     }, 300); // Match the duration of the animation
@@ -165,14 +100,7 @@ const Banner = () => {
           }}
         />
         <div className={`category-items ${animationClass}`}>
-          {/* Display four items based on the currentIndex */}
-          {BannerItemCards.slice(currentIndex, currentIndex + 4).map(
-            (item, index) => (
-              <Link href={`/ticket/${item.id}`} key={index}>
-              <BannerItemCard itemCart={item} />
-          </Link>
-            )
-          )}
+          <CategoriesPage bannerItems={bannerItems} />
         </div>
         <FontAwesomeIcon
           className="caret"

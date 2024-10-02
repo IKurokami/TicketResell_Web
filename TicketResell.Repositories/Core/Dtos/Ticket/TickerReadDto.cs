@@ -1,3 +1,5 @@
+
+using Repositories.Core.Dtos.User;
 using Repositories.Core.Dtos.Category;
 
 namespace Repositories.Core.Dtos.Ticket;
@@ -24,7 +26,9 @@ public class TickerReadDto
 
     public int? Status { get; set; }
 
+    public virtual SellerTicketReadDto Seller { get; set; }
+
     public string? Image { get; set; }
-    
+
     public virtual ICollection<CategoryReadDto> Categories { get; set; } = new List<CategoryReadDto>();
 }
