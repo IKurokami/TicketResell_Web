@@ -3,7 +3,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import "@/Css/Navbar.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import useScroll from "@/Hooks/useScroll";
+import { useScroll } from "@/Hooks/useScroll";
 import { checkAccessKey } from "./Cookie";
 import { logoutUser } from "./Logout";
 import Cookies from "js-cookie";
@@ -12,7 +12,7 @@ import { removeAllCookies } from "./Cookie";
 import { useRouter } from "next/navigation";
 const Navbar: React.FC = () => {
   const [menuActive, setMenuActive] = useState<boolean>(false);
-  const [isLoggedIn,setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
   const isScrolled = useScroll();
@@ -65,17 +65,17 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const handleCartClick = () => {
-    console.log("Cart clicked");
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push("/my-cart");
     // Implement cart handling logic here
   };
-
 
   // Handle check cookie
   const handleSignInClick = async (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
-    event.preventDefault(); 
+    event.preventDefault();
     console.log("handleSignInClick is called");
 
     const isValid = await checkAccessKey();
@@ -87,7 +87,6 @@ const Navbar: React.FC = () => {
       console.log("login success");
       router.push("/");
     } else {
-      
       router.push("/login");
     }
   };
@@ -97,7 +96,7 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     // Function to check if the user is logged in by checking for the 'id' cookie
     const checkUserLoginStatus = () => {
-      const id = Cookies.get('id'); // Get the user ID from the cookie
+      const id = Cookies.get("id"); // Get the user ID from the cookie
       if (id) {
         setIsLoggedIn(true); // User is logged in
       } else {
@@ -124,12 +123,11 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
-
   // Handle logout
   const handleLogout = async () => {
     const isLoggedOut = await logoutUser(Cookies.get("id"));
     if (isLoggedOut) {
-     setIsLoggedIn(false);
+      setIsLoggedIn(false);
       router.push("/login"); // Redirect to login after successful logout
     } else {
       console.log("Failed to log out. Please try again.");
@@ -249,7 +247,7 @@ const Navbar: React.FC = () => {
                   </a>
                 </li>
                 <li>
-                  <Link href="/login"  onClick={handleLogout}>
+                  <Link href="/login" onClick={handleLogout}>
                     Logout
                   </Link>
                 </li>

@@ -29,7 +29,7 @@ interface CategoriesPageProps {
   bannerItems: BannerItemCard[];
 }
 
-const fetchBannerItems = async (): Promise<BannerItemCard[]> => {
+export const fetchBannerItems = async (): Promise<BannerItemCard[]> => {
   const bannerItemsRes = await fetch("http://localhost:5296/api/ticket/read");
   const response = await bannerItemsRes.json();
   console.log(response.data);
@@ -72,21 +72,14 @@ const renderBannerItems = (
   );
 };
 
-const CategoriesPage = () => {
-  const [bannerItems, setBannerItems] = useState<BannerItemCard[]>([]);
+export const CategoriesPage = ({
+  bannerItems,
+}: {
+  bannerItems: BannerItemCard[];
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsToShow = useShowItem();
   const animationClass = "fade-in"; // Example animation class
-
-  // Fetch banner items when the component mounts
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await fetchBannerItems();
-      setBannerItems(data);
-    };
-
-    fetchData();
-  }, []);
 
   return (
     <div className={`category-items ${animationClass}`}>
@@ -94,5 +87,3 @@ const CategoriesPage = () => {
     </div>
   );
 };
-
-export default CategoriesPage;
