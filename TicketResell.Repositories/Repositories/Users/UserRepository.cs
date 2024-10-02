@@ -12,6 +12,19 @@ namespace Repositories.Repositories
         {
             _context = context;
         }
+
+        public new async Task<List<User>> GetAllAsync()
+        {
+            return await _context.Users.Include(x => x.Roles).ToListAsync();
+        }
+
+        public new async Task<User?> GetByIdAsync(string id)
+        {
+            return await _context.Users
+                .Where(u => u.UserId == id)
+                .Include(x => x.Roles)
+                .FirstOrDefaultAsync();
+        }
         
         public async Task<User?> GetUserByEmailAsync(string email)
         {
