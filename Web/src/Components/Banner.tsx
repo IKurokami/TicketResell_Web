@@ -1,12 +1,14 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import BannerItemCard, {
+import renderBannerItems, {
   BannerItemCard as ItemCard,
 } from "@/models/CategoryCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretRight, faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import "@/Css/Banner.css";
+import useShowItem from "@/Hooks/useShowItem";
 import Link from "next/link";
+import CategoriesPage from "@/models/CategoryCard";
 
 const BannerItemCards: ItemCard[] = [
   {
@@ -17,7 +19,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
-    id : "TIC01"
+    id: "TIC01",
   },
   {
     imageUrl:
@@ -27,7 +29,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
-    id : "TIC02"
+    id: "TIC02",
   },
   {
     imageUrl:
@@ -37,7 +39,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
-    id : "TIC03"
+    id: "TIC03",
   },
   {
     imageUrl:
@@ -47,7 +49,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
-    id : "TIC04"
+    id: "TIC04",
   },
   {
     imageUrl:
@@ -57,7 +59,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
-    id : "TIC05"
+    id: "TIC05",
   },
   {
     imageUrl:
@@ -67,7 +69,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
-    id : "TIC06"
+    id: "TIC06",
   },
   {
     imageUrl:
@@ -77,7 +79,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
-    id : "TIC07"
+    id: "TIC07",
   },
   {
     imageUrl:
@@ -87,7 +89,7 @@ const BannerItemCards: ItemCard[] = [
     author: "Vkev",
     description: "Description of a football event",
     price: "160k",
-    id : "TIC08"
+    id: "TIC08",
   },
 ];
 
@@ -104,27 +106,30 @@ const Categories = [
 const Banner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animationClass, setAnimationClass] = useState(""); // For sliding effect
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Store timeout reference
+  const itemsToShow = useShowItem();
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Store timeout reference
   // Function to move to the next product
   const nextProduct = () => {
     setAnimationClass("slide-out-left");
     setTimeout(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex + 4 < BannerItemCards.length ? prevIndex + 4 : 0
+        prevIndex + itemsToShow < BannerItemCards.length
+          ? prevIndex + itemsToShow
+          : 0
       );
       setAnimationClass("slide-in-right");
     }, 300); // Match the duration of the animation
   };
 
-  // Function to move to the previous product
   const prevProduct = () => {
     setAnimationClass("slide-out-right");
     setTimeout(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex - 4 >= 0
-          ? prevIndex - 4
-          : BannerItemCards.length - (BannerItemCards.length % 4 || 4)
+        prevIndex - itemsToShow >= 0
+          ? prevIndex - itemsToShow
+          : BannerItemCards.length -
+            (BannerItemCards.length % itemsToShow || itemsToShow)
       );
       setAnimationClass("slide-in-left");
     }, 300); // Match the duration of the animation
@@ -165,14 +170,7 @@ const Banner = () => {
           }}
         />
         <div className={`category-items ${animationClass}`}>
-          {/* Display four items based on the currentIndex */}
-          {BannerItemCards.slice(currentIndex, currentIndex + 4).map(
-            (item, index) => (
-              <Link href={`/ticket/${item.id}`} key={index}>
-              <BannerItemCard itemCart={item} />
-          </Link>
-            )
-          )}
+          <CategoriesPage />
         </div>
         <FontAwesomeIcon
           className="caret"
