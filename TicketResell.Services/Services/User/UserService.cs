@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using Repositories.Core.Dtos.User;
-using Repositories.Core.Validators;
 using Repositories.Core.Entities;
 using TicketResell.Repositories.UnitOfWork;
+using IValidatorFactory = Repositories.Core.Validators.IValidatorFactory;
 
 namespace TicketResell.Services.Services
 {
@@ -22,8 +23,8 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> CreateUserAsync(UserCreateDto dto, bool saveAll)
         {
-            var validator = _validatorFactory.GetValidator<User>();
-            User newUser = _mapper.Map<User>(dto);
+            IValidator<User?> validator = _validatorFactory.GetValidator<User>();
+            User? newUser = _mapper.Map<User>(dto);
             var validationResult = validator.Validate(newUser);
             if (!validationResult.IsValid)
             {

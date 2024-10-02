@@ -19,7 +19,7 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> CreateRoleAsync(RoleCreateDto dto, bool saveAll)
         {
-            Role role = _mapper.Map<Role>(dto);
+            Role? role = _mapper.Map<Role>(dto);
             await _unitOfWork.RoleRepository.CreateAsync(role);
             if (saveAll)
                 await _unitOfWork.CompleteAsync(); 
@@ -44,7 +44,7 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> GetRoleByIdAsync(string id)
         {
-            Role? role = await _unitOfWork.RoleRepository.GetByIdAsync(id);
+            Role role = await _unitOfWork.RoleRepository.GetByIdAsync(id);
             return ResponseModel.Success($"Successfully get sell config", role);
         }
 

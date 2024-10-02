@@ -45,7 +45,7 @@ public class OrderService : IOrderService
     public async Task<ResponseModel> GetOrderById(string id)
     {
         var order = await _unitOfWork.OrderRepository.GetByIdAsync(id);
-        return ResponseModel.Success($"Successfully get order: {order.OrderId}", order);
+        return ResponseModel.Success($"Successfully get order: {order?.OrderId}", order);
     }
 
     public async Task<ResponseModel> GetAllOrders()
@@ -84,13 +84,20 @@ public class OrderService : IOrderService
         return ResponseModel.Success($"Successfully get total price for order: {orderId}", total);
     }
 
-    public async Task<ResponseModel> UpdateOrder(Order order, bool saveAll = true)
+    public async Task<ResponseModel> UpdateOrder(Order? order, bool saveAll = true)
     {
         var validator = _validatorFactory.GetValidator<Order>();
-        var validationResult = await validator.ValidateAsync(order);
-        if (!validationResult.IsValid)
+        if (order != null)
         {
-            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            var validationResult = await validator.ValidateAsync(order);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            }
+        }
+        else
+        {
+            return ResponseModel.BadRequest("Validation Error", "No data");
         }
 
         _unitOfWork.OrderRepository.Update(order);
