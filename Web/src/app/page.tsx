@@ -11,7 +11,6 @@ import Product from "@/Components/Product";
 const Home = () => {
   return (
     <div className="home">
-      <Navbar />
       {/* <Announce/> */}
 
       <Background test={<Banner />} />
@@ -19,7 +18,6 @@ const Home = () => {
       <Topticket />
       <Product /> */}
 
-      <Footer />
       <div></div>
     </div>
   );
