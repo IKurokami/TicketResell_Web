@@ -8,6 +8,7 @@
     background-color: #ffffff;
     max-width: 1910px;
     margin: 0 auto;
+    
 }
 
 /* Search header */
@@ -80,6 +81,7 @@
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+
 }
 
 .ticket-filter-category {
@@ -91,6 +93,7 @@
     margin-bottom: 10px;
     font-weight: bold;
     color: #343a40;
+    flex-direction: column;
 }
 
 /* Checkbox styles */
@@ -256,6 +259,7 @@
     justify-content: center;
     gap: 10px;
     margin-top: 20px;
+    
 }
 
 .pagination button {

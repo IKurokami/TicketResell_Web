@@ -43,15 +43,17 @@ const Navbar: React.FC = () => {
     router.push(route);  // Handle menu item click with router.push
   };
 
-  const handleCartClick = () => {
-    console.log("Cart clicked");
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push('/my-cart');
   };
+
 
   return (
     <header className={`navbar ${isScrolled ? "scrolled" : ""}`}>
       <div className="navbar-brand">
         <a href="/" className="logo">
-          <span className="logo-green">Ticket</span> 
+          <span className="logo-green">Ticket</span>
           <span className="resell">Resell</span>
         </a>
       </div>
