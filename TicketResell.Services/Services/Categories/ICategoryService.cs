@@ -10,7 +10,7 @@ public interface ICategoryService
     
     public Task<ResponseModel> CreateCategoryAsync(CategoryCreateDto dto, bool saveAll=true);
 
-    public Task<ResponseModel> UpdateCategoryAsync(string id, CategoryUpdateDto dto,bool saveAll=true);
+    public Task<ResponseModel> UpdateCategoryAsync(string id, CategoryUpdateDto? dto,bool saveAll=true);
 
     public Task<ResponseModel> DeleteCategoryAsync(string id, bool saveAll = true);
 }

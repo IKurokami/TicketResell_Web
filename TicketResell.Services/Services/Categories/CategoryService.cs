@@ -50,7 +50,7 @@ public class CategoryService : ICategoryService
         return ResponseModel.Success("Successfully created Category");
     }
 
-    public async Task<ResponseModel> UpdateCategoryAsync(string id, CategoryUpdateDto dto,bool saveAll)
+    public async Task<ResponseModel> UpdateCategoryAsync(string id, CategoryUpdateDto? dto,bool saveAll)
     {
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
 
