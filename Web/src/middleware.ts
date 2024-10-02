@@ -10,15 +10,13 @@ export async function middleware(request: NextRequest) {
   // Define the paths that require authentication
   const protectedRoutes = ['/profile', '/favorites', '/history', '/myticket', '/settings'];
 
-  const logRequest = await fetch('https://example.com/api/log', {
+  const validate = await fetch('https://example.com/api/log', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      route: request.nextUrl.pathname,
-      message: 'Unauthorized access attempt',
-      timestamp: new Date().toISOString(),
+      accessKey: accessKey,
     }),
   });
 
