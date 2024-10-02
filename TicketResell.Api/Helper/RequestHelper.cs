@@ -78,7 +78,7 @@ public static class RequestHelper
         }
     }
     
-    public static void SetuserId(this HttpContext? context, string value = "")
+    public static void SetUserId(this HttpContext? context, string value = "")
     {
         if (context is not null)
         {

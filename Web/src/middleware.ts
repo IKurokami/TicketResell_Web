@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
   // Define the paths that require authentication
   const protectedRoutes = ['/profile', '/favorites', '/history', '/myticket', '/settings'];
 
-  const validate = await fetch('https://example.com/api/log', {
+  const validate = await fetch('http://localhost:5296/api/Authentication/islogged', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -20,11 +20,11 @@ export async function middleware(request: NextRequest) {
     }),
   });
 
+  const response = await validate.json(); // Parse the JSON response
 
   // Check if the current route is protected and the accessKey is missing
-  if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route)) && !accessKey) {
+  if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route)) && response.message == 'False') {
     // Redirect to the login page if not authenticated
-    
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
