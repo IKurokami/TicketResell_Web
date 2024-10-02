@@ -10,6 +10,7 @@ namespace TicketResell.Services.Services
 
         public ResponseModel()
         {
+            
         }
 
         private ResponseModel(int statusCode, string status, string message, object? data)

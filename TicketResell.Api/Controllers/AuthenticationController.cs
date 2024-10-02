@@ -43,11 +43,14 @@ namespace TicketResell.Api.Controllers
             var result = await _authService.LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
             if (result.Data != null)
             {
-                var loginInfo = (LoginInfoDto)result.Data;
-                
-                HttpContext.SetuserId(loginInfo.User.UserId);
-                HttpContext.SetAccessKey(loginInfo.AccessKey);
-                HttpContext.SetIsAuthenticated(true);
+                if (result.Data is LoginInfoDto loginInfo)
+                {
+                    if (loginInfo.User != null) 
+                        HttpContext.SetuserId(loginInfo.User.UserId);
+                    
+                    HttpContext.SetAccessKey(loginInfo.AccessKey);
+                    HttpContext.SetIsAuthenticated(true);
+                }
             }
             
             return ResponseParser.Result(result);
