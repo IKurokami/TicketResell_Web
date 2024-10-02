@@ -29,7 +29,7 @@ namespace TicketResell.Api.Controllers
             {
                 var loginInfo = (LoginInfoDto)result.Data;
                 
-                HttpContext.SetuserId(loginInfo.User.UserId);
+                HttpContext.SetUserId(loginInfo.User.UserId);
                 HttpContext.SetAccessKey(loginInfo.AccessKey);
                 HttpContext.SetIsAuthenticated(true);
             }
@@ -46,7 +46,7 @@ namespace TicketResell.Api.Controllers
                 if (result.Data is LoginInfoDto loginInfo)
                 {
                     if (loginInfo.User != null) 
-                        HttpContext.SetuserId(loginInfo.User.UserId);
+                        HttpContext.SetUserId(loginInfo.User.UserId);
                     
                     HttpContext.SetAccessKey(loginInfo.AccessKey);
                     HttpContext.SetIsAuthenticated(true);
@@ -54,6 +54,12 @@ namespace TicketResell.Api.Controllers
             }
             
             return ResponseParser.Result(result);
+        }
+        
+        [HttpPost("islogged")]
+        public async Task<IActionResult> IsLogged()
+        {
+            return ResponseParser.Result(ResponseModel.Success(HttpContext.GetIsAuthenticated().ToString()));
         }
 
         [HttpPost("logout/{userId}")]
@@ -67,6 +73,9 @@ namespace TicketResell.Api.Controllers
             }
             
             var result = await _authService.LogoutAsync(userId);
+            HttpContext.SetIsAuthenticated(false);
+            HttpContext.SetAccessKey("");
+            HttpContext.SetUserId("");
             return ResponseParser.Result(result);
         }
     }
