@@ -20,7 +20,7 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<UserCreateDto, User>();
             CreateMap<UserUpdateDto, User>();
             CreateMap<User, UserReadDto>();
-
+            CreateMap<User, SellerTicketReadDto>();
             //Revenue
             CreateMap<RevenueCreateDto, Revenue>();
             CreateMap<Revenue, RevenueReadDto>();

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // For Next.js 13+
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import "@/Css/Login.css"; // Import your CSS file
+import Cookies from 'js-cookie';
 
 interface TabProps {
   isActive: boolean;
@@ -48,35 +49,51 @@ const Login: React.FC = () => {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"buyer" | "seller">("buyer");
+  const [role] = useState<"buyer" | "seller">("buyer");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter(); // Initialize router
+  const [rememberMe, setRememberMe] = useState(false);
+
 
   const handleSignIn = async () => {
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
     }
-  
+
     try {
-      const response = await fetch("http://localhost:5296/api/Authentication/login", {
-        method: "POST", 
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          Gmail: email,
-          Password: password,
-        }),
-      });
-  
-      const data = await response.json();
-  
+      const response = await fetch(
+        "http://localhost:5296/api/Authentication/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Gmail: email,
+            Password: password,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
       if (!response.ok) {
-        console.error("Login error:", data);
-        setError(data.message || "Invalid email or password.");
+        console.error("Login error:", result);
+        setError(result.message || "Invalid email or password.");
       } else {
-        console.log("Login successful:", data.message);
+        console.log( result.message);
+        console.log(result);
+        if (rememberMe) {
+          Cookies.set("id", result.data.user.userId, { expires: 7 }); // Save user ID for 7 days
+          Cookies.set("accessKey", result.data.accessKey, { expires: 7 }); // Save accessKey for 7 days
+        } else {
+          Cookies.set("id", result.data.user.userId); // Save session cookies (will be removed on browser close)
+          Cookies.set("accessKey", result.data.accessKey); 
+        }
+        if(Cookies){
+          console.log("cookie saved");
+        }
         router.push("/");
       }
     } catch (error) {
@@ -84,54 +101,62 @@ const Login: React.FC = () => {
       setError("An error occurred. Please try again later.");
     }
   };
-    // Simulate a sign-in process
-    // Replace with actual sign-in logic
-    // if (email === "admin" && password === "1") {
-    //   setError(null); // Clear error if login is successful
-    //   router.push("/"); // Redirect to the home page
-    // } else {
-    //   setError("Invalid email or password.");
-    // }
+
   
 
-    const handleSignUp = async () => {
-      if (!username || !name || !email || !password || !role) {
-        setError("Please fill in all fields and choose a role.");
-        return;
-      }
-    
-      try {
-        const response = await fetch("http://localhost:5296/api/Authentication/register", {
+  // Simulate a sign-in process
+  // Replace with actual sign-in logic
+  // if (email === "admin" && password === "1") {
+  //   setError(null); // Clear error if login is successful
+  //   router.push("/"); // Redirect to the home page
+  // } else {
+  //   setError("Invalid email or password.");
+  // }
+
+  const handleSignUp = async () => {
+    if (!username || !name || !email || !password || !role) {
+      setError("Please fill in all fields and choose a role.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5296/api/Authentication/register",
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            UserId: "USER050000",
+            UserId: email,
             Username: username,
             Password: password,
             Gmail: email,
           }),
-        });
-    
-        const data = await response.json();
-    
-        if (!response.ok) {
-          // Handle error from the server
-          setError(data.message || "Something went wrong.");
-          return;
         }
-    
-        // Clear error if sign-up is successful
-        setError(null);
-        console.log("Signed up as:", role); // Log the chosen role
-        router.push("/"); // Redirect to home or another page after sign-up
-      } catch (error) {
-        console.error("Sign up error:", error);
-        setError("An error occurred during sign-up. Please try again.");
-      }
-    };
+      );
 
+      const result = await response.json();
+      console.log(result);
+
+      if (!response.ok) {
+        // Handle error from the server
+        setError(result.message || "Something went wrong.");
+        return;
+      }
+
+      // Clear error if sign-up is successful
+      setError(null);
+      console.log("Signed up as:", role); // Log the chosen role
+      router.push("/"); // Redirect to home or another page after sign-up
+    } catch (error) {
+      console.error("Sign up error:", error);
+      setError("An error occurred during sign-up. Please try again.");
+    }
+  };
+
+
+  
   return (
     <div className="container">
       <div className="form-container">
@@ -173,7 +198,7 @@ const Login: React.FC = () => {
 
               <div className="flex-row">
                 <label>
-                  <input type="checkbox" /> Remember me
+                  <input type="checkbox" checked={rememberMe}  onChange={(e) => setRememberMe(e.target.checked)}/> Remember me
                 </label>
                 <a href="#">Forgot password?</a>
               </div>
