@@ -25,9 +25,20 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         return tickets;
     }
 
+    public async Task<Ticket> GetByIdAsync(string id)
+    {
+        var ticket = await _context.Tickets.Include(x => x.Seller).FirstAsync(x => x.TicketId == id);
+        if (ticket == null)
+        {
+            throw new KeyNotFoundException("Id is not found");
+        }
+
+        return ticket;
+    }
+
     public async Task<List<Ticket>> GetTicketByNameAsync(string name)
     {
-        var tickets = await _context.Tickets.Where(x => x.Name == name).ToListAsync();
+        var tickets = await _context.Tickets.Include(x=>x.Seller).Where(x => x.Name == name).ToListAsync();
         if (tickets == null || tickets.Count == 0)
         {
             throw new KeyNotFoundException("Name is not found");
