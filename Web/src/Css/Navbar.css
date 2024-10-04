@@ -316,7 +316,7 @@
   }
 }
 
-@media (max-width: 550px) {
+@media (max-width: 430px) {
   .search-form {
     padding: 0.4rem 0.8rem;
     font-size: 0.85rem;
