@@ -81,7 +81,6 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ValidatorMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.MapControllers();
 app.Run();
 
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", "default");
