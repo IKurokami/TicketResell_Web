@@ -8,7 +8,8 @@ public interface ITicketService
 
     public Task<ResponseModel> GetTicketByNameAsync(string name);
 
-    public Task<ResponseModel> GetTicketAsync();
+    public Task<ResponseModel> GetTicketsAsync();
+    public Task<ResponseModel> GetTicketRangeAsync(int start, int count);
     
     public Task<ResponseModel> GetTicketByDateAsync(DateTime date);
     public Task<ResponseModel> GetTicketByIdAsync(string id);
