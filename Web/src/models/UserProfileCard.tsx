@@ -1,140 +1,233 @@
-
 import React, { useState } from 'react';
 
 export interface UserProfileCard {
     id: string;
     username: string;
     email: string;
-    avatar: string;
+    avatar: string | null;
+    phone: string | null;
+    address: string | null;
+    status: number;
+    fullname: string | null;
+    sex: string | null;
+    createDate: string;
+    sellConfigId: string | null;
+    bio: string | null;
+    birthday: string | null;
+    roles: string[];
 }
-
 
 const convertToUserProfileCard = (response: any | undefined): UserProfileCard => {
     return {
         id: response.userId,
         username: response.username,
         email: response.gmail,
-        avatar: "https://picsum.photos/1000",
+        avatar: response.avatar ?? "https://via.placeholder.com/120",
+        phone: response.phone ?? "",
+        address: response.address ?? "",
+        status: response.status,
+        fullname: response.fullname ?? "Anonymous",
+        sex: response.sex ?? "Not Specified",
+        createDate: response.createDate,
+        sellConfigId: response.sellConfigId ?? null,
+        bio: response.bio ?? "No bio provided",
+        birthday: response.birthday ?? "Not Provided",
+        roles: response.roles ?? []
     };
 };
 
 export const fetchUserProfile = async (id: string | undefined): Promise<UserProfileCard> => {
     const response = await fetch(`http://localhost:5296/api/user/read/${id}`);
     const responseModel = await response.json();
-    console.log("fetch user data", responseModel.data);
-
     const userProfile: UserProfileCard = convertToUserProfileCard(responseModel.data);
     return userProfile;
 };
 
 export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ userProfile }) => {
-    // Local state to manage the form data
     const [profile, setProfile] = useState(userProfile);
+    const [avatarPreview, setAvatarPreview] = useState<string>(profile.avatar || "https://via.placeholder.com/120");
 
-    // Handler for form input changes
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setProfile({
             ...profile,
-            [name]: value
+            [name]: value,
         });
     };
 
-    // Save profile handler (you can add functionality here to save it to a database or API)
-    const handleSave = () => {
-        console.log("Profile saved:", profile);
-        // Add API call or save logic here
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result as string);
+                setProfile({ ...profile, avatar: reader.result as string });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSave = async () => {
+        const userUpdateDto = {
+            UserId: profile.id,
+            SellConfigId: profile.sellConfigId,
+            Username: profile.username,
+            Password: null,
+            Gmail: profile.email,
+            Fullname: profile.fullname,
+            Sex: profile.sex,
+            Phone: profile.phone,
+            Address: profile.address,
+            Avatar: profile.avatar,
+            Birthday: profile.birthday,
+            Bio: profile.bio,
+        };
+
+        try {
+            const response = await fetch(`http://localhost:5296/api/user/update/${profile.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userUpdateDto), // Send the DTO
+            });
+
+            if (response.ok) {
+                const updatedProfile = await response.json();
+                setProfile(convertToUserProfileCard(updatedProfile.data));
+                alert('Profile updated successfully!');
+            } else {
+                const errorData = await response.json();
+                console.error('Error updating profile:', errorData);
+                alert(`Error: ${errorData.title || 'Error updating profile'}`);
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('An error occurred while updating the profile.');
+        }
     };
 
     return (
-        <section className="h-100 gradient-custom-2">
-            <div className="container py-5 h-100">
-                <div className="row d-flex justify-content-center">
-                    <div className="col col-lg-9 col-xl-8">
-                        <div className="card">
-                            <div
-                                className="rounded-top text-white d-flex flex-row"
-                                style={{ backgroundColor: '#000', height: '200px' }}
-                            >
-                                <div className="ms-4 mt-5 d-flex flex-column" style={{ width: '150px' }}>
-                                    <img
-                                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
-                                        alt="Generic placeholder"
-                                        className="img-fluid img-thumbnail mt-4 mb-2"
-                                        style={{ width: '150px', zIndex: 1 }}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-dark text-body"
-                                        style={{ zIndex: 1 }}
-                                    >
-                                        Edit profile
-                                    </button>
+        <div className="container">
+            <div className="body">
+                <div className="row">
+                    <div className="col-lg-4">
+                        <div className="card shadow-lg card-hover">
+                            <div className="card-body text-center">
+                                <img
+                                    src={avatarPreview}
+                                    alt="Avatar"
+                                    className="rounded-circle avatar-img"
+                                    width="110"
+                                    height="110"
+                                />
+                                <div className="mt-3">
+                                    <input type="file" className="form-control" onChange={handleAvatarChange} accept="image/*" />
                                 </div>
-                                <div className="ms-3" style={{ marginTop: '130px' }}>
-                                    <h5>Andy Horwitz</h5>
-                                    <p>New York</p>
+                                <div className="mt-4">
+                                    <h4>{profile.username}</h4>
+                                    <p className="text-secondary mb-1">{profile.bio}</p>
+                                    <p className="text-muted font-size-sm">Joined: {new Date(profile.createDate).toLocaleDateString()}</p>
                                 </div>
                             </div>
-                            <div className="p-4 text-black bg-body-tertiary">
-                                <div className="d-flex justify-content-end text-center py-1 text-body">
-                                    <div>
-                                        <p className="mb-1 h5">253</p>
-                                        <p className="small text-muted mb-0">Photos</p>
+                        </div>
+                    </div>
+
+                    <div className="col-lg-8">
+                        <div className="card shadow-lg card-hover">
+                            <div className="card-body">
+                                <div className="row mb-3">
+                                    <div className="col-sm-3">
+                                        <h6 className="mb-0">Full Name</h6>
                                     </div>
-                                    <div className="px-3">
-                                        <p className="mb-1 h5">1026</p>
-                                        <p className="small text-muted mb-0">Followers</p>
-                                    </div>
-                                    <div>
-                                        <p className="mb-1 h5">478</p>
-                                        <p className="small text-muted mb-0">Following</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="card-body p-4 text-black">
-                                <div className="mb-5 text-body">
-                                    <p className="lead fw-normal mb-1">About</p>
-                                    <div className="p-4 bg-body-tertiary">
-                                        <p className="font-italic mb-1">Web Developer</p>
-                                        <p className="font-italic mb-1">Lives in New York</p>
-                                        <p className="font-italic mb-0">Photographer</p>
-                                    </div>
-                                </div>
-                                <div className="d-flex justify-content-between align-items-center mb-4 text-body">
-                                    <p className="lead fw-normal mb-0">Recent photos</p>
-                                    <p className="mb-0"><a href="#!" className="text-muted">Show all</a></p>
-                                </div>
-                                <div className="row g-2">
-                                    <div className="col mb-2">
-                                        <img
-                                            src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
-                                            alt="image 1"
-                                            className="w-100 rounded-3"
-                                        />
-                                    </div>
-                                    <div className="col mb-2">
-                                        <img
-                                            src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp"
-                                            alt="image 2"
-                                            className="w-100 rounded-3"
+                                    <div className="col-sm-9 text-secondary">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="fullname"
+                                            value={profile.fullname || ''}
+                                            onChange={handleChange}
                                         />
                                     </div>
                                 </div>
-                                <div className="row g-2">
-                                    <div className="col">
-                                        <img
-                                            src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp"
-                                            alt="image 3"
-                                            className="w-100 rounded-3"
+
+                                <div className="row mb-3">
+                                    <div className="col-sm-3">
+                                        <h6 className="mb-0">Email</h6>
+                                    </div>
+                                    <div className="col-sm-9 text-secondary">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="email"
+                                            value={profile.email || ''}
+                                            readOnly
                                         />
                                     </div>
-                                    <div className="col">
-                                        <img
-                                            src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp"
-                                            alt="image 4"
-                                            className="w-100 rounded-3"
+                                </div>
+
+                                <div className="row mb-3">
+                                    <div className="col-sm-3">
+                                        <h6 className="mb-0">Phone</h6>
+                                    </div>
+                                    <div className="col-sm-9 text-secondary">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="phone"
+                                            value={profile.phone || ''}
+                                            onChange={handleChange}
                                         />
+                                    </div>
+                                </div>
+
+                                <div className="row mb-3">
+                                    <div className="col-sm-3">
+                                        <h6 className="mb-0">Sex</h6>
+                                    </div>
+                                    <div className="col-sm-9 text-secondary">
+                                        <select className="form-select" name="sex" value={profile.sex || ''} onChange={handleChange}>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Not Specified">Not Specified</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="row mb-3">
+                                    <div className="col-sm-3">
+                                        <h6 className="mb-0">Bio</h6>
+                                    </div>
+                                    <div className="col-sm-9 text-secondary">
+                                        <textarea
+                                            className="form-control"
+                                            name="bio"
+                                            value={profile.bio || ''}
+                                            onChange={handleChange}
+                                            rows={4}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="row mb-3">
+                                    <div className="col-sm-3">
+                                        <h6 className="mb-0">Birthday</h6>
+                                    </div>
+                                    <div className="col-sm-9 text-secondary">
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            name="birthday"
+                                            value={profile.birthday || ''}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-sm-3"></div>
+                                    <div className="col-sm-9 text-secondary">
+                                        <button className="btn btn-primary px-4 btn-hover" onClick={handleSave}>Save Changes</button>
                                     </div>
                                 </div>
                             </div>
@@ -142,7 +235,6 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ us
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
-
