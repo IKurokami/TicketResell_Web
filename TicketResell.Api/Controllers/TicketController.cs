@@ -41,6 +41,14 @@ namespace TicketResell.Api.Controllers
         }
 
         [HttpGet]
+        [Route("readcatebyid/{id}")]
+        public async Task<IActionResult> GetTicketByCategoryId(string id)
+        {
+            var response = await _ticketService.GetTicketByCategoryAsync(id);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpGet]
         [Route("readbyname/{name}")]
         public async Task<IActionResult> GetTicketByName(string name)
         {

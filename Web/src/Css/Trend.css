@@ -1,0 +1,54 @@
+.navbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: white;
+}
+
+.navbar-left button, .navbar-right button{
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0);
+    color: gray;
+    font-weight: bold;
+}
+
+.navbar-right button.isactivate,
+.soon.isactivate, .trend.isactivate{
+    background-color: white;
+    color: black;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.15);
+}
+
+
+.navbar-left button:hover, .navbar-right button:hover{
+    color: black;
+    cursor: pointer;
+}
+
+
+.navbar-left div, .navbar-right{
+    padding: 3px;
+    background-color:  rgb(237, 237, 237);
+    margin-left: 6rem;
+    border-radius: 10px;
+}
+
+.navbar-right{
+    margin-right: 6rem;
+}
+
+
+
+@media (max-width: 1300px) {
+
+    .navbar-left div{
+        background-color:  rgb(237, 237, 237);
+        margin-left: 0rem;
+    }
+    .navbar-right{
+        margin-right: 0rem;
+    }
+  }
