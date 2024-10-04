@@ -9,6 +9,7 @@ using Api.Middlewares;
 using StackExchange.Redis;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Tickets;
+using TicketResell.Services.Services.Categories;
 
 Env.Load();
 
@@ -34,6 +35,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();

@@ -1,14 +1,14 @@
 import React from "react";
 import Background from "@/Components/Background";
-import TicketDetail from "@/Components/TicketDetail";
 import "bootstrap/dist/css/bootstrap.min.css";
+import SellerShop from "@/Components/SellerShop";
 
-const Ticket = () => {
+const Shop = () => {
   return (
     <div>
-      <Background test={<TicketDetail />} />
+        <Background test={<SellerShop />} />
     </div>
   );
 };
 
-export default Ticket;
+export default Shop;

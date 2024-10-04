@@ -1,4 +1,5 @@
 using Repositories.Core.Context;
+using Repositories.Core.Dtos.Category;
 using Repositories.Core.Entities;
 
 namespace Repositories.Repositories;
@@ -12,6 +13,17 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public TicketRepository(TicketResellManagementContext context) : base(context)
     {
         _context = context;
+    }
+
+    public async Task<List<Ticket>> GetAllAsync()
+    {
+        var tickets = await _context.Tickets.Include(x=>x.Seller).ToListAsync();
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("Don't have ticket in this date");
+        }
+
+        return tickets;
     }
 
     public async Task<List<Ticket>> GetTicketByNameAsync(string name)
@@ -66,6 +78,15 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         _context.Tickets.Remove(ticket);
         
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<ICollection<Category>?> GetTicketCateByIdAsync(string id){
+        var categories = await _context.Tickets
+            .Where(t => t.TicketId == id)
+            .Select(t => t.Categories)
+            .FirstOrDefaultAsync();
+        return categories;
+ 
     }
 
 }

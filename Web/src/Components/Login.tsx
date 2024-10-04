@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // For Next.js 13+
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import "@/Css/Login.css"; // Import your CSS file
-
+import Cookies from 'js-cookie';
 interface TabProps {
   isActive: boolean;
   onClick: () => void;
@@ -57,26 +57,35 @@ const Login: React.FC = () => {
       setError("Please fill in all fields.");
       return;
     }
-  
+
     try {
-      const response = await fetch("http://localhost:5296/api/Authentication/login", {
-        method: "POST", 
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          Gmail: email,
-          Password: password,
-        }),
-      });
-  
-      const data = await response.json();
-  
+      const response = await fetch(
+        "http://localhost:5296/api/Authentication/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Gmail: email,
+            Password: password,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
       if (!response.ok) {
-        console.error("Login error:", data);
-        setError(data.message || "Invalid email or password.");
+        console.error("Login error:", result);
+        setError(result.message || "Invalid email or password.");
       } else {
-        console.log("Login successful:", data.message);
+        console.log( result.message);
+        console.log(result);
+        Cookies.set("id", result.data.user.userId, { expires: 7 }); // Lưu trong 7 ngày
+        Cookies.set("accessKey", result.data.accessKey, { expires: 7 });
+        if(Cookies){
+          console.log("cookie saved");
+        }
         router.push("/");
       }
     } catch (error) {
@@ -84,53 +93,59 @@ const Login: React.FC = () => {
       setError("An error occurred. Please try again later.");
     }
   };
-    // Simulate a sign-in process
-    // Replace with actual sign-in logic
-    // if (email === "admin" && password === "1") {
-    //   setError(null); // Clear error if login is successful
-    //   router.push("/"); // Redirect to the home page
-    // } else {
-    //   setError("Invalid email or password.");
-    // }
+
   
 
-    const handleSignUp = async () => {
-      if (!username || !name || !email || !password || !role) {
-        setError("Please fill in all fields and choose a role.");
-        return;
-      }
-    
-      try {
-        const response = await fetch("http://localhost:5296/api/Authentication/register", {
+  // Simulate a sign-in process
+  // Replace with actual sign-in logic
+  // if (email === "admin" && password === "1") {
+  //   setError(null); // Clear error if login is successful
+  //   router.push("/"); // Redirect to the home page
+  // } else {
+  //   setError("Invalid email or password.");
+  // }
+
+  const handleSignUp = async () => {
+    if (!username || !name || !email || !password || !role) {
+      setError("Please fill in all fields and choose a role.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5296/api/Authentication/register",
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            UserId: "USER050000",
+            UserId: email,
             Username: username,
             Password: password,
             Gmail: email,
           }),
-        });
-    
-        const data = await response.json();
-    
-        if (!response.ok) {
-          // Handle error from the server
-          setError(data.message || "Something went wrong.");
-          return;
         }
-    
-        // Clear error if sign-up is successful
-        setError(null);
-        console.log("Signed up as:", role); // Log the chosen role
-        router.push("/"); // Redirect to home or another page after sign-up
-      } catch (error) {
-        console.error("Sign up error:", error);
-        setError("An error occurred during sign-up. Please try again.");
+      );
+
+      const result = await response.json();
+      console.log(result);
+
+      if (!response.ok) {
+        // Handle error from the server
+        setError(result.message || "Something went wrong.");
+        return;
       }
-    };
+
+      // Clear error if sign-up is successful
+      setError(null);
+      console.log("Signed up as:", role); // Log the chosen role
+      router.push("/"); // Redirect to home or another page after sign-up
+    } catch (error) {
+      console.error("Sign up error:", error);
+      setError("An error occurred during sign-up. Please try again.");
+    }
+  };
 
   return (
     <div className="container">
