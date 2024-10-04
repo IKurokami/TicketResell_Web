@@ -1,4 +1,5 @@
 
+using Repositories.Core.Dtos.Category;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Dtos.Category;
 
@@ -31,4 +32,6 @@ public class TickerReadDto
     public string? Image { get; set; }
 
     public virtual ICollection<CategoryReadDto> Categories { get; set; } = new List<CategoryReadDto>();
+
+    public virtual CategoryReadDto Category { get; set; }
 }

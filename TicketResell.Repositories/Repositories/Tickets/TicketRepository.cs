@@ -1,4 +1,5 @@
 using Repositories.Core.Context;
+using Repositories.Core.Dtos.Category;
 using Repositories.Core.Entities;
 
 namespace Repositories.Repositories;
@@ -77,6 +78,15 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         _context.Tickets.Remove(ticket);
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<ICollection<Category>?> GetTicketCateByIdAsync(string id){
+        var categories = await _context.Tickets
+            .Where(t => t.TicketId == id)
+            .Select(t => t.Categories)
+            .FirstOrDefaultAsync();
+        return categories;
+ 
     }
 
 }
