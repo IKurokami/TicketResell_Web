@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaPencilAlt, FaPhoneAlt, FaEnvelope, FaUser, FaVenusMars, FaBirthdayCake, FaSave } from "react-icons/fa";
 
 export interface UserProfileCard {
     id: string;
@@ -108,42 +109,52 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ us
     };
 
     return (
-        <div className="container">
-            <div className="body">
-                <div className="row">
-                    <div className="col-lg-4">
-                        <div className="card shadow-lg card-hover">
-                            <div className="card-body text-center">
+        <div className="profile-container py-5">
+            <div className="row">
+                <div className="col-lg-4">
+                    <div className="fluent-card mb-4 mb-lg-0">
+                        <div className="fluent-card-body text-center">
+                            <div className="avatar-wrapper mb-4 position-relative">
                                 <img
                                     src={avatarPreview}
                                     alt="Avatar"
-                                    className="rounded-circle avatar-img"
-                                    width="110"
-                                    height="110"
+                                    className="fluent-avatar"
                                 />
-                                <div className="mt-3">
-                                    <input type="file" className="form-control" onChange={handleAvatarChange} accept="image/*" />
-                                </div>
-                                <div className="mt-4">
-                                    <h4>{profile.username}</h4>
-                                    <p className="text-secondary mb-1">{profile.bio}</p>
-                                    <p className="text-muted font-size-sm">Joined: {new Date(profile.createDate).toLocaleDateString()}</p>
-                                </div>
+                                <label htmlFor="avatar" className="avatar-edit-icon">
+                                    <FaPencilAlt />
+                                </label>
+                                <input
+                                    id="avatar"
+                                    type="file"
+                                    className="d-none"
+                                    onChange={handleAvatarChange}
+                                    accept="image/*"
+                                />
                             </div>
+                            <h4 className="mb-1 fluent-text-title">{profile.username}</h4>
+                            <p className="text-muted mb-3 fluent-text-secondary">{profile.bio}</p>
+                            <p className="fluent-text-secondary small">
+                                <i className="bi bi-calendar-event me-2"></i>
+                                Joined: {new Date(profile.createDate).toLocaleDateString()}
+                            </p>
                         </div>
                     </div>
+                </div>
 
-                    <div className="col-lg-8">
-                        <div className="card shadow-lg card-hover">
-                            <div className="card-body">
-                                <div className="row mb-3">
+                <div className="col-lg-8">
+                    <div className="fluent-card">
+                        <div className="fluent-card-body">
+                            <h5 className="card-title mb-4 fluent-text-title">Profile Information</h5>
+                            <form>
+                                <div className="row mb-3 align-items-center">
                                     <div className="col-sm-3">
-                                        <h6 className="mb-0">Full Name</h6>
+                                        <label htmlFor="fullname" className="form-label"><FaUser className="me-2" />Full Name</label>
                                     </div>
-                                    <div className="col-sm-9 text-secondary">
+                                    <div className="col-sm-9">
                                         <input
                                             type="text"
-                                            className="form-control"
+                                            className="form-control fluent-input"
+                                            id="fullname"
                                             name="fullname"
                                             value={profile.fullname || ''}
                                             onChange={handleChange}
@@ -151,14 +162,15 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ us
                                     </div>
                                 </div>
 
-                                <div className="row mb-3">
+                                <div className="row mb-3 align-items-center">
                                     <div className="col-sm-3">
-                                        <h6 className="mb-0">Email</h6>
+                                        <label htmlFor="email" className="form-label"><FaEnvelope className="me-2" />Email</label>
                                     </div>
-                                    <div className="col-sm-9 text-secondary">
+                                    <div className="col-sm-9">
                                         <input
-                                            type="text"
-                                            className="form-control"
+                                            type="email"
+                                            className="form-control fluent-input"
+                                            id="email"
                                             name="email"
                                             value={profile.email || ''}
                                             readOnly
@@ -166,14 +178,15 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ us
                                     </div>
                                 </div>
 
-                                <div className="row mb-3">
+                                <div className="row mb-3 align-items-center">
                                     <div className="col-sm-3">
-                                        <h6 className="mb-0">Phone</h6>
+                                        <label htmlFor="phone" className="form-label"><FaPhoneAlt className="me-2" />Phone</label>
                                     </div>
-                                    <div className="col-sm-9 text-secondary">
+                                    <div className="col-sm-9">
                                         <input
-                                            type="text"
-                                            className="form-control"
+                                            type="tel"
+                                            className="form-control fluent-input"
+                                            id="phone"
                                             name="phone"
                                             value={profile.phone || ''}
                                             onChange={handleChange}
@@ -181,12 +194,18 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ us
                                     </div>
                                 </div>
 
-                                <div className="row mb-3">
+                                <div className="row mb-3 align-items-center">
                                     <div className="col-sm-3">
-                                        <h6 className="mb-0">Sex</h6>
+                                        <label htmlFor="sex" className="form-label"><FaVenusMars className="me-2" />Sex</label>
                                     </div>
-                                    <div className="col-sm-9 text-secondary">
-                                        <select className="form-select" name="sex" value={profile.sex || ''} onChange={handleChange}>
+                                    <div className="col-sm-9">
+                                        <select
+                                            className="form-select fluent-select"
+                                            id="sex"
+                                            name="sex"
+                                            value={profile.sex || ''}
+                                            onChange={handleChange}
+                                        >
                                             <option value="Male">Male</option>
                                             <option value="Female">Female</option>
                                             <option value="Not Specified">Not Specified</option>
@@ -194,13 +213,14 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ us
                                     </div>
                                 </div>
 
-                                <div className="row mb-3">
+                                <div className="row mb-3 align-items-center">
                                     <div className="col-sm-3">
-                                        <h6 className="mb-0">Bio</h6>
+                                        <label htmlFor="bio" className="form-label"><FaPencilAlt className="me-2" />Bio</label>
                                     </div>
-                                    <div className="col-sm-9 text-secondary">
+                                    <div className="col-sm-9">
                                         <textarea
-                                            className="form-control"
+                                            className="form-control fluent-input"
+                                            id="bio"
                                             name="bio"
                                             value={profile.bio || ''}
                                             onChange={handleChange}
@@ -209,14 +229,15 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ us
                                     </div>
                                 </div>
 
-                                <div className="row mb-3">
+                                <div className="row mb-3 align-items-center">
                                     <div className="col-sm-3">
-                                        <h6 className="mb-0">Birthday</h6>
+                                        <label htmlFor="birthday" className="form-label"><FaBirthdayCake className="me-2" />Birthday</label>
                                     </div>
-                                    <div className="col-sm-9 text-secondary">
+                                    <div className="col-sm-9">
                                         <input
                                             type="date"
-                                            className="form-control"
+                                            className="form-control fluent-input"
+                                            id="birthday"
                                             name="birthday"
                                             value={profile.birthday || ''}
                                             onChange={handleChange}
@@ -224,13 +245,12 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ us
                                     </div>
                                 </div>
 
-                                <div className="row">
-                                    <div className="col-sm-3"></div>
-                                    <div className="col-sm-9 text-secondary">
-                                        <button className="btn btn-primary px-4 btn-hover" onClick={handleSave}>Save Changes</button>
-                                    </div>
+                                <div className="text-end">
+                                    <button type="button" className="btn fluent-btn" onClick={handleSave}>
+                                        <FaSave className="me-2" />Save Changes
+                                    </button>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
