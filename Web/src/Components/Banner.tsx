@@ -30,6 +30,7 @@ const Banner = () => {
 
   // Fetch banner items when the component mounts
   useEffect(() => {
+    console.log("Component mounted");
     const fetchData = async () => {
       const data = await fetchBannerItems();
       setBannerItems(data);

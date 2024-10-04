@@ -7,13 +7,21 @@ import Announce from "@/Components/Announcement";
 import Banner from "@/Components/Banner";
 import Topticket from "@/Components/Topticket";
 import Product from "@/Components/Product";
+import Trend from "@/Components/Trend";
 
 const Home = () => {
   return (
     <div className="home">
       {/* <Announce/> */}
 
-      <Background test={<Banner />} />
+      <Background
+        test={
+          <div>
+            <Banner />
+          </div>
+        }
+      />
+      <Trend />
       {/*     
       <Topticket />
       <Product /> */}
