@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const useScroll = () => {
+export const useScroll = () => {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   const handleScroll = () => {
@@ -17,5 +17,3 @@ const useScroll = () => {
 
   return isScrolled;
 };
-
-export default useScroll;

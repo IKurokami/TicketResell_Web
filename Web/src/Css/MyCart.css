@@ -116,10 +116,9 @@ h2 {
 .cart-summary {
   flex: 1;
   padding: 25px;
-  border: 1px solid #ddd;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   /* Stronger shadow for emphasis */
   max-width: 350px;
 }
@@ -165,29 +164,29 @@ h2 {
 }
 
 .payment-method {
+  background-color: #f5efef;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 15px;
-  border: 2px solid #ddd;
   cursor: pointer;
   border-radius: 10px;
   width: 100%;
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-  /* Light shadow */
+  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.1);
+
 }
 
 .payment-method:hover {
-  background-color: #f0f0f0;
+  background-color: #e4e4e4;
   border-color: #000;
   transform: scale(1.02);
   /* Subtle grow effect */
 }
 
 .payment-method.selected {
-  background-color: #e5ffe5;
-  border-color: #28a745;
+  background-color: #d6d6d6;
+  border-color: #b2ceb8;
 }
 
 .payment-method span {

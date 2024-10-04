@@ -7,9 +7,7 @@ import Announce from "@/Components/Announcement";
 const Signin = () => {
   return (
     <div className="Signin">
-      <Navbar />
       <Background test={<Login />} />
-      <Footer />
     </div>
   );
 };

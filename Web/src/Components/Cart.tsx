@@ -78,6 +78,7 @@ const MyCart: React.FC = () => {
     };
 
     const handleCheckout = () => {
+        const selectedTickets = items.filter(item => item.isSelected);
         const productsForCheckout = items.filter(item => item.isSelected);
         if (productsForCheckout.length === 0) {
             alert('Please select at least one product to checkout.');
@@ -87,6 +88,8 @@ const MyCart: React.FC = () => {
             alert('Please select a payment method.');
             return;
         }
+        localStorage.setItem('selectedTickets', JSON.stringify(selectedTickets));
+        localStorage.setItem('paymentMethod', selectedPayment);
         // Continue with payment logic (mocked)
         router.push('/checkout');
     };

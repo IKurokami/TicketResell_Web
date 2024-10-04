@@ -1,8 +1,4 @@
-
-
-
-
-.navbar {
+.navbarr {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -14,7 +10,7 @@
   right: 0;
   z-index: 1000;
   transition: background-color 0.3s ease;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .resell {
@@ -22,28 +18,28 @@
   flex-shrink: 0;
 }
 
-.navbar.scrolled {
+.navbarr.scrolled {
   background-color: #f7f9fa;
   color: black;
 }
 
-.navbar.scrolled .resell,
-.navbar.scrolled .nav-links ul li a,
-.navbar.scrolled .icon-link {
+.navbarr.scrolled .resell,
+.navbarr.scrolled .nav-links ul li a,
+.navbarr.scrolled .icon-link {
   color: black;
 }
-.navbar.scrolled .menu-toggle{
+.navbarr.scrolled .menu-toggle {
   color: black;
 }
-.navbar.scrolled .search-button{
+.navbarr.scrolled .search-button {
   color: black;
 }
 
-.navbar.scrolled .search-input {
+.navbarr.scrolled .search-input {
   background-color: rgba(75, 66, 66, 0.3);
 }
 
-.navbar-brand .logo {
+.navbarr-brand .logo {
   font-size: 2rem;
   font-weight: 700;
   color: #333;
@@ -260,7 +256,7 @@
   flex-shrink: 0;
 }
 
-.navbar-brand {
+.navbarr-brand {
   flex-shrink: 0;
 }
 
@@ -321,7 +317,6 @@
     padding: 0.4rem 0.8rem;
     font-size: 0.85rem;
     width: 200px;
-
   }
 
   .search-button {
@@ -338,15 +333,10 @@
 
   .nav-links.active ul {
     display: flex;
-
   }
-.nav-links ul li a{
-  color: black;
-}
-.nav-links ul{
-  background-color: rgb(255, 255, 255);
-  
-}
+  .nav-links ul li a {
+    color: black;
+  }
 
   .sign-in-btn {
     background-color: #28a745;
@@ -358,13 +348,10 @@
     /* Optional: add border radius for rounded corners */
     cursor: pointer;
     /* Change cursor to pointer for better UX */
-
   }
 
-
-
   .menu-toggle,
-  .navbar-search-icon {
+  .navbarr-search-icon {
     position: relative;
     /* Ensure they stay in their positions */
     margin: 0 15px;

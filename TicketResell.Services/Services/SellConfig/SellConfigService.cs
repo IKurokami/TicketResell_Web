@@ -19,7 +19,7 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> CreateSellConfigAsync(SellConfigCreateDto dto, bool saveAll)
         {
-            SellConfig sellConfig = _mapper.Map<SellConfig>(dto);
+            SellConfig? sellConfig = _mapper.Map<SellConfig>(dto);
             await _unitOfWork.SellConfigRepository.CreateAsync(sellConfig);
             if (saveAll)
                 await _unitOfWork.CompleteAsync();
@@ -43,7 +43,7 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> GetSellConfigByIdAsync(string id)
         {
-            SellConfig? sellConfig = await _unitOfWork.SellConfigRepository.GetByIdAsync(id);
+            SellConfig sellConfig = await _unitOfWork.SellConfigRepository.GetByIdAsync(id);
             return ResponseModel.Success($"Successfully get sell config", sellConfig);
         }
 
