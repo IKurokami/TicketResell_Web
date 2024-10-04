@@ -32,7 +32,7 @@ namespace TicketResell.Api.Controllers
             return ResponseParser.Result(response);
         }
         
-        [HttpPost("range")]
+        [HttpPost("getrange")]
         public async Task<IActionResult> GetTicketRange([FromBody] NumberRange range)
         {
             if (range.From < 0 || range.To < 0)
