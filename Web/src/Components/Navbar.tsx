@@ -7,7 +7,7 @@ import { useScroll } from "@/Hooks/useScroll";
 import { checkAccessKey } from "./Cookie";
 import { logoutUser } from "./Logout";
 import Cookies from "js-cookie";
-import { removeAllCookies } from "./Cookie";
+// import { removeAllCookies } from "./Cookie";
 // import { removeCookie  } from "./Cookie";
 import { useRouter } from "next/navigation";
 
@@ -87,7 +87,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     const isValid = await checkAccessKey();
 
     // removeCookie('id');
-    removeAllCookies();
 
     if (isValid) {
       setIsLoggedIn(true);
