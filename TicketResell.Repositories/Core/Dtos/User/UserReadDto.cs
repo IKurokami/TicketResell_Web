@@ -11,6 +11,7 @@ namespace Repositories.Core.Dtos.User
         public string UserId { get; set; } = null!;
 
         public string? SellConfigId { get; set; }
+
         public string? Username { get; set; }
 
         public int? Status { get; set; }
