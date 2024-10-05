@@ -6,6 +6,7 @@ using Repositories.Core.AutoMapperConfig;
 using Repositories.Core.Context;
 using Repositories.Core.Validators;
 using Api.Middlewares;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using StackExchange.Redis;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Carts;
@@ -64,8 +65,9 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.WithOrigins("http://localhost:3000")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();  // Enable credentials
         });
 });
 
