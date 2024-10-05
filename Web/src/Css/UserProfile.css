@@ -1,5 +1,6 @@
 .childrenData {
     margin-top: 150px;
+    padding-bottom: 150px;
     animation: fadeIn 1s ease-in-out;
 }
 
