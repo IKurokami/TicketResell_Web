@@ -56,14 +56,16 @@ builder.Services.AddScoped<Repositories.Core.Validators.IValidatorFactory, Valid
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:3000") // Add your front-end URL
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Your Next.js front-end URL
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // Allow credentials (cookies) to be sent
+    });
 });
+
+
 
 builder.Services.AddSession(options =>
 {
