@@ -15,20 +15,48 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         _context = context;
     }
 
-    public async Task<List<Ticket>> GetAllAsync()
+    public new async Task<List<Ticket>> GetAllAsync()
     {
-        var tickets = await _context.Tickets.Include(x=>x.Seller).ToListAsync();
+        var tickets = await _context.Tickets.Include(x => x.Categories).ToListAsync();
         if (tickets == null || tickets.Count == 0)
         {
-            throw new KeyNotFoundException("Don't have ticket in this date");
+            throw new KeyNotFoundException("No ticket in database");
+        }
+
+        return tickets;
+    }
+    
+    public async Task<List<Ticket>> GetTicketRangeAsync(int start, int count)
+    {
+        var tickets = await _context.Tickets
+            .OrderBy(t => t.CreateDate)
+            .Skip(start)
+            .Take(count)
+            .Include(x => x.Categories)
+            .ToListAsync();
+
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("No tickets found in the specified range");
         }
 
         return tickets;
     }
 
+    public async Task<Ticket> GetByIdAsync(string id)
+    {
+        var ticket = await _context.Tickets.Include(x => x.Seller).FirstAsync(x => x.TicketId == id);
+        if (ticket == null)
+        {
+            throw new KeyNotFoundException("Id is not found");
+        }
+
+        return ticket;
+    }
+
     public async Task<List<Ticket>> GetTicketByNameAsync(string name)
     {
-        var tickets = await _context.Tickets.Where(x => x.Name == name).ToListAsync();
+        var tickets = await _context.Tickets.Include(x => x.Seller).Where(x => x.Name == name).ToListAsync();
         if (tickets == null || tickets.Count == 0)
         {
             throw new KeyNotFoundException("Name is not found");
@@ -39,7 +67,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<List<Ticket>> GetTicketByDateAsync(DateTime date)
     {
-        var tickets = await _context.Tickets.Where(x => x.StartDate == date).ToListAsync();
+        var tickets = await _context.Tickets.Where(x => x.StartDate == date).Include(x => x.Categories).ToListAsync();
         if (tickets == null || tickets.Count == 0)
         {
             throw new KeyNotFoundException("Don't have ticket in this date");
@@ -65,28 +93,29 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task DeleteTicketAsync(string id)
     {
         var ticket = await _context.Tickets
-            .Include(t => t.Categories) 
+            .Include(t => t.Categories)
             .FirstOrDefaultAsync(t => t.TicketId == id);
 
         if (ticket == null)
         {
             throw new KeyNotFoundException("Ticket not found");
         }
-        
+
         ticket.Categories.Clear();
-        
+
         _context.Tickets.Remove(ticket);
-        
+
         await _context.SaveChangesAsync();
     }
 
-    public async Task<ICollection<Category>?> GetTicketCateByIdAsync(string id){
+    public async Task<ICollection<Category>?> GetTicketCateByIdAsync(string id)
+    {
         var categories = await _context.Tickets
             .Where(t => t.TicketId == id)
             .Select(t => t.Categories)
             .FirstOrDefaultAsync();
         return categories;
- 
+
     }
 
 }

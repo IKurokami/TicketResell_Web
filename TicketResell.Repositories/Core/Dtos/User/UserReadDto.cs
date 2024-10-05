@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Repositories.Core.Dtos.Role;
 
 namespace Repositories.Core.Dtos.User
 {
@@ -32,6 +33,7 @@ namespace Repositories.Core.Dtos.User
         public DateTime? Birthday { get; set; }
 
         public string? Bio { get; set; }
-
+        
+        public virtual ICollection<RoleReadDto> Roles { get; set; } = new List<RoleReadDto>();
     }
 }

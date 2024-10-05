@@ -1,6 +1,7 @@
 using AutoMapper;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Validators;
+using TicketResell.Api.Helper;
 
 namespace Repositories.Controllers
 {
@@ -57,12 +58,20 @@ namespace Repositories.Controllers
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDto dto)
         {
-
             var response = await _userService.UpdateUserByIdAsync(id, dto);
 
             return ResponseParser.Result(response);
         }
 
+        [HttpGet]
+        [Route("check/{id}")]
+
+        public async Task<IActionResult> CheckSeller(string id)
+        {
+            var response = await _userService.CheckSeller(id);
+            return ResponseParser.Result(response);
+        }
+        
         [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteUser(string id)

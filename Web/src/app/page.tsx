@@ -1,24 +1,27 @@
 import React, { useEffect } from "react";
-import Navbar from "@/Components/Navbar";
 import Background from "@/Components/Background";
-import Footer from "@/Components/Footer";
-
-import Announce from "@/Components/Announcement";
 import Banner from "@/Components/Banner";
-import Topticket from "@/Components/Topticket";
-import Product from "@/Components/Product";
+import Trend from "@/Components/Trend";
+import Navbar from "@/Components/Navbar";
+import Footer from "@/Components/Footer";
 
 const Home = () => {
   return (
     <div className="home">
       {/* <Announce/> */}
-
-      <Background test={<Banner />} />
+      <Navbar page={""} />
+      <Background
+        test={
+          <div>
+            <Banner />
+          </div>
+        }
+      />
+      <Trend />
+      <Footer />
       {/*     
       <Topticket />
       <Product /> */}
-
-      <div></div>
     </div>
   );
 };

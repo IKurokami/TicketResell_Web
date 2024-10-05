@@ -28,8 +28,10 @@ namespace TicketResell.Api.Controllers
             if (result.Data != null)
             {
                 var loginInfo = (LoginInfoDto)result.Data;
+
+                if (loginInfo.User != null) 
+                    HttpContext.SetUserId(loginInfo.User.UserId);
                 
-                HttpContext.SetuserId(loginInfo.User.UserId);
                 HttpContext.SetAccessKey(loginInfo.AccessKey);
                 HttpContext.SetIsAuthenticated(true);
             }
@@ -43,14 +45,23 @@ namespace TicketResell.Api.Controllers
             var result = await _authService.LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
             if (result.Data != null)
             {
-                var loginInfo = (LoginInfoDto)result.Data;
-                
-                HttpContext.SetuserId(loginInfo.User.UserId);
-                HttpContext.SetAccessKey(loginInfo.AccessKey);
-                HttpContext.SetIsAuthenticated(true);
+                if (result.Data is LoginInfoDto loginInfo)
+                {
+                    if (loginInfo.User != null) 
+                        HttpContext.SetUserId(loginInfo.User.UserId);
+                    
+                    HttpContext.SetAccessKey(loginInfo.AccessKey);
+                    HttpContext.SetIsAuthenticated(true);
+                }
             }
             
             return ResponseParser.Result(result);
+        }
+        
+        [HttpPost("islogged")]
+        public async Task<IActionResult> IsLogged()
+        {
+            return ResponseParser.Result(ResponseModel.Success(HttpContext.GetIsAuthenticated().ToString()));
         }
 
         [HttpPost("logout/{userId}")]
@@ -64,6 +75,9 @@ namespace TicketResell.Api.Controllers
             }
             
             var result = await _authService.LogoutAsync(userId);
+            HttpContext.SetIsAuthenticated(false);
+            HttpContext.SetAccessKey("");
+            HttpContext.SetUserId("");
             return ResponseParser.Result(result);
         }
     }

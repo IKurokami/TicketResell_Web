@@ -19,7 +19,7 @@ public class RevenueService : IRevenueService
 
     public async Task<ResponseModel> CreateRevenueAsync(RevenueCreateDto dto,bool saveAll)
     {
-        Revenue newRevenue = _mapper.Map<Revenue>(dto);
+        Revenue? newRevenue = _mapper.Map<Revenue>(dto);
         newRevenue.StartDate = DateTime.UtcNow;
         newRevenue.EndDate = newRevenue.StartDate.Value.AddMonths(1);
         newRevenue.Type = RevenueConstant.MONTH_TYPE;

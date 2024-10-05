@@ -17,11 +17,9 @@ body {
     width: 100vw;  /* Full viewport width */
     background-image: url('../../public/images/Background-default.jpg'); /* Set the background image */
     background-size: cover; /* Make sure the image covers the entire viewport */
-    background-position: center; /* Center the background image */
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
     overflow: hidden; /* Ensure no scrollbars appear */
     z-index: -3;
     filter: blur(30px);
@@ -33,7 +31,7 @@ body {
     box-sizing: border-box;
 }
 .Frontground {
-    min-height: 65vh; /* Minimum height to cover the viewport */
+    min-height: 40vh; /* Minimum height to cover the viewport */
     width: 100vw;       /* Full width of the viewport */
     background: linear-gradient(to top, white 10%, transparent); /* Gradient from white to transparent */
     z-index: 1; /* Ensure this layer is on top */

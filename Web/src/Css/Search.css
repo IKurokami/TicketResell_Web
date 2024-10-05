@@ -1,3 +1,4 @@
+
 /* Main container */
 .search-ticket-container {
     display: flex;
@@ -7,6 +8,7 @@
     background-color: #ffffff;
     max-width: 1910px;
     margin: 0 auto;
+    
 }
 
 /* Search header */
@@ -22,7 +24,8 @@
     display: flex;
     flex-grow: 1;
     max-width: 600px;
-    
+    order: 2;
+    /* Moves the search bar to the right */
 }
 
 .search-ticket-input {
@@ -78,6 +81,7 @@
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+
 }
 
 .ticket-filter-category {
@@ -89,6 +93,7 @@
     margin-bottom: 10px;
     font-weight: bold;
     color: #343a40;
+    flex-direction: column;
 }
 
 /* Checkbox styles */
@@ -118,7 +123,7 @@
     transition: all 0.3s ease;
 }
 
-.checkbox-label input:checked + .checkbox-custom {
+.checkbox-label input:checked+.checkbox-custom {
     background-color: #28a745;
     border-color: #28a745;
 }
@@ -134,7 +139,7 @@
     display: none;
 }
 
-.checkbox-label input:checked + .checkbox-custom::after {
+.checkbox-label input:checked+.checkbox-custom::after {
     display: block;
 }
 
@@ -151,7 +156,8 @@
     -webkit-appearance: none;
     height: 8px;
     border-radius: 5px;
-    background: #e9ecef; /* Initial default background */
+    background: #e9ecef;
+    /* Initial default background */
     outline: none;
     transition: background 0.3s ease;
 }
@@ -197,7 +203,8 @@
 /* Search results section */
 .ticket-search-results {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 products per row */
+    grid-template-columns: repeat(5, 1fr);
+    /* 5 products per row */
     gap: 20px;
 }
 
@@ -207,6 +214,8 @@
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    margin-top: 40px;
 }
 
 .ticket-card:hover {
@@ -250,6 +259,7 @@
     justify-content: center;
     gap: 10px;
     margin-top: 20px;
+    
 }
 
 .pagination button {
@@ -276,20 +286,33 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
-
+.slide-show{
+    width: 100vw;
+ 
+}
 /* Responsiveness */
 @media (max-width: 768px) {
     .search-header {
         flex-direction: column;
         align-items: stretch;
+        
+    }
+    .slide-show{
+        width: 770px;
+       height: 500px;
+      
     }
 
     .search-ticket-bar {
+        order: 1;
         margin-bottom: 10px;
+       
     }
 
     .filter-toggle {
-        align-self: flex-end;
+        order: 2;
+        align-self: flex-start;
+        margin-bottom: 10px;
     }
 
     .ticket-search-results {
@@ -300,5 +323,9 @@
 @media (max-width: 480px) {
     .ticket-search-results {
         grid-template-columns: 1fr;
+    }
+    .slide-show{
+        width: 480px;
+        height: 500px;
     }
 }

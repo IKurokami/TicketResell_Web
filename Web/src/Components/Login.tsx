@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"; // For Next.js 13+
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import "@/Css/Login.css"; // Import your CSS file
 import Cookies from 'js-cookie';
+
 interface TabProps {
   isActive: boolean;
   onClick: () => void;
@@ -48,9 +49,11 @@ const Login: React.FC = () => {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"buyer" | "seller">("buyer");
+  const [role] = useState<"buyer" | "seller">("buyer");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter(); // Initialize router
+  const [rememberMe, setRememberMe] = useState(false);
+
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -63,6 +66,7 @@ const Login: React.FC = () => {
         "http://localhost:5296/api/Authentication/login",
         {
           method: "POST",
+          credentials: 'include',
           headers: {
             "Content-Type": "application/json",
           },
@@ -81,8 +85,13 @@ const Login: React.FC = () => {
       } else {
         console.log( result.message);
         console.log(result);
-        Cookies.set("id", result.data.user.userId, { expires: 7 }); // Lưu trong 7 ngày
-        Cookies.set("accessKey", result.data.accessKey, { expires: 7 });
+        if (rememberMe) {
+          Cookies.set("id", result.data.user.userId, { expires: 7 }); // Save user ID for 7 days
+          Cookies.set("accessKey", result.data.accessKey, { expires: 7 }); // Save accessKey for 7 days
+        } else {
+          Cookies.set("id", result.data.user.userId); // Save session cookies (will be removed on browser close)
+          Cookies.set("accessKey", result.data.accessKey); 
+        }
         if(Cookies){
           console.log("cookie saved");
         }
@@ -147,6 +156,8 @@ const Login: React.FC = () => {
     }
   };
 
+
+  
   return (
     <div className="container">
       <div className="form-container">
@@ -188,7 +199,7 @@ const Login: React.FC = () => {
 
               <div className="flex-row">
                 <label>
-                  <input type="checkbox" /> Remember me
+                  <input type="checkbox" checked={rememberMe}  onChange={(e) => setRememberMe(e.target.checked)}/> Remember me
                 </label>
                 <a href="#">Forgot password?</a>
               </div>

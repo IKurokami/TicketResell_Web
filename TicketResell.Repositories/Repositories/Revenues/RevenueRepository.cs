@@ -33,7 +33,4 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
 
         return revenues;
     }
-
-    
-
 }
