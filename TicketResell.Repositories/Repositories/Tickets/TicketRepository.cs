@@ -20,7 +20,24 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         var tickets = await _context.Tickets.Include(x => x.Categories).ToListAsync();
         if (tickets == null || tickets.Count == 0)
         {
-            throw new KeyNotFoundException("Not found");
+            throw new KeyNotFoundException("No ticket in database");
+        }
+
+        return tickets;
+    }
+    
+    public async Task<List<Ticket>> GetTicketRangeAsync(int start, int count)
+    {
+        var tickets = await _context.Tickets
+            .OrderBy(t => t.CreateDate)
+            .Skip(start)
+            .Take(count)
+            .Include(x => x.Categories)
+            .ToListAsync();
+
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("No tickets found in the specified range");
         }
 
         return tickets;

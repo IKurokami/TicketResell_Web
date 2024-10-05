@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Repositories;
+using Repositories.Repositories.Carts;
 
 namespace TicketResell.Repositories.UnitOfWork
 {
@@ -22,6 +23,7 @@ namespace TicketResell.Repositories.UnitOfWork
             OrderDetailRepository = new OrderDetailRepository(_context);
             OrderRepository = new OrderRepository(_context);
             CategoryRepository = new CategoryRepository(_context);
+            CartRepository = new CartRepository(_context);
         }
 
         public IUserRepository UserRepository { get; }
@@ -33,6 +35,7 @@ namespace TicketResell.Repositories.UnitOfWork
         public IOrderDetailRepository OrderDetailRepository { get; }
         public IOrderRepository OrderRepository { get; }
         public ICategoryRepository CategoryRepository { get; }
+        public ICartRepository CartRepository { get; }
 
         public async Task<int> CompleteAsync()
         {

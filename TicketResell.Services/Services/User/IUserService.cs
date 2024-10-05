@@ -12,6 +12,8 @@ namespace TicketResell.Services.Services
         public Task<ResponseModel> UpdateUserByIdAsync(string id, UserUpdateDto dto, bool saveAll = true);
 
 
+        public Task<ResponseModel> CheckSeller(string id);
+        
         public Task<ResponseModel> DeleteUserByIdAsync(string id, bool saveAll = true);
     }
 }

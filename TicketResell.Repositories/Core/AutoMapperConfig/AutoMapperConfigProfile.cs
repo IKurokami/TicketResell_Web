@@ -9,6 +9,7 @@ using Repositories.Core.Dtos.SellConfig;
 using Repositories.Core.Dtos.Role;
 using Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Core.Dtos.Authentication;
+using TicketResell.Repositories.Core.Dtos.Cart;
 using Category = Repositories.Core.Entities.Category;
 
 namespace Repositories.Core.AutoMapperConfig
@@ -28,10 +29,13 @@ namespace Repositories.Core.AutoMapperConfig
             
             //Order
             CreateMap<OrderDto, Order>();
+            CreateMap<CartItemDto, OrderDetailDto>();
 
             //OrderDetail
             CreateMap<OrderDetailDto, OrderDetail>();
             CreateMap<OrderDetail, OrderDetailDto>();
+            //Cart
+            CreateMap<Order, CartDto>();
             
             CreateMap<SellConfigCreateDto, SellConfig>();
             CreateMap<SellConfig, SellConfigReadDto>();

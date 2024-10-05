@@ -14,11 +14,7 @@ namespace Repositories.Core.Dtos.User
         public string? Username { get; set; }
 
         public string? Password { get; set; }
-
-        public int? Status { get; set; }
-
-        public DateTime? CreateDate { get; set; }
-
+        
         public string? Gmail { get; set; }
 
         public string? Fullname { get; set; }
@@ -34,7 +30,5 @@ namespace Repositories.Core.Dtos.User
         public DateTime? Birthday { get; set; }
 
         public string? Bio { get; set; }
-
-        public int? Verify { get; set; }
     }
 }
