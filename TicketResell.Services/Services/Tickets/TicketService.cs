@@ -113,6 +113,12 @@ namespace TicketResell.Services.Services
             if(saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully deleted Ticket(s) with id: {id}" );
         }
+
+        public async Task<ResponseModel> GetTicketByCategoryAsync(string id)
+        {
+            var cate = await _unitOfWork.TicketRepository.GetTicketCateByIdAsync(id);
+            return ResponseModel.Success($"Successfully get Category of Ticket with id: {id}",cate);
+        }
     }
     
 }

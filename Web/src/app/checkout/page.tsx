@@ -1,15 +1,16 @@
-import React from "react";
+"use client";
+import React, { useRef, useState, useEffect } from 'react';
+import '@/Css/MyCart.css'; // Updated
 
-import Checkoutt from "@/Components/Checkout";
-import Background from "@/Components/Background";
+import Checkout from '@/Components/Checkout';
+import Background from '@/Components/Background';
 
-const Checkout = () => {
-  return (
-    <div className="Checkout">
-      <Background test={<Checkoutt />} />
-
-    </div>
-  );
+const Checkoutt = () => {
+    return (
+       
+        <Background test={ <Checkout/>} />
+   
+    );
 };
 
-export default Checkout;
+export default Checkoutt; // Updated

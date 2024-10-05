@@ -74,14 +74,14 @@ h2 {
 }
 
 .cart-table td button {
-  padding: 4px 8px;
+  padding: 2px 4px;
   font-size: 14px;
   /* Adjusted for better visibility */
   background-color: #00000088;
   color: #fff;
   border: none;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 4px;
   /* Slightly rounder buttons */
   transition: background-color 0.3s, transform 0.3s;
 }

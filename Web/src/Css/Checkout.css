@@ -1,63 +1,87 @@
-.checkout-container {
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
 }
 
-.checkout-container h2 {
-    text-align: center;
-    color: #2a9d8f;
-    margin-bottom: 20px;
+.checkout-container {
+    max-width: 2500px;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 150px;
+}
+
+h2,
+h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
 }
 
 .ticket-summary {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    margin-bottom: 2rem;
 }
 
-.ticket-summary h3 {
-    color: #2a9d8f;
-    margin-bottom: 10px;
-}
-
-.ticket-summary ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.ticket-summary ul li {
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
+.ticket-item {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
-.ticket-summary img {
-    max-width: 150px;
-    margin: 10px 0;
+.ticket-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.checkout-container button {
+.ticket-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 1rem;
+}
+
+.ticket-details {
+    flex-grow: 1;
+}
+
+.ticket-details p {
+    margin: 0.25rem 0;
+}
+
+.qr-code {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.qr-code img {
+    max-width: 200px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.info-btn {
     display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #2a9d8f;
-    color: white;
+    margin: 0 auto; /* Center the button */
+    padding: 1rem 2rem; /* Increase padding for more height and width */
+    background-color: #3498db;
+    color: #ffffff;
     border: none;
-    border-radius: 5px;
-    font-size: 16px;
+    border-radius: 4px;
+    font-size: 1rem;
     cursor: pointer;
-    margin-top: 20px;
+    transition: background-color 0.3s ease;
+    max-width: 300px; /* Increase max width for a longer button */
 }
 
-.checkout-container button:hover {
-    background-color: #21867a;
+.info-btn:hover {
+    background-color: #2980b9;
 }
 
 .modal {
@@ -66,59 +90,72 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
-    text-align: center;
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
 }
 
 .modal-content h3 {
-    color: #2a9d8f;
-    margin-bottom: 20px;
+    margin-top: 0;
 }
 
 .modal-content label {
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 1rem;
 }
 
 .modal-content input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
+    padding: 0.5rem;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .modal-content button {
-    padding: 10px 20px;
-    margin: 5px;
-    cursor: pointer;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #2ecc71;
+    color: #ffffff;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.modal-content button:first-of-type {
-    background-color: #2a9d8f;
-    color: white;
+.modal-content button:hover {
+    background-color: #27ae60;
 }
 
-.modal-content button:first-of-type:hover {
-    background-color: #21867a;
+.modal-content button:last-child {
+    background-color: #e74c3c;
+    margin-left: 0.5rem;
 }
 
-.modal-content button:last-of-type {
-    background-color: #ddd;
+.modal-content button:last-child:hover {
+    background-color: #c0392b;
 }
 
-.modal-content button:last-of-type:hover {
-    background-color: #bbb;
+@media screen and (max-width: 1500px) {
+    .info-btn {
+        max-width: 160px; /* Adjust max width for medium screens */
+        flex-shrink: 0;
+    }
+}
+
+@media screen and (max-width: 430px) {
+    .info-btn {
+        max-width: 120px; /* Further adjust max width for small screens */
+        margin: 0 auto; /* Center the button */
+        flex-shrink: 0;
+
+    }
 }
