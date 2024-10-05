@@ -8,6 +8,7 @@ using Repositories.Core.Validators;
 using Api.Middlewares;
 using StackExchange.Redis;
 using TicketResell.Repositories.UnitOfWork;
+using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Categories;
 using TicketResell.Services.Services.Tickets;
 using TicketResell.Services.Services.Categories;
@@ -43,6 +44,8 @@ builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ISellConfigService, SellConfigService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<ICartService, CartService>();
+
 
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);
 
@@ -55,13 +58,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<TicketValidator>();
 builder.Services.AddScoped<Repositories.Core.Validators.IValidatorFactory, ValidatorFactory>();
 
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000") // Add your front-end URL
+            policy.WithOrigins("http://localhost:3000")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -81,6 +83,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ValidatorMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.MapControllers();
 app.Run();
 
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", "default");

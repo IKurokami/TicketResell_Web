@@ -60,12 +60,25 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket: {ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> GetTicketAsync()
+        public async Task<ResponseModel> GetTicketsAsync()
         {
             var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
 
             var ticketDtos = _mapper.Map<List<TickerReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get ticket", ticketDtos);
+        }
+        
+        public async Task<ResponseModel> GetTicketRangeAsync(int start, int count)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketRangeAsync(start, count);
+
+            if (tickets == null || !tickets.Any())
+            {
+                return ResponseModel.NotFound("No tickets found in the specified range");
+            }
+
+            var ticketDtos = _mapper.Map<List<TickerReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully retrieved {tickets.Count} tickets", ticketDtos);
         }
 
         public async Task<ResponseModel> GetTicketByDateAsync(DateTime date)

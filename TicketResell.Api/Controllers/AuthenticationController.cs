@@ -28,8 +28,10 @@ namespace TicketResell.Api.Controllers
             if (result.Data != null)
             {
                 var loginInfo = (LoginInfoDto)result.Data;
+
+                if (loginInfo.User != null) 
+                    HttpContext.SetUserId(loginInfo.User.UserId);
                 
-                HttpContext.SetUserId(loginInfo.User.UserId);
                 HttpContext.SetAccessKey(loginInfo.AccessKey);
                 HttpContext.SetIsAuthenticated(true);
             }
