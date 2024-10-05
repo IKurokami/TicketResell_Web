@@ -7,21 +7,27 @@ import { useScroll } from "@/Hooks/useScroll";
 import { checkAccessKey } from "./Cookie";
 import { logoutUser } from "./Logout";
 import Cookies from "js-cookie";
-import { removeAllCookies } from "./Cookie";
+// import { removeAllCookies } from "./Cookie";
 // import { removeCookie  } from "./Cookie";
 import { useRouter } from "next/navigation";
-const Navbar: React.FC = () => {
+
+interface NavbarProps {
+  page: string;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const [menuActive, setMenuActive] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
-  const isScrolled = useScroll();
+  const adjustedIsScrolled = useScroll();
+  const isScrolled = page === "ticket" ? false : adjustedIsScrolled;
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
   const router = useRouter();
-
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
   };
+  console.log(page);
 
   const handleMenuToggle = () => {
     setMenuActive(!menuActive);
@@ -81,7 +87,7 @@ const Navbar: React.FC = () => {
     const isValid = await checkAccessKey();
 
     // removeCookie('id');
-    removeAllCookies();
+
     if (isValid) {
       setIsLoggedIn(true);
       console.log("login success");
@@ -131,15 +137,28 @@ const Navbar: React.FC = () => {
       router.push("/login"); // Redirect to login after successful logout
     } else {
       console.log("Failed to log out. Please try again.");
+      // Nếu không hợp lệ, chuyển đến trang login
+      router.push("/login");
     }
   };
 
   return (
-    <header className={`navbarr ${isScrolled ? "scrolled" : ""}`}>
+    <header
+      className={`${isScrolled ? "navbarr scrolled" : "navbarr"}`}
+      style={{
+        backgroundColor: page === "ticket" ? "white" : undefined,
+        boxShadow: page === "ticket" ? "0 2px 5px rgba(0, 0, 0, 0.2)" : "none",
+      }}
+    >
       <div className="navbarr-brand">
         <Link href="/" className="logo">
           <span className="logo-green">Ticket</span>{" "}
-          <span className="resell">Resell</span>
+          <span
+            className="resell"
+            style={{ color: page === "ticket" ? "black" : undefined }}
+          >
+            Resell
+          </span>
         </Link>
       </div>
 
@@ -152,13 +171,28 @@ const Navbar: React.FC = () => {
       <nav className={`nav-links ${menuActive ? "active" : ""}`}>
         <ul>
           <li>
-            <Link href="/">Home</Link>
+            <Link
+              href="/"
+              style={{ color: page === "ticket" ? "black" : undefined }}
+            >
+              Home
+            </Link>
           </li>
           <li>
-            <Link href="/sell">Sell</Link>
+            <Link
+              href="/sell"
+              style={{ color: page === "ticket" ? "black" : undefined }}
+            >
+              Sell
+            </Link>
           </li>
           <li>
-            <Link href="/contact">Contact Us</Link>
+            <Link
+              href="/contact"
+              style={{ color: page === "ticket" ? "black" : undefined }}
+            >
+              Contact Us
+            </Link>
           </li>
         </ul>
       </nav>
@@ -173,13 +207,19 @@ const Navbar: React.FC = () => {
           value={searchTerm}
           onChange={handleSearchChange}
           className="search-input"
+          style={{
+            backgroundColor: page === "ticket" ? "rgb(0,0,0,0.1)" : undefined,
+          }}
         />
         <button
           type="button"
           className="search-button"
           onClick={handleSearchIconClick}
         >
-          <i className="fas fa-search"></i>
+          <i
+            className="fas fa-search"
+            style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
+          ></i>
         </button>
       </form>
 
@@ -263,11 +303,22 @@ const Navbar: React.FC = () => {
           aria-label="Cart"
           onClick={handleCartClick}
         >
-          <i className="fas fa-shopping-cart"></i>
+          <i
+            className="fas fa-shopping-cart"
+            style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
+          ></i>
         </a>
 
-        <a href="#" className="icon-link noti-icon" aria-label="Notifications">
-          <i className="fas fa-bell"></i>
+        <a
+          href="#"
+          className="icon-link noti-icon"
+          style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
+          aria-label="Notifications"
+        >
+          <i
+            className="fas fa-bell"
+            style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
+          ></i>
           <span className="noti-badge">3</span> {/* Notification count */}
         </a>
       </div>

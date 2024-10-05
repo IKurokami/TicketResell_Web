@@ -17,4 +17,6 @@ public interface ITicketService
     public Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto,bool saveAll = true);
     
     public Task<ResponseModel> DeleteTicketAsync(string id,bool saveAll = true);
+    public Task<ResponseModel> GetTicketByCategoryAsync(string id);
+     
 }

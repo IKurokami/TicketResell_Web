@@ -1,4 +1,5 @@
 using Repositories.Core.Context;
+using Repositories.Core.Dtos.Category;
 using Repositories.Core.Entities;
 
 namespace Repositories.Repositories;
@@ -41,10 +42,21 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
         return tickets;
     }
-    
+
+    public async Task<Ticket> GetByIdAsync(string id)
+    {
+        var ticket = await _context.Tickets.Include(x => x.Seller).FirstAsync(x => x.TicketId == id);
+        if (ticket == null)
+        {
+            throw new KeyNotFoundException("Id is not found");
+        }
+
+        return ticket;
+    }
+
     public async Task<List<Ticket>> GetTicketByNameAsync(string name)
     {
-        var tickets = await _context.Tickets.Where(x => x.Name == name).Include(x => x.Categories).ToListAsync();
+        var tickets = await _context.Tickets.Include(x => x.Seller).Where(x => x.Name == name).ToListAsync();
         if (tickets == null || tickets.Count == 0)
         {
             throw new KeyNotFoundException("Name is not found");
@@ -94,6 +106,16 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         _context.Tickets.Remove(ticket);
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<ICollection<Category>?> GetTicketCateByIdAsync(string id)
+    {
+        var categories = await _context.Tickets
+            .Where(t => t.TicketId == id)
+            .Select(t => t.Categories)
+            .FirstOrDefaultAsync();
+        return categories;
+
     }
 
 }
