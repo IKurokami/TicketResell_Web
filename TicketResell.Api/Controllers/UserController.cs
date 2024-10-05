@@ -63,6 +63,15 @@ namespace Repositories.Controllers
             return ResponseParser.Result(response);
         }
 
+        [HttpGet]
+        [Route("check/{id}")]
+
+        public async Task<IActionResult> CheckSeller(string id)
+        {
+            var response = await _userService.CheckSeller(id);
+            return ResponseParser.Result(response);
+        }
+        
         [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteUser(string id)

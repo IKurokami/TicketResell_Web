@@ -7,8 +7,7 @@ import { useScroll } from "@/Hooks/useScroll";
 import { checkAccessKey } from "./Cookie";
 import { logoutUser } from "./Logout";
 import Cookies from "js-cookie";
-// import { removeAllCookies } from "./Cookie";
-// import { removeCookie  } from "./Cookie";
+import { removeAllCookies } from "./Cookie";
 import { useRouter } from "next/navigation";
 
 interface NavbarProps {
@@ -133,6 +132,8 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const handleLogout = async () => {
     const isLoggedOut = await logoutUser(Cookies.get("id"));
     if (isLoggedOut) {
+      removeAllCookies();
+      setDropdownVisible(false);
       setIsLoggedIn(false);
       router.push("/login"); // Redirect to login after successful logout
     } else {
@@ -243,7 +244,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
               />
             </a>
           )}
-          {isDropdownVisible && isLoggedIn && (
+          {isDropdownVisible  && (
             <div className="user-dropdown visible">
               <ul>
                 <li>
