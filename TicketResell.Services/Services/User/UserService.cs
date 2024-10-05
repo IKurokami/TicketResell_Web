@@ -61,19 +61,26 @@ namespace TicketResell.Services.Services
         public async Task<ResponseModel> UpdateUserByIdAsync(string id, UserUpdateDto dto, bool saveAll)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+            
+            if (string.IsNullOrEmpty(dto.Password))
+            {
+                dto.Password = user.Password;
+            }
+            
             _mapper.Map(dto, user);
-
+            
             var validator = _validatorFactory.GetValidator<User>();
 
             var validationResult = validator.Validate(user);
             if (!validationResult.IsValid)
             {
-                return ResponseModel.BadRequest("Validation error", validationResult.Errors.ToString());
+                return ResponseModel.BadRequest("Validation error", validationResult.Errors);
             }
+            
             _unitOfWork.UserRepository.Update(user);
             if (saveAll)
                 await _unitOfWork.CompleteAsync();
-            return ResponseModel.Success($"Successfully updated user: {user.Username}");
+            return ResponseModel.Success($"Successfully updated user: {user.Username}", _mapper.Map<UserReadDto>(user));
         }
 
         public async Task<ResponseModel> CheckSeller(string id)

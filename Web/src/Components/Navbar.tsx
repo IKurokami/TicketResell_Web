@@ -8,22 +8,25 @@ import { checkAccessKey } from "./Cookie";
 import { logoutUser } from "./Logout";
 import Cookies from "js-cookie";
 import { removeAllCookies } from "./Cookie";
-import { CheckSeller } from "./CheckSeller";
 import { useRouter } from "next/navigation";
-import SellPopup from "./PopUp";
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  page: string;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const [menuActive, setMenuActive] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
-  const isScrolled = useScroll();
+  const adjustedIsScrolled = useScroll();
+  const isScrolled = page === "ticket" ? false : adjustedIsScrolled;
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
-  const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
   const router = useRouter();
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
   };
+  console.log(page);
 
   const handleMenuToggle = () => {
     setMenuActive(!menuActive);
@@ -47,8 +50,6 @@ const Navbar: React.FC = () => {
   //   console.log("Redirecting to:", route);
   //   // Implement routing logic here
   // };
-
-  //Handle Seller
 
   const handleMenuItemClick = async (
     event: React.MouseEvent<HTMLAnchorElement>,
@@ -95,28 +96,6 @@ const Navbar: React.FC = () => {
     }
   };
 
-  //Handle sell button
-
-  const handleSellClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-
-    // Fetch seller status
-    const status = await CheckSeller();
-    console.log("Seller Status: ", status); // Log the status
-
-    // Routing or popup logic
-    if (status) {
-      router.push("/sell");
-    } else {
-      console.log("User is not a seller, showing popup");
-      setIsPopupVisible(true);
-    }
-  };
-
-  const closeDropdown = () => {
-    setIsPopupVisible(false);
-  };
-
   // Handle show icon when login
 
   useEffect(() => {
@@ -153,21 +132,34 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     const isLoggedOut = await logoutUser(Cookies.get("id"));
     if (isLoggedOut) {
+      removeAllCookies();
       setDropdownVisible(false);
       setIsLoggedIn(false);
-      removeAllCookies();
       router.push("/login"); // Redirect to login after successful logout
     } else {
       console.log("Failed to log out. Please try again.");
+      // Nếu không hợp lệ, chuyển đến trang login
+      router.push("/login");
     }
   };
 
   return (
-    <header className={`navbarr ${isScrolled ? "scrolled" : ""}`}>
+    <header
+      className={`${isScrolled ? "navbarr scrolled" : "navbarr"}`}
+      style={{
+        backgroundColor: page === "ticket" ? "white" : undefined,
+        boxShadow: page === "ticket" ? "0 2px 5px rgba(0, 0, 0, 0.2)" : "none",
+      }}
+    >
       <div className="navbarr-brand">
         <Link href="/" className="logo">
           <span className="logo-green">Ticket</span>{" "}
-          <span className="resell">Resell</span>
+          <span
+            className="resell"
+            style={{ color: page === "ticket" ? "black" : undefined }}
+          >
+            Resell
+          </span>
         </Link>
       </div>
 
@@ -177,23 +169,35 @@ const Navbar: React.FC = () => {
       </button>
 
       {/* Navigation Links */}
-
       <nav className={`nav-links ${menuActive ? "active" : ""}`}>
         <ul>
           <li>
-            <Link href="/">Home</Link>
+            <Link
+              href="/"
+              style={{ color: page === "ticket" ? "black" : undefined }}
+            >
+              Home
+            </Link>
           </li>
           <li>
-            <Link href="#" onClick={handleSellClick}>
+            <Link
+              href="/sell"
+              style={{ color: page === "ticket" ? "black" : undefined }}
+            >
               Sell
             </Link>
           </li>
           <li>
-            <Link href="/contact">Contact Us</Link>
+            <Link
+              href="/contact"
+              style={{ color: page === "ticket" ? "black" : undefined }}
+            >
+              Contact Us
+            </Link>
           </li>
         </ul>
       </nav>
-      <SellPopup isVisible={isPopupVisible} onClose={closeDropdown} />
+
       <form
         className={`search-form ${isSearchVisible ? "visible" : ""}`}
         onSubmit={handleSearchSubmit}
@@ -204,13 +208,19 @@ const Navbar: React.FC = () => {
           value={searchTerm}
           onChange={handleSearchChange}
           className="search-input"
+          style={{
+            backgroundColor: page === "ticket" ? "rgb(0,0,0,0.1)" : undefined,
+          }}
         />
         <button
           type="button"
           className="search-button"
           onClick={handleSearchIconClick}
         >
-          <i className="fas fa-search"></i>
+          <i
+            className="fas fa-search"
+            style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
+          ></i>
         </button>
       </form>
 
@@ -234,7 +244,7 @@ const Navbar: React.FC = () => {
               />
             </a>
           )}
-          {isDropdownVisible && (
+          {isDropdownVisible  && (
             <div className="user-dropdown visible">
               <ul>
                 <li>
@@ -294,11 +304,22 @@ const Navbar: React.FC = () => {
           aria-label="Cart"
           onClick={handleCartClick}
         >
-          <i className="fas fa-shopping-cart"></i>
+          <i
+            className="fas fa-shopping-cart"
+            style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
+          ></i>
         </a>
 
-        <a href="#" className="icon-link noti-icon" aria-label="Notifications">
-          <i className="fas fa-bell"></i>
+        <a
+          href="#"
+          className="icon-link noti-icon"
+          style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
+          aria-label="Notifications"
+        >
+          <i
+            className="fas fa-bell"
+            style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
+          ></i>
           <span className="noti-badge">3</span> {/* Notification count */}
         </a>
       </div>

@@ -28,7 +28,24 @@ namespace TicketResell.Api.Controllers
         [Route("read")]
         public async Task<IActionResult> GetTicket()
         {
-            var response = await _ticketService.GetTicketAsync();
+            var response = await _ticketService.GetTicketsAsync();
+            return ResponseParser.Result(response);
+        }
+        
+        [HttpPost("getrange")]
+        public async Task<IActionResult> GetTicketRange([FromBody] NumberRange range)
+        {
+            if (range.From < 0 || range.To < 0)
+            {
+                return ResponseParser.Result(ResponseModel.BadRequest("Range from cannot be negative"));
+            }
+
+            if (range.From > range.To)
+            {
+                return ResponseParser.Result(ResponseModel.BadRequest("Range from cannot be greater than the range to"));
+            }
+            
+            var response = await _ticketService.GetTicketRangeAsync(range.From, range.To - range.From + 1);
             return ResponseParser.Result(response);
         }
 
@@ -37,6 +54,14 @@ namespace TicketResell.Api.Controllers
         public async Task<IActionResult> GetTicketById(string id)
         {
             var response = await _ticketService.GetTicketByIdAsync(id);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpGet]
+        [Route("readcatebyid/{id}")]
+        public async Task<IActionResult> GetTicketByCategoryId(string id)
+        {
+            var response = await _ticketService.GetTicketByCategoryAsync(id);
             return ResponseParser.Result(response);
         }
 

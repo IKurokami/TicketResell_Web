@@ -1,17 +1,64 @@
+.bg-ticket-detail {
+  background: #ffffff;
+}
 .container {
-  margin-top: 15vh;
+  margin-top: 10vh;
   padding-top: 5vh;
-  background: white;
+  padding-bottom: 5vh;
+  /* background: #1e1e1e; */
 }
 .ticket--detail {
   margin-bottom: 10vh;
 }
 .ticket--info {
-  color: black;
-  margin-left: 3vw;
+  color: white;
+  margin-left: 0.5vw;
+}
+
+.ticket--price--block {
+  margin-top: 5vh;
+  color: white;
+  padding: 5.125vh 2vh;
+  background-color: #515151;
+}
+.Tag {
+  margin-left: 2vh;
+  margin-right: 2vh;
 }
 .ticket--price {
-  color: black;
+  font-size: 3rem;
+  font-weight: 500;
+  color: #fff;
+}
+.cta {
+  display: flex;
+}
+.dropdown {
+  margin-top: 1vh;
+}
+.ticket--btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #27ae60;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border: #fff;
+  padding: 2vh 2vw;
+  margin-left: 1vw;
+
+  border-radius: 5px;
+}
+.ticket--btn:hover {
+  opacity: 0.8;
+}
+.cart--icon {
+  margin-right: 1vw;
+}
+.seller--link {
+  text-decoration: none;
+  color: #27ae60;
 }
 .ticket--desc {
   padding-bottom: 10vh;
@@ -30,28 +77,20 @@
 
 .ticket--img {
   object-fit: contain;
-}
-.desc--list {
-  margin-top: 10px;
-  list-style-type: none;
-  display: flex;
-  justify-content: center;
-}
-.desc--item {
-  color: black;
-  text-decoration: none;
-  padding: 10px;
-  background: white;
+  max-height: 100vh;
 }
 
-.desc--item:hover {
-  background: #27ae60;
-}
-
-.desc--item.active {
-  border-bottom: 2px solid #27ae60;
-}
 .ticket--title {
   margin-bottom: 5vh;
+  color: #fff;
+}
+.ticket--item {
+  margin: 2vh 1vw;
+  padding: 2vh 1vw;
 }
 
+.ticket--list {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+}

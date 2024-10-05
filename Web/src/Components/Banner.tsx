@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretRight, faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import "@/Css/Banner.css";
 import useShowItem from "@/Hooks/useShowItem";
-import Link from "next/link";
+import Link from "next/link"; 
 import {
   fetchBannerItems,
   CategoriesPage,
@@ -30,6 +30,7 @@ const Banner = () => {
 
   // Fetch banner items when the component mounts
   useEffect(() => {
+    console.log("Component mounted");
     const fetchData = async () => {
       const data = await fetchBannerItems();
       setBannerItems(data);

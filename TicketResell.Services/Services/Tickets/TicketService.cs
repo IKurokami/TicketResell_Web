@@ -60,12 +60,25 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket: {ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> GetTicketAsync()
+        public async Task<ResponseModel> GetTicketsAsync()
         {
             var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
 
             var ticketDtos = _mapper.Map<List<TickerReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get ticket", ticketDtos);
+        }
+        
+        public async Task<ResponseModel> GetTicketRangeAsync(int start, int count)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketRangeAsync(start, count);
+
+            if (tickets == null || !tickets.Any())
+            {
+                return ResponseModel.NotFound("No tickets found in the specified range");
+            }
+
+            var ticketDtos = _mapper.Map<List<TickerReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully retrieved {tickets.Count} tickets", ticketDtos);
         }
 
         public async Task<ResponseModel> GetTicketByDateAsync(DateTime date)
@@ -112,6 +125,12 @@ namespace TicketResell.Services.Services
             await _unitOfWork.TicketRepository.DeleteTicketAsync(id);
             if(saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully deleted Ticket(s) with id: {id}" );
+        }
+
+        public async Task<ResponseModel> GetTicketByCategoryAsync(string id)
+        {
+            var cate = await _unitOfWork.TicketRepository.GetTicketCateByIdAsync(id);
+            return ResponseModel.Success($"Successfully get Category of Ticket with id: {id}",cate);
         }
     }
     

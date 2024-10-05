@@ -6,11 +6,11 @@ const useShowItem = () => {
 
   useEffect(() => {
     const updateItemsToShow = () => {
-      if (window.innerWidth < 900) {
+      if (window.innerWidth < 700) {
         setItemsToShow(1); // Small screens
-      } else if (window.innerWidth < 1350) {
+      } else if (window.innerWidth < 1000) {
         setItemsToShow(2); // Medium screens
-      } else if (window.innerWidth < 1850) {
+      } else if (window.innerWidth < 1350) {
         setItemsToShow(3); // Large screens
       } else {
         setItemsToShow(4); // Extra-large screens

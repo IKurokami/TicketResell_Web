@@ -8,8 +8,10 @@ using Repositories.Core.Validators;
 using Api.Middlewares;
 using StackExchange.Redis;
 using TicketResell.Repositories.UnitOfWork;
+using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Categories;
 using TicketResell.Services.Services.Tickets;
+using TicketResell.Services.Services.Categories;
 
 Env.Load();
 
@@ -36,11 +38,14 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ISellConfigService, SellConfigService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<ICartService, CartService>();
+
 
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);
 
@@ -53,19 +58,16 @@ builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<TicketValidator>();
 builder.Services.AddScoped<Repositories.Core.Validators.IValidatorFactory, ValidatorFactory>();
 
-
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000") // Your Next.js front-end URL
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials(); // Allow credentials (cookies) to be sent
-    });
+    options.AddPolicy("AllowSpecificOrigin",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
-
-
 
 builder.Services.AddSession(options =>
 {
