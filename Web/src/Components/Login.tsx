@@ -66,6 +66,7 @@ const Login: React.FC = () => {
         "http://localhost:5296/api/Authentication/login",
         {
           method: "POST",
+          credentials: 'include',
           headers: {
             "Content-Type": "application/json",
           },

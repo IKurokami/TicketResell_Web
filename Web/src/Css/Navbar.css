@@ -307,6 +307,9 @@
     align-items: center;
     gap: 10px;
   }
+  .nav-links ul li a{
+    color: black;
+  }
 }
 
 @media (max-width: 550px) {

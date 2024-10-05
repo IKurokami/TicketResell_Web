@@ -8,6 +8,7 @@ using Repositories.Core.Validators;
 using Api.Middlewares;
 using StackExchange.Redis;
 using TicketResell.Repositories.UnitOfWork;
+using TicketResell.Services.Services.Categories;
 using TicketResell.Services.Services.Tickets;
 
 Env.Load();
@@ -31,6 +32,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITicketService, TicketService>();

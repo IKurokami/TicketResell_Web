@@ -3,9 +3,11 @@ export const logoutUser = async (userId: string | undefined) => {
     try {
       const response = await fetch(`http://localhost:5296/api/Authentication/logout/${userId}`, {
         method: "POST", // or "DELETE" depending on your API
+        credentials: 'include',
         headers: {
           "Content-Type": "application/json",
         },
+
       });
   
       if (response.ok) {

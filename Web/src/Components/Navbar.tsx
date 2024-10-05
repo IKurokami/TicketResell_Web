@@ -3,22 +3,24 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import "@/Css/Navbar.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import useScroll from "@/Hooks/useScroll";
+import { useScroll } from "@/Hooks/useScroll";
 import { checkAccessKey } from "./Cookie";
 import { logoutUser } from "./Logout";
 import Cookies from "js-cookie";
-// import { removeAllCookies } from "./Cookie";
-// import { removeCookie  } from "./Cookie";
+import { removeAllCookies } from "./Cookie";
+import { CheckSeller } from "./CheckSeller";
 import { useRouter } from "next/navigation";
+import SellPopup from "./PopUp";
+
 const Navbar: React.FC = () => {
   const [menuActive, setMenuActive] = useState<boolean>(false);
-  const [isLoggedIn,setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
   const isScrolled = useScroll();
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
+  const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
   const router = useRouter();
-
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
   };
@@ -46,6 +48,8 @@ const Navbar: React.FC = () => {
   //   // Implement routing logic here
   // };
 
+  //Handle Seller
+
   const handleMenuItemClick = async (
     event: React.MouseEvent<HTMLAnchorElement>,
     path: string
@@ -65,31 +69,52 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const handleCartClick = () => {
-    console.log("Cart clicked");
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push("/my-cart");
     // Implement cart handling logic here
   };
-
 
   // Handle check cookie
   const handleSignInClick = async (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
-    event.preventDefault(); 
+    event.preventDefault();
     console.log("handleSignInClick is called");
 
     const isValid = await checkAccessKey();
 
     // removeCookie('id');
-    
+
     if (isValid) {
       setIsLoggedIn(true);
       console.log("login success");
       router.push("/");
     } else {
-      
       router.push("/login");
     }
+  };
+
+  //Handle sell button
+
+  const handleSellClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    // Fetch seller status
+    const status = await CheckSeller();
+    console.log("Seller Status: ", status); // Log the status
+
+    // Routing or popup logic
+    if (status) {
+      router.push("/sell");
+    } else {
+      console.log("User is not a seller, showing popup");
+      setIsPopupVisible(true);
+    }
+  };
+
+  const closeDropdown = () => {
+    setIsPopupVisible(false);
   };
 
   // Handle show icon when login
@@ -97,7 +122,7 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     // Function to check if the user is logged in by checking for the 'id' cookie
     const checkUserLoginStatus = () => {
-      const id = Cookies.get('id'); // Get the user ID from the cookie
+      const id = Cookies.get("id"); // Get the user ID from the cookie
       if (id) {
         setIsLoggedIn(true); // User is logged in
       } else {
@@ -124,12 +149,13 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
-
   // Handle logout
   const handleLogout = async () => {
     const isLoggedOut = await logoutUser(Cookies.get("id"));
     if (isLoggedOut) {
-     setIsLoggedIn(false);
+      setDropdownVisible(false);
+      setIsLoggedIn(false);
+      removeAllCookies();
       router.push("/login"); // Redirect to login after successful logout
     } else {
       console.log("Failed to log out. Please try again.");
@@ -151,20 +177,23 @@ const Navbar: React.FC = () => {
       </button>
 
       {/* Navigation Links */}
+
       <nav className={`nav-links ${menuActive ? "active" : ""}`}>
         <ul>
           <li>
             <Link href="/">Home</Link>
           </li>
           <li>
-            <Link href="/sell">Sell</Link>
+            <Link href="#" onClick={handleSellClick}>
+              Sell
+            </Link>
           </li>
           <li>
             <Link href="/contact">Contact Us</Link>
           </li>
         </ul>
       </nav>
-
+      <SellPopup isVisible={isPopupVisible} onClose={closeDropdown} />
       <form
         className={`search-form ${isSearchVisible ? "visible" : ""}`}
         onSubmit={handleSearchSubmit}
@@ -205,7 +234,7 @@ const Navbar: React.FC = () => {
               />
             </a>
           )}
-          {isDropdownVisible && isLoggedIn && (
+          {isDropdownVisible && (
             <div className="user-dropdown visible">
               <ul>
                 <li>
@@ -249,7 +278,7 @@ const Navbar: React.FC = () => {
                   </a>
                 </li>
                 <li>
-                  <Link href="/login"  onClick={handleLogout}>
+                  <Link href="/login" onClick={handleLogout}>
                     Logout
                   </Link>
                 </li>

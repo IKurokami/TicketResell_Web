@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Repositories.Core.Entities;
 using Repositories.Core.Helper;
 using TicketResell.Repositories.UnitOfWork;
 
