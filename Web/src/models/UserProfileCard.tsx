@@ -154,7 +154,7 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
     const handleCloseEditModal = () => setIsEditModalOpen(false);
 
     return (
-        <div className="bg-transparent min-h-screen font-sans mt-16">
+        <div className="bg-transparent min-h-96 pb-32 font-sans mt-16">
             <div className="max-w-md mx-auto pt-16 px-4">
                 {/* Header */}
                 <div className="bg-white rounded-t-xl shadow-sm">
