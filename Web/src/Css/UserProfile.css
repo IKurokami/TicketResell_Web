@@ -4,6 +4,10 @@
     animation: fadeIn 1s ease-in-out;
 }
 
+.container{
+    margin-top: 0;
+}
+
 .profile-container {
     max-width: 1200px;
     margin: 0 auto;
