@@ -2,16 +2,18 @@ using Microsoft.EntityFrameworkCore;
 using Repositories.Constants;
 using Repositories.Core.Context;
 using Repositories.Core.Entities;
+using TicketResell.Repositories.Logger;
 
 namespace Repositories.Repositories
 {
     public class UserRepository : GenericRepository<User>, IUserRepository
     {
         private readonly TicketResellManagementContext _context;
-
-        public UserRepository(TicketResellManagementContext context) : base(context)
+        public readonly IAppLogger _logger;
+        public UserRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
         {
             _context = context;
+            _logger = logger;
         }
 
         public new async Task CreateAsync(User? user)
@@ -23,7 +25,7 @@ namespace Repositories.Repositories
                 user?.Roles.Add(role);
             }
 
-            if (user != null) 
+            if (user != null)
                 await _context.Users.AddAsync(user);
         }
 
@@ -39,7 +41,7 @@ namespace Repositories.Repositories
                 .Include(x => x.Roles)
                 .FirstOrDefaultAsync();
         }
-        
+
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Gmail == email);
@@ -48,12 +50,12 @@ namespace Repositories.Repositories
         public async Task<bool> CheckRoleSell(string id)
         {
             var roleId = RoleConstant.roleSeller;
-            
+
             var user = await _context.Users
-                .Include(u => u.Roles)       
-                .ThenInclude(x => x.Users)       
+                .Include(u => u.Roles)
+                .ThenInclude(x => x.Users)
                 .FirstOrDefaultAsync(u => u.UserId == id);
-            
+
             if (user != null && user.Roles.Any(ur => ur.RoleId == roleId))
             {
                 return true;
@@ -62,5 +64,17 @@ namespace Repositories.Repositories
             return false;
         }
 
+        public async Task RegisterSeller(User? user)
+        {
+            var roleId = RoleConstant.roleSeller;
+            var role = await _context.Roles.FindAsync(roleId);
+            if (role != null)
+            {
+                user?.Roles.Add(role);
+            }
+
+            if (user != null)
+                _context.Users.Update(user);
+        }
     }
 }

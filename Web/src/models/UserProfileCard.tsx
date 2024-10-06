@@ -1,260 +1,319 @@
-import React, { useState } from 'react';
-import { FaPencilAlt, FaPhoneAlt, FaEnvelope, FaUser, FaVenusMars, FaBirthdayCake, FaSave } from "react-icons/fa";
+import React, { useState } from "react";
+import {
+  FaPencilAlt,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaUser,
+  FaChevronRight,
+  FaSave,
+} from "react-icons/fa";
 
 export interface UserProfileCard {
-    id: string;
-    username: string;
-    email: string;
-    avatar: string | null;
-    phone: string | null;
-    address: string | null;
-    status: number;
-    fullname: string | null;
-    sex: string | null;
-    createDate: string;
-    sellConfigId: string | null;
-    bio: string | null;
-    birthday: string | null;
-    roles: string[];
+  id: string;
+  username: string;
+  email: string;
+  avatar: string | null;
+  phone: string | null;
+  address: string | null;
+  status: number;
+  fullname: string | null;
+  sex: string | null;
+  createDate: string;
+  sellConfigId: string | null;
+  bio: string | null;
+  birthday: string | null;
+  roles: string[];
 }
 
-const convertToUserProfileCard = (response: any | undefined): UserProfileCard => {
-    return {
-        id: response.userId,
-        username: response.username,
-        email: response.gmail,
-        avatar: response.avatar ?? "https://via.placeholder.com/120",
-        phone: response.phone ?? "",
-        address: response.address ?? "",
-        status: response.status,
-        fullname: response.fullname ?? "Anonymous",
-        sex: response.sex ?? "Not Specified",
-        createDate: response.createDate,
-        sellConfigId: response.sellConfigId ?? null,
-        bio: response.bio ?? "No bio provided",
-        birthday: response.birthday ?? "Not Provided",
-        roles: response.roles ?? []
-    };
+export interface UserUpdateDto {
+  UserId: string;
+  SellConfigId: string | null;
+  Username: string;
+  Password: string | null;
+  Gmail: string;
+  Fullname: string | null;
+  Sex: string | null;
+  Phone: string | null;
+  Address: string | null;
+  Avatar: string | null;
+  Birthday: string | null;
+  Bio: string | null;
+}
+
+const convertToUserProfileCard = (
+  response: undefined | any
+): UserProfileCard => {
+  return {
+    id: response.userId,
+    username: response.username,
+    email: response.gmail,
+    avatar: response.avatar ?? "https://picsum.photos/200",
+    phone: response.phone ?? "",
+    address: response.address ?? "",
+    status: response.status,
+    fullname: response.fullname ?? "Anonymous",
+    sex: response.sex ?? "Not Specified",
+    createDate: response.createDate,
+    sellConfigId: response.sellConfigId ?? null,
+    bio: response.bio ?? "No bio provided",
+    birthday: response.birthday ?? "Not Provided",
+    roles: response.roles ?? [],
+  };
 };
 
-export const fetchUserProfile = async (id: string | undefined): Promise<UserProfileCard> => {
-    const response = await fetch(`http://localhost:5296/api/user/read/${id}`);
-    const responseModel = await response.json();
-    const userProfile: UserProfileCard = convertToUserProfileCard(responseModel.data);
-    return userProfile;
+export const fetchUserProfile = async (
+  id: string | undefined
+): Promise<UserProfileCard> => {
+  const response = await fetch(`http://localhost:5296/api/user/read/${id}`);
+  const responseModel = await response.json();
+  const userProfile: UserProfileCard = convertToUserProfileCard(
+    responseModel.data
+  );
+  return userProfile;
 };
+export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
+  userProfile,
+}) => {
+  const [profile, setProfile] = useState(userProfile);
+  const [avatarPreview, setAvatarPreview] = useState<string>(
+    profile.avatar || "https://picsum.photos/200"
+  );
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showSaveButton, setShowSaveButton] = useState(false);
 
-export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({ userProfile }) => {
-    const [profile, setProfile] = useState(userProfile);
-    const [avatarPreview, setAvatarPreview] = useState<string>(profile.avatar || "https://via.placeholder.com/120");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfile({ ...profile, [name]: value });
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setProfile({
-            ...profile,
-            [name]: value,
-        });
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+        setProfile({ ...profile, avatar: reader.result as string });
+        setShowSaveButton(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveProfile = async (avatarOnly: boolean = false) => {
+    const userUpdateDto: UserUpdateDto = {
+      UserId: profile.id,
+      SellConfigId: profile.sellConfigId,
+      Username: profile.username,
+      Password: null,
+      Gmail: profile.email,
+      Fullname: profile.fullname,
+      Sex: profile.sex,
+      Phone: profile.phone,
+      Address: profile.address,
+      Avatar: profile.avatar,
+      Birthday: profile.birthday,
+      Bio: profile.bio,
     };
 
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatarPreview(reader.result as string);
-                setProfile({ ...profile, avatar: reader.result as string });
-            };
-            reader.readAsDataURL(file);
+    if (avatarOnly) {
+      // Only update the avatar if saving from the quick save button
+      userUpdateDto.Avatar = profile.avatar;
+    }
+
+    setIsEditModalOpen(false);
+    setShowSaveButton(false);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5296/api/user/update/${profile.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userUpdateDto),
         }
-    };
+      );
 
-    const handleSave = async () => {
-        const userUpdateDto = {
-            UserId: profile.id,
-            SellConfigId: profile.sellConfigId,
-            Username: profile.username,
-            Password: null,
-            Gmail: profile.email,
-            Fullname: profile.fullname,
-            Sex: profile.sex,
-            Phone: profile.phone,
-            Address: profile.address,
-            Avatar: profile.avatar,
-            Birthday: profile.birthday,
-            Bio: profile.bio,
-        };
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        setProfile(convertToUserProfileCard(updatedProfile.data));
+        alert("Profile updated successfully!");
+      } else {
+        const errorData = await response.json();
+        console.error("Error updating profile:", errorData);
+        alert(`Error: ${errorData.title || "Error updating profile"}`);
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("An error occurred while updating the profile.");
+    }
+  };
 
-        try {
-            const response = await fetch(`http://localhost:5296/api/user/update/${profile.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userUpdateDto), // Send the DTO
-            });
+  const handleOpenEditModal = () => setIsEditModalOpen(true);
+  const handleCloseEditModal = () => setIsEditModalOpen(false);
 
-            if (response.ok) {
-                const updatedProfile = await response.json();
-                setProfile(convertToUserProfileCard(updatedProfile.data));
-                alert('Profile updated successfully!');
-            } else {
-                const errorData = await response.json();
-                console.error('Error updating profile:', errorData);
-                alert(`Error: ${errorData.title || 'Error updating profile'}`);
-            }
-        } catch (error) {
-            console.error('Error updating profile:', error);
-            alert('An error occurred while updating the profile.');
-        }
-    };
-
-    return (
-        <div className="profile-container py-5">
-            <div className="row">
-                <div className="col-lg-4">
-                    <div className="fluent-card mb-4 mb-lg-0">
-                        <div className="fluent-card-body text-center">
-                            <div className="avatar-wrapper mb-4 position-relative">
-                                <img
-                                    src={avatarPreview}
-                                    alt="Avatar"
-                                    className="fluent-avatar"
-                                />
-                                <label htmlFor="avatar" className="avatar-edit-icon">
-                                    <FaPencilAlt />
-                                </label>
-                                <input
-                                    id="avatar"
-                                    type="file"
-                                    className="d-none"
-                                    onChange={handleAvatarChange}
-                                    accept="image/*"
-                                />
-                            </div>
-                            <h4 className="mb-1 fluent-text-title">{profile.username}</h4>
-                            <p className="text-muted mb-3 fluent-text-secondary">{profile.bio}</p>
-                            <p className="fluent-text-secondary small">
-                                <i className="bi bi-calendar-event me-2"></i>
-                                Joined: {new Date(profile.createDate).toLocaleDateString()}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-lg-8">
-                    <div className="fluent-card">
-                        <div className="fluent-card-body">
-                            <h5 className="card-title mb-4 fluent-text-title">Profile Information</h5>
-                            <form>
-                                <div className="row mb-3 align-items-center">
-                                    <div className="col-sm-3">
-                                        <label htmlFor="fullname" className="form-label"><FaUser className="me-2" />Full Name</label>
-                                    </div>
-                                    <div className="col-sm-9">
-                                        <input
-                                            type="text"
-                                            className="form-control fluent-input"
-                                            id="fullname"
-                                            name="fullname"
-                                            value={profile.fullname || ''}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="row mb-3 align-items-center">
-                                    <div className="col-sm-3">
-                                        <label htmlFor="email" className="form-label"><FaEnvelope className="me-2" />Email</label>
-                                    </div>
-                                    <div className="col-sm-9">
-                                        <input
-                                            type="email"
-                                            className="form-control fluent-input"
-                                            id="email"
-                                            name="email"
-                                            value={profile.email || ''}
-                                            readOnly
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="row mb-3 align-items-center">
-                                    <div className="col-sm-3">
-                                        <label htmlFor="phone" className="form-label"><FaPhoneAlt className="me-2" />Phone</label>
-                                    </div>
-                                    <div className="col-sm-9">
-                                        <input
-                                            type="tel"
-                                            className="form-control fluent-input"
-                                            id="phone"
-                                            name="phone"
-                                            value={profile.phone || ''}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="row mb-3 align-items-center">
-                                    <div className="col-sm-3">
-                                        <label htmlFor="sex" className="form-label"><FaVenusMars className="me-2" />Sex</label>
-                                    </div>
-                                    <div className="col-sm-9">
-                                        <select
-                                            className="form-select fluent-select"
-                                            id="sex"
-                                            name="sex"
-                                            value={profile.sex || ''}
-                                            onChange={handleChange}
-                                        >
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                            <option value="Not Specified">Not Specified</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="row mb-3 align-items-center">
-                                    <div className="col-sm-3">
-                                        <label htmlFor="bio" className="form-label"><FaPencilAlt className="me-2" />Bio</label>
-                                    </div>
-                                    <div className="col-sm-9">
-                                        <textarea
-                                            className="form-control fluent-input"
-                                            id="bio"
-                                            name="bio"
-                                            value={profile.bio || ''}
-                                            onChange={handleChange}
-                                            rows={4}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="row mb-3 align-items-center">
-                                    <div className="col-sm-3">
-                                        <label htmlFor="birthday" className="form-label"><FaBirthdayCake className="me-2" />Birthday</label>
-                                    </div>
-                                    <div className="col-sm-9">
-                                        <input
-                                            type="date"
-                                            className="form-control fluent-input"
-                                            id="birthday"
-                                            name="birthday"
-                                            value={profile.birthday || ''}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="text-end">
-                                    <button type="button" className="btn fluent-btn" onClick={handleSave}>
-                                        <FaSave className="me-2" />Save Changes
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <div className="bg-transparent min-h-96 pb-32 font-sans mt-16">
+      <div className="max-w-md mx-auto pt-16 px-4">
+        {/* Header */}
+        <div className="bg-white rounded-t-xl shadow-sm">
+          <div className="relative pt-8 pb-4 px-4 text-center">
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
+              <div className="relative">
+                <img
+                  src={avatarPreview}
+                  alt="Avatar"
+                  className="w-24 h-24 rounded-full border-4 border-white shadow-sm object-cover"
+                />
+                <label
+                  htmlFor="avatar"
+                  className="absolute bottom-0 right-0 bg-gray-200 text-gray-600 p-1.5 rounded-full cursor-pointer"
+                >
+                  <FaPencilAlt size={12} />
+                </label>
+                <input
+                  id="avatar"
+                  type="file"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                  accept="image/*"
+                />
+              </div>
             </div>
+            <h1 className="text-2xl font-semibold text-gray-900 mt-12">
+              {profile.username}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">{profile.bio}</p>
+            {showSaveButton && (
+              <button
+                onClick={() => handleSaveProfile(true)}
+                className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:border-blue-700 focus:shadow-outline-blue active:bg-blue-700 transition ease-in-out duration-150"
+              >
+                <FaSave className="mr-2" /> Save Avatar
+              </button>
+            )}
+          </div>
         </div>
-    );
+
+        {/* User Information */}
+        <div className="bg-white shadow-sm">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <p className="text-sm text-gray-600 flex items-center">
+              <FaPhoneAlt className="mr-3 text-gray-400" />
+              {profile.phone ? profile.phone : "No Phone Provided"}
+            </p>
+          </div>
+          <div className="px-4 py-3 border-b border-gray-200">
+            <p className="text-sm text-gray-600 flex items-center">
+              <FaEnvelope className="mr-3 text-gray-400" />
+              {profile.email}
+            </p>
+          </div>
+          <div className="px-4 py-3">
+            <p className="text-sm text-gray-600 flex items-center">
+              <FaUser className="mr-3 text-gray-400" />
+              {profile.sellConfigId ? "Bank Info Added" : "No Bank Info"}
+            </p>
+          </div>
+        </div>
+
+        {/* Profile Actions */}
+        <div className="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+          <button
+            onClick={() => handleOpenEditModal()}
+            className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between"
+          >
+            <span>Edit Profile</span>
+            <FaChevronRight className="text-gray-400" />
+          </button>
+          <div className="border-t border-gray-200"></div>
+          <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between">
+            <span>Change Password</span>
+            <FaChevronRight className="text-gray-400" />
+          </button>
+          <div className="border-t border-gray-200"></div>
+          <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between">
+            <span>Add Bank Info</span>
+            <FaChevronRight className="text-gray-400" />
+          </button>
+        </div>
+      </div>
+
+      {/* Edit Profile Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
+          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+              <button
+                onClick={handleCloseEditModal}
+                className="text-blue-500 font-semibold"
+              >
+                Cancel
+              </button>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Edit Profile
+              </h2>
+              <button
+                onClick={() => handleSaveProfile()}
+                className="text-blue-500 font-semibold"
+              >
+                Save
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={profile.username}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bio
+                </label>
+                <input
+                  type="text"
+                  name="bio"
+                  value={profile.bio ?? ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="text"
+                  name="email"
+                  value={profile.email}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={profile.phone ?? ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };

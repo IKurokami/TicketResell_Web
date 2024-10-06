@@ -3,16 +3,19 @@ using Repositories.Core.Context;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
 using Microsoft.EntityFrameworkCore;
+using TicketResell.Repositories.Logger;
+using Microsoft.Extensions.Logging;
 
 namespace Repositories.Repositories;
 
 public class TransactionRepository : GenericRepository<Transaction>, ITransactionRepository
 {
     public readonly TicketResellManagementContext _context;
-
-    public TransactionRepository(TicketResellManagementContext context) : base(context)
+    public readonly IAppLogger _logger;
+    public TransactionRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<OrderDetail>> GetTransactionsByDateAsync(string sellerId, DateRange dateRange)
@@ -44,7 +47,7 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
         {
             var user = orderDetail.Order?.Buyer;
 
-            if (user != null) 
+            if (user != null)
                 result.Add(user);
         }
 

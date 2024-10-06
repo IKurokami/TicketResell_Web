@@ -1,16 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Core.Entities;
+using TicketResell.Repositories.Logger;
 
 namespace Repositories.Repositories
 {
     public class OrderDetailRepository : GenericRepository<OrderDetail>, IOrderDetailRepository
     {
         private readonly TicketResellManagementContext _context;
-
-        public OrderDetailRepository(TicketResellManagementContext context) : base(context)
+        private readonly IAppLogger _logger;
+        public OrderDetailRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
         {
             _context = context;
+            _logger = logger;
         }
 
 
@@ -31,5 +33,7 @@ namespace Repositories.Repositories
             return await _context.OrderDetails.Where(od => od.Ticket != null && od.Ticket.SellerId == sellerId)
                 .ToListAsync();
         }
+
+
     }
 }

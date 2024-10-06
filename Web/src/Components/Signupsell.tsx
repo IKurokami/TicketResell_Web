@@ -1,29 +1,29 @@
 "use client";
 import React, { useState } from "react";
 import "@/Css/SignupSell.css";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 interface ProfileData {
-  address: string | null;
-  avatar: string | null;
-  bio: string | null;
-  birthday: string | null;
+  gmail: string | null;
   fullname: string | null;
-  gmail: string;
-  phone: string | null;
   sex: "male" | "female" | "other" | null;
+  phone: string | null;
+  address: string | null;
+  birthday: string | null;
 }
+
 
 const ProfileForm: React.FC = () => {
   const [profileData, setProfileData] = useState<ProfileData>({
-    address: null,
-    avatar: null,
-    bio: null,
-    birthday: null,
+    gmail: null,
     fullname: null,
-    gmail: "cuong@gmai.com", // Pre-filled as per your example
-    phone: null,
     sex: null,
+    phone: null,
+    address: null,
+    birthday: null,
   });
+  const route = useRouter();
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -37,10 +37,29 @@ const ProfileForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    const id = Cookies.get('id');
     e.preventDefault();
-    console.log("Profile data submitted:", profileData);
-    // Handle form submission here
+    try {
+      const response = await fetch(`http://localhost:5296/api/user/updateseller/${id}`, {
+        method: "PUT", // Assuming you're updating the seller, hence using PUT
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Profile updated successfully:", data);
+        route.push("/sell");
+      } else {
+        console.error("Error updating profile:", response.status);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      // Handle network errors
+    }
   };
 
   return (
@@ -50,7 +69,6 @@ const ProfileForm: React.FC = () => {
           <h1>
             Ticket<span>Resell</span>
           </h1>
-         
         </div>
 
         <form onSubmit={handleSubmit} className="profile-form">
@@ -66,13 +84,13 @@ const ProfileForm: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="gmail">Email</label>
+            <label htmlFor="gmail">Gmail</label>
             <input
-              type="email"
+              type="gmail"
               id="gmail"
               name="gmail"
-              value={profileData.gmail}
               onChange={handleChange}
+              placeholder="Enter your gmail"
             />
           </div>
 

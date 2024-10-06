@@ -3,16 +3,18 @@ using Repositories.Core.Context;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
 using Repositories.Repositories.Carts;
+using TicketResell.Repositories.Logger;
 
 namespace Repositories.Repositories
 {
     public class CartRepository : ICartRepository
     {
         private readonly TicketResellManagementContext _context;
-
-        public CartRepository(TicketResellManagementContext context)
+        private readonly IAppLogger _logger;
+        public CartRepository(IAppLogger logger, TicketResellManagementContext context)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<Order?> GetCartByUserIdAsync(string userId)
@@ -66,7 +68,7 @@ namespace Repositories.Repositories
             {
                 existingItem.Quantity += item.Quantity;
                 existingItem.Price = item.Price;
-                
+
                 item.OrderDetailId = existingItem.OrderDetailId;
                 item.Quantity = existingItem.Quantity;
                 item.Price = existingItem.Price;
@@ -95,7 +97,7 @@ namespace Repositories.Repositories
 
             existingItem.Quantity = item.Quantity;
             existingItem.Price = item.Price;
-            
+
             item.OrderDetailId = existingItem.OrderDetailId;
             item.Quantity = existingItem.Quantity;
             item.Price = existingItem.Price;
@@ -115,7 +117,7 @@ namespace Repositories.Repositories
             {
                 throw new Exception("Item not found in cart");
             }
-            
+
             cart.OrderDetails.Remove(itemToRemove);
             await _context.SaveChangesAsync();
         }

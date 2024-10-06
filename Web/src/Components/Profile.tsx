@@ -4,7 +4,6 @@ import { fetchUserProfile, UserProfileCard, UserProfilePage } from "@/models/Use
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import '@/Css/UserProfile.css';
 
 const Profile = () => {
@@ -36,13 +35,7 @@ const Profile = () => {
     if (isLoading) return <div>Loading...</div>;
     if (!userProfile) return <div>No user profile found.</div>;
 
-    return (
-        <div className="container">
-            <div className="childrenData">
-                <UserProfilePage userProfile={userProfile} />
-            </div>
-        </div>
-    );
+    return <UserProfilePage userProfile={userProfile} />;
 }
 
 export default Profile;

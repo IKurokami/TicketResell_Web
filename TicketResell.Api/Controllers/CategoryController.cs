@@ -2,7 +2,7 @@ using Repositories.Core.Dtos.Category;
 using TicketResell.Services.Services;
 using TicketResell.Services.Services.Categories;
 
-namespace TicketResell.Api.Controllers;
+namespace TicketResell.Repositories.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 

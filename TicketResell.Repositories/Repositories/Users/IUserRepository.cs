@@ -7,5 +7,7 @@ namespace Repositories.Repositories
         public Task<User?> GetUserByEmailAsync(string email);
 
         public Task<bool> CheckRoleSell(string id);
+
+        public Task RegisterSeller(User user);
     }
 }

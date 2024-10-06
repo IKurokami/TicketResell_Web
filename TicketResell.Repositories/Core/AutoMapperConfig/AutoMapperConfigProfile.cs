@@ -11,6 +11,7 @@ using Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Core.Dtos.Cart;
 using Category = Repositories.Core.Entities.Category;
+using TicketResell.Repositories.Core.Dtos.Ticket;
 
 namespace Repositories.Core.AutoMapperConfig
 {
@@ -22,11 +23,15 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<UserUpdateDto, User>();
             CreateMap<User, UserReadDto>();
             CreateMap<User, SellerTicketReadDto>();
+            CreateMap<SellerRegisterDto, User>()
+                .ForMember(dest => dest.Username, opt => opt.Ignore())  
+                .ForMember(dest => dest.Password, opt => opt.Ignore());
+
             //Revenue
             CreateMap<RevenueCreateDto, Revenue>();
             CreateMap<Revenue, RevenueReadDto>();
             CreateMap<RevenueUpdateDto, Revenue>();
-            
+
             //Order
             CreateMap<OrderDto, Order>();
             CreateMap<CartItemDto, OrderDetailDto>();
@@ -36,7 +41,7 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<OrderDetail, OrderDetailDto>();
             //Cart
             CreateMap<Order, CartDto>();
-            
+
             CreateMap<SellConfigCreateDto, SellConfig>();
             CreateMap<SellConfig, SellConfigReadDto>();
             CreateMap<SellConfigUpdateDto, SellConfig>();
@@ -45,14 +50,15 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<RoleUpdateDto, Role>();
             //Ticket
             CreateMap<TicketCreateDto, Ticket>();
-            CreateMap<Ticket, TickerReadDto>();
+            CreateMap<Ticket, TicketReadDto>();
+            CreateMap<Ticket, TicketTopDto>();
             CreateMap<TicketUpdateDto, Ticket>();
-            
+
             //Category
             CreateMap<CategoryCreateDto, Category>();
-            CreateMap< Category,CategoryReadDto>();
+            CreateMap<Category, CategoryReadDto>();
             CreateMap<CategoryUpdateDto, Category>();
-            
+
             //Authentication
             CreateMap<LoginDto, User>();
             CreateMap<RegisterDto, User>();
