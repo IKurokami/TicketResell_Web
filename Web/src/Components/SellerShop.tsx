@@ -1,7 +1,9 @@
 `use client`;
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 import "../Css/SellerShop.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
-import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Dropdown } from "react-bootstrap";
 
 const SellerShop = () => {
   return (
@@ -28,10 +30,23 @@ const SellerShop = () => {
             <p className="seller--title">Giap Cao Dinh</p>
           </div>
           <p className="seller--register-time">Join at </p>
-          <div className="seller--navbar">
+          {/* <div className="seller--navbar">
             <Link href="/seller-shop/edit" className="navbar--btn">
               Edit Profile
             </Link>
+          </div> */}
+          <div className="row navbar--list gap-3">
+            <div className="navbar--item col-1">
+              <span></span>
+              <FontAwesomeIcon icon={faBars} />
+              <span className="text">Filter</span>
+            </div>
+            <div className="navbar--item col-1">
+              <span className="text">Status</span>
+            </div>
+            <div className="navbar--item col-1">
+              <span className="text">Category</span>
+            </div>
           </div>
         </div>
       </main>
