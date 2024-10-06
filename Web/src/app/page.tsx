@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Background from "@/Components/Background";
 import Banner from "@/Components/Banner";
 import Trend from "@/Components/Trend";
