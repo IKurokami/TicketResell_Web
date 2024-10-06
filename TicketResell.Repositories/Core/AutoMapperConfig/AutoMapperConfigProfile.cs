@@ -23,6 +23,10 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<UserUpdateDto, User>();
             CreateMap<User, UserReadDto>();
             CreateMap<User, SellerTicketReadDto>();
+            CreateMap<SellerRegisterDto, User>()
+                .ForMember(dest => dest.Username, opt => opt.Ignore())  
+                .ForMember(dest => dest.Password, opt => opt.Ignore());
+
             //Revenue
             CreateMap<RevenueCreateDto, Revenue>();
             CreateMap<Revenue, RevenueReadDto>();

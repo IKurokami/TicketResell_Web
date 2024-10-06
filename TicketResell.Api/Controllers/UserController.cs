@@ -24,6 +24,14 @@ namespace Repositories.Controllers
             return ResponseParser.Result(response);
         }
 
+        [HttpPut]
+        [Route("updateseller/{id}")]
+        public async Task<IActionResult> RegisterSell(string id, [FromBody] SellerRegisterDto dto)
+        {
+            var response = await _userService.RegisterSeller(id, dto);
+            return ResponseParser.Result(response);
+        }
+
         [Route("createtwo")]
         public async Task<IActionResult> CreateTwoUser([FromBody] UserCreateDto dto)
         {
