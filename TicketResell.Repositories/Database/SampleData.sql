@@ -1,3 +1,55 @@
+-- Inserting sample data into the [OrderDetail] table using TicketId and OrderId
+INSERT INTO [OrderDetail] (
+    [OrderDetailId], 
+    [OrderId], 
+    [TicketId], 
+    [Price], 
+    [Quantity]
+)
+VALUES
+-- Order Details for ORD001
+('OD001', 'ORD001', 'TICKET001', 100.0, 2),
+('OD002', 'ORD001', 'TICKET002', 150.0, 1),
+
+-- Order Details for ORD002
+('OD003', 'ORD002', 'TICKET004', 75.0, 3),
+
+-- Order Details for ORD003
+('OD004', 'ORD003', 'TICKET007', 250.0, 1),
+
+-- Order Details for ORD004
+('OD005', 'ORD004', 'TICKET006', 180.0, 1),
+
+-- Order Details for ORD005
+('OD006', 'ORD005', 'TICKET009', 175.0, 2),
+('OD007', 'ORD005', 'TICKET010', 200.0, 1),
+
+-- Order Details for ORD006
+('OD008', 'ORD006', 'TICKET011', 300.0, 1),
+
+-- Order Details for ORD007
+('OD009', 'ORD007', 'TICKET013', 220.0, 2),
+
+-- Order Details for ORD008
+('OD010', 'ORD008', 'TICKET014', 190.0, 1),
+('OD011', 'ORD008', 'TICKET015', 270.0, 1),
+
+-- Order Details for ORD009
+('OD012', 'ORD009', 'TICKET017', 240.0, 1),
+
+-- Order Details for ORD010
+('OD013', 'ORD010', 'TICKET019', 280.0, 2),
+
+-- Order Details for ORD011
+('OD014', 'ORD011', 'TICKET020', 70.0, 3),
+
+-- Order Details for ORD012
+('OD015', 'ORD012', 'TICKET028', 225.0, 1),
+
+-- Order Details for ORD013
+('OD016', 'ORD013', 'TICKET030', 155.0, 1);
+
+
 
 -- Inserting sample data into the [Order] table
 INSERT INTO [Order] (
