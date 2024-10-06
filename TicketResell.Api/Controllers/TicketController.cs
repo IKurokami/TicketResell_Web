@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TicketResell.Services.Services;
 using TicketResell.Services.Services.Tickets;
 
-namespace TicketResell.Api.Controllers
+namespace TicketResell.Repositories.Controllers
 {
     [Route("/api/[controller]")]
     [ApiController]
@@ -31,7 +31,15 @@ namespace TicketResell.Api.Controllers
             var response = await _ticketService.GetTicketsAsync();
             return ResponseParser.Result(response);
         }
-        
+
+        [HttpGet]
+        [Route("gettop/{amount:int}")]
+        public async Task<IActionResult> GetTopTicket(int amount)
+        {
+            var response = await _ticketService.GetTopTicket(amount);
+            return ResponseParser.Result(response);
+        }
+
         [HttpPost("getrange")]
         public async Task<IActionResult> GetTicketRange([FromBody] NumberRange range)
         {
@@ -44,7 +52,7 @@ namespace TicketResell.Api.Controllers
             {
                 return ResponseParser.Result(ResponseModel.BadRequest("Range from cannot be greater than the range to"));
             }
-            
+
             var response = await _ticketService.GetTicketRangeAsync(range.From, range.To - range.From + 1);
             return ResponseParser.Result(response);
         }
@@ -85,7 +93,7 @@ namespace TicketResell.Api.Controllers
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketUpdateDto dto)
         {
-            var response = await _ticketService.UpdateTicketAsync(id,dto);
+            var response = await _ticketService.UpdateTicketAsync(id, dto);
             return ResponseParser.Result(response);
 
         }

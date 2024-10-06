@@ -2,6 +2,7 @@ using AutoMapper;
 using Repositories.Core.Dtos.Ticket;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
+using TicketResell.Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Tickets;
 
@@ -48,7 +49,7 @@ namespace TicketResell.Services.Services
             newTicket.CreateDate = DateTime.UtcNow;
             newTicket.ModifyDate = DateTime.UtcNow;
             await _unitOfWork.TicketRepository.CreateTicketAsync(newTicket, dto.CategoriesId);
-            if(saveAll) await _unitOfWork.CompleteAsync();
+            if (saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success("Successfully created Ticket");
         }
 
@@ -56,18 +57,26 @@ namespace TicketResell.Services.Services
         {
             var ticket = await _unitOfWork.TicketRepository.GetTicketByNameAsync(name);
 
-            var ticketDtos = _mapper.Map<List<TickerReadDto>>(ticket);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(ticket);
             return ResponseModel.Success($"Successfully get ticket: {ticketDtos}", ticketDtos);
+        }
+
+        public async Task<ResponseModel> GetTopTicket(int amount)
+        {
+            var ticket = await _unitOfWork.TicketRepository.GetTopTicketBySoldAmount(amount);
+            var ticketDtos = _mapper.Map<List<TicketTopDto>>(ticket);
+
+            return ResponseModel.Success($"Successfully get top ticket", ticketDtos);
         }
 
         public async Task<ResponseModel> GetTicketsAsync()
         {
             var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
 
-            var ticketDtos = _mapper.Map<List<TickerReadDto>>(tickets);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get ticket", ticketDtos);
         }
-        
+
         public async Task<ResponseModel> GetTicketRangeAsync(int start, int count)
         {
             var tickets = await _unitOfWork.TicketRepository.GetTicketRangeAsync(start, count);
@@ -77,7 +86,7 @@ namespace TicketResell.Services.Services
                 return ResponseModel.NotFound("No tickets found in the specified range");
             }
 
-            var ticketDtos = _mapper.Map<List<TickerReadDto>>(tickets);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
             return ResponseModel.Success($"Successfully retrieved {tickets.Count} tickets", ticketDtos);
         }
 
@@ -86,7 +95,7 @@ namespace TicketResell.Services.Services
             var ticket = await _unitOfWork.TicketRepository.GetTicketByDateAsync(date);
 
 
-            var ticketDtos = _mapper.Map<List<TickerReadDto>>(ticket);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(ticket);
             return ResponseModel.Success($"Successfully get ticket: {ticketDtos}", ticketDtos);
         }
 
@@ -95,11 +104,11 @@ namespace TicketResell.Services.Services
         {
             var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
 
-            var ticketDtos = _mapper.Map<TickerReadDto>(ticket);
+            var ticketDtos = _mapper.Map<TicketReadDto>(ticket);
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto,bool saveAll)
+        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto, bool saveAll)
         {
             var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
 
@@ -116,23 +125,23 @@ namespace TicketResell.Services.Services
             }
 
             _unitOfWork.TicketRepository.Update(ticket);
-            if(saveAll) await _unitOfWork.CompleteAsync();
+            if (saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully updated ticket: {ticket.TicketId}");
         }
 
         public async Task<ResponseModel> DeleteTicketAsync(string id, bool saveAll)
         {
             await _unitOfWork.TicketRepository.DeleteTicketAsync(id);
-            if(saveAll) await _unitOfWork.CompleteAsync();
-            return ResponseModel.Success($"Successfully deleted Ticket(s) with id: {id}" );
+            if (saveAll) await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully deleted Ticket(s) with id: {id}");
         }
 
         public async Task<ResponseModel> GetTicketByCategoryAsync(string id)
         {
             var cate = await _unitOfWork.TicketRepository.GetTicketCateByIdAsync(id);
-            return ResponseModel.Success($"Successfully get Category of Ticket with id: {id}",cate);
+            return ResponseModel.Success($"Successfully get Category of Ticket with id: {id}", cate);
         }
     }
-    
+
 }
 

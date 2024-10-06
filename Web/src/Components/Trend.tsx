@@ -1,14 +1,43 @@
 "use client";
 import "@/Css/Trend.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import TicketList, {
+  fetchTopTicketData,
+  RankItemCardProps,
+} from "@/models/RankItemCard";
+
 const Trend = () => {
   const [buttonLeftActive, setButtonLeftActive] = useState(1);
   const [buttonRightActive, setButtonRightActive] = useState(2);
+  const [TopticketList, setTopTicketList] = useState<RankItemCardProps[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const ticketData = await fetchTopTicketData();
+      setTopTicketList(ticketData);
+    };
+
+    fetchData().catch((error) => {
+      console.error("Failed to fetch top ticket data:", error);
+    });
+  }, []);
+
+  const splitTicketList = (list: RankItemCardProps[]) => {
+    let newList = [...list];
+    if (newList.length % 2 !== 0) {
+      newList.pop();
+    }
+
+    const midpoint = newList.length / 2;
+
+    return [newList.slice(0, midpoint), newList.slice(midpoint)];
+  };
+  const [firstHalf, secondHalf] = splitTicketList(TopticketList);
+
   const handleLeftButtonClick = (index: any) => {
     setButtonLeftActive(index);
   };
-
   const handleRightButtonClick = (index: any) => {
     setButtonRightActive(index);
   };
@@ -80,25 +109,7 @@ const Trend = () => {
               </div>
             </div>
             <div className="rank-item">
-              <div className="rank-item-card">
-                <div className="left-info">
-                  <span className="rank">1</span>
-                  <span className="ticket">
-                    <img
-                      src={
-                        "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517"
-                      }
-                      alt="Picture of the author"
-                    />
-                    Concert ticket
-                  </span>
-                </div>
-                <div className="right-info">
-                  <span className="date">12/9/2024</span>
-                  <span className="price">15$</span>
-                  <span className="amount">50</span>
-                </div>
-              </div>
+              <TicketList topTicketList={firstHalf} />
             </div>
           </div>
         </div>
@@ -114,6 +125,9 @@ const Trend = () => {
                 <span className="price">Price</span>
                 <span className="amount">Amount</span>
               </div>
+            </div>
+            <div className="rank-item">
+              <TicketList topTicketList={secondHalf} />
             </div>
           </div>
         </div>

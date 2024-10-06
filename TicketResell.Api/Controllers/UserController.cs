@@ -1,7 +1,7 @@
 using AutoMapper;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Validators;
-using TicketResell.Api.Helper;
+using TicketResell.Repositories.Helper;
 
 namespace Repositories.Controllers
 {
@@ -71,7 +71,7 @@ namespace Repositories.Controllers
             var response = await _userService.CheckSeller(id);
             return ResponseParser.Result(response);
         }
-        
+
         [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteUser(string id)

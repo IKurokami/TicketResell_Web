@@ -1,7 +1,7 @@
-using TicketResell.Api.Helper;
+using TicketResell.Repositories.Helper;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 
-namespace TicketResell.Api.Controllers
+namespace TicketResell.Repositories.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -29,16 +29,16 @@ namespace TicketResell.Api.Controllers
             {
                 var loginInfo = (LoginInfoDto)result.Data;
 
-                if (loginInfo.User != null) 
+                if (loginInfo.User != null)
                     HttpContext.SetUserId(loginInfo.User.UserId);
-                
+
                 HttpContext.SetAccessKey(loginInfo.AccessKey);
                 HttpContext.SetIsAuthenticated(true);
             }
-            
+
             return ResponseParser.Result(result);
         }
-        
+
         [HttpPost("login-key")]
         public async Task<IActionResult> Login([FromBody] AccessKeyLoginDto accessKeyLoginDto)
         {
@@ -47,17 +47,17 @@ namespace TicketResell.Api.Controllers
             {
                 if (result.Data is LoginInfoDto loginInfo)
                 {
-                    if (loginInfo.User != null) 
+                    if (loginInfo.User != null)
                         HttpContext.SetUserId(loginInfo.User.UserId);
-                    
+
                     HttpContext.SetAccessKey(loginInfo.AccessKey);
                     HttpContext.SetIsAuthenticated(true);
                 }
             }
-            
+
             return ResponseParser.Result(result);
         }
-        
+
         [HttpPost("islogged")]
         public async Task<IActionResult> IsLogged()
         {
@@ -73,7 +73,7 @@ namespace TicketResell.Api.Controllers
             {
                 return ResponseParser.Result(ResponseModel.Unauthorized("You are not logged in"));
             }
-            
+
             var result = await _authService.LogoutAsync(userId);
             HttpContext.SetIsAuthenticated(false);
             HttpContext.SetAccessKey("");

@@ -1,11 +1,11 @@
-namespace TicketResell.Api.Helper;
+namespace TicketResell.Repositories.Helper;
 
 public static class RequestHelper
 {
     public static string isAuthenticatedKey = "isAuthenticated";
     public static string userIdKey = "userId";
     public static string accessKeyKey = "accessKey";
-    
+
     public static bool GetIsAuthenticated(this HttpContext? context)
     {
         if (context is not null)
@@ -17,10 +17,10 @@ public static class RequestHelper
                 return bool.Parse(isAuthenticated);
             }
         }
-        
+
         return false;
     }
-    
+
     public static string GetUserId(this HttpContext? context)
     {
         if (context is not null)
@@ -32,10 +32,10 @@ public static class RequestHelper
                 return userId;
             }
         }
-        
+
         return string.Empty;
     }
-    
+
     public static string GetAccessKey(this HttpContext? context)
     {
         if (context is not null)
@@ -47,7 +47,7 @@ public static class RequestHelper
                 return accessKey;
             }
         }
-        
+
         return string.Empty;
     }
 
@@ -62,14 +62,14 @@ public static class RequestHelper
             {
                 result.IsAuthenticated = bool.Parse(isAuthenticated);
             }
-            
+
             result.UserId = context.Session.GetString(userIdKey) ?? string.Empty;
             result.AccessKey = context.Session.GetString(accessKeyKey) ?? string.Empty;
         }
-        
+
         return result;
     }
-    
+
     public static void SetIsAuthenticated(this HttpContext? context, bool value = false)
     {
         if (context is not null)
@@ -77,7 +77,7 @@ public static class RequestHelper
             context.Session.SetString(isAuthenticatedKey, value.ToString());
         }
     }
-    
+
     public static void SetUserId(this HttpContext? context, string value = "")
     {
         if (context is not null)
@@ -92,7 +92,7 @@ public static class RequestHelper
             }
         }
     }
-    
+
     public static void SetAccessKey(this HttpContext? context, string? value = "")
     {
         if (context is not null)
