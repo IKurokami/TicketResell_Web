@@ -3,25 +3,58 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import useDropdown from "@/Hooks/useDropDown";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import * as SolidIcons from "@fortawesome/free-solid-svg-icons";
 
 interface ChildComponentProps {
   title: string; // `title` must be a string
   content: string; // `description` must be an object with a text property
+  dropdownStatus: boolean; // Add a new prop for controlling dropdown visibility. Default to false.
+  iconDropdown: string;
 }
 
-const Dropdown: React.FC<ChildComponentProps> = ({ title, content }) => {
-  const { isDropdownVisible, toggleDropdown } = useDropdown('dropdown-menu');
-
+const Dropdown: React.FC<ChildComponentProps> = ({
+  title,
+  content,
+  dropdownStatus,
+  iconDropdown,
+}) => {
+  const { isDropdownVisible, toggleDropdown } = useDropdown("dropdown-menu");
+  const checkDropDown = dropdownStatus;
+  const icon = SolidIcons[iconDropdown as keyof typeof SolidIcons];
 
   return (
     <div className="dropdown-container">
       <button className="dropdown-button" onClick={toggleDropdown}>
         <span className="button-content">
+          <span className="icon">
+            {icon ? (
+              <FontAwesomeIcon icon={icon as any} /> // Pass the icon directly after asserting the type
+            ) : (
+              <span></span> // Handle invalid icon names
+            )}
+          </span>
           <span className="text">{title}</span>
         </span>
-        {isDropdownVisible ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        {checkDropDown && (
+          <>
+            {isDropdownVisible ? (
+              <ChevronUp size={20} />
+            ) : (
+              <ChevronDown size={20} />
+            )}
+          </>
+        )}
       </button>
-      {isDropdownVisible && (
+
+      {checkDropDown ? (
+        isDropdownVisible && (
+          <div className="dropdown-content">
+            {/* Add your price history content here */}
+            <p>{content}</p>
+          </div>
+        )
+      ) : (
         <div className="dropdown-content">
           {/* Add your price history content here */}
           <p>{content}</p>
@@ -38,16 +71,13 @@ const Dropdown: React.FC<ChildComponentProps> = ({ title, content }) => {
           align-items: center;
           width: 100%;
           padding: 10px 15px;
-          background-color: #1e1e1e;
-          color: white;
-          border: 1px solid #fff;
+          color: #000;
+          border: 1px solid #e0e0e0;
           border-radius: 5px 5px 0 0;
           cursor: pointer;
           transition: background-color 0.3s;
         }
-        .dropdown-button:hover {
-          background-color: #2a2a2a;
-        }
+
         .button-content {
           display: flex;
           align-items: center;
@@ -60,8 +90,7 @@ const Dropdown: React.FC<ChildComponentProps> = ({ title, content }) => {
         }
         .dropdown-content {
           padding: 15px;
-          background-color: #2a2a2a;
-          border: 1px solid #fff;
+          border: 1px solid #e0e0e0;
           border-radius: 0 0 5px 5px;
           color: white;
         }

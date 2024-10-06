@@ -5,30 +5,32 @@
   margin-top: 10vh;
   padding-top: 5vh;
   padding-bottom: 5vh;
-  /* background: #1e1e1e; */
 }
 .ticket--detail {
   margin-bottom: 10vh;
 }
 .ticket--info {
-  color: white;
+  padding-top: 5vh;
+  color: #000;
   margin-left: 0.5vw;
 }
 
-.ticket--price--block {
-  margin-top: 5vh;
-  color: white;
+.ticket--price--block,
+.ticket--related {
+  margin-top: 1vh;
+  color: #000;
   padding: 5.125vh 2vh;
-  background-color: #515151;
+  background-color: #fdfdfd;
+  border: 1px solid rgba(18 18 18 / 12%);
 }
 .Tag {
   margin-left: 2vh;
   margin-right: 2vh;
 }
 .ticket--price {
-  font-size: 3rem;
-  font-weight: 500;
-  color: #fff;
+  font-size: 2rem;
+  font-weight: 400;
+  color: #000;
 }
 .cta {
   display: flex;
@@ -41,18 +43,18 @@
   justify-content: center;
   align-items: center;
   background: #27ae60;
-  color: white;
+  color: #fff;
   font-size: 1rem;
   font-weight: 600;
   border: #fff;
   padding: 2vh 2vw;
   margin-left: 1vw;
-
   border-radius: 5px;
 }
 .ticket--btn:hover {
-  opacity: 0.8;
+  background-color: #2ecc71;
 }
+
 .cart--icon {
   margin-right: 1vw;
 }
@@ -63,34 +65,27 @@
 .ticket--desc {
   padding-bottom: 10vh;
 }
-.ticket--img--list {
-  padding-top: 2vh;
-  padding-left: 0.75vw;
-}
-
-.ticket--img--list .col-lg-3 {
+.ticket--related {
   box-sizing: border-box;
-  padding: 0;
-  border-left: 2px solid #27ae60;
-  border-right: 2px solid #27ae60;
 }
-
 .ticket--img {
   object-fit: contain;
   max-height: 100vh;
+  width: 10vh;
 }
 
 .ticket--title {
   margin-bottom: 5vh;
-  color: #fff;
+  color: #000;
 }
+
 .ticket--item {
-  margin: 2vh 1vw;
-  padding: 2vh 1vw;
+  background: #fdfdfd;
+  max-width: 100px;
+  border: 1px solid rgba(18 18 18 / 12%);
+  margin-right: 3vw;
 }
 
 .ticket--list {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: space-evenly;
+
 }
