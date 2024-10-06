@@ -62,5 +62,17 @@ namespace Repositories.Repositories
             return false;
         }
 
+        public async Task RegisterSeller(User? user)
+        {
+            var roleId = RoleConstant.roleSeller;
+            var role = await _context.Roles.FindAsync(roleId);
+            if (role != null)
+            {
+                user?.Roles.Add(role);
+            }
+
+            if (user != null)
+                _context.Users.Update(user);
+        }
     }
 }

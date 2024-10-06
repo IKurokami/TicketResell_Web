@@ -9,7 +9,9 @@ import { logoutUser } from "./Logout";
 import Cookies from "js-cookie";
 import { removeAllCookies } from "./Cookie";
 import { useRouter } from "next/navigation";
+import SellPopup from "./PopUp";
 
+import { CheckSeller } from "./CheckSeller";
 interface NavbarProps {
   page: string;
 }
@@ -21,6 +23,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
   const adjustedIsScrolled = useScroll();
   const isScrolled = page === "ticket" ? false : adjustedIsScrolled;
+  const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
   const router = useRouter();
   const handleSearchIconClick = () => {
@@ -94,6 +97,23 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     } else {
       router.push("/login");
     }
+  };
+
+  const handleSellClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Fetch seller status
+    const status = await CheckSeller();
+    console.log("Seller Status: ", status); // Log the status
+    // Routing or popup logic
+    if (status) {
+      router.push("/sell");
+    } else {
+      console.log("User is not a seller, showing popup");
+      setIsPopupVisible(true);
+    }
+  };
+  const closeDropdown = () => {
+    setIsPopupVisible(false);
   };
 
   // Handle show icon when login
@@ -181,11 +201,13 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
           </li>
           <li>
             <Link
-              href="/sell"
+              href="#"
               style={{ color: page === "ticket" ? "black" : undefined }}
+              onClick={handleSellClick}
             >
               Sell
             </Link>
+            <SellPopup isVisible={isPopupVisible} onClose={closeDropdown} />
           </li>
           <li>
             <Link

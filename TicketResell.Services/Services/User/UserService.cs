@@ -83,6 +83,22 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully updated user: {user.Username}", _mapper.Map<UserReadDto>(user));
         }
 
+        public async Task<ResponseModel> RegisterSeller(string id,SellerRegisterDto dto,bool saveAll)
+        {
+            User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+            _mapper.Map(dto, user);
+            var validator = _validatorFactory.GetValidator<User>();
+            var validationResult = validator.Validate(user);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            }
+            await _unitOfWork.UserRepository.RegisterSeller(user);
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully register seller");  
+        }
+
         public async Task<ResponseModel> CheckSeller(string id)
         {
             var check = await _unitOfWork.UserRepository.CheckRoleSell(id);

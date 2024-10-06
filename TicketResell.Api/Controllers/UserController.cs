@@ -23,6 +23,14 @@ namespace Repositories.Controllers
             var response = await _userService.CreateUserAsync(dto);
             return ResponseParser.Result(response);
         }
+        
+        [HttpPut]
+        [Route("updateseller/{id}")]
+        public async Task<IActionResult> RegisterSell(string id,[FromBody] SellerRegisterDto dto)
+        {
+            var response = await _userService.RegisterSeller(id,dto);
+            return ResponseParser.Result(response);
+        }
 
         [Route("createtwo")]
         public async Task<IActionResult> CreateTwoUser([FromBody] UserCreateDto dto)
@@ -71,6 +79,8 @@ namespace Repositories.Controllers
             var response = await _userService.CheckSeller(id);
             return ResponseParser.Result(response);
         }
+        
+        
         
         [HttpDelete]
         [Route("delete/{id}")]
