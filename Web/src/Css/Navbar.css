@@ -25,6 +25,8 @@
 .navbarr.scrolled {
   background-color: #f7f9fa;
   color: black;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
 }
 
 .navbarr.scrolled .resell,
