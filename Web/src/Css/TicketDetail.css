@@ -38,17 +38,33 @@
 .dropdown {
   margin-top: 1vh;
 }
+.tag--list {
+  display: flex;
+  list-style-type: none;
+  padding: 0;
+}
+.tag--list--item {
+  border: 1px solid rgba(18 18 18 / 12%);
+  padding: 3px 5px;
+  margin-right: 1vw;
+  border-radius: 10px;
+  font-weight: 400;
+}
+.ticket--detail--btn {
+  padding: 2vh 2vw;
+  margin-left: 1vw;
+  border-radius: 5px;
+}
 .ticket--btn {
   display: flex;
   justify-content: center;
   align-items: center;
+  text-decoration: none;
   background: #27ae60;
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
   border: #fff;
-  padding: 2vh 2vw;
-  margin-left: 1vw;
   border-radius: 5px;
 }
 .ticket--btn:hover {
@@ -66,12 +82,13 @@
   padding-bottom: 10vh;
 }
 .ticket--related {
-  box-sizing: border-box;
+  box-sizing: content-box;
+  border-radius: 10px;
 }
 .ticket--img {
   object-fit: contain;
   max-height: 100vh;
-  width: 10vh;
+  max-width: 100vh;
 }
 
 .ticket--title {
@@ -81,11 +98,15 @@
 
 .ticket--item {
   background: #fdfdfd;
-  max-width: 100px;
   border: 1px solid rgba(18 18 18 / 12%);
-  margin-right: 3vw;
+  margin-right: 0.5vw;
 }
 
 .ticket--list {
+  display: flex;
+  padding: 0 2vw;
+}
 
+.ticket--related--btn {
+  padding: 2vh 0.1vw;
 }

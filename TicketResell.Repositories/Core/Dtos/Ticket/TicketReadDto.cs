@@ -33,5 +33,4 @@ public class TicketReadDto
 
     public virtual ICollection<CategoryReadDto> Categories { get; set; } = new List<CategoryReadDto>();
 
-    public virtual CategoryReadDto Category { get; set; }
 }

@@ -49,7 +49,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<Ticket> GetByIdAsync(string id)
     {
-        var ticket = await _context.Tickets.Include(x => x.Seller).FirstAsync(x => x.TicketId == id);
+        var ticket = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories).FirstAsync(x => x.TicketId == id);
         if (ticket == null)
         {
             throw new KeyNotFoundException("Id is not found");

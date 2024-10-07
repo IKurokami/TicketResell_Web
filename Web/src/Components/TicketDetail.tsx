@@ -6,27 +6,37 @@ import { faTag } from "@fortawesome/free-solid-svg-icons";
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Button } from "react-bootstrap";
 import Dropdown from "./Dropdown";
 import Link from "next/link";
 
+type Category = {
+  categoryId: string;
+  name: string;
+  description: string;
+};
+type seller = {
+  userId: string;
+  username: string;
+  fullname: string;
+};
 type Ticket = {
   name: string;
   cost: number;
   location: string;
   startDate: string;
-  author: string;
+  author: seller;
   imageUrl: string;
   description: string;
+  categories: Category[];
 };
 
 const TicketDetail = () => {
   const [ticketresult, setTicketresult] = useState<Ticket | null>(null);
-  const { id } = useParams(); // Get the ID from the URL parameters
+  const { id } = useParams<{ id: string }>(); // Get the ID from the URL parameters
   const [title, setTitle] = useState("");
 
   // Function to fetch ticket by ID
-  const fetchTicketById = async (id: string | string[]) => {
+  const fetchTicketById = async (id: string | null) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Ticket/readbyid/${id}`,
@@ -54,16 +64,17 @@ const TicketDetail = () => {
             imageUrl: result.data.image,
             name: result.data.name,
             startDate: new Date(result.data.startDate).toLocaleDateString(),
-            author:
-              result.data.seller && result.data.seller.username
-                ? result.data.seller.username
-                : "Unknown Seller",
+            author: result.data.seller,
             location: `Event at ${result.data.location}`,
             cost: result.data.cost,
             description: result.data.description,
+            categories: result.data.categories.map((category: any) => ({
+              categoryId: category.categoryId,
+              name: category.name,
+              description: category.description,
+            })),
           };
           setTicketresult(ticketDetail); // Set the fetched ticket result
-          console.log(ticketresult?.author);
         }
       } else {
         console.error("ID is undefined or invalid.");
@@ -105,12 +116,19 @@ const TicketDetail = () => {
               Sold by {}
               <Link
                 className="seller--link"
-                href={`/seller/${ticketresult.author}`}
+                href={`/sellshop/${ticketresult.author.userId}`}
               >
-                <strong>{ticketresult.author}</strong>
+                <strong>{ticketresult.author.fullname}</strong>
               </Link>
             </p>
             <p>Location: {ticketresult.location} </p>{" "}
+            <ul className="tag--list">
+              {ticketresult.categories.map((category) => (
+                <li className="tag--list--item" key={category.categoryId}>
+                  <strong># {category.name}</strong>
+                </li>
+              ))}
+            </ul>
             {/* Replace with actual sold result if available */}
             <div className="tag--list row">
               <p className="">Date: {ticketresult.startDate}</p>
@@ -121,11 +139,11 @@ const TicketDetail = () => {
                 <strong>{ticketresult.cost} VND</strong> {/* Format cost */}
               </p>
               <div className="cta">
-                <button className="ticket--btn">
+                <button className="ticket--btn ticket--detail--btn">
                   <i className="fas fa-shopping-cart cart--icon"></i>
                   Add to cart
                 </button>
-                <button className="ticket--btn">
+                <button className="ticket--btn ticket--detail--btn">
                   <i className="fa-solid fa-cash-register cart--icon"></i>
                   Buy Now
                 </button>
@@ -146,30 +164,24 @@ const TicketDetail = () => {
           <h2 className="ticket--title row justify-content-center">
             Related Tickets
           </h2>
-          <div className="ticket--list row justify-content-center ">
-            <div
-              className="card col-12 col-lg-3 ticket--item"
-              style={{ width: "20%" }}
-            >
+          <div className="col-12 ticket--list justify-content-center">
+            <div className="card ticket--item col-3 shadow">
               <img
                 src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
-                className="card-img-top ticket--img"
+                className="card-img-top"
                 alt="..."
               />
               <div className="card-body">
-                <h5 className="card-title text-dark">Card title</h5>
-                <p className="card-text text-dark">
+                <h5 className="card-title">Card title</h5>
+                <p className="card-text">
                   <strong>100.000 VND</strong>
                 </p>
-                <a href="#" className="ticket-btn btn btn-primary">
+                <a href="#" className="ticket--btn ticket--related--btn">
                   Add to cart
                 </a>
               </div>
             </div>
-            <div
-              className="card col-12 col-lg-3 ticket--item"
-              style={{ width: "20%" }}
-            >
+            <div className="card col-12 col-lg-3 ticket--item shadow">
               <img
                 src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
                 className="card-img-top ticket--img"
@@ -180,15 +192,12 @@ const TicketDetail = () => {
                 <p className="card-text text-dark">
                   <strong>100.000 VND</strong>
                 </p>
-                <a href="#" className=" btn btn-primary">
+                <a href="#" className=" ticket--btn ticket--related--btn">
                   Add to cart
                 </a>
               </div>
             </div>
-            <div
-              className="card col-12 col-lg-3 ticket--item"
-              style={{ width: "20%" }}
-            >
+            <div className="card col-12 col-lg-3 ticket--item shadow">
               <img
                 src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
                 className="card-img-top ticket--img"
@@ -199,15 +208,12 @@ const TicketDetail = () => {
                 <p className="card-text text-dark">
                   <strong>100.000 VND</strong>
                 </p>
-                <a href="#" className="btn btn-primary">
+                <a href="#" className="ticket--btn ticket--related--btn">
                   Add to cart
                 </a>
               </div>
             </div>
-            <div
-              className="card col-12 col-lg-3 ticket--item"
-              style={{ width: "20%" }}
-            >
+            <div className="card col-12 col-lg-3 ticket--item shadow">
               <img
                 src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
                 className="card-img-top ticket--img"
@@ -218,7 +224,7 @@ const TicketDetail = () => {
                 <p className="card-text text-dark">
                   <strong>100.000 VND</strong>
                 </p>
-                <a href="#" className="btn btn-primary">
+                <a href="#" className="ticket--btn ticket--related--btn">
                   Add to cart
                 </a>
               </div>
