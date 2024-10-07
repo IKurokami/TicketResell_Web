@@ -168,7 +168,8 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
       className={`${isScrolled ? "navbarr scrolled" : "navbarr"}`}
       style={{
         backgroundColor: page === "ticket" ? "white" : undefined,
-        boxShadow: page === "ticket" ? "0 2px 5px rgba(0, 0, 0, 0.2)" : "none",
+        boxShadow:
+          page === "ticket" ? "0 2px 5px rgba(0, 0, 0, 0.2)" : undefined,
       }}
     >
       <div className="navbarr-brand">
