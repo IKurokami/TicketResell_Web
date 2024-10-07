@@ -1,16 +1,12 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { BannerItemCard as ItemCard } from "@/models/CategoryCard";
+import { BannerItemCard } from "@/models/CategoryCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretRight, faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import "@/Css/Banner.css";
 import useShowItem from "@/Hooks/useShowItem";
-import Link from "next/link"; 
-import {
-  fetchBannerItems,
-  CategoriesPage,
-  BannerItemCard,
-} from "@/models/CategoryCard";
+import Link from "next/link";
+import { fetchBannerItems, CategoriesPage } from "@/models/CategoryCard";
 
 const Categories = [
   "All",
@@ -24,11 +20,10 @@ const Categories = [
 
 const Banner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [animationClass, setAnimationClass] = useState(""); // For sliding effect
+  const [animationClass, setAnimationClass] = useState("");
   const [bannerItems, setBannerItems] = useState<BannerItemCard[]>([]);
   const itemsToShow = useShowItem();
 
-  // Fetch banner items when the component mounts
   useEffect(() => {
     console.log("Component mounted");
     const fetchData = async () => {
@@ -39,49 +34,77 @@ const Banner = () => {
     fetchData();
   }, []);
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Store timeout reference
-  // Function to move to the next product
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const getNextIndex = (currentIndex: number): number => {
+    const remainingItems = bannerItems.length - currentIndex;
+
+    if (remainingItems <= itemsToShow) {
+      // If remaining items are less than or equal to itemsToShow, go back to start
+      return 0;
+    }
+    return currentIndex + itemsToShow;
+  };
+
+  const getPrevIndex = (currentIndex: number): number => {
+    if (currentIndex === 0) {
+      // If at the start, go to the last complete set of items
+      const remainder = bannerItems.length % itemsToShow;
+      if (remainder === 0) {
+        return bannerItems.length - itemsToShow;
+      }
+      // If there's an incomplete set at the end, go to the start of that set
+      return bannerItems.length - remainder;
+    }
+    return Math.max(0, currentIndex - itemsToShow);
+  };
+
   const nextProduct = () => {
     setAnimationClass("slide-out-left");
     setTimeout(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex + itemsToShow < bannerItems.length
-          ? prevIndex + itemsToShow
-          : 0
-      );
+      setCurrentIndex(getNextIndex(currentIndex));
       setAnimationClass("slide-in-right");
-    }, 300); // Match the duration of the animation
+    }, 300);
   };
 
   const prevProduct = () => {
     setAnimationClass("slide-out-right");
     setTimeout(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex - itemsToShow >= 0
-          ? prevIndex - itemsToShow
-          : bannerItems.length -
-            (bannerItems.length % itemsToShow || itemsToShow)
-      );
+      setCurrentIndex(getPrevIndex(currentIndex));
       setAnimationClass("slide-in-left");
-    }, 300); // Match the duration of the animation
+    }, 300);
   };
 
-  // Function to reset the timer whenever user clicks on prev/next
   const resetTimeout = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    timeoutRef.current = setTimeout(nextProduct, 5000); // Reset to 5 seconds
+    timeoutRef.current = setTimeout(nextProduct, 5000);
   };
 
   useEffect(() => {
-    // Initialize the timeout for the first time
     resetTimeout();
     return () => {
-      // Clean up timeout when component unmounts
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [currentIndex]); // Whenever currentIndex changes, reset the timer
+  }, [currentIndex]);
+
+  // Get the current visible items
+  const getVisibleItems = () => {
+    const endIndex = currentIndex + itemsToShow;
+    const items = bannerItems.slice(currentIndex, endIndex);
+
+    // If we don't have enough items to fill the view and we're not at the start,
+    // we should go back to the beginning
+    if (items.length < itemsToShow && currentIndex !== 0) {
+      setCurrentIndex(0);
+      return bannerItems.slice(0, itemsToShow);
+    }
+
+    return items;
+  };
+
+  const visibleItems = getVisibleItems();
 
   return (
     <div className="categories">
@@ -101,7 +124,7 @@ const Banner = () => {
           }}
         />
         <div className={`category-items ${animationClass}`}>
-          <CategoriesPage bannerItems={bannerItems} />
+          <CategoriesPage bannerItems={visibleItems} />
         </div>
         <FontAwesomeIcon
           className="caret"

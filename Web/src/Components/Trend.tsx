@@ -103,7 +103,6 @@ const Trend = () => {
                 <span className="ticket">Ticket</span>
               </div>
               <div className="right-info">
-                <span className="date">Date</span>
                 <span className="price">Price</span>
                 <span className="amount">Amount</span>
               </div>
@@ -121,7 +120,6 @@ const Trend = () => {
                 <span className="ticket">Ticket</span>
               </div>
               <div className="right-info">
-                <span className="date">Date</span>
                 <span className="price">Price</span>
                 <span className="amount">Amount</span>
               </div>

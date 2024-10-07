@@ -1,6 +1,8 @@
 import useShowItem from "@/Hooks/useShowItem";
+import { promises } from "dns";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { fetchImage } from "./FetchImage";
 
 export interface BannerItemCard {
   imageUrl: string;
@@ -12,17 +14,43 @@ export interface BannerItemCard {
   id: string;
 }
 
-const convertToBannerItemCards = (response: any[]): BannerItemCard[] => {
-  return response.map((item) => ({
-    imageUrl:
-      "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517",
-    name: item.name,
-    date: item.createDate,
-    author: "", // or some default value if author information is available
-    description: "", // or some default value if description information is available
-    price: item.cost.toString(), // Convert cost to string
-    id: item.ticketId,
-  }));
+const DEFAULT_IMAGE =
+  "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
+
+const convertToBannerItemCards = async (
+  response: any[]
+): Promise<BannerItemCard[]> => {
+  const bannerItemCards = await Promise.all(
+    response.map(async (item) => {
+      let imageUrl = DEFAULT_IMAGE;
+
+      if (item.ticketId) {
+        const { imageUrl: fetchedImageUrl, error } = await fetchImage(
+          item.ticketId
+        );
+
+        if (fetchedImageUrl) {
+          imageUrl = fetchedImageUrl;
+        } else {
+          console.error(
+            `Error fetching image for ticket ${item.ticketId}: ${error}`
+          );
+        }
+      }
+
+      return {
+        imageUrl, // Dynamically fetched image or default image
+        name: item.name,
+        date: item.createDate,
+        author: "", // Add author if available or use a default value
+        description: "", // Add description if available or use a default value
+        price: item.cost.toString(), // Convert cost to string
+        id: item.ticketId,
+      };
+    })
+  );
+
+  return bannerItemCards;
 };
 
 interface CategoriesPageProps {
@@ -34,7 +62,9 @@ export const fetchBannerItems = async (): Promise<BannerItemCard[]> => {
   const response = await bannerItemsRes.json();
   console.log(response.data);
 
-  const bannerItems: BannerItemCard[] = convertToBannerItemCards(response.data);
+  const bannerItems: Promise<BannerItemCard[]> = convertToBannerItemCards(
+    response.data
+  );
 
   return bannerItems;
 };

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 
 const RetrievePage = () => {
   const [imageId, setImageId] = useState<string>("");
@@ -24,7 +24,6 @@ const RetrievePage = () => {
     }
 
     try {
-      // Log the request URL for debugging
       console.log(`Fetching image from: /api/images/${imageId}`);
 
       const response = await fetch(`/api/images/${imageId}`);
@@ -41,7 +40,6 @@ const RetrievePage = () => {
         throw new Error(`Server error: ${response.statusText}`);
       }
 
-      // Create a blob URL from the image data
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       setImageUrl(url);
@@ -58,37 +56,49 @@ const RetrievePage = () => {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <h1 style={{ color: "#333", marginBottom: "20px" }}>Retrieve Image</h1>
+    <div className="p-5 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Retrieve Image</h1>
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
-        <div style={{ marginBottom: "10px" }}>
-          <label htmlFor="id" style={{ display: "block", marginBottom: "5px" }}>
+      <form onSubmit={handleSubmit} className="mb-6">
+        <div className="mb-4">
+          <label
+            htmlFor="_id"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Image ID:
           </label>
           <input
             type="text"
-            id="id"
+            id="_id"
             value={imageId}
             onChange={handleIdChange}
-            placeholder="Enter image ID (e.g., TICKET001)"
+            placeholder="Enter image ID"
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
 
-        <button type="submit" disabled={isLoading}>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+        >
           {isLoading ? "Loading..." : "Retrieve Image"}
         </button>
       </form>
 
-      {error && <div>{error}</div>}
+      {error && <div className="text-red-600 mb-4">{error}</div>}
 
       {imageUrl && (
-        <div style={{ marginTop: "20px" }}>
-          <h2 style={{ color: "#333", marginBottom: "10px" }}>
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Retrieved Image:
           </h2>
-          <img src={imageUrl} alt="Retrieved image" />
+          <img
+            src={imageUrl}
+            alt="Retrieved image"
+            className="max-w-full h-auto rounded-lg shadow-md"
+          />
         </div>
       )}
     </div>
