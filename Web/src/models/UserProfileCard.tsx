@@ -249,6 +249,14 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
   return (
     <div className="bg-transparent min-h-96 pb-32 font-sans mt-16">
       <div className="max-w-md mx-auto pt-16 px-4">
+        {/* Banner */}
+        <div className="h-40 -mb-5 rounded-xl shadow-lg overflow-hidden">
+          <img
+              src="https://picsum.photos/1000"
+              alt="Banner"
+              className="w-full h-full object-cover"
+          />
+        </div>
         {/* Header */}
         <div className="bg-white rounded-t-xl shadow-sm">
           <div className="relative pt-8 pb-4 px-4 text-center">
@@ -290,7 +298,7 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
         </div>
 
         {/* User Information */}
-        <div className="bg-white shadow-sm">
+        <div className="bg-white shadow-sm rounded-b-xl">
           <div className="px-4 py-3 border-b border-gray-200">
             <p className="text-sm text-gray-600 flex items-center">
               <FaPhoneAlt className="mr-3 text-gray-400" />
