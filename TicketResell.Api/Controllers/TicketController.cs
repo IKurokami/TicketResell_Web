@@ -40,6 +40,15 @@ namespace TicketResell.Repositories.Controllers
             return ResponseParser.Result(response);
         }
 
+        [HttpGet("qr/{ticketId}")]
+        public async Task<IActionResult> GetQrImage(string ticketId)
+        {
+            var response = await _ticketService.GetQrImageAsBase64Async(ticketId);
+
+            return ResponseParser.Result(response);
+
+        }
+
         [HttpPost("getrange")]
         public async Task<IActionResult> GetTicketRange([FromBody] NumberRange range)
         {
