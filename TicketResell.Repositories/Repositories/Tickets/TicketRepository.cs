@@ -5,14 +5,18 @@ using Repositories.Core.Entities;
 namespace Repositories.Repositories;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using TicketResell.Repositories.Logger;
 
 public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 {
     private readonly TicketResellManagementContext _context;
+    private readonly IAppLogger _logger;
 
-    public TicketRepository(TicketResellManagementContext context) : base(context)
+    public TicketRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
     {
         _context = context;
+        _logger = logger;
     }
 
     public new async Task<List<Ticket>> GetAllAsync()
@@ -25,7 +29,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
         return tickets;
     }
-    
+
     public async Task<List<Ticket>> GetTicketRangeAsync(int start, int count)
     {
         var tickets = await _context.Tickets
@@ -118,4 +122,29 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     }
 
+    public async Task<List<Ticket>> GetTopTicketBySoldAmount(int amount)
+    {
+        var topSellingTickets = await _context.OrderDetails
+            .GroupBy(od => od.TicketId)
+            .Select(g => new
+            {
+                TicketId = g.Key,
+                TotalQuantity = g.Sum(od => od.Quantity)
+            })
+            .OrderByDescending(t => t.TotalQuantity)
+            .Take(amount)  // Adjust this number as needed
+            .ToListAsync();
+
+        var topSellingTicketIds = topSellingTickets.Select(t => t.TicketId).ToList();
+
+        var topSellingTicketInfos = await _context.Tickets
+            .Where(t => topSellingTicketIds.Contains(t.TicketId))
+            .ToListAsync();
+
+        var orderedTopSellingTicketInfos = topSellingTicketIds
+            .Select(id => topSellingTicketInfos.First(t => t.TicketId == id))
+            .ToList();
+
+        return orderedTopSellingTicketInfos;
+    }
 }

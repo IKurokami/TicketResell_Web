@@ -1,3 +1,85 @@
+.ranking{
+    display: flex;
+    justify-content: space-between;
+}
+
+.rank-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    padding-left: 0;
+    padding-right: 0;
+    border-bottom: 1px solid rgb(139, 139, 139);
+}
+
+.left-rank .rank-bar-container{
+    padding-left: 6.5rem;
+    background-color: white;
+    padding-right: 1rem;
+    width: 50vw;
+}
+.right-rank .rank-bar-container{
+    padding-left: 1rem;
+    background-color: white;
+    padding-right: 6.5rem;
+    width: 50vw;
+}
+
+.ticket img{
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 10px;
+    margin-right: 1rem;
+}
+
+.ticket {
+    display: flex;
+    align-items: center
+}
+
+.left-rank .left-info {
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.left-rank .right-info {
+    display: flex;
+    align-items: center;
+}
+
+.right-info span {
+    min-width: 3rem;
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.left-info span {
+    display: flex;
+    min-width: 4rem;
+    justify-content: flex-start;
+
+}
+
+.right-rank .right-info {
+    display: flex;
+    align-items: center;
+}
+.rank-bar{
+    background-color: white;
+}
+.right-rank .left-info {
+    display: flex;
+    align-items: center;
+}
+
+.left-info span,
+.right-info span {
+    margin-right: 10px;
+}
+
 .navbar{
     display: flex;
     justify-content: space-between;
@@ -40,9 +122,28 @@
     margin-right: 6rem;
 }
 
+.rank-item-card{
+    height: 5rem;
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+}
+
 
 
 @media (max-width: 1300px) {
+    .left-rank .rank-bar-container{
+        padding-left: 1rem;
+        background-color: white;
+        padding-right: 1rem;
+        width: 50vw;
+    }
+    .right-rank .rank-bar-container{
+        padding-left: 1rem;
+        background-color: white;
+        padding-right: 1rem;
+        width: 50vw;
+    }
 
     .navbar-left div{
         background-color:  rgb(237, 237, 237);
@@ -51,4 +152,28 @@
     .navbar-right{
         margin-right: 0rem;
     }
+  }
+
+  @media (max-width: 900px) {
+    .navbar{
+          display: block;
+          justify-content: center;
+    }
+    .left-rank{
+        display: none;
+    }
+    .right-rank .rank-bar-container{
+        width: 100vw;
+    }
+    .navbar-right{
+        padding: 3px;
+        background-color:  rgb(237, 237, 237);
+        margin-left: 0rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+        max-width: 358px;
+        
+    }
+    
+
   }

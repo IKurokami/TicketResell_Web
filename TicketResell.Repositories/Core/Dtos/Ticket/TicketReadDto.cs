@@ -7,7 +7,7 @@ namespace Repositories.Core.Dtos.Ticket;
 
 using System;
 
-public class TickerReadDto
+public class TicketReadDto
 {
     public string TicketId { get; set; } = null!;
 

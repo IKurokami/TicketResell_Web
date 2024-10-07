@@ -1,14 +1,16 @@
 .bg-seller-shop {
-  background: #3d3e3e;
-  color: white;
+  background: #fff;
+  color: #000;
   padding-bottom: 5vh;
 }
+/* common class */
+
 .profile--image {
   position: relative;
   margin-top: 10vh;
   width: 100%; /* Adjust width as necessary */
   height: 40vh; /* Adjust height as necessary */
-  background: #3d3e3e;
+  background: #f7f8fa;
 }
 .cover-image {
   width: 100%;
@@ -21,9 +23,9 @@
   position: absolute;
   border-radius: 50%;
   left: 7vw;
-  bottom: 35%;
-  border: 5px solid white;
-  background: #3d3e3e;
+  bottom: 40%;
+  border: 5px solid #fff;
+  background: #f7f8fa;
 }
 .avatar {
   width: 100%;
@@ -46,9 +48,21 @@
 
 .navbar--btn {
   text-decoration: none;
-  color: white;
+  color: #000;
   font-size: 1rem;
   padding: 2vh 1vw;
   border: 2px solid black;
   display: inline-block;
+}
+.navbar--item {
+  padding: 10px 20px;
+  background-color: #f6f6f6;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
 }

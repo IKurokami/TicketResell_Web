@@ -78,7 +78,7 @@
   text-align: center;
   object-fit: cover;
   width: 20vw;
-  height: 20;
+  height: 20vw;
   min-width: 300px;
   min-height: 300px;
 }
@@ -99,6 +99,8 @@
   position: absolute; 
   top: 0vh;
   left: 0; 
+  min-width: 300px;
+  min-height: 300px;
   right: 0; 
   bottom: 0; 
   background:linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.584) );;

@@ -82,19 +82,24 @@ const TicketDetail = () => {
     <div className="bg-ticket-detail">
       <main className="container">
         <div className="row ticket--detail">
-          <div className="col-12 col-lg-4 ticket--intro">
+          <div className="col-12 col-lg-5 ticket--intro">
             <img
-              className="rounded ticket--img img-thumbnail bg-dark"
+              className="rounded ticket--img "
               style={{ width: "100%" }}
               src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
               // src={ticketresult.imageUrl}
               alt={ticketresult.name}
             />
             <div className="dropdown">
-              <Dropdown title={"Description"} content="" />
+              <Dropdown
+                title={"Description"}
+                content=""
+                dropdownStatus={false}
+                iconDropdown="faList"
+              />
             </div>
           </div>
-          <div className="ticket--info col-12 col-lg-7">
+          <div className="ticket--info col-12 col-lg-6">
             <h2 className="ticket--name">{ticketresult.name}</h2>
             <p className="ticket--seller">
               Sold by {}
@@ -110,7 +115,7 @@ const TicketDetail = () => {
             <div className="tag--list row">
               <p className="">Date: {ticketresult.startDate}</p>
             </div>
-            <div className="ticket--price--block border border-secondary rounded">
+            <div className="ticket--price--block rounded">
               <p className="ticket--price">
                 <FontAwesomeIcon className="Tag" icon={faTag} />{" "}
                 <strong>{ticketresult.cost} VND</strong> {/* Format cost */}
@@ -127,7 +132,12 @@ const TicketDetail = () => {
               </div>
             </div>
             <div className="dropdown">
-              <Dropdown title={"Seller"} content="" />
+              <Dropdown
+                title={"Review"}
+                content=""
+                dropdownStatus={true}
+                iconDropdown="faShop"
+              />
             </div>
           </div>
         </div>
@@ -136,16 +146,19 @@ const TicketDetail = () => {
           <h2 className="ticket--title row justify-content-center">
             Related Tickets
           </h2>
-          <div className="ticket--list">
-            <div className="card bg-dark col-12 col-lg-3 border-white ticket--item">
+          <div className="ticket--list row justify-content-center ">
+            <div
+              className="card col-12 col-lg-3 ticket--item"
+              style={{ width: "20%" }}
+            >
               <img
                 src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
                 className="card-img-top ticket--img"
                 alt="..."
               />
               <div className="card-body">
-                <h5 className="card-title text-white">Card title</h5>
-                <p className="card-text text-white">
+                <h5 className="card-title text-dark">Card title</h5>
+                <p className="card-text text-dark">
                   <strong>100.000 VND</strong>
                 </p>
                 <a href="#" className="ticket-btn btn btn-primary">
@@ -153,15 +166,18 @@ const TicketDetail = () => {
                 </a>
               </div>
             </div>
-            <div className="card bg-dark col-12 col-lg-3 border-white ticket--item">
+            <div
+              className="card col-12 col-lg-3 ticket--item"
+              style={{ width: "20%" }}
+            >
               <img
                 src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
                 className="card-img-top ticket--img"
                 alt="..."
               />
               <div className="card-body">
-                <h5 className="card-title text-white">Card title</h5>
-                <p className="card-text text-white">
+                <h5 className="card-title text-dark">Card title</h5>
+                <p className="card-text text-dark">
                   <strong>100.000 VND</strong>
                 </p>
                 <a href="#" className=" btn btn-primary">
@@ -169,15 +185,37 @@ const TicketDetail = () => {
                 </a>
               </div>
             </div>
-            <div className="card bg-dark col-12 col-lg-3 border-white ticket--item">
+            <div
+              className="card col-12 col-lg-3 ticket--item"
+              style={{ width: "20%" }}
+            >
               <img
                 src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
                 className="card-img-top ticket--img"
                 alt="..."
               />
               <div className="card-body">
-                <h5 className="card-title text-white">Card title</h5>
-                <p className="card-text text-white">
+                <h5 className="card-title text-dark">Card title</h5>
+                <p className="card-text text-dark">
+                  <strong>100.000 VND</strong>
+                </p>
+                <a href="#" className="btn btn-primary">
+                  Add to cart
+                </a>
+              </div>
+            </div>
+            <div
+              className="card col-12 col-lg-3 ticket--item"
+              style={{ width: "20%" }}
+            >
+              <img
+                src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
+                className="card-img-top ticket--img"
+                alt="..."
+              />
+              <div className="card-body">
+                <h5 className="card-title text-dark">Card title</h5>
+                <p className="card-text text-dark">
                   <strong>100.000 VND</strong>
                 </p>
                 <a href="#" className="btn btn-primary">

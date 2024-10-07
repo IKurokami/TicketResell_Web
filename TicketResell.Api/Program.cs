@@ -13,6 +13,7 @@ using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Categories;
 using TicketResell.Services.Services.Tickets;
 using TicketResell.Services.Services.Categories;
+using TicketResell.Repositories.Logger;
 
 Env.Load();
 
@@ -33,6 +34,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 // Automapper configuration
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
+builder.Services.AddSingleton<IAppLogger, AppLogger>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -58,7 +60,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<OrderDetailValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<TicketValidator>();
 builder.Services.AddScoped<Repositories.Core.Validators.IValidatorFactory, ValidatorFactory>();
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",

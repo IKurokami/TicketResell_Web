@@ -2,16 +2,18 @@ using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
+using TicketResell.Repositories.Logger;
 
 namespace Repositories.Repositories
 {
     public class OrderRepository : GenericRepository<Order>, IOrderRepository
     {
         private readonly TicketResellManagementContext _context;
-
-        public OrderRepository(TicketResellManagementContext context) : base(context)
+        private readonly IAppLogger _logger;
+        public OrderRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
         {
             _context = context;
+            _logger = logger;
         }
 
 

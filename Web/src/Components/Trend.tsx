@@ -1,14 +1,43 @@
 "use client";
 import "@/Css/Trend.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import TicketList, {
+  fetchTopTicketData,
+  RankItemCardProps,
+} from "@/models/RankItemCard";
 
 const Trend = () => {
   const [buttonLeftActive, setButtonLeftActive] = useState(1);
   const [buttonRightActive, setButtonRightActive] = useState(2);
+  const [TopticketList, setTopTicketList] = useState<RankItemCardProps[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const ticketData = await fetchTopTicketData();
+      setTopTicketList(ticketData);
+    };
+
+    fetchData().catch((error) => {
+      console.error("Failed to fetch top ticket data:", error);
+    });
+  }, []);
+
+  const splitTicketList = (list: RankItemCardProps[]) => {
+    let newList = [...list];
+    if (newList.length % 2 !== 0) {
+      newList.pop();
+    }
+
+    const midpoint = newList.length / 2;
+
+    return [newList.slice(0, midpoint), newList.slice(midpoint)];
+  };
+  const [firstHalf, secondHalf] = splitTicketList(TopticketList);
+
   const handleLeftButtonClick = (index: any) => {
     setButtonLeftActive(index);
   };
-
   const handleRightButtonClick = (index: any) => {
     setButtonRightActive(index);
   };
@@ -64,6 +93,44 @@ const Trend = () => {
             </button>
           </div>
         </nav>
+      </div>
+      <div className="ranking">
+        <div className="left-rank">
+          <div className="rank-bar-container">
+            <div className="rank-bar">
+              <div className="left-info">
+                <span className="rank">Rank</span>
+                <span className="ticket">Ticket</span>
+              </div>
+              <div className="right-info">
+                <span className="date">Date</span>
+                <span className="price">Price</span>
+                <span className="amount">Amount</span>
+              </div>
+            </div>
+            <div className="rank-item">
+              <TicketList topTicketList={firstHalf} />
+            </div>
+          </div>
+        </div>
+        <div className="right-rank">
+          <div className="rank-bar-container">
+            <div className="rank-bar">
+              <div className="left-info">
+                <span className="rank">Rank</span>
+                <span className="ticket">Ticket</span>
+              </div>
+              <div className="right-info">
+                <span className="date">Date</span>
+                <span className="price">Price</span>
+                <span className="amount">Amount</span>
+              </div>
+            </div>
+            <div className="rank-item">
+              <TicketList topTicketList={secondHalf} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

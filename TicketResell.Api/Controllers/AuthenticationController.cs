@@ -85,7 +85,7 @@ namespace TicketResell.Api.Controllers
             HttpContext.SetUserId("");
             return ResponseParser.Result(result);
         }
-        
+
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
@@ -99,7 +99,7 @@ namespace TicketResell.Api.Controllers
             var result = await _authService.ChangePasswordAsync(changePasswordDto.UserId, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
             return ResponseParser.Result(result);
         }
-        
+
         [HttpPost("send-verification-email")]
         public async Task<IActionResult> SendVerificationEmail([FromBody] string userId)
         {

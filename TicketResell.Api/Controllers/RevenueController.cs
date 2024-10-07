@@ -3,7 +3,7 @@ using Repositories.Core.Dtos.Revenue;
 using TicketResell.Services.Services;
 using TicketResell.Services.Services.Revenues;
 
-namespace TicketResell.Api.Controllers
+namespace TicketResell.Repositories.Controllers
 {
     [Route("/api/[controller]")]
     [ApiController]
@@ -56,7 +56,7 @@ namespace TicketResell.Api.Controllers
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateRevenue(string id, [FromBody] RevenueUpdateDto dto)
         {
-            var response = await _revenueService.UpdateRevenueAsync(id,dto);
+            var response = await _revenueService.UpdateRevenueAsync(id, dto);
 
             return ResponseParser.Result(response);
         }

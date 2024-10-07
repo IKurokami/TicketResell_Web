@@ -4,26 +4,28 @@ using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Repositories;
 using Repositories.Repositories.Carts;
+using TicketResell.Repositories.Logger;
 
 namespace TicketResell.Repositories.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly TicketResellManagementContext _context;
-
-        public UnitOfWork(TicketResellManagementContext context)
+        private readonly IAppLogger _logger;
+        public UnitOfWork(IAppLogger logger, TicketResellManagementContext context)
         {
             _context = context;
-            UserRepository = new UserRepository(_context);
-            TransactionRepository = new TransactionRepository(_context);
-            TicketRepository = new TicketRepository(_context);
-            SellConfigRepository = new SellConfigRepository(_context);
-            RoleRepository = new RoleRepository(_context);
-            RevenueRepository = new RevenueRepository(_context);
-            OrderDetailRepository = new OrderDetailRepository(_context);
-            OrderRepository = new OrderRepository(_context);
-            CategoryRepository = new CategoryRepository(_context);
-            CartRepository = new CartRepository(_context);
+            _logger = logger;
+            UserRepository = new UserRepository(_logger, _context);
+            TransactionRepository = new TransactionRepository(_logger, _context);
+            TicketRepository = new TicketRepository(_logger, _context);
+            SellConfigRepository = new SellConfigRepository(_logger, _context);
+            RoleRepository = new RoleRepository(_logger, _context);
+            RevenueRepository = new RevenueRepository(_logger, _context);
+            OrderDetailRepository = new OrderDetailRepository(_logger, _context);
+            OrderRepository = new OrderRepository(_logger, _context);
+            CategoryRepository = new CategoryRepository(_logger, _context);
+            CartRepository = new CartRepository(_logger, _context);
         }
 
         public IUserRepository UserRepository { get; }
