@@ -6,7 +6,6 @@ import { faTag } from "@fortawesome/free-solid-svg-icons";
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Button } from "react-bootstrap";
 import Dropdown from "./Dropdown";
 import Link from "next/link";
 
@@ -26,7 +25,7 @@ const TicketDetail = () => {
   const [title, setTitle] = useState("");
 
   // Function to fetch ticket by ID
-  const fetchTicketById = async (id: string | string[]) => {
+  const fetchTicketById = async (id: string) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Ticket/readbyid/${id}`,
