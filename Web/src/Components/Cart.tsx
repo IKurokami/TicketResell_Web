@@ -145,217 +145,138 @@ const MyCart: React.FC = () => {
         <div className="p-6 flex flex-col lg:flex-row">
           {/* Left Column: Tickets Table */}
           <div className="w-full lg:w-2/3 lg:pr-6 mb-6 lg:mb-0">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Payment Cart
+            <h2
+              className="text-4xl font-semibold text-gray-800 mb-8 tracking-wider"
+              style={{ fontFamily: "serif" }}
+            >
+              🛒 Payment Cart
             </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
+            <div
+              className="overflow-x-auto shadow-lg rounded-lg border bg-gray-50 p-6 relative"
+              style={{
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center",
+                backgroundSize: "cover",
+                border: "2px solid #2b2b2b",
+                borderRadius: "10px",
+              }}
+            >
+              <table className="w-full text-lg text-black">
+                <thead className="bg-white border-b">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        No
-                      </span>
+                    {/* Column Headers with Emojis */}
+                    <th
+                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
+                      style={{ borderBottom: "1px solid #2b2b2b" }}
+                    >
+                      No ✅
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
-                          />
-                        </svg>
-                        Ticket Name
-                      </span>
+                    <th
+                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
+                      style={{ borderBottom: "1px solid #2b2b2b" }}
+                    >
+                      Ticket Name 🎟️
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        Amount
-                      </span>
+                    <th
+                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
+                      style={{ borderBottom: "1px solid #2b2b2b" }}
+                    >
+                      Amount
                     </th>
-                    <th className="hidden sm:table-cell px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                        Date
-                      </span>
+                    <th
+                      className="hidden sm:table-cell px-6 py-4 text-left text-gray-600 tracking-wide"
+                      style={{ borderBottom: "1px solid #2b2b2b" }}
+                    >
+                      Date 📅
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        Price
-                      </span>
+                    <th
+                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
+                      style={{ borderBottom: "1px solid #2b2b2b" }}
+                    >
+                      Price 💸
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 12a7 7 0 11-14 0 7 7 0 0114 0z"
-                          />
-                        </svg>
-                        Select
-                      </span>
+                    <th
+                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
+                      style={{ borderBottom: "1px solid #2b2b2b" }}
+                    >
+                      Select ✅
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-300">
                   {items.slice(0, 10).map((item, index) => (
                     <tr
                       key={item.orderDetailId}
-                      className="hover:bg-gray-50 transition duration-150 ease-in-out"
+                      className="hover:bg-gray-100 transition-all duration-200 ease-in-out"
                     >
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        {index + 1}
+                      <td
+                        className="px-6 py-4 whitespace-nowrap"
+                        style={{ borderBottom: "1px solid #2b2b2b" }}
+                      >
+                        <span className="block text-gray-900">{index + 1}</span>
                       </td>
-                      <td className="px-4 py-2 whitespace-nowrap">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap"
+                        style={{ borderBottom: "1px solid #2b2b2b" }}
+                      >
                         <div className="flex items-center">
                           <img
                             src="https://picsum.photos/200"
                             alt={item.ticket.name}
-                            className="w-10 h-10 rounded-full mr-2"
+                            className="w-12 h-12 rounded-full mr-4"
+                            style={{ border: "2px solid #2b2b2b" }}
                           />
-                          <span className="text-sm text-gray-900">
+                          <span className="text-gray-900 text-lg">
                             {item.ticket.name}
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-2 whitespace-nowrap">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap"
+                        style={{ borderBottom: "1px solid #2b2b2b" }}
+                      >
                         <div className="flex items-center">
                           <button
-                            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                            className="text-gray-700 hover:text-black focus:outline-none"
                             onClick={() =>
                               handleQuantityChange(item.orderDetailId, false)
                             }
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M20 12H4"
-                              />
-                            </svg>
+                            ➖
                           </button>
-                          <span className="mx-2 text-sm text-gray-900">
-                            {item.quantity}
-                          </span>
+                          <span className="mx-4 text-lg">{item.quantity}</span>
                           <button
-                            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                            className="text-gray-700 hover:text-black focus:outline-none"
                             onClick={() =>
                               handleQuantityChange(item.orderDetailId, true)
                             }
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                              />
-                            </svg>
+                            ➕
                           </button>
                         </div>
                       </td>
-                      <td className="hidden sm:table-cell px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        className="hidden sm:table-cell px-6 py-4 text-gray-600"
+                        style={{ borderBottom: "1px solid #2b2b2b" }}
+                      >
                         {item.ticket.startDate}
                       </td>
-                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        className="px-6 py-4 text-gray-700"
+                        style={{ borderBottom: "1px solid #2b2b2b" }}
+                      >
                         € {item.price.toFixed(2)}
                       </td>
-                      <td className="px-4 py-2 whitespace-nowrap">
+                      <td
+                        className="px-6 py-4"
+                        style={{ borderBottom: "1px solid #2b2b2b" }}
+                      >
                         <input
                           type="checkbox"
                           checked={item.isSelected}
                           onChange={() => handleSelect(item.orderDetailId)}
-                          className="form-checkbox h-5 w-5 text-blue-600"
+                          className="form-checkbox h-6 w-6 text-blue-700"
+                          style={{ border: "1px solid #2b2b2b" }}
                         />
                       </td>
                     </tr>
@@ -364,7 +285,6 @@ const MyCart: React.FC = () => {
               </table>
             </div>
           </div>
-
           {/* Right Column: Payment Method and Summary */}
           <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200">
             <h3 className="text-2xl font-semibold text-gray-800 mb-6">
