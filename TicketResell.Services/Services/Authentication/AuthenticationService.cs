@@ -1,6 +1,10 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
@@ -143,7 +147,109 @@ public class AuthenticationService : IAuthenticationService
         return await ValidateAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
     }
     
-    
+    public async Task<ResponseModel> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ResponseModel.NotFound("User not found");
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.Password))
+        {
+            return ResponseModel.BadRequest("Password change failed", "Current password is incorrect");
+        }
+
+        user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CompleteAsync();
+
+        return ResponseModel.Success("Password changed successfully");
+    }
+    public async Task<ResponseModel> SendVerificationEmailAsync(string userId)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ResponseModel.NotFound("User not found");
+        }
+
+        if (user.Verify == 1)
+        {
+            return ResponseModel.BadRequest("Email already verified");
+        }
+
+        var token = GenerateEmailConfirmationToken();
+        var expirationTime = DateTime.UtcNow.AddMinutes(5);
+
+        // Store token in Redis
+        var db = _redis.GetDatabase();
+        await db.StringSetAsync(
+            $"email_verification:{userId}",
+            JsonConvert.SerializeObject(new { Token = token, Expiration = expirationTime }),
+            TimeSpan.FromMinutes(5)
+        );
+
+        var confirmationLink = $"http://localhost:5296/api/authentication/confirm-email?userId={userId}&token={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token))}";
+
+        await SendEmailAsync(user.Gmail, "Confirm your email", $"Please confirm your email by clicking this link: {confirmationLink}");
+
+        return ResponseModel.Success("Verification email sent");
+    }
+
+    public async Task<ResponseModel> ConfirmEmailAsync(string userId, string token)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ResponseModel.NotFound("User not found");
+        }
+
+        if (user.Verify == 1)
+        {
+            return ResponseModel.BadRequest("Email already verified");
+        }
+
+        // Retrieve token from Redis
+        var db = _redis.GetDatabase();
+        var storedTokenJson = await db.StringGetAsync($"email_verification:{userId}");
+        
+        if (!storedTokenJson.HasValue)
+        {
+            return ResponseModel.BadRequest("Invalid or expired token");
+        }
+
+        var storedToken = JsonConvert.DeserializeAnonymousType(storedTokenJson, new { Token = "", Expiration = DateTime.UtcNow });
+
+        if (storedToken.Token != token || storedToken.Expiration < DateTime.UtcNow)
+        {
+            return ResponseModel.BadRequest("Invalid or expired token");
+        }
+
+        user.Verify = 1;
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CompleteAsync();
+
+        // Remove the token from Redis
+        await db.KeyDeleteAsync($"email_verification:{userId}");
+
+        return ResponseModel.Success("Email verified successfully");
+    }
+
+    private string GenerateEmailConfirmationToken()
+    {
+        return Guid.NewGuid().ToString();
+    }
+
+    private async Task SendEmailAsync(string email, string subject, string message)
+    {
+        // Implement email sending logic here
+        // You might want to use a service like SendGrid, Mailgun, or SMTP
+        // For this example, we'll just simulate sending an email
+        Console.WriteLine($"Sending email to {email}");
+        Console.WriteLine($"Subject: {subject}");
+        Console.WriteLine($"Message: {message}");
+    }
     private string GenerateAccessKey()
     {
         var key = new byte[32];
