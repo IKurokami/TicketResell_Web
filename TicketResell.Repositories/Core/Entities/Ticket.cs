@@ -1,6 +1,7 @@
-﻿namespace Repositories.Core.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
+
+namespace Repositories.Core.Entities;
 
 public partial class Ticket
 {
@@ -23,6 +24,10 @@ public partial class Ticket
     public int? Status { get; set; }
 
     public string? Image { get; set; }
+
+    public byte[]? Qr { get; set; }
+
+    public string? Description { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
