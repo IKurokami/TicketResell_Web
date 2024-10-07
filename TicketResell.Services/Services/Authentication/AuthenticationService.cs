@@ -50,7 +50,7 @@ public class AuthenticationService : IAuthenticationService
         }
 
         user.Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
-        user.CreateDate = DateTime.Now;
+        user.CreateDate = DateTime.UtcNow;
         user.Status = 1;
         
         await _unitOfWork.UserRepository.CreateAsync(user);

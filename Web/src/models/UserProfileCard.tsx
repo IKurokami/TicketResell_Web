@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaPencilAlt,
   FaPhoneAlt,
@@ -71,6 +71,7 @@ export const fetchUserProfile = async (
   );
   return userProfile;
 };
+
 export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
   userProfile,
 }) => {
@@ -78,6 +79,7 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
   const [avatarPreview, setAvatarPreview] = useState<string>(
     profile.avatar || "https://picsum.photos/200"
   );
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
@@ -86,24 +88,47 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
     newPassword: "",
     confirmNewPassword: "",
   });
+
+  useEffect(() => {
+    loadUserImage();
+  }, [profile.id]);
+
+  const loadUserImage = async () => {
+    try {
+      const response = await fetch(`/api/images/${profile.id}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setAvatarPreview(url);
+      } else {
+        setAvatarPreview("");
+      }
+    } catch (error) {
+      console.error("Error loading user image:", error);
+      setAvatarPreview("");
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile({ ...profile, [name]: value });
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
-        setProfile({ ...profile, avatar: reader.result as string });
         setShowSaveButton(true);
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const [imageFileSelected, setImageFile] = useState<File | null>(null);
   const handleSaveProfile = async (avatarOnly: boolean = false) => {
     const userUpdateDto: UserUpdateDto = {
       UserId: profile.id,
@@ -115,29 +140,48 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
       Sex: profile.sex,
       Phone: profile.phone,
       Address: profile.address,
-      Avatar: profile.avatar,
+      Avatar: profile.id,
       Birthday: profile.birthday,
       Bio: profile.bio,
     };
 
-    if (avatarOnly) {
-      // Only update the avatar if saving from the quick save button
-      userUpdateDto.Avatar = profile.avatar;
-    }
-
     setIsEditModalOpen(false);
     setShowSaveButton(false);
 
+    if (avatarOnly && imageFileSelected) {
+      const formData = new FormData();
+      formData.append("image", imageFileSelected);
+      formData.append("id", profile.id); // Append the image ID
+
+      try {
+        const response = await fetch("/api/uploadImage", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          alert(data.message);
+        } else {
+          throw new Error("Image upload failed.");
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Error uploading image.");
+      }
+      return;
+    }
+
     try {
       const response = await fetch(
-        `http://localhost:5296/api/user/update/${profile.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userUpdateDto),
-        }
+          `http://localhost:5296/api/user/update/${profile.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userUpdateDto),
+          }
       );
 
       if (response.ok) {

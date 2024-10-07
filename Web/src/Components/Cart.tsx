@@ -1,124 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '@/Css/MyCart.css';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUniversity, faMobileAlt } from '@fortawesome/free-solid-svg-icons';
 import { faPaypal } from '@fortawesome/free-brands-svg-icons';
+import Cookies from "js-cookie";
+
+export interface Ticket {
+  ticketId: string;
+  sellerId: string;
+  name: string;
+  cost: number;
+  location: string;
+  startDate: string;
+  createDate: string;
+  modifyDate: string;
+  status: number;
+  seller: null | any;
+  image: string;
+  categories: any[];
+  category: null | any;
+};
+export interface CartItem {
+  orderDetailId: string;
+  orderId: string;
+  ticketId: string;
+  price: number;
+  quantity: number;
+  ticket: Ticket;
+};
+interface CartItemWithSelection extends CartItem {
+  isSelected: boolean;
+}
 
 const MyCart: React.FC = () => {
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      name: 'Concert Ticket',
-      price: 44.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-10-10',
-      isSelected: false,
-    },
-    {
-      id: 2,
-      name: 'Football Match',
-      price: 60.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-10-15',
-      isSelected: false,
-    },
-    {
-      id: 3,
-      name: 'Theater Play',
-      price: 30.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-10-20',
-      isSelected: false,
-    },
-    {
-      id: 4,
-      name: 'Movie Ticket',
-      price: 12.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-10-25',
-      isSelected: false,
-    },
-    {
-      id: 5,
-      name: 'Festival Ticket',
-      price: 100.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-10-30',
-      isSelected: false,
-    },
-    {
-      id: 6,
-      name: 'Opera Ticket',
-      price: 85.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-11-05',
-      isSelected: false,
-    },
-    {
-      id: 6,
-      name: 'Opera Ticket',
-      price: 85.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-11-05',
-      isSelected: false,
-    },
-    {
-      id: 6,
-      name: 'Opera Ticket',
-      price: 85.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-11-05',
-      isSelected: false,
-    },
-    {
-      id: 6,
-      name: 'Opera Ticket',
-      price: 85.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-11-05',
-      isSelected: false,
-    },
-    {
-      id: 6,
-      name: 'Opera Ticket',
-      price: 85.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-11-05',
-      isSelected: false,
-    },
-    {
-      id: 6,
-      name: 'Opera Ticket',
-      price: 85.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-11-05',
-      isSelected: false,
-    },
-    {
-      id: 6,
-      name: 'Opera Ticket',
-      price: 85.00,
-      quantity: 1,
-      imageUrl: 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451',
-      date: '2024-11-05',
-      isSelected: false,
-    },
-  ]);
+  const [items, setItems] = useState<CartItemWithSelection[]>([]);
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        const id = Cookies.get('id');
+        const response = await fetch(`http://localhost:5296/api/cart/items/${id}`);
+        const data = await response.json();
+        console.log("cart data: ", data.data);
+        const itemsWithSelection = data.data.map((item: CartItem) => ({
+          ...item,
+          isSelected: false
+        }));
+        setItems(itemsWithSelection);
+      } catch (error) {
+        console.error('Error fetching cart items:', error);
+      }
+    };
+    fetchCartItems();
+  }, []);
+  useEffect(() => {
+    console.log("Cart items updated: ", items);
+  }, [items]);
 
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
-
   const paymentMethods = [
     { id: 'atm', name: 'ATM-Banking', icon: faUniversity },
     { id: 'momo', name: 'Momo', icon: faMobileAlt },
@@ -133,9 +73,9 @@ const MyCart: React.FC = () => {
   const totalPrice = totalItemsPrice > 0 ? totalItemsPrice : 0;
 
   // Chọn sản phẩm
-  const handleSelect = (id: number) => {
+  const handleSelect = (id: string) => {
     const updatedItems = items.map(item =>
-      item.id === id ? { ...item, isSelected: !item.isSelected } : item
+      item.orderDetailId === id ? { ...item, isSelected: !item.isSelected } : item
     );
     setItems(updatedItems);
   };
@@ -146,9 +86,9 @@ const MyCart: React.FC = () => {
   };
 
   // Thay đổi số lượng sản phẩm
-  const handleQuantityChange = (id: number, increment: boolean) => {
+  const handleQuantityChange = (id: string, increment: boolean) => {
     const updatedItems = items.map(item => {
-      if (item.id === id) {
+      if (item.orderDetailId === id) {
         const newQuantity = increment ? item.quantity + 1 : Math.max(item.quantity - 1, 1);
         return { ...item, quantity: newQuantity };
       }
@@ -194,30 +134,30 @@ const MyCart: React.FC = () => {
           </thead>
           <tbody>
             {items.slice(0, 10).map((item, index) => (
-              <React.Fragment key={item.id}>
+              <React.Fragment key={item.orderDetailId}>
                 <tr>
                   <td>{index + 1}</td>
                   <td className='Item-image'>
                     <img
-                      src={item.imageUrl}
-                      alt={item.name}
+                      src="https://picsum.photos/200"
+                      alt={item.ticket.name}
                       className="ticket-image"
                     />
-                    {item.name}
+                    {item.ticket.name}
                   </td>
                   <td>
-                    <button className="quantity-btn" onClick={() => handleQuantityChange(item.id, false)}>-</button>
+                    <button className="quantity-btn" onClick={() => handleQuantityChange(item.orderDetailId, false)}>-</button>
                     <span className="quantity-input">{item.quantity}</span>
-                    <button className="quantity-btn" onClick={() => handleQuantityChange(item.id, true)}>+</button>
+                    <button className="quantity-btn" onClick={() => handleQuantityChange(item.orderDetailId, true)}>+</button>
                   </td>
 
-                  <td>{item.date}</td>
+                  <td>{item.ticket.startDate}</td>
                   <td>€ {item.price.toFixed(2)}</td>
                   <td>
                     <input
                       type="checkbox"
                       checked={item.isSelected}
-                      onChange={() => handleSelect(item.id)}
+                      onChange={() => handleSelect(item.orderDetailId)}
                     />
                   </td>
                 </tr>

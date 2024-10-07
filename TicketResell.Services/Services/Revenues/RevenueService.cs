@@ -55,7 +55,7 @@ public class RevenueService : IRevenueService
         string type = RevenueConstant.MONTH_TYPE;
         var revenues = await  _unitOfWork.RevenueRepository.GetRevenuesBySellerId_MonthAsync(id, type);
 
-        DateTime date = DateTime.Now;
+        DateTime date = DateTime.UtcNow;
         foreach (var revenue in revenues)
         {
             if (revenue.StartDate <= date && date <= revenue.EndDate)
