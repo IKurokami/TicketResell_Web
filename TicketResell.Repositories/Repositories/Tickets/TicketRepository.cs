@@ -94,6 +94,17 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         await _context.Tickets.AddAsync(ticket);
     }
 
+    public async Task<List<Ticket>> GetTicketBySellerId(string id)
+    {
+        var tickets = await _context.Tickets.Where(x => x.SellerId == id).ToListAsync();
+        if (tickets == null)
+        {
+            throw new KeyNotFoundException("Ticket not found");
+        }
+
+        return tickets;
+    }
+
     public async Task DeleteTicketAsync(string id)
     {
         var ticket = await _context.Tickets

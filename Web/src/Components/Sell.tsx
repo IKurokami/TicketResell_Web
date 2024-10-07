@@ -5,6 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@/Css/Sell.css";
 import { Search, Plus } from "lucide-react";
 import { TicketCard, convertToTicketCards } from "@/models/TicketSellCard";
+import AddTicketModal from "@/Components/AddTicketPopup";
 
 const fetchTicketItems = async (): Promise<TicketCard[]> => {
   const response = await fetch("http://localhost:5296/api/ticket/read");
@@ -13,6 +14,7 @@ const fetchTicketItems = async (): Promise<TicketCard[]> => {
 };
 
 const TicketsPage = () => {
+  const [modalOpen, setModalOpen] = useState(false);
   const [ticketItems, setTicketItems] = useState<TicketCard[]>([]);
 
   const fetchItems = async () => {
@@ -26,6 +28,10 @@ const TicketsPage = () => {
 
     fetchItems();
   }, []);
+
+  const handleButtonClick = () => {
+    setModalOpen(true);
+  };
 
   return (
     <div className="tickets-page-wrapper">
@@ -62,16 +68,20 @@ const TicketsPage = () => {
               <input type="text" placeholder="Search ticket" />
               <Search className="search-icon" />
             </div>
-            <button className=" add-ticket-btn">
+            <button className=" add-ticket-btn" onClick={handleButtonClick}>
               <Plus className="add-button" />
             </button>
           </div>
+          <AddTicketModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+          />
 
           <div className="tickets-section">
             <div className="row justify-content-center">
               {ticketItems.length > 0 ? (
                 ticketItems.map((ticketItem) => (
-                  <div key={ticketItem.id} className="col-lg-3 ticket-card">
+                  <div key={ticketItem.id} className="col-lg-4 ticket-card">
                     <div className="card">
                       <div className="card-img-container">
                         <img
@@ -87,8 +97,14 @@ const TicketsPage = () => {
                       </div>
                       <div className="card-body">
                         <h5 className="card-title">{ticketItem.name}</h5>
-                        <p className="card-date">{ticketItem.date}</p>
-                        <p className="ticket-price">${ticketItem.price}</p>
+                        <p className="card-location">
+                          Location: {ticketItem.location}
+                        </p>
+                        <p className="card-date">Date: {ticketItem.date}</p>
+                        <p className="ticket-price">
+                          Cost: ${ticketItem.price}
+                        </p>
+
                         <button className="edit-btn">Edit</button>
                       </div>
                     </div>

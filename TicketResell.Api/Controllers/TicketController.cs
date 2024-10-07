@@ -33,6 +33,15 @@ namespace TicketResell.Repositories.Controllers
         }
 
         [HttpGet]
+        [Route("readbySellerId/{id}")]
+        public async Task<IActionResult> GetTicketBySellerId(string id)
+        {
+            var response = await _ticketService.GetTicketBySellerId(id);
+            return ResponseParser.Result(response);
+        }
+        
+        
+        [HttpGet]
         [Route("gettop/{amount:int}")]
         public async Task<IActionResult> GetTopTicket(int amount)
         {

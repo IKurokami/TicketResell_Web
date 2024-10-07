@@ -61,6 +61,13 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket: {ticketDtos}", ticketDtos);
         }
 
+        public async Task<ResponseModel> GetTicketBySellerId(string id)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketBySellerId(id);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully get ticket : {ticketDtos}", ticketDtos);
+        }
+
         public async Task<ResponseModel> GetTopTicket(int amount)
         {
             var ticket = await _unitOfWork.TicketRepository.GetTopTicketBySoldAmount(amount);

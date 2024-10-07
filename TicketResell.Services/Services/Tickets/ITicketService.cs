@@ -8,6 +8,7 @@ public interface ITicketService
 
     public Task<ResponseModel> GetTicketByNameAsync(string name);
 
+    public Task<ResponseModel> GetTicketBySellerId(string id);
     public Task<ResponseModel> GetTicketsAsync();
     public Task<ResponseModel> GetTicketRangeAsync(int start, int count);
     public Task<ResponseModel> GetTopTicket(int amount);
@@ -18,5 +19,4 @@ public interface ITicketService
 
     public Task<ResponseModel> DeleteTicketAsync(string id, bool saveAll = true);
     public Task<ResponseModel> GetTicketByCategoryAsync(string id);
-
 }
