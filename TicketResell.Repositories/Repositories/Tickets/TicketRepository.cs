@@ -147,4 +147,20 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
         return orderedTopSellingTicketInfos;
     }
+
+    public async Task<string> GetQrImageAsBase64Async(string ticketId)
+    {
+        var ticket = await _context.Tickets
+            .Where(t => t.TicketId == ticketId)
+            .Select(t => t.Qr)
+            .FirstOrDefaultAsync();
+
+        if (ticket == null || ticket.Length == 0)
+        {
+            return null;
+        }
+
+        return Convert.ToBase64String(ticket);
+    }
+
 }
