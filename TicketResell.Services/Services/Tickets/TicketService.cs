@@ -68,7 +68,10 @@ namespace TicketResell.Services.Services
 
             return ResponseModel.Success($"Successfully get top ticket", ticketDtos);
         }
-
+        public async Task<ResponseModel> GetQrImageAsBase64Async(string ticketId)
+        {
+            return ResponseModel.Success($"Successfully get qr", await _unitOfWork.TicketRepository.GetQrImageAsBase64Async(ticketId));
+        }
         public async Task<ResponseModel> GetTicketsAsync()
         {
             var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
