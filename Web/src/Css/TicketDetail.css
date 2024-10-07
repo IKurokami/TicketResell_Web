@@ -24,10 +24,10 @@
   border: 1px solid rgba(18 18 18 / 12%);
 }
 .Tag {
-  margin-left: 2vh;
   margin-right: 2vh;
 }
 .ticket--price {
+  padding-left: 1vw;
   font-size: 2rem;
   font-weight: 400;
   color: #000;

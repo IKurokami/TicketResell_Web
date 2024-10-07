@@ -29,17 +29,14 @@ const SellerShop = () => {
           <div className="seller-desc">
             <p className="seller--title">Giap Cao Dinh</p>
           </div>
-          <p className="seller--register-time">Join at </p>
-          {/* <div className="seller--navbar">
-            <Link href="/seller-shop/edit" className="navbar--btn">
-              Edit Profile
-            </Link>
-          </div> */}
+          <p className="seller--register--time">Join at </p>
           <div className="row navbar--list gap-3">
-            <div className="navbar--item col-1">
-              <span></span>
-              <FontAwesomeIcon icon={faBars} />
-              <span className="text">Filter</span>
+            <div className="navbar--item">
+              <p>
+                <span></span>
+                <FontAwesomeIcon icon={faBars} />
+                Filter
+              </p>
             </div>
             <div className="navbar--item col-1">
               <span className="text">Status</span>

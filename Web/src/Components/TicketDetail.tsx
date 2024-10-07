@@ -2,12 +2,13 @@
 import "../Css/TicketDetail.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTag } from "@fortawesome/free-solid-svg-icons";
+import { faLocationDot, faTag, faUser } from "@fortawesome/free-solid-svg-icons";
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Dropdown from "./Dropdown";
 import Link from "next/link";
+import { fetchImage } from "@/models/FetchImage";
 
 type Category = {
   categoryId: string;
@@ -25,15 +26,20 @@ type Ticket = {
   location: string;
   startDate: string;
   author: seller;
+  imageId: string;
   imageUrl: string;
   description: string;
   categories: Category[];
 };
+const DEFAULT_IMAGE =
+  "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
 
 const TicketDetail = () => {
   const [ticketresult, setTicketresult] = useState<Ticket | null>(null);
   const { id } = useParams<{ id: string }>(); // Get the ID from the URL parameters
   const [title, setTitle] = useState("");
+  const DEFAULT_IMAGE =
+    "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
 
   // Function to fetch ticket by ID
   const fetchTicketById = async (id: string | null) => {
@@ -58,10 +64,23 @@ const TicketDetail = () => {
         // Ensure id is defined
         const result = await fetchTicketById(id); // Use id directly
         console.log(result);
-
+        result.data.imageUrl = DEFAULT_IMAGE;
+        if (result.data.image) {
+          const { imageUrl: fetchedImageUrl, error } = await fetchImage(
+            result.data.image
+          );
+          if (fetchedImageUrl) {
+            result.data.imageUrl = fetchedImageUrl;
+          } else {
+            console.error(
+              `Error fetching image for ticket ${result.data.image}: ${error}`
+            );
+          }
+        }
         if (result) {
           const ticketDetail: Ticket = {
-            imageUrl: result.data.image,
+            imageUrl: result.data.imageUrl,
+            imageId: result.data.image,
             name: result.data.name,
             startDate: new Date(result.data.startDate).toLocaleDateString(),
             author: result.data.seller,
@@ -97,8 +116,8 @@ const TicketDetail = () => {
             <img
               className="rounded ticket--img "
               style={{ width: "100%" }}
-              src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
-              // src={ticketresult.imageUrl}
+              // src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
+              src={ticketresult.imageUrl}
               alt={ticketresult.name}
             />
             <div className="dropdown">
@@ -113,6 +132,7 @@ const TicketDetail = () => {
           <div className="ticket--info col-12 col-lg-6">
             <h2 className="ticket--name">{ticketresult.name}</h2>
             <p className="ticket--seller">
+            <span><FontAwesomeIcon className="Tag" icon={faUser} /></span>
               Sold by {}
               <Link
                 className="seller--link"
@@ -121,7 +141,7 @@ const TicketDetail = () => {
                 <strong>{ticketresult.author.fullname}</strong>
               </Link>
             </p>
-            <p>Location: {ticketresult.location} </p>{" "}
+            <p><span><FontAwesomeIcon className="Tag" icon={faLocationDot} /></span>Location: {ticketresult.location} </p>{" "}
             <ul className="tag--list">
               {ticketresult.categories.map((category) => (
                 <li className="tag--list--item" key={category.categoryId}>

@@ -12,31 +12,38 @@
     padding-left: 0;
     padding-right: 0;
     border-bottom: 1px solid rgb(139, 139, 139);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: gray;
 }
 
 .left-rank .rank-bar-container{
     padding-left: 6.5rem;
     background-color: white;
-    padding-right: 1rem;
+    padding-right: 2rem;
     width: 50vw;
 }
 .right-rank .rank-bar-container{
-    padding-left: 1rem;
+    padding-left: 2rem;
     background-color: white;
     padding-right: 6.5rem;
     width: 50vw;
 }
 
+.ticket-image{
+    min-width: 14rem;
+    max-width: 14rem;
+}
+
 .ticket img{
-    width: 3.5rem;
-    height: 3.5rem;
+    height: 8rem;
     border-radius: 10px;
     margin-right: 1rem;
 }
 
 .ticket {
     display: flex;
-    align-items: center
+    align-items: center;
 }
 
 .left-rank .left-info {
@@ -51,14 +58,14 @@
 }
 
 .right-info span {
-    min-width: 3rem;
+    min-width: 4rem;
     justify-content: flex-end;
     text-align: right;
 }
 
 .left-info span {
     display: flex;
-    min-width: 4rem;
+    min-width: 3rem;
     justify-content: flex-start;
 
 }
@@ -123,7 +130,7 @@
 }
 
 .rank-item-card{
-    height: 5rem;
+    height: 10rem;
     display: flex;
     justify-content: space-between;
     background-color: white;
@@ -159,10 +166,10 @@
           display: block;
           justify-content: center;
     }
-    .left-rank{
+    .right-rank{
         display: none;
     }
-    .right-rank .rank-bar-container{
+    .left-rank .rank-bar-container{
         width: 100vw;
     }
     .navbar-right{
