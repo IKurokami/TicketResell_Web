@@ -1,9 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
-using TicketResell.Api.Helper;
 using TicketResell.Repositories.Core.Dtos.Authentication;
+using TicketResell.Repositories.Helper;
 
-namespace TicketResell.Api.Controllers
+namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
