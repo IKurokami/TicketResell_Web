@@ -1,27 +1,27 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaFilter } from "react-icons/fa";
-import "@/Css/Search.css";
+import { FaSearch, FaFilter, FaTimes } from "react-icons/fa";
 
 const Search: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [priceRange, setPriceRange] = useState(1000); // Initial price range value
+  const [priceRange, setPriceRange] = useState(1000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState(""); // Location filter
-  const [filteredImages, setFilteredImages] = useState([]); // Store filtered images
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [filteredImages, setFilteredImages] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("search");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const itemsPerPage = 15;
+  const itemsPerPage = 12;
 
-  // Generate 20 images with varying prices and genres
-  const images = Array.from({ length: 20 }, (_, index) => ({
+  const images = Array.from({ length: 2000 }, (_, index) => ({
     imageUrl:
       "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/products/11655/8932451",
     title: `Movie ${index + 1}`,
-    genre: ["action", "comedy", "drama", "sci-fi", "horror"][index % 5], // Cycle through the genres
-    price: Math.floor(Math.random() * 1001), // Random price between 0 and 1000
-    location: ["ny", "la", "chicago"][index % 3], // Cycle through locations
-    date: `2023-10-${String(index + 1).padStart(2, "0")}`, // Set date in October
+    genre: ["Action", "Comedy", "Drama", "Sci-Fi", "Horror"][index % 5],
+    price: Math.floor(Math.random() * 1001),
+    location: ["New York", "Los Angeles", "Chicago"][index % 3],
+    date: `2023-10-${String(index + 1).padStart(2, "0")}`,
+    description: "An exciting cinematic experience you won't want to miss!",
   }));
 
   const totalPages = Math.ceil(filteredImages.length / itemsPerPage);
@@ -32,7 +32,6 @@ const Search: React.FC = () => {
     }
   };
 
-  // Handle price range change
   const handlePriceRangeChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -40,197 +39,435 @@ const Search: React.FC = () => {
     setPriceRange(value);
   };
 
-  // Handle genre checkbox change
-  const handleGenreChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = event.target;
-    if (checked) {
-      setSelectedGenres((prevGenres) => [...prevGenres, value]);
-    } else {
-      setSelectedGenres((prevGenres) =>
-        prevGenres.filter((genre) => genre !== value)
-      );
-    }
+  const handleGenreChange = (genre: string) => {
+    setSelectedGenres((prevGenres) =>
+      prevGenres.includes(genre)
+        ? prevGenres.filter((g) => g !== genre)
+        : [...prevGenres, genre]
+    );
   };
 
-  // Handle location select change
   const handleLocationChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     setSelectedLocation(event.target.value);
   };
 
-  // Function to filter images based on selected filters (genres, location, and price)
   const filterImages = () => {
     let filtered = images;
-
-    // Filter by price range
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (image) =>
+          image.title.toLowerCase().includes(searchLower) ||
+          image.genre.toLowerCase().includes(searchLower) ||
+          image.location.toLowerCase().includes(searchLower)
+      );
+    }
     filtered = filtered.filter((image) => image.price <= priceRange);
-
-    // Filter by selected genres
     if (selectedGenres.length > 0) {
       filtered = filtered.filter((image) =>
         selectedGenres.includes(image.genre)
       );
     }
-
-    // Filter by location
     if (selectedLocation) {
       filtered = filtered.filter(
         (image) => image.location === selectedLocation
       );
     }
-
     setFilteredImages(filtered);
   };
 
-  // Update the filtered images whenever filters change
   useEffect(() => {
     filterImages();
-    setCurrentPage(1); // Reset to page 1 after filtering
-  }, [priceRange, selectedGenres, selectedLocation]);
+    setCurrentPage(1);
+  }, [searchTerm, priceRange, selectedGenres, selectedLocation]);
 
-  // Update range slider background on initial load
-  useEffect(() => {
-    const rangeInput = document.querySelector(
-      '.range-slider input[type="range"]'
-    ) as HTMLInputElement;
-    if (rangeInput) {
-      // Ensure that rangeInput is not null
-      const percentage = (priceRange / 1000) * 100; // Calculate percentage based on max value (1000)
-      rangeInput.style.background = `linear-gradient(to right, #28a745 ${percentage}%, #e9ecef ${percentage}%)`;
-    }
-  }, [priceRange]);
-
-  // Get the current page's images to display (after filtering)
   const paginatedImages = filteredImages.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  return (
-    <div className="search-ticket-container">
-      <div className="search-header">
-        <div className="search-ticket-bar">
-          <input
-            type="text"
-            placeholder="Search for movie tickets..."
-            className="search-ticket-input"
-          />
-          <button className="search-ticket-button">
-            <FaSearch />
-          </button>
-        </div>
-        <button
-          className="filter-toggle"
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-        >
-          <FaFilter /> Filters
-        </button>
-      </div>
+  const renderPaginationButtons = () => {
+    const maxVisiblePages = 5;
+    const pageButtons = [];
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-      {isFilterOpen && (
-        <div className="ticket-filters">
-          {/* Genres Filter */}
-          <div className="ticket-filter-category">
-            <label>Genres</label>
-            <div className="checkbox-group">
-              {["Action", "Comedy", "Drama", "Sci-Fi", "Horror"].map(
-                (genre) => (
-                  <label key={genre} className="checkbox-label">
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    if (startPage > 1) {
+      pageButtons.push(
+        <button
+          key="first"
+          onClick={() => handlePageChange(1)}
+          className="w-10 h-10 mx-1 rounded-full shadow-md transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+        >
+          1
+        </button>
+      );
+      if (startPage > 2) {
+        pageButtons.push(
+          <span key="ellipsis1" className="mx-1">
+            ...
+          </span>
+        );
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageButtons.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`w-10 h-10 mx-1 rounded-full shadow-md transition-colors duration-200 ${
+            currentPage === i
+              ? "bg-blue-500 text-white"
+              : "bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pageButtons.push(
+          <span key="ellipsis2" className="mx-1">
+            ...
+          </span>
+        );
+      }
+      pageButtons.push(
+        <button
+          key="last"
+          onClick={() => handlePageChange(totalPages)}
+          className="w-10 h-10 mx-1 rounded-full shadow-md transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+        >
+          {totalPages}
+        </button>
+      );
+    }
+
+    return pageButtons;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
+      <style jsx global>{`
+        .movie-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .movie-card-wrapper {
+          position: relative;
+          z-index: 1;
+          transition: z-index 0s 0.1s;
+        }
+
+        .movie-card-wrapper:hover {
+          z-index: 2;
+          transition: z-index 0s;
+        }
+
+        .movie-card {
+          transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .movie-card-wrapper:hover .movie-card {
+          transform: scale(1.05);
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .movie-card .card-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease-out;
+        }
+
+        .movie-card:hover .card-content {
+          max-height: 200px;
+        }
+
+        .marquee {
+          overflow: hidden;
+          white-space: nowrap;
+          width: 100%;
+        }
+
+        .marquee span {
+          display: inline-block;
+          padding-left: 100%;
+          animation: marquee 15s linear infinite;
+        }
+
+        @keyframes marquee {
+          0% {
+            transform: translate(0, 0);
+          }
+          100% {
+            transform: translate(-100%, 0);
+          }
+        }
+
+        .token {
+          display: inline-block;
+          padding: 4px 8px;
+          background-color: #edf2f7;
+          border-radius: 20px;
+          margin: 2px;
+          font-size: 0.875rem;
+          color: #4a5568;
+          transition: all 0.3s ease;
+        }
+
+        .movie-card:hover .token {
+          background-color: aqua;
+          color: black;
+        }
+
+        .tokenize-wrapper {
+          margin-top: 0.5rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+
+        .add-to-cart-button {
+          background-color: aqua;
+          color: black;
+          width: 40px;
+          height: 40px;
+          border: none;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
+          opacity: 0;
+        }
+
+        .movie-card:hover .add-to-cart-button {
+          opacity: 1;
+        }
+
+        .add-to-cart-button:hover {
+          transform: scale(1.1);
+        }
+
+        .card-footer {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 8px;
+          margin-top: auto;
+        }
+      `}</style>
+
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Movie Tickets
+          </h1>
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="flex">
+              <button
+                className={`flex-1 py-3 px-4 text-center font-medium ${
+                  activeTab === "search"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+                onClick={() => setActiveTab("search")}
+              >
+                Search
+              </button>
+              <button
+                className={`flex-1 py-3 px-4 text-center font-medium ${
+                  activeTab === "filter"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+                onClick={() => setActiveTab("filter")}
+              >
+                Filter
+              </button>
+            </div>
+            <div className="p-4">
+              {activeTab === "search" && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search for movie tickets..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full py-3 px-4 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
+                  />
+                  <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <FaSearch size={20} />
+                  </button>
+                </div>
+              )}
+              {activeTab === "filter" && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Genres</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {["Action", "Comedy", "Drama", "Sci-Fi", "Horror"].map(
+                        (genre) => (
+                          <button
+                            key={genre}
+                            onClick={() => handleGenreChange(genre)}
+                            className={`px-4 py-2 rounded-full text-sm transition-colors duration-200 ${
+                              selectedGenres.includes(genre)
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            }`}
+                          >
+                            {genre}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Price Range</h3>
                     <input
-                      type="checkbox"
-                      name="genre"
-                      value={genre.toLowerCase()}
-                      onChange={handleGenreChange}
+                      type="range"
+                      min="0"
+                      max="1000"
+                      step="5"
+                      value={priceRange}
+                      onChange={handlePriceRangeChange}
+                      className="w-full"
                     />
-                    <span className="checkbox-custom"></span>
-                    {genre}
-                  </label>
-                )
+                    <span className="text-sm text-gray-600">
+                      $0 - ${priceRange}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Location</h3>
+                    <select
+                      className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedLocation}
+                      onChange={handleLocationChange}
+                    >
+                      <option value="">All Locations</option>
+                      <option value="New York">New York</option>
+                      <option value="Los Angeles">Los Angeles</option>
+                      <option value="Chicago">Chicago</option>
+                    </select>
+                  </div>
+                </div>
               )}
             </div>
           </div>
-
-          {/* Price Range Filter */}
-          <div className="ticket-filter-category">
-            <label>Price Range</label>
-            <div className="range-slider">
-              <input
-                type="range"
-                min="0"
-                max="1000"
-                step="5"
-                value={priceRange}
-                onChange={handlePriceRangeChange}
-              />
-              <span className="range-value">$0 - ${priceRange}</span>
-            </div>
-          </div>
-
-          {/* Location Filter */}
-          <div className="ticket-filter-category">
-            <label>Location</label>
-            <select
-              className="location-select"
-              value={selectedLocation}
-              onChange={handleLocationChange}
-            >
-              <option value="">Select a location</option>
-              <option value="ny">New York</option>
-              <option value="la">Los Angeles</option>
-              <option value="chicago">Chicago</option>
-            </select>
-          </div>
         </div>
-      )}
 
-      {/* Products Display */}
-      <div className="ticket-search-results">
-        {paginatedImages.length > 0 ? (
-          paginatedImages.map((item, index) => (
-            <div key={index} className="ticket-card">
-              <div className="ticket-card-image">
-                <img src={item.imageUrl} alt={item.title} />
+        {/* Movie grid */}
+        <div className="movie-grid">
+          {paginatedImages.length > 0 ? (
+            paginatedImages.map((item, index) => (
+              <div key={index} className="movie-card-wrapper">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
+                  <div className="relative">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
+                      ${item.price}
+                    </div>
+                  </div>
+                  <div className="p-4 flex-grow">
+                    <h3 className="text-lg font-semibold mb-1 text-gray-900">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-1">
+                      {item.location}
+                    </p>
+                    <p className="text-sm text-gray-600">{item.date}</p>
+                    <div className="tokenize-wrapper">
+                      {item.genre.split(",").map((g: any) => (
+                        <span key={g} className="token">
+                          {g}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="card-content mt-2">
+                      <p className="text-sm text-gray-700">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4 card-footer">
+                    <button
+                      className="add-to-cart-button"
+                      aria-label="Add to cart"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                      </svg>
+                    </button>
+                    <div className="marquee text-sm text-gray-500">
+                      <span>
+                        Get your tickets now! Limited availability. Don't miss
+                        out!
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="ticket-card-details">
-                <h3 className="ticket-card-title">{item.title}</h3>
-                <p className="ticket-card-price">${item.price}</p>
-                <p className="ticket-card-location">{item.location}</p>
-                <p className="ticket-card-date">{item.date}</p>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>No results match your search criteria.</p>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-600">
+              No results match your search criteria.
+            </p>
+          )}
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center m-8">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              &lt;
+            </button>
+            {renderPaginationButtons()}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="w-10 h-10 mx-1 rounded-full shadow-md transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              &gt;
+            </button>
+          </div>
         )}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            &lt;
-          </button>
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index}
-              onClick={() => handlePageChange(index + 1)}
-              className={currentPage === index + 1 ? "active" : ""}
-            >
-              {index + 1}
-            </button>
-          ))}
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            &gt;
-          </button>
-        </div>
-      )}
     </div>
   );
 };
