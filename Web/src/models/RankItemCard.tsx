@@ -13,10 +13,14 @@ export interface RankItemCardProps {
   price: string | number;
   amount: string | number;
 }
-
 const DEFAULT_IMAGE =
   "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
 
+export interface FetchOptions {
+  headers?: HeadersInit;
+  body?: BodyInit;
+  method?: string;
+}
 const convertToRankItemCards = async (
   data: any[]
 ): Promise<RankItemCardProps[]> => {
@@ -62,29 +66,31 @@ const convertToRankItemCards = async (
   return rankItemCards;
 };
 
-export const fetchTopTicketData = async (): Promise<RankItemCardProps[]> => {
-  try {
-    // Fetch data from the given URL
-    const response = await fetch("http://localhost:5296/api/ticket/gettop/6");
+export const fetchTopTicketData = async (
+  endpoint: string,
+  options?: FetchOptions
+): Promise<RankItemCardProps[]> => {
+  const fetchOptions: RequestInit = {
+    method: options?.method || "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+    body: options?.body,
+  };
 
-    // Check if the response is successful
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
+  const response = await fetch(endpoint, fetchOptions);
 
-    // Parse the JSON data
-    const data = await response.json();
-
-    // Convert the fetched data into RankItemCardProps structure
-    const ticketList: Promise<RankItemCardProps[]> = convertToRankItemCards(
-      data.data
-    );
-    console.log(ticketList);
-    return ticketList;
-  } catch (error) {
-    console.error("Failed to fetch ticket data:", error);
-    return [];
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`);
   }
+
+  const data = await response.json();
+  const ticketList: RankItemCardProps[] = await convertToRankItemCards(
+    data.data
+  );
+  console.log(ticketList);
+  return ticketList;
 };
 
 export const RankItemCard: React.FC<RankItemCardProps> = ({

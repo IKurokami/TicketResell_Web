@@ -16,6 +16,8 @@ public interface ITicketRepository : IRepository<Ticket>
 
     Task<ICollection<Category>?> GetTicketCateByIdAsync(string id);
 
+    Task<List<Ticket>> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange);
+
     Task<string> GetQrImageAsBase64Async(string ticketId);
 
 }
