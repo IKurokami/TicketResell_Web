@@ -11,6 +11,6 @@ public class TicketValidator : Validators<Ticket>
         AddRequired(ticket => ticket.Name);
         AddEqualOrGreaterThan(ticket => ticket.Cost, 0);
         AddRequired(ticket => ticket.Location);
-        AddEqualOrGreaterThan(ticket => ticket.StartDate, DateTime.Now);
+        AddEqualOrGreaterThan(ticket => ticket.StartDate, DateTime.UtcNow);
     }
 }

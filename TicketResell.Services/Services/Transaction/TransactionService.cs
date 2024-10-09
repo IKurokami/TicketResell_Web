@@ -19,7 +19,7 @@ public class TransactionService : ITransactionService
     public async Task<ResponseModel> GetOrderDetailByDate(string sellerId, DateRange dateRange)
     {
         dateRange.StartDate ??= DateTime.MinValue;
-        dateRange.EndDate ??= DateTime.Now;
+        dateRange.EndDate ??= DateTime.UtcNow;
 
         var orderDetails = await _unitOfWork.TransactionRepository.GetTransactionsByDateAsync(sellerId, dateRange);
 
@@ -34,7 +34,7 @@ public class TransactionService : ITransactionService
     public async Task<ResponseModel> CalculatorTotal(string sellerId, DateRange dateRange)
     {
         dateRange.StartDate ??= DateTime.MinValue;
-        dateRange.EndDate ??= DateTime.Now;
+        dateRange.EndDate ??= DateTime.UtcNow;
 
         var total = await _unitOfWork.TransactionRepository.CalculatorTotal(sellerId, dateRange);
 

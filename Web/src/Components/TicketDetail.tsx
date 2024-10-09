@@ -1,4 +1,5 @@
 "use client";
+import Cookies from "js-cookie";
 import "../Css/TicketDetail.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,12 +12,14 @@ import {
   faTag,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-
+import { checkLogin } from "./checkLogin";
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Dropdown from "./Dropdown";
 import Link from "next/link";
 import { fetchImage } from "@/models/FetchImage";
+import addToCart from "@/Hooks/addToCart";
+import { useRouter } from "next/navigation";
 
 type Category = {
   categoryId: string;
@@ -45,10 +48,42 @@ const DEFAULT_IMAGE =
 const TicketDetail = () => {
   const [ticketresult, setTicketresult] = useState<Ticket | null>(null);
   const { id } = useParams<{ id: string }>(); // Get the ID from the URL parameters
-  const [title, setTitle] = useState("");
+  const [remainingItems, setRemainingItems] = useState(0);
+  const router = useRouter();
+  const userId = Cookies.get("id");
+
+  const splitId = () => {
+    if (id) {
+      return id.split("_")[0];
+    } else {
+      console.error("id.fullTicketId is undefined or null");
+    }
+  };
   const DEFAULT_IMAGE =
     "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
   const [count, setCount] = useState(1);
+  const fetchRemainingByID = async (id: string | null) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5296/api/Ticket/count/${id}`,
+        {
+          method: "GET",
+        }
+      );
+      return await response.json(); // Parse and return JSON result
+    } catch (error) {
+      console.error("Error fetching ticket result:", error);
+      return null; // Return null in case of error
+    }
+  };
+  const checkRemainingItem = async () => {
+    const idOrigin = splitId();
+    if (idOrigin) {
+      const temp = await fetchRemainingByID(idOrigin);
+      return temp.data;
+    }
+    return 0;
+  };
   const increase = () => {
     setCount(count + 1);
   };
@@ -70,6 +105,26 @@ const TicketDetail = () => {
     } catch (error) {
       console.error("Error fetching ticket result:", error);
       return null; // Return null in case of error
+    }
+  };
+  const { addItem } = addToCart(); // Destructure the addItem function from the hook
+
+  const handleAddToCart = async () => {
+    const check = await checkLogin(); // Check if user is logged in
+    if (check === "False") {
+      alert("Please login before add to cart");
+      router.push("/login"); // Redirect to login page if not logged in
+    } else {
+      const result = await addItem({
+        UserId: ticketresult?.author.userId,
+        TicketId: id,
+        Quantity: count,
+      }); // Correctly passing the argument
+      if (result) {
+        console.log("Item added to cart successfully:", result);
+      } else {
+        console.error("Failed to add item to cart");
+      }
     }
   };
 
@@ -102,8 +157,8 @@ const TicketDetail = () => {
               hour: "2-digit",
               minute: "2-digit",
               year: "numeric",
-              month: "2-digit",
               day: "2-digit",
+              month: "2-digit",
               hour12: true, // Use true if you want AM/PM format
               timeZone: "Asia/Ho_Chi_Minh", // Vietnam timezone
             }),
@@ -117,12 +172,20 @@ const TicketDetail = () => {
               description: category.description,
             })),
           };
+          console.log(result);
+          console.log(result.data.description);
           setTicketresult(ticketDetail); // Set the fetched ticket result
         }
       } else {
         console.error("ID is undefined or invalid.");
       }
     };
+    const getRemainingItems = async () => {
+      const remaining = await checkRemainingItem(); // Call your function
+      setRemainingItems(parseInt(remaining, 10));
+    };
+
+    getRemainingItems();
 
     loadresult(); // Call the loadresult function
   }, [id]);
@@ -155,6 +218,7 @@ const TicketDetail = () => {
           </div>
           <div className="ticket--info col-12 col-lg-6">
             <h2 className="ticket--name">{ticketresult.name}</h2>
+            <p>Remaining {remainingItems} item</p>
             <p className="ticket--seller">
               <span>
                 <FontAwesomeIcon className="Tag" icon={faUser} />
@@ -198,12 +262,19 @@ const TicketDetail = () => {
                   <FontAwesomeIcon icon={faMinus} />
                 </button>
                 <div className="number--block">{count}</div>
-                <button className="number--btn" onClick={increase}>
+                <button
+                  className="number--btn"
+                  onClick={increase}
+                  disabled={count >= remainingItems}
+                >
                   <FontAwesomeIcon icon={faPlus} />
                 </button>
               </div>
               <div className="cta">
-                <button className="ticket--btn ticket--detail--btn">
+                <button
+                  className="ticket--btn ticket--detail--btn"
+                  onClick={handleAddToCart}
+                >
                   <FontAwesomeIcon
                     className="cart--icon"
                     icon={faCartShopping}
@@ -211,7 +282,10 @@ const TicketDetail = () => {
                   Add to cart
                 </button>
                 <button className="ticket--btn ticket--detail--btn">
-                  <FontAwesomeIcon className="cart--icon" icon={faCashRegister} />
+                  <FontAwesomeIcon
+                    className="cart--icon"
+                    icon={faCashRegister}
+                  />
                   Buy Now
                 </button>
               </div>
