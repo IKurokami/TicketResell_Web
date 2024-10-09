@@ -2,13 +2,13 @@ import { fetchImage } from "./FetchImage";
 
 const baseUrl = "http://localhost:5296";
 
-interface Category {
+export interface Category {
   categoryId: string;
   name: string;
   description: string;
 }
 
-interface Ticket {
+export interface Ticket {
   ticketId: string;
   sellerId: string;
   name: string;

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
-import { fetchTickets } from "@/models/TicketFetch";
 import Cookies from "js-cookie";
 import {
   CreditCardClockRegular,
@@ -12,48 +11,42 @@ import {
   PhonePageHeaderRegular,
 } from "@fluentui/react-icons";
 
-export interface Ticket {
-  ticketId: string;
-  sellerId: string;
-  name: string;
-  cost: number;
-  location: string;
-  startDate: string;
-  createDate: string;
-  modifyDate: string;
-  status: number;
-  seller: null | any;
-  image: string;
-  categories: any[];
-  category: null | any;
-}
 export interface CartItem {
   orderDetailId: string;
   orderId: string;
   ticketId: string;
   price: number;
   quantity: number;
-  ticket: Ticket;
+  ticket: {
+    name: string;
+    imageUrl: string;
+    startDate: string;
+  };
 }
+
 interface CartItemWithSelection extends CartItem {
   isSelected: boolean;
+  image: string;
 }
 
 const MyCart: React.FC = () => {
   const [items, setItems] = useState<CartItemWithSelection[]>([]);
+  const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
+  const router = useRouter();
 
+  // Fetch cart items when component loads
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        // Cookies.get("id")
-        const id = "USER001";
+        // Cookies.get("id") 
+        const id = "USER001"; // Get the user ID from cookies
         const response = await fetch(
           `http://localhost:5296/api/cart/items/${id}`
         );
         const data = await response.json();
-        console.log("cart data: ", data.data);
         const itemsWithSelection = data.data.map((item: CartItem) => ({
           ...item,
+          image: item.ticket.imageUrl,
           isSelected: false,
         }));
         setItems(itemsWithSelection);
@@ -63,11 +56,11 @@ const MyCart: React.FC = () => {
     };
     fetchCartItems();
   }, []);
+
   useEffect(() => {
     console.log("Cart items updated: ", items);
   }, [items]);
 
-  const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const paymentMethods = [
     { id: "bank-transfer", name: "Bank Transfer", icon: BuildingBankRegular },
     {
@@ -78,9 +71,7 @@ const MyCart: React.FC = () => {
     },
   ];
 
-  const router = useRouter();
-
-  // Tính tổng giá tiền của các sản phẩm được chọn
+  // Filter selected items for checkout
   const selectedItems = items.filter((item) => item.isSelected);
   const totalItemsPrice = selectedItems.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -88,7 +79,7 @@ const MyCart: React.FC = () => {
   );
   const totalPrice = totalItemsPrice > 0 ? totalItemsPrice : 0;
 
-  // Chọn sản phẩm
+  // Select a cart item
   const handleSelect = (id: string) => {
     const updatedItems = items.map((item) =>
       item.orderDetailId === id
@@ -98,12 +89,12 @@ const MyCart: React.FC = () => {
     setItems(updatedItems);
   };
 
-  // Chọn phương thức thanh toán
+  // Select payment method
   const handleSelectPayment = (id: string) => {
     setSelectedPayment((prev) => (prev === id ? null : id));
   };
 
-  // Thay đổi số lượng sản phẩm
+  // Change item quantity
   const handleQuantityChange = (id: string, increment: boolean) => {
     const updatedItems = items.map((item) => {
       if (item.orderDetailId === id) {
@@ -117,9 +108,23 @@ const MyCart: React.FC = () => {
     setItems(updatedItems);
   };
 
-  // Tiến hành thanh toán
+  // Remove item from cart
+  const handleRemoveItem = async (ticketId: string) => {
+    // Cookies.get("id") 
+    const userId = "USER001"; // Assuming you have the userId in cookies
+    try {
+      await fetch(`http://localhost:5296/api/cart/remove/${userId}/${ticketId}`, {
+        method: "DELETE",
+      });
+      // Remove the item locally from the state after successful deletion
+      setItems((prevItems) => prevItems.filter((item) => item.ticketId !== ticketId));
+    } catch (error) {
+      console.error("Error removing item from cart:", error);
+    }
+  };
+
+  // Proceed to checkout
   const handleCheckout = () => {
-    const selectedTickets = items.filter((item) => item.isSelected);
     const productsForCheckout = items.filter((item) => item.isSelected);
     if (productsForCheckout.length === 0) {
       alert("Please select at least one product to checkout.");
@@ -129,7 +134,7 @@ const MyCart: React.FC = () => {
       alert("Please select a payment method.");
       return;
     }
-    localStorage.setItem("selectedTickets", JSON.stringify(selectedTickets));
+    localStorage.setItem("selectedTickets", JSON.stringify(productsForCheckout));
     localStorage.setItem("paymentMethod", selectedPayment);
     router.push("/checkout");
   };
@@ -157,44 +162,28 @@ const MyCart: React.FC = () => {
               }}
             >
               <table className="w-full text-lg text-black">
-                <thead className="bg-white border-b">
+                <thead className="bg-white border-b ">
                   <tr>
-                    {/* Column Headers with Emojis */}
-                    <th
-                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
-                      style={{ borderBottom: "1px solid #2b2b2b" }}
-                    >
-                      No ✅
+                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                      No
                     </th>
-                    <th
-                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
-                      style={{ borderBottom: "1px solid #2b2b2b" }}
-                    >
-                      Ticket Name 🎟️
+                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                      Ticket Name
                     </th>
-                    <th
-                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
-                      style={{ borderBottom: "1px solid #2b2b2b" }}
-                    >
+                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
                       Amount
                     </th>
-                    <th
-                      className="hidden sm:table-cell px-6 py-4 text-left text-gray-600 tracking-wide"
-                      style={{ borderBottom: "1px solid #2b2b2b" }}
-                    >
-                      Date 📅
+                    <th className="hidden sm:table-cell px-6 py-4 text-center text-gray-600 tracking-wide">
+                      Date
                     </th>
-                    <th
-                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
-                      style={{ borderBottom: "1px solid #2b2b2b" }}
-                    >
-                      Price 💸
+                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                      Price
                     </th>
-                    <th
-                      className="px-6 py-4 text-left text-gray-600 tracking-wide"
-                      style={{ borderBottom: "1px solid #2b2b2b" }}
-                    >
-                      Select ✅
+                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                      Select
+                    </th>
+                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                      Remove
                     </th>
                   </tr>
                 </thead>
@@ -204,19 +193,13 @@ const MyCart: React.FC = () => {
                       key={item.orderDetailId}
                       className="hover:bg-gray-100 transition-all duration-200 ease-in-out"
                     >
-                      <td
-                        className="px-6 py-4 whitespace-nowrap"
-                        style={{ borderBottom: "1px solid #2b2b2b" }}
-                      >
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
                         <span className="block text-gray-900">{index + 1}</span>
                       </td>
-                      <td
-                        className="px-6 py-4 whitespace-nowrap"
-                        style={{ borderBottom: "1px solid #2b2b2b" }}
-                      >
-                        <div className="flex items-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center">
                           <img
-                            src="https://picsum.photos/200"
+                            src={item.image}
                             alt={item.ticket.name}
                             className="w-64 h-24 rounded mr-1"
                             style={{ border: "2px solid #2b2b2b" }}
@@ -226,46 +209,38 @@ const MyCart: React.FC = () => {
                           </span>
                         </div>
                       </td>
-                      <td
-                        className="px-6 py-4 whitespace-nowrap"
-                        style={{ borderBottom: "1px solid #2b2b2b" }}
-                      >
-                        <div className="flex items-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center">
                           <button
                             className="text-gray-700 hover:text-black focus:outline-none"
-                            onClick={() =>
-                              handleQuantityChange(item.orderDetailId, false)
-                            }
+                            onClick={() => handleQuantityChange(item.orderDetailId, false)}
                           >
                             ➖
                           </button>
                           <span className="mx-4 text-lg">{item.quantity}</span>
                           <button
                             className="text-gray-700 hover:text-black focus:outline-none"
-                            onClick={() =>
-                              handleQuantityChange(item.orderDetailId, true)
-                            }
+                            onClick={() => handleQuantityChange(item.orderDetailId, true)}
                           >
                             ➕
                           </button>
                         </div>
                       </td>
-                      <td
-                        className="hidden sm:table-cell px-6 py-4 text-gray-600"
-                        style={{ borderBottom: "1px solid #2b2b2b" }}
-                      >
-                        {item.ticket.startDate}
+                      <td className="hidden sm:table-cell px-6 py-4 text-center text-gray-600">
+                        {new Date(item.ticket.startDate).toLocaleString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: false,
+                        })}
                       </td>
-                      <td
-                        className="px-6 py-4 text-gray-700"
-                        style={{ borderBottom: "1px solid #2b2b2b" }}
-                      >
+                      <td className="px-6 py-4 text-center text-gray-700">
                         € {item.price.toFixed(2)}
                       </td>
-                      <td
-                        className="px-6 py-4"
-                        style={{ borderBottom: "1px solid #2b2b2b" }}
-                      >
+                      <td className="px-6 py-4 text-center">
                         <input
                           type="checkbox"
                           checked={item.isSelected}
@@ -274,12 +249,22 @@ const MyCart: React.FC = () => {
                           style={{ border: "1px solid #2b2b2b" }}
                         />
                       </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleRemoveItem(item.ticketId)}
+                        >
+                          Remove
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+
             </div>
           </div>
+
           {/* Right Column: Payment Method and Summary */}
           <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200">
             <h3 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -305,11 +290,10 @@ const MyCart: React.FC = () => {
                   {paymentMethods.map((method) => (
                     <div
                       key={method.id}
-                      className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
-                        selectedPayment === method.id
-                          ? "bg-blue-100 border border-blue-500"
-                          : "bg-gray-100 hover:bg-gray-200"
-                      }`}
+                      className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${selectedPayment === method.id
+                        ? "bg-blue-100 border border-blue-500"
+                        : "bg-gray-100 hover:bg-gray-200"
+                        }`}
                       onClick={() => handleSelectPayment(method.id)}
                     >
                       {method.icon ? (
