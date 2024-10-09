@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUniversity, faMobileAlt } from "@fortawesome/free-solid-svg-icons";
-import { faPaypal } from "@fortawesome/free-brands-svg-icons";
+import { fetchTickets } from "@/models/TicketFetch";
 import Cookies from "js-cookie";
 import {
   CreditCardClockRegular,
@@ -47,7 +45,7 @@ const MyCart: React.FC = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        // Cookies.get('id')
+        // Cookies.get("id")
         const id = "USER001";
         const response = await fetch(
           `http://localhost:5296/api/cart/items/${id}`
@@ -71,15 +69,12 @@ const MyCart: React.FC = () => {
 
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const paymentMethods = [
-    { id: "credit-card", name: "Credit Card", icon: CreditCardClockRegular },
-    { id: "wallet", name: "Digital Wallet", icon: WalletRegular },
-    { id: "cash", name: "Cash", icon: MoneyRegular },
-    { id: "gift-card", name: "Gift Card", icon: GiftRegular },
     { id: "bank-transfer", name: "Bank Transfer", icon: BuildingBankRegular },
     {
-      id: "mobile-payment",
-      name: "Mobile Payment",
-      icon: PhonePageHeaderRegular,
+      id: "momo",
+      name: "MoMo",
+      imageUrl:
+        "https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png",
     },
   ];
 
@@ -223,7 +218,7 @@ const MyCart: React.FC = () => {
                           <img
                             src="https://picsum.photos/200"
                             alt={item.ticket.name}
-                            className="w-12 h-12 rounded-full mr-4"
+                            className="w-64 h-24 rounded mr-1"
                             style={{ border: "2px solid #2b2b2b" }}
                           />
                           <span className="text-gray-900 text-lg">
@@ -306,7 +301,7 @@ const MyCart: React.FC = () => {
 
               <div>
                 <p className="text-sm text-gray-600 mb-3">Payment Method:</p>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-4">
                   {paymentMethods.map((method) => (
                     <div
                       key={method.id}
@@ -317,7 +312,15 @@ const MyCart: React.FC = () => {
                       }`}
                       onClick={() => handleSelectPayment(method.id)}
                     >
-                      <method.icon className="text-3xl mb-2 text-gray-700" />
+                      {method.icon ? (
+                        <method.icon className="text-3xl mb-2 text-gray-700" />
+                      ) : (
+                        <img
+                          src={method.imageUrl}
+                          alt={method.name}
+                          className="w-12 h-12 mb-2"
+                        />
+                      )}
                       <span className="text-xs text-gray-700">
                         {method.name}
                       </span>
