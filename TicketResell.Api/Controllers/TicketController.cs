@@ -114,5 +114,13 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.DeleteTicketAsync(id);
             return ResponseParser.Result(response);
         }
+
+        [HttpGet]
+        [Route("count/{id}")]
+        public async Task<IActionResult> GetTicketRemaining(string id)
+        {
+            var response = await _ticketService.GetTicketRemainingAsync(id);
+            return ResponseParser.Result(response);
+        }
     }
 }

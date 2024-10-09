@@ -49,7 +49,7 @@ namespace Repositories.Repositories
         {
             var newCart = new Order
             {
-                OrderId = "ORD" + Guid.NewGuid().ToString(),
+                OrderId = "ORD" + id.NewGuid().ToString(),
                 BuyerId = userId,
                 Total = 0,
                 Date = DateTime.UtcNow,
@@ -87,7 +87,7 @@ namespace Repositories.Repositories
         {
             if (cart == null)
             {
-                throw new Exception("Cart not found");
+                throw new Exception("Cart not found");Gu
             }
 
             var existingItem = cart.OrderDetails.FirstOrDefault(od => od.TicketId == item.TicketId);

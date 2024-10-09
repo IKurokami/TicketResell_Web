@@ -18,5 +18,6 @@ public interface ITicketService
 
     public Task<ResponseModel> DeleteTicketAsync(string id, bool saveAll = true);
     public Task<ResponseModel> GetTicketByCategoryAsync(string id);
+    public Task<ResponseModel> GetTicketRemainingAsync (string id);
 
 }

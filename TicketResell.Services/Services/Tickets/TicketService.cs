@@ -50,7 +50,7 @@ namespace TicketResell.Services.Services
             newTicket.ModifyDate = DateTime.UtcNow;
             await _unitOfWork.TicketRepository.CreateTicketAsync(newTicket, dto.CategoriesId);
             if (saveAll) await _unitOfWork.CompleteAsync();
-            return ResponseModel.Success("Successfully created Ticket");
+            return ResponseModel.Success("Successfully created Ticket", dto);
         }
 
         public async Task<ResponseModel> GetTicketByNameAsync(string name)
@@ -143,6 +143,12 @@ namespace TicketResell.Services.Services
         {
             var cate = await _unitOfWork.TicketRepository.GetTicketCateByIdAsync(id);
             return ResponseModel.Success($"Successfully get Category of Ticket with id: {id}", cate);
+        }
+
+        public async Task<ResponseModel> GetTicketRemainingAsync(string id)
+        {
+            var count = await _unitOfWork.TicketRepository.GetTicketRemainingAsync(id);
+            return ResponseModel.Success($"Successfully get Category of Ticket with id: {id}", count);
         }
     }
 

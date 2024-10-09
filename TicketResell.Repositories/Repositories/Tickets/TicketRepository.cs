@@ -21,7 +21,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public new async Task<List<Ticket>> GetAllAsync()
     {
-        var tickets = await _context.Tickets.Include(x => x.Categories).ToListAsync();
+        var tickets = await _context.Tickets.ToListAsync();
         if (tickets == null || tickets.Count == 0)
         {
             throw new KeyNotFoundException("No ticket in database");
@@ -36,7 +36,6 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .OrderBy(t => t.CreateDate)
             .Skip(start)
             .Take(count)
-            .Include(x => x.Categories)
             .ToListAsync();
 
         if (tickets == null || tickets.Count == 0)
@@ -49,7 +48,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<Ticket> GetByIdAsync(string id)
     {
-        var ticket = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories).FirstAsync(x => x.TicketId == id);
+        var ticket = await _context.Tickets.Include(x => x.Seller).FirstAsync(x => x.TicketId.StartsWith(id));
         if (ticket == null)
         {
             throw new KeyNotFoundException("Id is not found");
@@ -163,4 +162,9 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         return Convert.ToBase64String(ticket);
     }
 
+    public async Task<int> GetTicketRemainingAsync(string ticketId)
+    {
+        int count = await _context.Tickets.Where(ticket => ticket.TicketId.StartsWith(ticketId)).CountAsync();
+        return count;
+    }
 }
