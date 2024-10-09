@@ -16,7 +16,7 @@ const Search: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
 
-  const itemsPerPage = 12;
+  const itemsPerPage = 9;
   useEffect(() => {
     const loadTickets = async () => {
       const fetchedTickets = await fetchTickets();
