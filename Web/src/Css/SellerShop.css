@@ -8,7 +8,7 @@
 .profile--image {
   position: relative;
   margin-top: 10vh;
-  width: 100%; /* Adjust width as necessary */
+  max-width: 100%; /* Adjust width as necessary */
   height: 40vh; /* Adjust height as necessary */
   background: #f7f8fa;
 }
@@ -23,7 +23,7 @@
   position: absolute;
   border-radius: 50%;
   left: 7vw;
-  bottom: 40%;
+  bottom: 0;
   border: 5px solid #fff;
   background: #f7f8fa;
 }
@@ -41,7 +41,7 @@
   font-size: 2rem;
   font-weight: 500;
 }
-.seller--register-time {
+.seller--register--time {
   font-size: 1.2rem;
   font-weight: 400;
 }

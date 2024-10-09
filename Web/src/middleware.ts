@@ -23,10 +23,10 @@ export async function middleware(request: NextRequest) {
   const response = await validate.json(); // Parse the JSON response
 
   // Check if the current route is protected and the accessKey is missing
-  // if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route)) && response.message == 'False') {
-  //   // Redirect to the login page if not authenticated
-  //   return NextResponse.redirect(new URL('/login', request.url));
-  // }
+  if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route)) && response.message == 'False') {
+    // Redirect to the login page if not authenticated
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
 
   // Continue to the requested page if authenticated or if route does not require authentication
   return NextResponse.next();
