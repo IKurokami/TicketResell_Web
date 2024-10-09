@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
+import { BuildingBankRegular } from "@fluentui/react-icons";
 import Cookies from "js-cookie";
-import {
-  CreditCardClockRegular,
-  WalletRegular,
-  MoneyRegular,
-  GiftRegular,
-  BuildingBankRegular,
-  PhonePageHeaderRegular,
-} from "@fluentui/react-icons";
-
 export interface CartItem {
   orderDetailId: string;
   orderId: string;
@@ -38,8 +30,13 @@ const MyCart: React.FC = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        // Cookies.get("id") 
-        const id = "USER001"; // Get the user ID from cookies
+        const id = Cookies.get("id");
+
+        if (!id) {
+          router.push("/login");
+          return;
+        }
+        // Get the user ID from cookies
         const response = await fetch(
           `http://localhost:5296/api/cart/items/${id}`
         );
@@ -110,14 +107,18 @@ const MyCart: React.FC = () => {
 
   // Remove item from cart
   const handleRemoveItem = async (ticketId: string) => {
-    // Cookies.get("id") 
-    const userId = "USER001"; // Assuming you have the userId in cookies
+    const userId = Cookies.get("id"); // Assuming you have the userId in cookies
     try {
-      await fetch(`http://localhost:5296/api/cart/remove/${userId}/${ticketId}`, {
-        method: "DELETE",
-      });
+      await fetch(
+        `http://localhost:5296/api/cart/remove/${userId}/${ticketId}`,
+        {
+          method: "DELETE",
+        }
+      );
       // Remove the item locally from the state after successful deletion
-      setItems((prevItems) => prevItems.filter((item) => item.ticketId !== ticketId));
+      setItems((prevItems) =>
+        prevItems.filter((item) => item.ticketId !== ticketId)
+      );
     } catch (error) {
       console.error("Error removing item from cart:", error);
     }
@@ -134,7 +135,10 @@ const MyCart: React.FC = () => {
       alert("Please select a payment method.");
       return;
     }
-    localStorage.setItem("selectedTickets", JSON.stringify(productsForCheckout));
+    localStorage.setItem(
+      "selectedTickets",
+      JSON.stringify(productsForCheckout)
+    );
     localStorage.setItem("paymentMethod", selectedPayment);
     router.push("/checkout");
   };
@@ -152,7 +156,7 @@ const MyCart: React.FC = () => {
               🛒 Payment Cart
             </h2>
             <div
-              className="overflow-x-auto shadow-lg rounded-lg border bg-gray-50 p-6 relative"
+              className="overflow-x-auto rounded border bg-gray-50 relative"
               style={{
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
@@ -162,33 +166,33 @@ const MyCart: React.FC = () => {
               }}
             >
               <table className="w-full text-lg text-black">
-                <thead className="bg-white border-b ">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                    <th scope="col" className="px-6 py-3">
                       No
                     </th>
-                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                    <th scope="col" className="px-6 py-3">
                       Ticket Name
                     </th>
-                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                    <th scope="col" className="px-6 py-3">
                       Amount
                     </th>
-                    <th className="hidden sm:table-cell px-6 py-4 text-center text-gray-600 tracking-wide">
+                    <th scope="col" className="px-6 py-3 hidden sm:table-cell">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                    <th scope="col" className="px-6 py-3">
                       Price
                     </th>
-                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                    <th scope="col" className="px-6 py-3">
                       Select
                     </th>
-                    <th className="px-6 py-4 text-center text-gray-600 tracking-wide">
+                    <th scope="col" className="px-6 py-3">
                       Remove
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-300">
-                  {items.slice(0, 10).map((item, index) => (
+                  {items.map((item, index) => (
                     <tr
                       key={item.orderDetailId}
                       className="hover:bg-gray-100 transition-all duration-200 ease-in-out"
@@ -209,50 +213,80 @@ const MyCart: React.FC = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-3">
                           <button
-                            className="text-gray-700 hover:text-black focus:outline-none"
-                            onClick={() => handleQuantityChange(item.orderDetailId, false)}
+                            onClick={() =>
+                              handleQuantityChange(item.orderDetailId, false)
+                            }
+                            className="text-gray-400 hover:text-gray-500 focus:outline-none"
                           >
-                            ➖
+                            <svg
+                              className="w-5 h-5"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
                           </button>
-                          <span className="mx-4 text-lg">{item.quantity}</span>
+                          <span className="font-medium text-gray-900">
+                            {item.quantity}
+                          </span>
                           <button
-                            className="text-gray-700 hover:text-black focus:outline-none"
-                            onClick={() => handleQuantityChange(item.orderDetailId, true)}
+                            onClick={() =>
+                              handleQuantityChange(item.orderDetailId, true)
+                            }
+                            className="text-gray-400 hover:text-gray-500 focus:outline-none"
                           >
-                            ➕
+                            <svg
+                              className="w-5 h-5"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
                           </button>
                         </div>
                       </td>
                       <td className="hidden sm:table-cell px-6 py-4 text-center text-gray-600">
-                        {new Date(item.ticket.startDate).toLocaleString("en-GB", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                          hour12: false,
-                        })}
+                        {new Date(item.ticket.startDate).toLocaleString(
+                          "en-GB",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: false,
+                          }
+                        )}
                       </td>
                       <td className="px-6 py-4 text-center text-gray-700">
                         € {item.price.toFixed(2)}
                       </td>
-                      <td className="px-6 py-4 text-center">
-                        <input
-                          type="checkbox"
-                          checked={item.isSelected}
-                          onChange={() => handleSelect(item.orderDetailId)}
-                          className="form-checkbox h-6 w-6 text-blue-700"
-                          style={{ border: "1px solid #2b2b2b" }}
-                        />
+                      <td className="px-6 py-4">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={item.isSelected}
+                            onChange={() => handleSelect(item.orderDetailId)}
+                            className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out"
+                          />
+                        </label>
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-6 py-4">
                         <button
-                          className="text-red-500 hover:text-red-700"
                           onClick={() => handleRemoveItem(item.ticketId)}
+                          className="font-medium text-red-600 hover:text-red-900"
                         >
                           Remove
                         </button>
@@ -261,7 +295,6 @@ const MyCart: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-
             </div>
           </div>
 
@@ -290,10 +323,11 @@ const MyCart: React.FC = () => {
                   {paymentMethods.map((method) => (
                     <div
                       key={method.id}
-                      className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${selectedPayment === method.id
-                        ? "bg-blue-100 border border-blue-500"
-                        : "bg-gray-100 hover:bg-gray-200"
-                        }`}
+                      className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
+                        selectedPayment === method.id
+                          ? "bg-blue-100 border border-blue-500"
+                          : "bg-gray-100 hover:bg-gray-200"
+                      }`}
                       onClick={() => handleSelectPayment(method.id)}
                     >
                       {method.icon ? (

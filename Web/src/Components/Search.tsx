@@ -18,6 +18,9 @@ const Search: React.FC = () => {
 
   const itemsPerPage = 9;
   useEffect(() => {
+    let searchData = localStorage.getItem("searchData");
+    if (searchData) setSearchTerm(searchData);
+
     const loadTickets = async () => {
       const fetchedTickets = await fetchTickets();
       setTickets(fetchedTickets);
@@ -91,6 +94,7 @@ const Search: React.FC = () => {
   };
 
   useEffect(() => {
+    localStorage.setItem("searchData", searchTerm);
     filterTickets();
     setCurrentPage(1);
   }, [searchTerm, priceRange, selectedGenres, selectedLocation, tickets]);
