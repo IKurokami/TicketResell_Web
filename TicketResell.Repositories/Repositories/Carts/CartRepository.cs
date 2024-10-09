@@ -21,6 +21,7 @@ namespace Repositories.Repositories
         {
             return await _context.Orders
                 .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Ticket)
                 .FirstOrDefaultAsync(o => o.BuyerId == userId && o.Status == (int)OrderStatus.Pending);
         }
 
@@ -51,7 +52,7 @@ namespace Repositories.Repositories
                 OrderId = "ORD" + Guid.NewGuid().ToString(),
                 BuyerId = userId,
                 Total = 0,
-                Date = DateTime.Now,
+                Date = DateTime.UtcNow,
                 Status = (int)OrderStatus.Pending
             };
 

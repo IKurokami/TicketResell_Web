@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaPencilAlt,
   FaPhoneAlt,
@@ -71,6 +71,7 @@ export const fetchUserProfile = async (
   );
   return userProfile;
 };
+
 export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
   userProfile,
 }) => {
@@ -78,27 +79,56 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
   const [avatarPreview, setAvatarPreview] = useState<string>(
     profile.avatar || "https://picsum.photos/200"
   );
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showSaveButton, setShowSaveButton] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
+
+  useEffect(() => {
+    loadUserImage();
+  }, [profile.id]);
+
+  const loadUserImage = async () => {
+    try {
+      const response = await fetch(`/api/images/${profile.id}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setAvatarPreview(url);
+      } else {
+        setAvatarPreview("");
+      }
+    } catch (error) {
+      console.error("Error loading user image:", error);
+      setAvatarPreview("");
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile({ ...profile, [name]: value });
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
-        setProfile({ ...profile, avatar: reader.result as string });
         setShowSaveButton(true);
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const [imageFileSelected, setImageFile] = useState<File | null>(null);
   const handleSaveProfile = async (avatarOnly: boolean = false) => {
     const userUpdateDto: UserUpdateDto = {
       UserId: profile.id,
@@ -110,29 +140,48 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
       Sex: profile.sex,
       Phone: profile.phone,
       Address: profile.address,
-      Avatar: profile.avatar,
+      Avatar: profile.id,
       Birthday: profile.birthday,
       Bio: profile.bio,
     };
 
-    if (avatarOnly) {
-      // Only update the avatar if saving from the quick save button
-      userUpdateDto.Avatar = profile.avatar;
-    }
-
     setIsEditModalOpen(false);
     setShowSaveButton(false);
 
+    if (avatarOnly && imageFileSelected) {
+      const formData = new FormData();
+      formData.append("image", imageFileSelected);
+      formData.append("id", profile.id); // Append the image ID
+
+      try {
+        const response = await fetch("/api/uploadImage", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          alert(data.message);
+        } else {
+          throw new Error("Image upload failed.");
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Error uploading image.");
+      }
+      return;
+    }
+
     try {
       const response = await fetch(
-        `http://localhost:5296/api/user/update/${profile.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userUpdateDto),
-        }
+          `http://localhost:5296/api/user/update/${profile.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userUpdateDto),
+          }
       );
 
       if (response.ok) {
@@ -153,9 +202,61 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
   const handleOpenEditModal = () => setIsEditModalOpen(true);
   const handleCloseEditModal = () => setIsEditModalOpen(false);
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData({ ...passwordData, [name]: value });
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      alert("New passwords do not match!");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+          `http://localhost:5296/api/Authentication/change-password`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              UserId: profile.id,
+              CurrentPassword: passwordData.currentPassword,
+              NewPassword: passwordData.newPassword,
+            }),
+          }
+      );
+
+      if (response.ok) {
+        alert("Password changed successfully!");
+        setIsChangePasswordModalOpen(false);
+        setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.title || "Error changing password"}`);
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      alert("An error occurred while changing the password.");
+    }
+  };
+
+  const handleOpenChangePasswordModal = () => setIsChangePasswordModalOpen(true);
+  const handleCloseChangePasswordModal = () => setIsChangePasswordModalOpen(false);
+
   return (
     <div className="bg-transparent min-h-96 pb-32 font-sans mt-16">
       <div className="max-w-md mx-auto pt-16 px-4">
+        {/* Banner */}
+        <div className="h-40 -mb-5 rounded-xl shadow-lg overflow-hidden">
+          <img
+              src="https://picsum.photos/1000"
+              alt="Banner"
+              className="w-full h-full object-cover"
+          />
+        </div>
         {/* Header */}
         <div className="bg-white rounded-t-xl shadow-sm">
           <div className="relative pt-8 pb-4 px-4 text-center">
@@ -197,7 +298,7 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
         </div>
 
         {/* User Information */}
-        <div className="bg-white shadow-sm">
+        <div className="bg-white shadow-sm rounded-b-xl">
           <div className="px-4 py-3 border-b border-gray-200">
             <p className="text-sm text-gray-600 flex items-center">
               <FaPhoneAlt className="mr-3 text-gray-400" />
@@ -221,14 +322,17 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
         {/* Profile Actions */}
         <div className="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <button
-            onClick={() => handleOpenEditModal()}
-            className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between"
+              onClick={() => handleOpenEditModal()}
+              className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between"
           >
             <span>Edit Profile</span>
             <FaChevronRight className="text-gray-400" />
           </button>
           <div className="border-t border-gray-200"></div>
-          <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between">
+          <button
+              onClick={handleOpenChangePasswordModal}
+              className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between"
+          >
             <span>Change Password</span>
             <FaChevronRight className="text-gray-400" />
           </button>
@@ -313,6 +417,69 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Change Password Modal */}
+      {isChangePasswordModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
+            <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+              <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <button
+                    onClick={handleCloseChangePasswordModal}
+                    className="text-blue-500 font-semibold"
+                >
+                  Cancel
+                </button>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Change Password
+                </h2>
+                <button
+                    onClick={handleChangePassword}
+                    className="text-blue-500 font-semibold"
+                >
+                  Save
+                </button>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Current Password
+                  </label>
+                  <input
+                      type="password"
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    New Password
+                  </label>
+                  <input
+                      type="password"
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm New Password
+                  </label>
+                  <input
+                      type="password"
+                      name="confirmNewPassword"
+                      value={passwordData.confirmNewPassword}
+                      onChange={handlePasswordChange}
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
       )}
     </div>
   );
