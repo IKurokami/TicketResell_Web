@@ -1,5 +1,6 @@
 // models/TicketCardModel.ts
 import { fetchImage } from "./FetchImage";
+
 export interface TicketCard {
   name: string;
   price: string;
@@ -31,12 +32,38 @@ export const convertToTicketCards = async (response: any[]): Promise<TicketCard[
         name: item.name,
         price: item.cost.toString(), // Ensure price is a string
         id: item.ticketId,
-        date: item.startDate,
+        date:  new Date(item.startDate).toLocaleString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour12: true, 
+          timeZone: "Asia/Ho_Chi_Minh", 
+        }),
         location:item.location,
-        imageUrl, // Set the imageUrl fetched or default
+        imageUrl,
       };
     })
   );
 
   return ticketCards;
+};
+
+import Cookies from "js-cookie";
+
+
+export const fetchTicketItems = async (): Promise<TicketCard[]> => {
+  const id = Cookies.get('id');
+  if (!id) {
+    throw new Error("Seller ID not found");
+  }
+
+  const response = await fetch(`http://localhost:5296/api/ticket/readbySellerId/${id}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch tickets");
+  }
+
+  const result = await response.json();
+  return convertToTicketCards(result.data);
 };

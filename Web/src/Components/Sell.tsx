@@ -3,35 +3,64 @@ import React from "react";
 import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@/Css/Sell.css";
-import { Search, Plus } from "lucide-react";
-import { TicketCard, convertToTicketCards } from "@/models/TicketSellCard";
+import { Search } from "lucide-react";
+import { TicketCard, fetchTicketItems } from "@/models/TicketSellCard";
 import AddTicketModal from "@/Components/AddTicketPopup";
-
-const fetchTicketItems = async (): Promise<TicketCard[]> => {
-  const response = await fetch("http://localhost:5296/api/ticket/read");
-  const result = await response.json();
-  return convertToTicketCards(result.data);
-};
+import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {deleteImage} from "@/models/Deleteimage";
 
 const TicketsPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [ticketItems, setTicketItems] = useState<TicketCard[]>([]);
+  
 
   const fetchItems = async () => {
     const items = await fetchTicketItems();
     console.log(items);
-
     setTicketItems(items);
   };
   useEffect(() => {
-    // Fetch the ticket items when the component is mounted
-
     fetchItems();
   }, []);
 
   const handleButtonClick = () => {
     setModalOpen(true);
   };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    try {
+       
+        const response = await fetch(
+            `http://localhost:5296/api/Ticket/delete/${ticketId}`,
+            {
+                method: "DELETE",
+            }
+        );
+
+        if (response.ok) {
+           
+            setTicketItems((prevItems) =>
+                prevItems.filter((ticket) => ticket.id !== ticketId)
+            );
+            console.log(`Ticket with ID ${ticketId} deleted successfully.`);
+
+            
+            const imageDeleteResult = await deleteImage(ticketId);
+            if (imageDeleteResult.success) {
+                console.log(`Image with Ticket ID ${ticketId} deleted successfully.`);
+            } else {
+                console.error(`Failed to delete image: ${imageDeleteResult.error}`);
+            }
+        } else {
+            console.error("Failed to delete the ticket.");
+        }
+        fetchItems();
+    } catch (error) {
+        console.error("Error deleting ticket:", error);
+    }
+};
+
 
   return (
     <div className="tickets-page-wrapper">
@@ -69,7 +98,7 @@ const TicketsPage = () => {
               <Search className="search-icon" />
             </div>
             <button className=" add-ticket-btn" onClick={handleButtonClick}>
-              <Plus className="add-button" />
+              <FontAwesomeIcon icon={faPlus} />
             </button>
           </div>
           <AddTicketModal
@@ -78,7 +107,7 @@ const TicketsPage = () => {
           />
 
           <div className="tickets-section">
-            <div className="row justify-content-center">
+            <div className="row justify-content-left">
               {ticketItems.length > 0 ? (
                 ticketItems.map((ticketItem) => (
                   <div key={ticketItem.id} className="col-lg-4 ticket-card">
@@ -104,8 +133,15 @@ const TicketsPage = () => {
                         <p className="ticket-price">
                           Cost: ${ticketItem.price}
                         </p>
-
-                        <button className="edit-btn">Edit</button>
+                        <div className="ticket-bin-btn">
+                          <button className="edit-btn">Edit</button>
+                          <FontAwesomeIcon
+                            className="bin-icon"
+                            icon={faTrash}
+                            onClick={() => handleDeleteTicket(ticketItem.id)} 
+                            style={{ cursor: 'pointer' }} 
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

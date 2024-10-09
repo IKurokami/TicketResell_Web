@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Modal, TextField, Button, Box, Autocomplete, Typography } from "@mui/material";
+import Cookies from "js-cookie";
 
-import { fetchTicketItems } from "@/models/TicketSellCard";
-import {
-  Modal,
-  TextField,
-  Button,
-  Box,
-  Autocomplete,
-  Typography,
-} from "@mui/material";
-import Cookies from "js-cookie"; 
-import "@/Css/AddTicketModal.css";
-
-interface AddTicketModalProps {
+interface UpdateTicketModalProps {
   open: boolean;
   onClose: () => void;
+  ticketData: FormDataType; // Ticket data passed as prop
 }
 
 interface FormDataType {
@@ -24,7 +15,7 @@ interface FormDataType {
   date: string;
   image: string;
   description: string;
-  Qrcode: string[]; // Change this to an array of files
+  Qrcode: string[];
   categories: Category[];
 }
 
@@ -33,26 +24,13 @@ interface Category {
   name: string;
 }
 
-const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
-  const initialFormData: FormDataType = {
-    name: "",
-    cost: "",
-    location: "",
-    date: "",
-    image: "",
-    description: "",
-    Qrcode: [],
-    categories: [],
-  };
-
+const UpdateTicketModal: React.FC<UpdateTicketModalProps> = ({ open, onClose, ticketData }) => {
+  const [formData, setFormData] = useState<FormDataType>(ticketData);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState(initialFormData);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null); // Add state for image preview
-  const [quantity, setQuantity] = useState(1);
-  const [qrFileNames, setQrFileNames] = useState(Array(quantity).fill(""));
-  const [qrFiles, setQrFiles] = useState(Array(quantity).fill(null));
+  const [imagePreview, setImagePreview] = useState<string | null>(ticketData.image); // Pre-fill image preview
+  const [qrFiles, setQrFiles] = useState<string[]>(ticketData.Qrcode);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -84,10 +62,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
     });
   };
 
-  const handleCategoriesChange = (
-    event: React.SyntheticEvent<Element, Event>,
-    value: Category[]
-  ) => {
+  const handleCategoriesChange = (event: React.SyntheticEvent<Element, Event>, value: Category[]) => {
     setFormData({
       ...formData,
       categories: value,
@@ -108,27 +83,19 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
     }
   };
 
-  const handleQrFileChange = async (
-    index: number,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleQrFileChange = async (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
       const reader = new FileReader();
 
       reader.onloadend = () => {
         const newQrFiles = [...qrFiles];
-        const newQrFileNames = [...qrFileNames];
-
         newQrFiles[index] = reader.result as string;
-        newQrFileNames[index] = file.name;
 
         setQrFiles(newQrFiles);
-        setQrFileNames(newQrFileNames);
-
         setFormData((prevData) => ({
           ...prevData,
-          qr: newQrFiles,
+          Qrcode: newQrFiles,
         }));
       };
 
@@ -136,138 +103,51 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
     }
   };
 
-  const handleQuantityChange = (newQuantity: number) => {
-    setQuantity(newQuantity);
-
-    setQrFiles((prevFiles) => {
-      const updatedFiles = [...prevFiles];
-      while (updatedFiles.length < newQuantity) {
-        updatedFiles.push(null);
-      }
-      return updatedFiles.slice(0, newQuantity);
-    });
-
-    setQrFileNames((prevNames) => {
-      const updatedNames = [...prevNames];
-      while (updatedNames.length < newQuantity) {
-        updatedNames.push("");
-      }
-      return updatedNames.slice(0, newQuantity);
-    });
-  };
-
-  const handleSave = async () => {
+  const handleUpdate = async () => {
     const sellerId = Cookies.get("id");
-    if (
-      !formData.name ||
-      !formData.cost ||
-      !formData.location ||
-      !formData.date ||
-      !formData.image ||
-      !formData.description ||
-      !formData.Qrcode
-    ) {
+    if (!formData.name || !formData.cost || !formData.location || !formData.date || !formData.image || !formData.description || !formData.Qrcode) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    const generateTicketId = () => {
-      const randomNum = Math.floor(100 + Math.random() * 900);
-      return `TICKET${randomNum}`;
+    const ticket = {
+      TicketId: ticketData.TicketId, 
+      SellerId: sellerId,
+      Name: formData.name,
+      Cost: parseFloat(formData.cost),
+      Location: formData.location,
+      StartDate: new Date(formData.date),
+      Status: 1,
+      Image: formData.image,
+      Qrcode: formData.Qrcode,
+      CategoriesId: formData.categories.map((category) => category.categoryId),
+      Description: formData.description,
     };
 
-    const checkTicketIdExist = async (ticketId: string) => {
-      const response = await fetch(
-        `http://localhost:5296/api/Ticket/checkexist/${ticketId}`
-      );
-      return response.status === 200;
-    };
-
-    const createTickets = async () => {
-      let baseTicketId = generateTicketId();
-      let isValidId = await checkTicketIdExist(baseTicketId);
-
-      while (isValidId) {
-        baseTicketId = generateTicketId();
-        isValidId = await checkTicketIdExist(baseTicketId);
-      }
-
-      const tickets = Array.from({ length: quantity }).map((_, index) => {
-        let ticketId = baseTicketId;
-        if (quantity > 1) {
-          ticketId = `${baseTicketId}_${index + 1}`;
-        }
-
-        return {
-          TicketId: ticketId,
-          SellerId: sellerId,
-          Name: formData.name,
-          Cost: parseFloat(formData.cost),
-          Location: formData.location,
-          StartDate: new Date(formData.date),
-          Status: 1,
-          Image: baseTicketId,
-          Qrcode: qrFiles[index],
-          CategoriesId: formData.categories.map(
-            (category) => category.categoryId
-          ),
-          Description: formData.description,
-        };
+    try {
+      const response = await fetch(`http://localhost:5296/api/Ticket/update/${ticket.TicketId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(ticket),
       });
 
-      console.log(tickets);
-
-      const uploadImagePromises = tickets.map((ticket) => {
-        const formData = new FormData();
-        formData.append("id", ticket.Image);
-        formData.append("image", selectedFile as Blob);
-        return fetch("/api/uploadImage", {
-          method: "POST",
-          body: formData,
-        });
-      });
-
-      try {
-        await Promise.all(uploadImagePromises);
-        console.log("Images uploaded successfully (simulated).");
-
-        const createTicketPromises = tickets.map(async (ticket) => {
-          await fetch("http://localhost:5296/api/Ticket/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(ticket),
-          });
-        });
-
-        await Promise.all(createTicketPromises);
-        console.log("Tickets created successfully.");
-      } catch (error) {
-        console.error("Error creating tickets or uploading images:", error);
+      if (response.ok) {
+        console.log("Ticket updated successfully.");
+        onClose();
+      } else {
+        console.error("Failed to update the ticket.");
       }
-      setFormData(initialFormData);
-      setSelectedFile(null);
-      setQrFiles([]);
-      setQuantity(1);
-      setQrFileNames([]);
-      setImagePreview(null);
-      onClose();
-    };
-
-    await createTickets();
-    fetchTicketItems(); 
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+    }
   };
 
-
-
   const handleCancel = () => {
-    setFormData(initialFormData);
+    setFormData(ticketData);
     setSelectedFile(null);
-    setQrFiles([]);
-    setQuantity(1);
-    setQrFileNames([]);
-    setImagePreview(null); // Clear the image preview
+    setImagePreview(ticketData.image); // Reset the image preview
     onClose();
   };
 
@@ -284,21 +164,11 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
         <Box className="modal-style">
           <div className="modal-content">
             <div className="modal-title">
-              <h2>Add Ticket</h2>
+              <h2>Update Ticket</h2>
               <button className="close-button" onClick={handleCancel}>
                 ×
               </button>
             </div>
-
-            <TextField
-              fullWidth
-              label="Quantity"
-              value={quantity}
-              onChange={(e) => handleQuantityChange(Number(e.target.value))}
-              type="number"
-              margin="normal"
-              inputProps={{ min: 1 }}
-            />
 
             <TextField
               fullWidth
@@ -342,7 +212,6 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
               required
             />
 
-            {/* Autocomplete for selecting multiple categories */}
             <Autocomplete
               multiple
               options={categories}
@@ -370,7 +239,6 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
               required
             />
 
-            {/* File input for image */}
             <Typography variant="h6" margin="normal">
               Ticket Image:
             </Typography>
@@ -383,15 +251,13 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
               required
             />
 
-            {/* Image preview */}
             {imagePreview && (
               <Box className="image-preview">
                 <img src={imagePreview} alt="Selected image preview" />
               </Box>
             )}
 
-            {/* QR Code Files */}
-            {Array.from({ length: quantity }).map((_, index) => (
+            {Array.from({ length: qrFiles.length }).map((_, index) => (
               <div key={index}>
                 <Typography variant="h6" margin="normal">
                   QR image {index + 1}:
@@ -419,8 +285,8 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
               <Button onClick={handleCancel} color="secondary">
                 Cancel
               </Button>
-              <Button onClick={handleSave} color="primary" variant="contained">
-                Save
+              <Button onClick={handleUpdate} color="primary" variant="contained">
+                Update
               </Button>
             </div>
           </div>
@@ -430,4 +296,4 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ open, onClose }) => {
   );
 };
 
-export default AddTicketModal;
+export default UpdateTicketModal;

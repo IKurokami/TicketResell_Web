@@ -25,6 +25,16 @@ namespace TicketResell.Repositories.Controllers
         }
 
         [HttpGet]
+        [Route("checkexist/{id}")]
+        
+        public async Task<IActionResult> CheckExistTicket(string id)
+        {
+            var response = await _ticketService.CheckExistId(id);
+            return ResponseParser.Result(response);
+        }
+        
+        
+        [HttpGet]
         [Route("read")]
         public async Task<IActionResult> GetTicket()
         {
@@ -47,6 +57,15 @@ namespace TicketResell.Repositories.Controllers
         {
             var response = await _ticketService.GetTopTicket(amount);
             return ResponseParser.Result(response);
+        }
+
+        [HttpGet("qr/{ticketId}")]
+        public async Task<IActionResult> GetQrImage(string ticketId)
+        {
+            var response = await _ticketService.GetQrImageAsBase64Async(ticketId);
+
+            return ResponseParser.Result(response);
+
         }
 
         [HttpPost("getrange")]
