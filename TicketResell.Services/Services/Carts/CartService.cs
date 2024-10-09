@@ -1,5 +1,8 @@
 using AutoMapper;
+using Repositories.Core.Dtos.Order;
+using Repositories.Core.Dtos.OrderDetail;
 using Repositories.Core.Entities;
+using Repositories.Core.Helper;
 using Repositories.Core.Validators;
 using TicketResell.Repositories.Core.Dtos.Cart;
 using TicketResell.Repositories.UnitOfWork;
@@ -151,6 +154,93 @@ namespace TicketResell.Services.Services
             var total = cart.OrderDetails.Sum(item => item.Price * item.Quantity);
 
             return ResponseModel.Success($"Successfully calculated cart total for user: {userId}", total);
+        }
+        
+        public async Task<ResponseModel> GetCartItems(string userId)
+        {
+            var cart = await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId);
+            if (cart == null)
+            {
+                return ResponseModel.NotFound($"Cart not found for user: {userId}");
+            }
+
+            var cartItems = _mapper.Map<IEnumerable<OrderDetailDto>>(cart.OrderDetails);
+            return ResponseModel.Success($"Successfully retrieved cart items for user: {userId}", cartItems);
+        }
+        
+        public async Task<ResponseModel> CreateOrderFromSelectedItems(string userId, List<string> selectedTicketIds)
+        {
+            var cart = await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId);
+            if (cart == null)
+            {
+                return ResponseModel.NotFound($"Cart not found for user: {userId}");
+            }
+
+            var selectedItems = cart.OrderDetails.Where(od => selectedTicketIds.Contains(od.TicketId)).ToList();
+            if (!selectedItems.Any())
+            {
+                return ResponseModel.BadRequest("No selected items found in the cart");
+            }
+
+            var order = new Order
+            {
+                OrderId = "O" + Guid.NewGuid(),
+                BuyerId = userId,
+                Date = DateTime.UtcNow,
+                OrderDetails = selectedItems
+            };
+
+            var validator = _validatorFactory.GetValidator<Order>();
+            var validationResult = await validator.ValidateAsync(order);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            }
+
+            await _unitOfWork.OrderRepository.CreateAsync(order);
+            foreach (var ticketId in selectedTicketIds)
+            {
+                await _unitOfWork.CartRepository.RemoveFromCartAsync(cart, ticketId);
+            }
+
+            var orderDto = _mapper.Map<OrderDto>(order);
+            return ResponseModel.Success("Order created successfully", orderDto);
+        }
+        
+        public async Task<ResponseModel> Checkout(string userId)
+        {
+            var cart = await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId);
+            if (cart == null)
+            {
+                return ResponseModel.NotFound($"Cart not found for user: {userId}");
+            }
+
+            if (!cart.OrderDetails.Any())
+            {
+                return ResponseModel.BadRequest("Cart is empty");
+            }
+
+            var order = new Order
+            {
+                OrderId = "O" + Guid.NewGuid(),
+                BuyerId = userId,
+                Date = DateTime.UtcNow,
+                Status = (int)OrderStatus.Completed,
+                OrderDetails = cart.OrderDetails.ToList()
+            };
+
+            var validator = _validatorFactory.GetValidator<Order>();
+            var validationResult = await validator.ValidateAsync(order);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            }
+
+            await _unitOfWork.OrderRepository.CreateAsync(order);
+            await _unitOfWork.CartRepository.ClearCartAsync(userId);
+
+            var orderDto = _mapper.Map<OrderDto>(order);
+            return ResponseModel.Success("Checkout completed successfully", orderDto);
         }
     }
 }

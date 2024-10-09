@@ -1,7 +1,9 @@
-using TicketResell.Repositories.Helper;
+using System.Text;
+using Microsoft.AspNetCore.WebUtilities;
 using TicketResell.Repositories.Core.Dtos.Authentication;
+using TicketResell.Repositories.Helper;
 
-namespace TicketResell.Repositories.Controllers
+namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -25,27 +27,11 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var result = await _authService.LoginAsync(loginDto);
-            if (result.Data != null)
+            if (result is { StatusCode: 200, Data: not null })
             {
-                var loginInfo = (LoginInfoDto)result.Data;
+                var loginInfo = result.Data as LoginInfoDto;
 
-                if (loginInfo.User != null)
-                    HttpContext.SetUserId(loginInfo.User.UserId);
-
-                HttpContext.SetAccessKey(loginInfo.AccessKey);
-                HttpContext.SetIsAuthenticated(true);
-            }
-
-            return ResponseParser.Result(result);
-        }
-
-        [HttpPost("login-key")]
-        public async Task<IActionResult> Login([FromBody] AccessKeyLoginDto accessKeyLoginDto)
-        {
-            var result = await _authService.LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
-            if (result.Data != null)
-            {
-                if (result.Data is LoginInfoDto loginInfo)
+                if (loginInfo != null)
                 {
                     if (loginInfo.User != null)
                         HttpContext.SetUserId(loginInfo.User.UserId);
@@ -54,10 +40,29 @@ namespace TicketResell.Repositories.Controllers
                     HttpContext.SetIsAuthenticated(true);
                 }
             }
-
+            
             return ResponseParser.Result(result);
         }
-
+        
+        [HttpPost("login-key")]
+        public async Task<IActionResult> Login([FromBody] AccessKeyLoginDto accessKeyLoginDto)
+        {
+            var result = await _authService.LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
+            if (result.Data != null)
+            {
+                if (result.Data is LoginInfoDto loginInfo)
+                {
+                    if (loginInfo.User != null) 
+                        HttpContext.SetUserId(loginInfo.User.UserId);
+                    
+                    HttpContext.SetAccessKey(loginInfo.AccessKey);
+                    HttpContext.SetIsAuthenticated(true);
+                }
+            }
+            
+            return ResponseParser.Result(result);
+        }
+        
         [HttpPost("islogged")]
         public async Task<IActionResult> IsLogged()
         {
@@ -78,6 +83,35 @@ namespace TicketResell.Repositories.Controllers
             HttpContext.SetIsAuthenticated(false);
             HttpContext.SetAccessKey("");
             HttpContext.SetUserId("");
+            return ResponseParser.Result(result);
+        }
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            var authenData = HttpContext.GetAuthenData();
+
+            if (!authenData.IsAuthenticated || authenData.UserId != changePasswordDto.UserId)
+            {
+                return ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to change this password"));
+            }
+
+            var result = await _authService.ChangePasswordAsync(changePasswordDto.UserId, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            return ResponseParser.Result(result);
+        }
+
+        [HttpPost("send-verification-email")]
+        public async Task<IActionResult> SendVerificationEmail([FromBody] string userId)
+        {
+            var result = await _authService.SendVerificationEmailAsync(userId);
+            return ResponseParser.Result(result);
+        }
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+        {
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+            var result = await _authService.ConfirmEmailAsync(userId, decodedToken);
             return ResponseParser.Result(result);
         }
     }

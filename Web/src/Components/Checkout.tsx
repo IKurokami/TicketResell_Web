@@ -1,132 +1,196 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import '@/Css/Checkout.css';
-import { useRouter } from 'next/navigation';
-
-interface Ticket {
-    id: number;
-    name: string;
-    quantity: number;
-    price: number;
-    date: string;
-    imageUrl: string;
-}
-
-interface UserInfo {
-    name: string;
-    phone: string;
-    email: string;
-}
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { BuildingBankRegular } from "@fluentui/react-icons";
+import { CartItem } from "@/Components/Cart"; // Importing types from MyCart
+import { Ticket } from "@/models/TicketFetch";
 
 const Checkout: React.FC = () => {
-    const [selectedTickets, setSelectedTickets] = useState<Ticket[]>([]);
-    const [paymentMethod, setPaymentMethod] = useState<string>('');
-    const [userInfo, setUserInfo] = useState<UserInfo>({ name: '', phone: '', email: '' });
-    const [showModal, setShowModal] = useState(false);
-    const router = useRouter();
+  const [selectedItems, setSelectedItems] = useState<CartItem[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [shippingInfo, setShippingInfo] = useState({
+    fullName: "",
+    email: "",
+    address: "",
+    city: "",
+    country: "",
+  });
 
-    useEffect(() => {
-        const tickets = JSON.parse(localStorage.getItem('selectedTickets') || '[]');
-        const payment = localStorage.getItem('paymentMethod') || '';
-        setSelectedTickets(tickets);
-        setPaymentMethod(payment);
-    }, []);
+  const router = useRouter();
+  const taxRate = 0.05; // 5% tax
 
-    const handleOpenModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
+  useEffect(() => {
+    const storedItems = localStorage.getItem("selectedTickets");
+    const storedPaymentMethod = localStorage.getItem("paymentMethod");
 
-    const handleSubmit = () => {
-        if (userInfo.name && userInfo.phone && userInfo.email) {
-            alert('Thank you! Your tickets will be sent to your email.');
-            handleCloseModal();
-            router.push('/confirmation');
-        } else {
-            alert('Please fill in all the fields.');
-        }
-    };
+    if (storedItems) {
+      setSelectedItems(JSON.parse(storedItems));
+    }
+    if (storedPaymentMethod) {
+      setPaymentMethod(storedPaymentMethod);
+    }
+  }, []);
 
-    const renderQRCode = () => {
-        switch (paymentMethod) {
-            case 'momo': return <img src="/images/momo-qr.png" alt="Momo QR" />;
-            case 'atm': return <img src="/images/atm-qr.png" alt="ATM QR" />;
-            case 'paypal': return <img src="/images/paypal-qr.png" alt="PayPal QR" />;
-            default: return null;
-        }
-    };
+  const totalPrice = selectedItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
-    const calculateTotalPrice = () => {
-        return selectedTickets.reduce((total, ticket) => total + ticket.price * ticket.quantity, 0);
-    };
+  const taxAmount = totalPrice * taxRate;
+  const totalWithTax = totalPrice + taxAmount;
 
-    return (
-        <div className="checkout-container">
-            <h2 className="checkout-title">Checkout</h2>
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setShippingInfo((prev) => ({ ...prev, [name]: value }));
+  };
 
-            <div className="ticket-summary">
-                <h3>Selected Tickets</h3>
-                <ul className="ticket-list">
-                    {selectedTickets.map((ticket, index) => (
-                        <li key={index} className="ticket-item">
-                            <img src={ticket.imageUrl} alt={ticket.name} className="ticket-image" />
-                            <div className="ticket-details">
-                                <p>{ticket.name} - {ticket.quantity}x</p>
-                                <p>Date: {ticket.date}</p>
-                                <p>Price: €{ticket.price.toFixed(2)}</p>
-                            </div>
-                        </li>
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Order submitted", { selectedItems, paymentMethod, shippingInfo });
+    localStorage.removeItem("selectedTickets");
+    localStorage.removeItem("paymentMethod");
+    router.push("/order-confirmation");
+  };
+
+  return (
+    <div className="mt-24 pb-32 px-4 sm:px-6 lg:px-16 shadow rounded">
+      <div className="mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-6 flex flex-col lg:flex-row">
+          {/* Left Column: Selected Items and Shipping Form */}
+          <div className="w-full lg:w-2/3 lg:pr-6 mb-6 lg:mb-0">
+            <h2 className="text-4xl font-semibold text-gray-800 mb-8 tracking-wider" style={{ fontFamily: "serif" }}>
+              🛒 Checkout
+            </h2>
+
+            {/* Selected Items */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-4">Selected Items</h3>
+              <div className="overflow-x-auto shadow-lg rounded-lg border bg-gray-50 p-6">
+                <table className="w-full text-lg text-black">
+                  <thead className="bg-white border-b">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-gray-600 tracking-wide">Ticket Name</th>
+                      <th className="px-6 py-4 text-left text-gray-600 tracking-wide">Quantity</th>
+                      <th className="px-6 py-4 text-left text-gray-600 tracking-wide">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-300">
+                    {selectedItems.map((item) => (
+                      <tr key={item.orderDetailId} className="hover:bg-gray-100">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <img
+                              src={item.ticket.imageUrl}
+                              alt={item.ticket.name}
+                              className="w-16 h-16 rounded mr-4"
+                              style={{ border: "2px solid #2b2b2b" }}
+                            />
+                            <span className="text-gray-900">{item.ticket.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">€ {(item.price * item.quantity).toFixed(2)}</td>
+                      </tr>
                     ))}
-                </ul>
-                <div className="total-price">
-                    <h3>Total Price: €{calculateTotalPrice().toFixed(2)}</h3>
-                </div>
-                <h3>Payment Method: {paymentMethod.toUpperCase()}</h3>
-                <div className="qr-code">
-                    {renderQRCode()}
-                </div>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <button onClick={handleOpenModal} className="confirm-btn">Confirm</button>
+            {/* Shipping Information Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-4">Buyer Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="fullName"
+                  value={shippingInfo.fullName}
+                  onChange={handleInputChange}
+                  placeholder="Full Name"
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <input
+                  type="email"
+                  name="email"
+                  value={shippingInfo.email}
+                  onChange={handleInputChange}
+                  placeholder="Email Address"
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <input
+                  type="text"
+                  name="address"
+                  value={shippingInfo.address}
+                  onChange={handleInputChange}
+                  placeholder="Address"
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <input
+                  type="text"
+                  name="country"
+                  value={shippingInfo.country}
+                  onChange={handleInputChange}
+                  placeholder="Country"
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </form>
+          </div>
 
-            {showModal && (
-                <div className="modal-overlay" onClick={handleCloseModal}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <h3>Enter Your Information</h3>
-                        <label>
-                            Name:
-                            <input
-                                type="text"
-                                value={userInfo.name}
-                                onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
-                                placeholder="Enter your name"
-                            />
-                        </label>
-                        <label>
-                            Phone:
-                            <input
-                                type="text"
-                                value={userInfo.phone}
-                                onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
-                                placeholder="Enter your phone number"
-                            />
-                        </label>
-                        <label>
-                            Email:
-                            <input
-                                type="email"
-                                value={userInfo.email}
-                                onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-                                placeholder="Enter your email"
-                            />
-                        </label>
-                        <div className="modal-actions">
-                            <button onClick={handleSubmit} className="submit-btn">Submit</button>
-                            <button onClick={handleCloseModal} className="cancel-btn">Cancel</button>
-                        </div>
-                    </div>
+          {/* Right Column: Order Summary and Payment */}
+          <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h3>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Subtotal</span>
+                <span className="text-sm font-medium text-gray-900">€ {totalPrice.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Tax (5%)</span>
+                <span className="text-sm font-medium text-gray-900">€ {taxAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+                <span className="text-lg font-semibold text-gray-800">Total</span>
+                <span className="text-lg font-semibold text-blue-600">€ {totalWithTax.toFixed(2)}</span>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-600 mb-3">Payment Method:</p>
+                <div className="flex items-center justify-center p-4 rounded-lg bg-gray-100">
+                  {paymentMethod === "bank-transfer" ? (
+                    <>
+                      <BuildingBankRegular className="text-3xl mr-2 text-gray-700" />
+                      <span className="text-sm text-gray-700">Bank Transfer</span>
+                    </>
+                  ) : (
+                    <>
+                      <img
+                        src="https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png"
+                        alt="MoMo"
+                        className="w-8 h-8 mr-2"
+                      />
+                      <span className="text-sm text-gray-700">MoMo</span>
+                    </>
+                  )}
                 </div>
-            )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
+                onClick={handleSubmit}
+              >
+                Place Order
+              </button>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Checkout;

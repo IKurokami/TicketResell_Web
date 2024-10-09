@@ -121,7 +121,14 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         return categories;
 
     }
-
+    public async Task<List<Ticket>> GetTicketsByCategoryAndDateAsync(string categoryName, int amount)
+    {
+        return await _context.Tickets
+            .Where(t => t.Categories.Any(c => c.Name == categoryName) && t.StartDate > DateTime.Now)
+            .OrderBy(t => t.StartDate)
+            .Take(amount)
+            .ToListAsync();
+    }
     public async Task<List<Ticket>> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange)
     {
         var now = DateTime.Now;

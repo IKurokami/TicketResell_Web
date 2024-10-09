@@ -23,7 +23,7 @@ public class OrderService : IOrderService
     public async Task<ResponseModel> CreateOrder(OrderDto dto, bool saveAll = true)
     {
         var order = _mapper.Map<Order>(dto);
-        order.Date = DateTime.Now;
+        order.Date = DateTime.UtcNow;
         order.Total = 0;
         order.Status = (int)OrderStatus.Pending;
 
@@ -62,8 +62,8 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> GetOrdersByDateRange(DateRange dateRange)
     {
-        dateRange.StartDate ??= new DateTime(0);
-        dateRange.EndDate ??= DateTime.Now;
+        dateRange.StartDate ??= DateTime.MinValue;
+        dateRange.EndDate ??= DateTime.UtcNow;
         var orders = await _unitOfWork.OrderRepository.GetOrdersByDateRangeAsync(dateRange);
         return ResponseModel.Success($"Successfully get order from {dateRange.StartDate} to {dateRange.EndDate}",
             orders);

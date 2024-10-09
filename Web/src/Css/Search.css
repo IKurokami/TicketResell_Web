@@ -1,3 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.movie-card-wrapper {
+    position: relative;
+    z-index: 1;
+    transition: z-index 0s 0.1s;
+}
+
+.movie-card-wrapper:hover {
+    z-index: 2;
+    transition: z-index 0s;
+}
+
+.movie-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.movie-card-wrapper:hover .movie-card {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.movie-card .card-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.movie-card:hover .card-content {
+    max-height: 200px;
+}
+
+.marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.marquee span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 15s linear infinite;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(-100%, 0);
+    }
+}
+
+.token {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: #edf2f7;
+    border-radius: 20px;
+    margin: 2px;
+    font-size: 0.875rem;
+    color: #4a5568;
+    transition: all 0.3s ease;
+}
+
+.movie-card:hover .token {
+    background-color: greenyellow;
+    color: black;
+}
+
+.tokenize-wrapper {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.add-to-cart-button {
+    background-color: aqua;
+    color: black;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
+    opacity: 0;
+}
+
+.movie-card:hover .add-to-cart-button {
+    opacity: 1;
+}
+
+.add-to-cart-button:hover {
+    transform: scale(1.1);
+}
+
+.card-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    margin-top: auto;
+}
 
 /* Main container */
 .search-ticket-container {

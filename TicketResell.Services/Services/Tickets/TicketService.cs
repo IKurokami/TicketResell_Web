@@ -35,6 +35,16 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully retrieved {tickets.Count} tickets", ticketDtos);
         }
 
+        public async Task<ResponseModel> GetTicketsByCategoryAndDateAsync(string categoryName, int amount)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsByCategoryAndDateAsync(categoryName, amount);
+            if (tickets.Count == 0)
+            {
+                return ResponseModel.NotFound($"Not found any ticket with category {categoryName}");
+            }
+            return ResponseModel.Success("Successfully get ticket by category name", tickets);
+        }
+
         public async Task<ResponseModel> CreateTicketAsync(TicketCreateDto dto, bool saveAll)
         {
             var validatorTicket = _validatorFactory.GetValidator<Ticket>();

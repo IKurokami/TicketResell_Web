@@ -39,12 +39,12 @@ const convertToBannerItemCards = async (
       }
 
       return {
-        imageUrl, // Dynamically fetched image or default image
+        imageUrl,
         name: item.name,
         date: item.createDate,
-        author: "", // Add author if available or use a default value
-        description: "", // Add description if available or use a default value
-        price: item.cost.toString(), // Convert cost to string
+        author: "",
+        description: "",
+        price: item.cost.toString(),
         id: item.ticketId,
       };
     })

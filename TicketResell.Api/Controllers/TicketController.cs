@@ -68,6 +68,14 @@ namespace TicketResell.Repositories.Controllers
         }
 
 
+        [HttpGet("getbycategory")]
+        public async Task<IActionResult> GetTicketsByCategoryAndDate(TicketCategoryRequestDto dto)
+        {
+            var response = await _ticketService.GetTicketsByCategoryAndDateAsync(dto.CategoryName, dto.Amount);
+
+            return ResponseParser.Result(response);
+        }
+
         [HttpPost("getrange")]
         public async Task<IActionResult> GetTicketRange([FromBody] NumberRange range)
         {

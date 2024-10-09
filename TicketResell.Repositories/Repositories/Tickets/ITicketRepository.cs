@@ -18,6 +18,8 @@ public interface ITicketRepository : IRepository<Ticket>
 
     Task<List<Ticket>> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange);
 
+    Task<List<Ticket>> GetTicketsByCategoryAndDateAsync(string categoryName, int amount);
+
     Task<string> GetQrImageAsBase64Async(string ticketId);
 
 }

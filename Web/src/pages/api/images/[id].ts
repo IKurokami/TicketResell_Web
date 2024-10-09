@@ -52,24 +52,27 @@ export default async function handler(
         }
 
         // Explicitly query by the 'id' field, not _id
-        const imageDoc = await TicketImage.findOne({ id: id });
+        const imageDoc = await TicketImage.find({ id: id });
 
         if (!imageDoc) {
             console.log('Image not found for ID:', id);
             return res.status(404).json({ message: "Image not found" });
         }
 
-        console.log('Image found:', imageDoc.id);
+        console.log('Image found:', imageDoc);
+
+        imageDoc.map((image) : any =>{
+            imageCache[id] = image.image;
+        });
 
         // Store the image in the cache
-        imageCache[id] = imageDoc.image;
 
         // Set the appropriate content type and caching headers
         res.setHeader("Content-Type", "image/jpeg");
         res.setHeader('Cache-Control', 'public, max-age=3600, immutable'); // Cache for 1 hour
 
         // Send the image data
-        return res.send(imageDoc.image);
+        return res.send(imageDoc);
 
     } catch (error) {
         console.error("Error retrieving image:", error);
