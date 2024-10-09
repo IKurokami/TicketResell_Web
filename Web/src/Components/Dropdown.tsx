@@ -50,13 +50,11 @@ const Dropdown: React.FC<ChildComponentProps> = ({
       {checkDropDown ? (
         isDropdownVisible && (
           <div className="dropdown-content">
-            {/* Add your price history content here */}
             <p>{content}</p>
           </div>
         )
       ) : (
         <div className="dropdown-content">
-          {/* Add your price history content here */}
           <p>{content}</p>
         </div>
       )}
@@ -92,7 +90,7 @@ const Dropdown: React.FC<ChildComponentProps> = ({
           padding: 15px;
           border: 1px solid #e0e0e0;
           border-radius: 0 0 5px 5px;
-          color: white;
+          color: #000;
         }
       `}</style>
     </div>

@@ -2,7 +2,15 @@
 import "../Css/TicketDetail.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLocationDot, faTag, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCartShopping,
+  faCashRegister,
+  faLocationDot,
+  faMinus,
+  faPlus,
+  faTag,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -40,7 +48,15 @@ const TicketDetail = () => {
   const [title, setTitle] = useState("");
   const DEFAULT_IMAGE =
     "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
-
+  const [count, setCount] = useState(1);
+  const increase = () => {
+    setCount(count + 1);
+  };
+  const decrease = () => {
+    if (count > 1) {
+      setCount(count - 1);
+    }
+  };
   // Function to fetch ticket by ID
   const fetchTicketById = async (id: string | null) => {
     try {
@@ -82,7 +98,15 @@ const TicketDetail = () => {
             imageUrl: result.data.imageUrl,
             imageId: result.data.image,
             name: result.data.name,
-            startDate: new Date(result.data.startDate).toLocaleDateString(),
+            startDate: new Date(result.data.startDate).toLocaleString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour12: true, // Use true if you want AM/PM format
+              timeZone: "Asia/Ho_Chi_Minh", // Vietnam timezone
+            }),
             author: result.data.seller,
             location: `Event at ${result.data.location}`,
             cost: result.data.cost,
@@ -107,6 +131,7 @@ const TicketDetail = () => {
   if (!ticketresult) {
     return <p>Loading...</p>;
   }
+  console.log(ticketresult.description);
 
   return (
     <div className="bg-ticket-detail">
@@ -115,7 +140,6 @@ const TicketDetail = () => {
           <div className="col-12 col-lg-5 ticket--intro">
             <img
               className="rounded ticket--img "
-              style={{ width: "100%" }}
               // src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
               src={ticketresult.imageUrl}
               alt={ticketresult.name}
@@ -123,7 +147,7 @@ const TicketDetail = () => {
             <div className="dropdown">
               <Dropdown
                 title={"Description"}
-                content=""
+                content={ticketresult.description}
                 dropdownStatus={false}
                 iconDropdown="faList"
               />
@@ -132,7 +156,9 @@ const TicketDetail = () => {
           <div className="ticket--info col-12 col-lg-6">
             <h2 className="ticket--name">{ticketresult.name}</h2>
             <p className="ticket--seller">
-            <span><FontAwesomeIcon className="Tag" icon={faUser} /></span>
+              <span>
+                <FontAwesomeIcon className="Tag" icon={faUser} />
+              </span>
               Sold by {}
               <Link
                 className="seller--link"
@@ -141,7 +167,12 @@ const TicketDetail = () => {
                 <strong>{ticketresult.author.fullname}</strong>
               </Link>
             </p>
-            <p><span><FontAwesomeIcon className="Tag" icon={faLocationDot} /></span>Location: {ticketresult.location} </p>{" "}
+            <p>
+              <span>
+                <FontAwesomeIcon className="Tag" icon={faLocationDot} />
+              </span>
+              Location: {ticketresult.location}{" "}
+            </p>{" "}
             <ul className="tag--list">
               {ticketresult.categories.map((category) => (
                 <li className="tag--list--item" key={category.categoryId}>
@@ -158,13 +189,29 @@ const TicketDetail = () => {
                 <FontAwesomeIcon className="Tag" icon={faTag} />{" "}
                 <strong>{ticketresult.cost} VND</strong> {/* Format cost */}
               </p>
+              <div className="ticket--number mb-3 ml-5">
+                <button
+                  className="number--btn"
+                  onClick={decrease}
+                  disabled={count <= 1}
+                >
+                  <FontAwesomeIcon icon={faMinus} />
+                </button>
+                <div className="number--block">{count}</div>
+                <button className="number--btn" onClick={increase}>
+                  <FontAwesomeIcon icon={faPlus} />
+                </button>
+              </div>
               <div className="cta">
                 <button className="ticket--btn ticket--detail--btn">
-                  <i className="fas fa-shopping-cart cart--icon"></i>
+                  <FontAwesomeIcon
+                    className="cart--icon"
+                    icon={faCartShopping}
+                  />
                   Add to cart
                 </button>
                 <button className="ticket--btn ticket--detail--btn">
-                  <i className="fa-solid fa-cash-register cart--icon"></i>
+                  <FontAwesomeIcon className="cart--icon" icon={faCashRegister} />
                   Buy Now
                 </button>
               </div>
@@ -172,7 +219,7 @@ const TicketDetail = () => {
             <div className="dropdown">
               <Dropdown
                 title={"Review"}
-                content=""
+                content={ticketresult.description}
                 dropdownStatus={true}
                 iconDropdown="faShop"
               />
@@ -185,10 +232,10 @@ const TicketDetail = () => {
             Related Tickets
           </h2>
           <div className="col-12 ticket--list justify-content-center">
-            <div className="card ticket--item col-3 shadow">
+            <div className="card col-12 col-lg-3 ticket--item shadow">
               <img
                 src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
-                className="card-img-top"
+                className="card-img-top ticket--img"
                 alt="..."
               />
               <div className="card-body">
