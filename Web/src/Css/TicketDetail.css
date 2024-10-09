@@ -1,3 +1,4 @@
+@import "~bootstrap/dist/css/bootstrap.min.css";
 .bg-ticket-detail {
   background: #ffffff;
 }
@@ -110,7 +111,7 @@
 .ticket--related--btn {
   padding: 2vh 0.1vw;
 }
-.ticket--number{
+.ticket--number {
   display: flex;
   align-items: center;
 }
@@ -124,7 +125,7 @@
 .number--btn:hover {
   background-color: lightgray;
 }
-.number--block{
+.number--block {
   padding: 2px 2vw;
   border: 1px solid rgba(18 18 18 / 12%);
   border-radius: 5px;

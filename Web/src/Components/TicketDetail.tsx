@@ -1,7 +1,7 @@
 "use client";
 import Cookies from "js-cookie";
 import "../Css/TicketDetail.css";
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+// import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCartShopping,
@@ -111,12 +111,11 @@ const TicketDetail = () => {
 
   const handleAddToCart = async () => {
     const check = await checkLogin(); // Check if user is logged in
-    if (check === "False") {
-      alert("Please login before add to cart");
+    if (check == "False") {
       router.push("/login"); // Redirect to login page if not logged in
     } else {
       const result = await addItem({
-        UserId: ticketresult?.author.userId,
+        UserId: userId,
         TicketId: id,
         Quantity: count,
       }); // Correctly passing the argument

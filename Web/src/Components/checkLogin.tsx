@@ -6,6 +6,7 @@ export const checkLogin = async () => {
     "http://localhost:5296/api/Authentication/islogged",
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
