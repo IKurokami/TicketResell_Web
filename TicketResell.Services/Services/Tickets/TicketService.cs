@@ -22,6 +22,18 @@ namespace TicketResell.Services.Services
             _validatorFactory = validatorFactory;
         }
 
+        public async Task<ResponseModel> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsStartingWithinTimeRangeAsync(ticketAmount, timeRange);
+
+            if (tickets == null || !tickets.Any())
+            {
+                return ResponseModel.NotFound("No tickets found in the specified time range.");
+            }
+
+            var ticketDtos = _mapper.Map<List<TicketTopDto>>(tickets);
+            return ResponseModel.Success($"Successfully retrieved {tickets.Count} tickets", ticketDtos);
+        }
 
         public async Task<ResponseModel> CreateTicketAsync(TicketCreateDto dto, bool saveAll)
         {

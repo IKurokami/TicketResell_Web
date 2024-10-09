@@ -2,6 +2,7 @@ using Repositories.Core.Dtos.Ticket;
 using Microsoft.AspNetCore.Mvc;
 using TicketResell.Services.Services;
 using TicketResell.Services.Services.Tickets;
+using TicketResell.Repositories.Core.Dtos.Ticket;
 
 namespace TicketResell.Repositories.Controllers
 {
@@ -48,6 +49,24 @@ namespace TicketResell.Repositories.Controllers
             return ResponseParser.Result(response);
 
         }
+
+        [HttpPost("getticketsbytimerange")]
+        public async Task<IActionResult> GetTicketsStartingWithinTimeRange([FromBody] TicketTimeRangeRequestDto request)
+        {
+            if (request.TicketAmount <= 0)
+            {
+                return ResponseParser.Result(ResponseModel.BadRequest("Ticket amount must be greater than 0"));
+            }
+
+            if (request.TimeRange <= TimeSpan.Zero)
+            {
+                return ResponseParser.Result(ResponseModel.BadRequest("Time range must be greater than 0"));
+            }
+
+            var response = await _ticketService.GetTicketsStartingWithinTimeRangeAsync(request.TicketAmount, request.TimeRange);
+            return ResponseParser.Result(response);
+        }
+
 
         [HttpPost("getrange")]
         public async Task<IActionResult> GetTicketRange([FromBody] NumberRange range)

@@ -121,6 +121,27 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     }
 
+    public async Task<List<Ticket>> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange)
+    {
+        var now = DateTime.Now;
+        var endTime = now.Add(timeRange);
+
+        var tickets = await _context.Tickets
+            .Where(t => t.StartDate.HasValue && t.StartDate >= now && t.StartDate <= endTime)
+            .OrderBy(t => t.StartDate)
+            .Take(ticketAmount)
+            .ToListAsync();
+
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("No tickets found in the specified time range.");
+        }
+
+        return tickets;
+    }
+
+
+
     public async Task<List<Ticket>> GetTopTicketBySoldAmount(int amount)
     {
         var topSellingTickets = await _context.OrderDetails
