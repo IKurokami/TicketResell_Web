@@ -148,11 +148,13 @@ const MyCart: React.FC = () => {
   return (
     <div className="mt-24 w-full-screen rounded">
       <div className="mx-auto bg-white rounded-t-xl overflow-hidden">
-        <div className="p-6 flex flex-col lg:flex-row">
+        <div className="p-6 flex flex-col lg:flex-row relative">
           {/* Left Column: Tickets Table */}
-          <div className="w-full lg:w-2/3">
-            <h2 className="text-2xl font-bold mb-6">Shopping Cart</h2>
-            <div className="hidden sm:grid sm:grid-cols-6 gap-4 mb-4 text-sm font-medium text-gray-500">
+          <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
+            <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
+              Shopping Cart
+            </h2>
+            <div className="hidden sm:grid sm:grid-cols-6 gap-4 mb-4 text-sm font-medium text-gray-500 sticky top-16 bg-white z-10 py-2">
               <div className="col-span-3">Product</div>
               <div>Price</div>
               <div>Quantity</div>
@@ -246,69 +248,71 @@ const MyCart: React.FC = () => {
           </div>
 
           {/* Right Column: Payment Method and Summary */}
-          <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6">
-              Summary
-            </h3>
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Selected Items</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {selectedItems.length}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Subtotal</span>
-                <span className="text-sm font-medium text-gray-900">
-                  € {totalItemsPrice.toFixed(2)}
-                </span>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-600 mb-3">Payment Method:</p>
-                <div className="grid grid-cols-2 gap-4">
-                  {paymentMethods.map((method) => (
-                    <div
-                      key={method.id}
-                      className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
-                        selectedPayment === method.id
-                          ? "bg-blue-100 border border-blue-500"
-                          : "bg-gray-100 hover:bg-gray-200"
-                      }`}
-                      onClick={() => handleSelectPayment(method.id)}
-                    >
-                      {method.icon ? (
-                        <method.icon className="text-3xl mb-2 text-gray-700" />
-                      ) : (
-                        <img
-                          src={method.imageUrl}
-                          alt={method.name}
-                          className="w-12 h-12 mb-2"
-                        />
-                      )}
-                      <span className="text-xs text-gray-700">
-                        {method.name}
-                      </span>
-                    </div>
-                  ))}
+          <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky top-24 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            <div className="sticky top-0 bg-white z-10 py-4">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+                Summary
+              </h3>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Selected Items</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {selectedItems.length}
+                  </span>
                 </div>
-              </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Subtotal</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    € {totalItemsPrice.toFixed(2)}
+                  </span>
+                </div>
 
-              <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-                <span className="text-lg font-semibold text-gray-800">
-                  Total Price
-                </span>
-                <span className="text-lg font-semibold text-blue-600">
-                  € {totalPrice.toFixed(2)}
-                </span>
-              </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-3">Payment Method:</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {paymentMethods.map((method) => (
+                      <div
+                        key={method.id}
+                        className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
+                          selectedPayment === method.id
+                            ? "bg-blue-100 border border-blue-500"
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }`}
+                        onClick={() => handleSelectPayment(method.id)}
+                      >
+                        {method.icon ? (
+                          <method.icon className="text-3xl mb-2 text-gray-700" />
+                        ) : (
+                          <img
+                            src={method.imageUrl}
+                            alt={method.name}
+                            className="w-12 h-12 mb-2"
+                          />
+                        )}
+                        <span className="text-xs text-gray-700">
+                          {method.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-              <button
-                className="w-full bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
-                onClick={handleCheckout}
-              >
-                Checkout
-              </button>
+                <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+                  <span className="text-lg font-semibold text-gray-800">
+                    Total Price
+                  </span>
+                  <span className="text-lg font-semibold text-blue-600">
+                    € {totalPrice.toFixed(2)}
+                  </span>
+                </div>
+
+                <button
+                  className="w-full bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition duration-300 mt-4"
+                  onClick={handleCheckout}
+                >
+                  Checkout
+                </button>
+              </div>
             </div>
           </div>
         </div>
