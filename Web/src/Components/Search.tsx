@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { fetchTickets, getCategoryNames } from "../models/TicketFetch";
 import Link from "next/link";
+import TicketGrid from "./TicketGrid";
 
 const Search: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,8 +17,11 @@ const Search: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
 
-  const itemsPerPage = 12;
+  const itemsPerPage = 9;
   useEffect(() => {
+    let searchData = localStorage.getItem("searchData");
+    if (searchData) setSearchTerm(searchData);
+
     const loadTickets = async () => {
       const fetchedTickets = await fetchTickets();
       setTickets(fetchedTickets);
@@ -91,6 +95,7 @@ const Search: React.FC = () => {
   };
 
   useEffect(() => {
+    localStorage.setItem("searchData", searchTerm);
     filterTickets();
     setCurrentPage(1);
   }, [searchTerm, priceRange, selectedGenres, selectedLocation, tickets]);
@@ -168,12 +173,12 @@ const Search: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
+    <div className="mt-24 min-h-screen p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Sidebar */}
           <div className="w-full md:w-1/4">
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-transparent rounded-2xl border-r overflow-hidden">
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-4">Filters</h2>
 
@@ -187,7 +192,7 @@ const Search: React.FC = () => {
                         onClick={() => handleGenreChange(genre)}
                         className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
                           selectedGenres.includes(genre)
-                            ? "bg-blue-500 text-white"
+                            ? "bg-green-500 text-white"
                             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                         }`}
                       >
@@ -238,7 +243,7 @@ const Search: React.FC = () => {
           <div className="flex-1">
             {/* Search Bar */}
             <div className="mb-6">
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="bg-transparent rounded-2xl border-r overflow-hidden">
                 <div className="p-4">
                   <div className="relative">
                     <input
@@ -246,7 +251,7 @@ const Search: React.FC = () => {
                       placeholder="Search for event tickets..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full py-3 px-4 pr-10 rounded-full border-2 border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
+                      className="w-full py-3 px-4 pr-10 rounded-full border-r focus:outline-none focus:ring-2 focus:ring-green-500"
                     />
                     <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                       <FaSearch size={20} />
@@ -256,73 +261,8 @@ const Search: React.FC = () => {
               </div>
             </div>
 
-            {/*Movie Grid*/}
-            <div className="movie-grid">
-              {paginatedTickets.length > 0 ? (
-                paginatedTickets.map((ticket, index) => (
-                  <Link
-                    className="no-underline"
-                    href={`/ticket/${ticket.ticketId}`}
-                    key={index}
-                    passHref
-                  >
-                    <div className="movie-card-wrapper cursor-pointer no-underline visited:no-underline">
-                      <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
-                        <div className="relative">
-                          <img
-                            src={ticket.imageUrl}
-                            alt={ticket.name}
-                            className="w-full h-48 object-cover"
-                          />
-                          <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
-                            ${ticket.cost}
-                          </div>
-                        </div>
-                        <div className="p-4 flex-grow">
-                          <h3 className="text-lg font-semibold mb-1 text-gray-900">
-                            {ticket.name}
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-1">
-                            {ticket.location}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {new Date(ticket.startDate).toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )}
-                          </p>
-                          <div className="tokenize-wrapper">
-                            {getCategoryNames(ticket)
-                              .split(",")
-                              .map((category) => (
-                                <span key={category} className="token">
-                                  {category.trim()}
-                                </span>
-                              ))}
-                          </div>
-                          <div className="card-content mt-2">
-                            <p className="text-sm text-gray-700">
-                              An exciting event you won't want to miss!
-                            </p>
-                          </div>
-                        </div>
-                        {/* ... (card footer remains the same) */}
-                      </div>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <p className="col-span-full text-center text-gray-600">
-                  No results match your search criteria.
-                </p>
-              )}
-            </div>
+            {/*Ticket Grid*/}
+            <TicketGrid paginatedTickets={paginatedTickets} />
 
             {/* Pagination */}
             {totalPages > 1 && (

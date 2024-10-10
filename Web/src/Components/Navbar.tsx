@@ -41,6 +41,8 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.setItem("searchData", searchTerm);
+    router.push("/search");
     console.log("Tìm kiếm:", searchTerm);
   };
 
