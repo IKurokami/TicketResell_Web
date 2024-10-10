@@ -140,7 +140,7 @@ const MyCart: React.FC = () => {
   };
 
   return (
-    <div className="mt-24 pb-32 px-4 sm:px-6 lg:px-16 shadow rounded">
+    <div className="mt-24 pb-32 px-0 sm:px-6 lg:px-16 ">
       <div className="mx-auto bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-6 flex flex-col lg:flex-row">
           {/* Left Column: Tickets Table */}
