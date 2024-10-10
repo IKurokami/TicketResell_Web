@@ -66,8 +66,8 @@ namespace TicketResell.Services.Services
             }
 
             await _unitOfWork.CartRepository.AddToCartAsync(cart, cartItem);
-
-            return ResponseModel.Success($"Successfully added item to cart for user: {cartItemDto.UserId}", cartItem);
+            
+            return ResponseModel.Success($"Successfully added item to cart for user: {cartItemDto.UserId}");
         }
 
         public async Task<ResponseModel> UpdateCartItem(CartItemDto cartItemDto)
