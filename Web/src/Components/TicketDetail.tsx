@@ -1,5 +1,6 @@
 "use client";
 import Cookies from "js-cookie";
+import 'bootstrap/dist/css/bootstrap.min.css';  // Import Bootstrap CSS
 import "../Css/TicketDetail.css";
 // import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
