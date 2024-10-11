@@ -13,4 +13,6 @@ public interface ICategoryService
     public Task<ResponseModel> UpdateCategoryAsync(string id, CategoryUpdateDto? dto,bool saveAll=true);
 
     public Task<ResponseModel> DeleteCategoryAsync(string id, bool saveAll = true);
+
+    public Task<ResponseModel> GetTicketByCategoryAsync(string [] categoriesId);
 }

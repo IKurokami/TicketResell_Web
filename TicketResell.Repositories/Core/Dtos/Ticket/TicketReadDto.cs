@@ -1,7 +1,6 @@
 
 using Repositories.Core.Dtos.Category;
 using Repositories.Core.Dtos.User;
-using Repositories.Core.Dtos.Category;
 
 namespace Repositories.Core.Dtos.Ticket;
 
@@ -31,9 +30,9 @@ public class TicketReadDto
 
     public string? Image { get; set; }
 
+
     public string? Description { get; set; }
 
-    public virtual ICollection<CategoryReadDto> Categories { get; set; } = new List<CategoryReadDto>();
-
-    public virtual CategoryReadDto Category { get; set; }
+    public virtual ICollection<CategoryReadDto> Categories { get; set; } 
+    
 }

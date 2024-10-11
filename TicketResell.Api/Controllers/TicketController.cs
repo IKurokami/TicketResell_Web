@@ -26,6 +26,16 @@ namespace TicketResell.Repositories.Controllers
         }
 
         [HttpGet]
+        [Route("checkexist/{id}")]
+        
+        public async Task<IActionResult> CheckExistTicket(string id)
+        {
+            var response = await _ticketService.CheckExistId(id);
+            return ResponseParser.Result(response);
+        }
+        
+        
+        [HttpGet]
         [Route("read")]
         public async Task<IActionResult> GetTicket()
         {
@@ -33,6 +43,15 @@ namespace TicketResell.Repositories.Controllers
             return ResponseParser.Result(response);
         }
 
+        [HttpGet]
+        [Route("readbySellerId/{id}")]
+        public async Task<IActionResult> GetTicketBySellerId(string id)
+        {
+            var response = await _ticketService.GetTicketBySellerId(id);
+            return ResponseParser.Result(response);
+        }
+        
+        
         [HttpGet]
         [Route("gettop/{amount:int}")]
         public async Task<IActionResult> GetTopTicket(int amount)
@@ -139,6 +158,14 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> GetTicketRemaining(string id)
         {
             var response = await _ticketService.GetTicketRemainingAsync(id);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpGet]
+        [Route("getByCate")]
+        public async Task<IActionResult> GetTicketByCateId([FromBody] string [] id)
+        {
+            var response = await _ticketService.GetTicketByCategoryIdAsync(id);
             return ResponseParser.Result(response);
         }
     }

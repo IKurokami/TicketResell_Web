@@ -6,14 +6,15 @@
 
     ```json
     {
-      "ticketId": "TIC05",
+      "ticketId": "TICh05",
       "sellerId": "USER01",
       "name": "Concert Ticket",
       "cost": 150.00,
       "location": "Stadium",
       "startDate": "2024-09-25T19:30:00",
       "status": 1,
-      "image": "https://example.com/image.jpg",
+      "qr":"qr image",
+      "image": "TIC05",
       "CategoriesId": ["CAT01","CAT02"]
     }
     ```

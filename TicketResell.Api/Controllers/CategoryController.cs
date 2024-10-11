@@ -53,4 +53,10 @@ public class CategoryController : ControllerBase
         var response = await _categoryService.DeleteCategoryAsync(id);
         return ResponseParser.Result(response);
     }
+    [HttpGet("getTicket")]
+    public async Task<IActionResult> GetTicketByCateID([FromBody] string [] categoriesId)
+    {
+        var response = await _categoryService.GetTicketByCategoryAsync(categoriesId);
+        return ResponseParser.Result(response);
+    }
 }

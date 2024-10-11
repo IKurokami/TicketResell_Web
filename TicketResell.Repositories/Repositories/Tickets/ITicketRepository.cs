@@ -12,6 +12,10 @@ public interface ITicketRepository : IRepository<Ticket>
     Task<List<Ticket>> GetTicketByDateAsync(DateTime date);
     Task CreateTicketAsync(Ticket ticket, List<string> categoryIds);
 
+    Task<Boolean> CheckExist(string id);    
+    
+    Task<List<Ticket>> GetTicketBySellerId(string id);
+
     Task DeleteTicketAsync(string id);
 
     Task<ICollection<Category>?> GetTicketCateByIdAsync(string id);
@@ -20,6 +24,11 @@ public interface ITicketRepository : IRepository<Ticket>
 
     Task<string> GetQrImageAsBase64Async(string ticketId);
     Task<int> GetTicketRemainingAsync (string ticketId);
+
+    Task<List<Ticket>> GetTicketByCateIdAsync(string [] categoriesId);
+
+
+
 
 }
 
