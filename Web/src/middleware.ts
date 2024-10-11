@@ -1,27 +1,29 @@
 // middleware.ts
+import { log } from 'console';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 // import Cookies from 'js-cookie';
 
 export async function middleware(request: NextRequest) {
   // Get the access key from cookies
-  const accessKey = request.cookies.get('accessKey')?.value;
+  const accessKey = request.cookies.get('.AspNetCore.Session')?.value;
 
   // Define the paths that require authentication
   const protectedRoutes = ['/profile', '/favorites', '/history', '/myticket', '/settings'];
-
+  
   const validate = await fetch('http://localhost:5296/api/Authentication/islogged', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Cookie: `.AspNetCore.Session=${accessKey}`
     },
     body: JSON.stringify({
       accessKey: accessKey,
     }),
   });
 
-  const response = await validate.json(); // Parse the JSON response
 
+  const response = await validate.json(); // Parse the JSON response
   // Check if the current route is protected and the accessKey is missing
   if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route)) && response.message == 'False') {
     // Redirect to the login page if not authenticated

@@ -153,6 +153,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   // Handle logout
   const handleLogout = async () => {
     const isLoggedOut = await logoutUser(Cookies.get("id"));
+
     if (isLoggedOut) {
       removeAllCookies();
       setDropdownVisible(false);

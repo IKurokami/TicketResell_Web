@@ -134,6 +134,7 @@ const TicketDetail = () => {
         // Ensure id is defined
         const result = await fetchTicketById(id); // Use id directly
         console.log(result);
+
         result.data.imageUrl = DEFAULT_IMAGE;
         if (result.data.image) {
           const { imageUrl: fetchedImageUrl, error } = await fetchImage(

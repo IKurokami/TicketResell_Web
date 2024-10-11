@@ -155,7 +155,7 @@ namespace TicketResell.Services.Services
 
             return ResponseModel.Success($"Successfully calculated cart total for user: {userId}", total);
         }
-        
+
         public async Task<ResponseModel> GetCartItems(string userId)
         {
             var cart = await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId);
@@ -167,7 +167,7 @@ namespace TicketResell.Services.Services
             var cartItems = _mapper.Map<IEnumerable<OrderDetailDto>>(cart.OrderDetails);
             return ResponseModel.Success($"Successfully retrieved cart items for user: {userId}", cartItems);
         }
-        
+
         public async Task<ResponseModel> CreateOrderFromSelectedItems(string userId, List<string> selectedTicketIds)
         {
             var cart = await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId);
@@ -206,7 +206,7 @@ namespace TicketResell.Services.Services
             var orderDto = _mapper.Map<OrderDto>(order);
             return ResponseModel.Success("Order created successfully", orderDto);
         }
-        
+
         public async Task<ResponseModel> Checkout(string userId)
         {
             var cart = await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId);

@@ -19,6 +19,7 @@ namespace Repositories.Repositories
 
         public async Task<Order?> GetCartByUserIdAsync(string userId)
         {
+
             return await _context.Orders
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Ticket)
@@ -58,7 +59,6 @@ namespace Repositories.Repositories
 
             await _context.Orders.AddAsync(newCart);
             await _context.SaveChangesAsync();
-
             return newCart;
         }
 
@@ -79,7 +79,6 @@ namespace Repositories.Repositories
                 item.OrderId = cart.OrderId;
                 cart.OrderDetails.Add(item);
             }
-
             await _context.SaveChangesAsync();
         }
 
