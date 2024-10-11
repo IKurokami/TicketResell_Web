@@ -2,15 +2,15 @@ namespace TicketResell.Repositories.Helper;
 
 public static class RequestHelper
 {
-    public static string isAuthenticatedKey = "isAuthenticated";
-    public static string userIdKey = "userId";
-    public static string accessKeyKey = "accessKey";
-
+    private const string IsAuthenticatedKey = "isAuthenticated";
+    private const string UserIdKey = "userId";
+    private const string AccessKeyKey = "accessKey";
+    
     public static bool GetIsAuthenticated(this HttpContext? context)
     {
         if (context is not null)
         {
-            var isAuthenticated = context.Session.GetString(isAuthenticatedKey);
+            var isAuthenticated = context.Session.GetString(IsAuthenticatedKey);
 
             if (!string.IsNullOrEmpty(isAuthenticated))
             {
@@ -21,11 +21,27 @@ public static class RequestHelper
         return false;
     }
 
+    public static bool IsUserIdAuthenticated(this HttpContext? context, string? userId)
+    {
+        if (context is null) return false;
+
+        if (string.IsNullOrEmpty(userId)) return false;
+
+        var isAuthenticated = context.Session.GetString(IsAuthenticatedKey);
+
+        if (string.IsNullOrEmpty(isAuthenticated)) return false;
+
+        var contextUserId = context.GetUserId();
+        if (string.IsNullOrEmpty(contextUserId)) return false;
+        
+        return string.Equals(contextUserId, userId) && bool.Parse(isAuthenticated);
+    }
+
     public static string GetUserId(this HttpContext? context)
     {
         if (context is not null)
         {
-            var userId = context.Session.GetString(userIdKey);
+            var userId = context.Session.GetString(UserIdKey);
 
             if (!string.IsNullOrEmpty(userId))
             {
@@ -40,7 +56,7 @@ public static class RequestHelper
     {
         if (context is not null)
         {
-            var accessKey = context.Session.GetString(accessKeyKey);
+            var accessKey = context.Session.GetString(AccessKeyKey);
 
             if (!string.IsNullOrEmpty(accessKey))
             {
@@ -56,15 +72,15 @@ public static class RequestHelper
         var result = new RequestAuthenData();
         if (context is not null)
         {
-            var isAuthenticated = context.Session.GetString(isAuthenticatedKey);
+            var isAuthenticated = context.Session.GetString(IsAuthenticatedKey);
 
             if (!string.IsNullOrEmpty(isAuthenticated))
             {
                 result.IsAuthenticated = bool.Parse(isAuthenticated);
             }
 
-            result.UserId = context.Session.GetString(userIdKey) ?? string.Empty;
-            result.AccessKey = context.Session.GetString(accessKeyKey) ?? string.Empty;
+            result.UserId = context.Session.GetString(UserIdKey) ?? string.Empty;
+            result.AccessKey = context.Session.GetString(AccessKeyKey) ?? string.Empty;
         }
 
         return result;
@@ -74,7 +90,7 @@ public static class RequestHelper
     {
         if (context is not null)
         {
-            context.Session.SetString(isAuthenticatedKey, value.ToString());
+            context.Session.SetString(IsAuthenticatedKey, value.ToString());
         }
     }
 
@@ -84,11 +100,11 @@ public static class RequestHelper
         {
             if (value != string.Empty)
             {
-                context.Session.SetString(userIdKey, value);
+                context.Session.SetString(UserIdKey, value);
             }
             else
             {
-                context.Session.Remove(userIdKey);
+                context.Session.Remove(UserIdKey);
             }
         }
     }
@@ -99,11 +115,11 @@ public static class RequestHelper
         {
             if (value != string.Empty)
             {
-                context.Session.SetString(accessKeyKey, value);
+                context.Session.SetString(AccessKeyKey, value);
             }
             else
             {
-                context.Session.Remove(accessKeyKey);
+                context.Session.Remove(AccessKeyKey);
             }
         }
     }

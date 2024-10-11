@@ -41,6 +41,8 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.setItem("searchData", searchTerm);
+    router.push("/search");
     console.log("Tìm kiếm:", searchTerm);
   };
 
@@ -151,15 +153,15 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   // Handle logout
   const handleLogout = async () => {
     const isLoggedOut = await logoutUser(Cookies.get("id"));
+
     if (isLoggedOut) {
       removeAllCookies();
       setDropdownVisible(false);
       setIsLoggedIn(false);
-      router.push("/login"); // Redirect to login after successful logout
+      router.push("/login"); 
     } else {
       console.log("Failed to log out. Please try again.");
       // Nếu không hợp lệ, chuyển đến trang login
-      router.push("/login");
     }
   };
 
@@ -249,9 +251,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
       <div className="user-section">
         {!isLoggedIn && (
-          // <Link href="/login" onClick={handleSignInClick} className="sign-in-btn">
-          //   Sign in
-          // </Link>
+         
           <button onClick={handleSignInClick} className="sign-in-btn">
             Sign in
           </button>

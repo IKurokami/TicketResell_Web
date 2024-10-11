@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // For Next.js 13+
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import "@/Css/Login.css"; // Import your CSS file
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 interface TabProps {
   isActive: boolean;
@@ -54,7 +54,6 @@ const Login: React.FC = () => {
   const router = useRouter(); // Initialize router
   const [rememberMe, setRememberMe] = useState(false);
 
-
   const handleSignIn = async () => {
     if (!email || !password) {
       setError("Please fill in all fields.");
@@ -66,7 +65,7 @@ const Login: React.FC = () => {
         "http://localhost:5296/api/Authentication/login",
         {
           method: "POST",
-          credentials: 'include',
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -83,16 +82,14 @@ const Login: React.FC = () => {
         console.error("Login error:", result);
         setError(result.message || "Invalid email or password.");
       } else {
-        console.log( result.message);
-        console.log(result);
         if (rememberMe) {
           Cookies.set("id", result.data.user.userId, { expires: 7 }); // Save user ID for 7 days
           Cookies.set("accessKey", result.data.accessKey, { expires: 7 }); // Save accessKey for 7 days
         } else {
           Cookies.set("id", result.data.user.userId); // Save session cookies (will be removed on browser close)
-          Cookies.set("accessKey", result.data.accessKey); 
+          Cookies.set("accessKey", result.data.accessKey);
         }
-        if(Cookies){
+        if (Cookies) {
           console.log("cookie saved");
         }
         router.push("/");
@@ -102,8 +99,6 @@ const Login: React.FC = () => {
       setError("An error occurred. Please try again later.");
     }
   };
-
-  
 
   // Simulate a sign-in process
   // Replace with actual sign-in logic
@@ -156,8 +151,6 @@ const Login: React.FC = () => {
     }
   };
 
-
-  
   return (
     <div className="container">
       <div className="form-container">
@@ -199,7 +192,12 @@ const Login: React.FC = () => {
 
               <div className="flex-row">
                 <label>
-                  <input type="checkbox" checked={rememberMe}  onChange={(e) => setRememberMe(e.target.checked)}/> Remember me
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />{" "}
+                  Remember me
                 </label>
                 <a href="#">Forgot password?</a>
               </div>

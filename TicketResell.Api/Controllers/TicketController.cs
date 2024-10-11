@@ -1,7 +1,7 @@
 using Repositories.Core.Dtos.Ticket;
-using Microsoft.AspNetCore.Mvc;
-using TicketResell.Services.Services;
+using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Tickets;
+using TicketResell.Repositories.Core.Dtos.Ticket;
 
 namespace TicketResell.Repositories.Controllers
 {
@@ -20,9 +20,22 @@ namespace TicketResell.Repositories.Controllers
         [Route("create")]
         public async Task<IActionResult> CreateTicket([FromBody] TicketCreateDto dto)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to create a ticket"));
+
             var response = await _ticketService.CreateTicketAsync(dto);
             return ResponseParser.Result(response);
         }
+
+        [HttpGet]
+        [Route("checkexist/{id}")]
+
+        public async Task<IActionResult> CheckExistTicket(string id)
+        {
+            var response = await _ticketService.CheckExistId(id);
+            return ResponseParser.Result(response);
+        }
+
 
         [HttpGet]
         [Route("read")]
@@ -31,6 +44,15 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketsAsync();
             return ResponseParser.Result(response);
         }
+
+        [HttpGet]
+        [Route("readbySellerId/{id}")]
+        public async Task<IActionResult> GetTicketBySellerId(string id)
+        {
+            var response = await _ticketService.GetTicketBySellerId(id);
+            return ResponseParser.Result(response);
+        }
+
 
         [HttpGet]
         [Route("gettop/{amount:int}")]
@@ -44,9 +66,33 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> GetQrImage(string ticketId)
         {
             var response = await _ticketService.GetQrImageAsBase64Async(ticketId);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPost("getticketsbytimerange")]
+        public async Task<IActionResult> GetTicketsStartingWithinTimeRange([FromBody] TicketTimeRangeRequestDto request)
+        {
+            if (request.TicketAmount <= 0)
+            {
+                return ResponseParser.Result(ResponseModel.BadRequest("Ticket amount must be greater than 0"));
+            }
+
+            if (request.TimeRange <= TimeSpan.Zero)
+            {
+                return ResponseParser.Result(ResponseModel.BadRequest("Time range must be greater than 0"));
+            }
+
+            var response = await _ticketService.GetTicketsStartingWithinTimeRangeAsync(request.TicketAmount, request.TimeRange);
+            return ResponseParser.Result(response);
+        }
+
+
+        [HttpGet("getbycategory")]
+        public async Task<IActionResult> GetTicketsByCategoryAndDate(TicketCategoryRequestDto dto)
+        {
+            var response = await _ticketService.GetTicketsByCategoryAndDateAsync(dto.CategoryName, dto.Amount);
 
             return ResponseParser.Result(response);
-
         }
 
         [HttpPost("getrange")]
@@ -102,17 +148,32 @@ namespace TicketResell.Repositories.Controllers
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketUpdateDto dto)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
+
             var response = await _ticketService.UpdateTicketAsync(id, dto);
             return ResponseParser.Result(response);
-
         }
 
         [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteTicket(string id)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
+
             var response = await _ticketService.DeleteTicketAsync(id);
             return ResponseParser.Result(response);
         }
+
+        [HttpGet]
+        [Route("count/{id}")]
+        public async Task<IActionResult> GetTicketRemaining(string id)
+        {
+            var response = await _ticketService.GetTicketRemainingAsync(id);
+            return ResponseParser.Result(response);
+        }
+
+
     }
 }

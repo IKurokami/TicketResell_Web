@@ -89,6 +89,7 @@
 
 .category-card img {
   object-fit: cover;
+  object-position: center;
   width: 20vw;
   height: 20vw;
   min-width: 300px;

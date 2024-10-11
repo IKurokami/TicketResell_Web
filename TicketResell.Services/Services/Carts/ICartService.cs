@@ -12,4 +12,5 @@ public interface ICartService
     Task<ResponseModel> ClearCart(string userId);
     Task<ResponseModel> GetCartTotal(string userId);
     Task<ResponseModel> CreateOrderFromSelectedItems(string userId, List<string> selectedTicketIds);
+    Task<ResponseModel> Checkout(string userId);
 }

@@ -9,6 +9,9 @@ export const useScroll = () => {
   };
 
   useEffect(() => {
+    // Set the initial scroll state
+    handleScroll(); // This will set the initial state based on the current scroll position
+
     window.addEventListener("scroll", handleScroll, true);
     return () => {
       window.removeEventListener("scroll", handleScroll, true);

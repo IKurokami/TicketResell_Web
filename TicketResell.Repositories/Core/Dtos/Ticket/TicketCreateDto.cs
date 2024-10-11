@@ -18,5 +18,9 @@ public class TicketCreateDto
 
     public string? Image { get; set; }
 
+    public string? Qrcode { get; set; }
+
+    public string? Description { get; set; }
+    
     public List<string> CategoriesId { get; set; }
 }
