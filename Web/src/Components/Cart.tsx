@@ -3,6 +3,9 @@ import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
 import { BuildingBankRegular } from "@fluentui/react-icons";
 import Cookies from "js-cookie";
+import { CheckCircle } from "lucide-react";
+import { fetchImage } from "@/models/FetchImage";
+
 export interface CartItem {
   orderDetailId: string;
   orderId: string;
@@ -18,7 +21,7 @@ export interface CartItem {
 
 interface CartItemWithSelection extends CartItem {
   isSelected: boolean;
-  image: string;
+  imageUrl: string;
 }
 
 const MyCart: React.FC = () => {
@@ -36,21 +39,53 @@ const MyCart: React.FC = () => {
           router.push("/login");
           return;
         }
-        // Get the user ID from cookies
+
         const response = await fetch(
-          `http://localhost:5296/api/cart/items/${id}`
+          `http://localhost:5296/api/cart/items/${id}`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
+
         const data = await response.json();
-        const itemsWithSelection = data.data.map((item: CartItem) => ({
-          ...item,
-          image: item.ticket.imageUrl,
-          isSelected: false,
-        }));
+
+        const itemsWithSelection = await Promise.all(
+          data.data.map(async (item: { ticketId: string }) => {
+            let image =
+              "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"; // default image
+
+            if (item.ticketId) {
+              const { imageUrl: fetchedImageUrl, error } = await fetchImage(
+                item.ticketId
+              );
+
+              if (fetchedImageUrl) {
+                image = fetchedImageUrl;
+              } else {
+                console.error(
+                  `Error fetching image for ticket ${item.ticketId}: ${error}`
+                );
+              }
+            }
+
+            return {
+              ...item,
+              imageUrl: image,
+              isSelected: false,
+            };
+          })
+        );
+
         setItems(itemsWithSelection);
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
     };
+
     fetchCartItems();
   }, []);
 
@@ -112,6 +147,7 @@ const MyCart: React.FC = () => {
       await fetch(
         `http://localhost:5296/api/cart/remove/${userId}/${ticketId}`,
         {
+          credentials: "include",
           method: "DELETE",
         }
       );
@@ -144,224 +180,194 @@ const MyCart: React.FC = () => {
   };
 
   return (
-    <div className="mt-24 pb-32 px-4 sm:px-6 lg:px-16 shadow rounded">
-      <div className="mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 flex flex-col lg:flex-row">
+    <div className="mt-24 w-full-screen rounded">
+      <div className="mx-auto bg-white rounded-t-xl overflow-hidden">
+        <div className="p-6 flex flex-col lg:flex-row relative">
           {/* Left Column: Tickets Table */}
-          <div className="w-full lg:w-2/3 lg:pr-6 mb-6 lg:mb-0">
-            <h2
-              className="text-4xl font-semibold text-gray-800 mb-8 tracking-wider"
-              style={{ fontFamily: "serif" }}
-            >
-              🛒 Payment Cart
+          <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
+            <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
+              Shopping Cart
             </h2>
-            <div
-              className="overflow-x-auto rounded border bg-gray-50 relative"
-              style={{
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                backgroundSize: "cover",
-                border: "2px solid #2b2b2b",
-                borderRadius: "10px",
-              }}
-            >
-              <table className="w-full text-lg text-black">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3">
-                      No
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Ticket Name
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Amount
-                    </th>
-                    <th scope="col" className="px-6 py-3 hidden sm:table-cell">
-                      Date
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Price
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Select
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Remove
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-300">
-                  {items.map((item, index) => (
-                    <tr
-                      key={item.orderDetailId}
-                      className="hover:bg-gray-100 transition-all duration-200 ease-in-out"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className="block text-gray-900">{index + 1}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center">
-                          <img
-                            src={item.image}
-                            alt={item.ticket.name}
-                            className="w-64 h-24 rounded mr-1"
-                            style={{ border: "2px solid #2b2b2b" }}
-                          />
-                          <span className="text-gray-900 text-lg">
-                            {item.ticket.name}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center space-x-3">
-                          <button
-                            onClick={() =>
-                              handleQuantityChange(item.orderDetailId, false)
-                            }
-                            className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </button>
-                          <span className="font-medium text-gray-900">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleQuantityChange(item.orderDetailId, true)
-                            }
-                            className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                      <td className="hidden sm:table-cell px-6 py-4 text-center text-gray-600">
-                        {new Date(item.ticket.startDate).toLocaleString(
-                          "en-GB",
-                          {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                            hour12: false,
-                          }
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-center text-gray-700">
-                        € {item.price.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <label className="inline-flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={item.isSelected}
-                            onChange={() => handleSelect(item.orderDetailId)}
-                            className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out"
-                          />
-                        </label>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button
-                          onClick={() => handleRemoveItem(item.ticketId)}
-                          className="font-medium text-red-600 hover:text-red-900"
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="hidden sm:grid sm:grid-cols-6 gap-4 mb-4 text-sm font-medium text-gray-500 sticky top-16 bg-white z-10 py-2">
+              <div className="col-span-3">Product</div>
+              <div>Price</div>
+              <div>Quantity</div>
+              <div>Total</div>
             </div>
+            {items.map((item) => (
+              <div
+                key={item.orderDetailId}
+                className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-6 sm:gap-4 sm:items-center relative"
+              >
+                {/* Delete button positioned absolutely at top right with label */}
+                <div className="absolute bottom-2 right-2 mr-1 group">
+                  <button
+                    onClick={() => handleRemoveItem(item.ticketId)}
+                    className="rounded-full flex items-center justify-center focus-within:outline-red-500"
+                    aria-label="Delete item"
+                  >
+                    <svg
+                      width="34"
+                      height="34"
+                      viewBox="0 0 34 34"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle
+                        className="fill-red-50 transition-all duration-500 group-hover:fill-red-400"
+                        cx="17"
+                        cy="17"
+                        r="17"
+                        fill=""
+                      />
+                      <path
+                        className="stroke-red-500 transition-all duration-500 group-hover:stroke-white"
+                        d="M14.1673 13.5997V12.5923C14.1673 11.8968 14.7311 11.333 15.4266 11.333H18.5747C19.2702 11.333 19.834 11.8968 19.834 12.5923V13.5997M19.834 13.5997C19.834 13.5997 14.6534 13.5997 11.334 13.5997C6.90804 13.5998 27.0933 13.5998 22.6673 13.5997C21.5608 13.5997 19.834 13.5997 19.834 13.5997ZM12.4673 13.5997H21.534V18.8886C21.534 20.6695 21.534 21.5599 20.9807 22.1131C20.4275 22.6664 19.5371 22.6664 17.7562 22.6664H16.2451C14.4642 22.6664 13.5738 22.6664 13.0206 22.1131C12.4673 21.5599 12.4673 20.6695 12.4673 18.8886V13.5997Z"
+                        stroke="#EF4444"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="flex items-center col-span-3 mb-4 sm:mb-0">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.ticket.name}
+                    className="w-64 h-32 object-cover rounded mr-4"
+                  />
+                  <div>
+                    <h3 className="font-medium text-gray-900">
+                      {item.ticket.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {new Date(item.ticket.startDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="mb-2 sm:mb-0">
+                  <span className="sm:hidden font-medium mr-2">Price:</span>€
+                  {item.price.toFixed(2)}
+                </div>
+                <div className="flex items-center mb-2 sm:mb-0">
+                  <span className="sm:hidden font-medium mr-2">Quantity:</span>
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(item.orderDetailId, false)
+                    }
+                    className="text-gray-500 hover:text-gray-600"
+                  >
+                    -
+                  </button>
+                  <span className="mx-2">{item.quantity}</span>
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(item.orderDetailId, true)
+                    }
+                    className="text-gray-500 hover:text-gray-600"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="mb-2 sm:mb-0">
+                  <span className="sm:hidden font-medium mr-2">Total:</span>€
+                  {(item.price * item.quantity).toFixed(2)}
+                </div>
+
+                <div className="absolute top-2 right-2 mr-1 group">
+                  <label className="inline-flex items-center cursor-pointer">
+                    <span className="mr-2 text-gray-700">Select</span>{" "}
+                    {/* Always visible label on the left */}
+                    <input
+                      type="checkbox"
+                      checked={item.isSelected}
+                      onChange={() => handleSelect(item.orderDetailId)}
+                      className="hidden"
+                    />
+                    <span
+                      className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ease-in-out ${
+                        item.isSelected
+                          ? "bg-green-500 border-green-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {item.isSelected && (
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  </label>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Right Column: Payment Method and Summary */}
-          <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6">
-              Summary
-            </h3>
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Selected Items</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {selectedItems.length}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Subtotal</span>
-                <span className="text-sm font-medium text-gray-900">
-                  € {totalItemsPrice.toFixed(2)}
-                </span>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-600 mb-3">Payment Method:</p>
-                <div className="grid grid-cols-2 gap-4">
-                  {paymentMethods.map((method) => (
-                    <div
-                      key={method.id}
-                      className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
-                        selectedPayment === method.id
-                          ? "bg-blue-100 border border-blue-500"
-                          : "bg-gray-100 hover:bg-gray-200"
-                      }`}
-                      onClick={() => handleSelectPayment(method.id)}
-                    >
-                      {method.icon ? (
-                        <method.icon className="text-3xl mb-2 text-gray-700" />
-                      ) : (
-                        <img
-                          src={method.imageUrl}
-                          alt={method.name}
-                          className="w-12 h-12 mb-2"
-                        />
-                      )}
-                      <span className="text-xs text-gray-700">
-                        {method.name}
-                      </span>
-                    </div>
-                  ))}
+          <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky top-24 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            <div className="sticky top-0 bg-white z-10 py-4">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+                Summary
+              </h3>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Selected Items</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {selectedItems.length}
+                  </span>
                 </div>
-              </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Subtotal</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    € {totalItemsPrice.toFixed(2)}
+                  </span>
+                </div>
 
-              <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-                <span className="text-lg font-semibold text-gray-800">
-                  Total Price
-                </span>
-                <span className="text-lg font-semibold text-blue-600">
-                  € {totalPrice.toFixed(2)}
-                </span>
-              </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-3">Payment Method:</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {paymentMethods.map((method) => (
+                      <div
+                        key={method.id}
+                        className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
+                          selectedPayment === method.id
+                            ? "bg-blue-100 border border-green-500"
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }`}
+                        onClick={() => handleSelectPayment(method.id)}
+                      >
+                        {method.icon ? (
+                          <method.icon className="text-3xl mb-2 text-gray-700" />
+                        ) : (
+                          <img
+                            src={method.imageUrl}
+                            alt={method.name}
+                            className="w-12 h-12 mb-2"
+                          />
+                        )}
+                        <span className="text-xs text-gray-700">
+                          {method.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-              <button
-                className="w-full bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
-                onClick={handleCheckout}
-              >
-                Checkout
-              </button>
+                <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+                  <span className="text-lg font-semibold text-gray-800">
+                    Total Price
+                  </span>
+                  <span className="text-lg font-semibold text-green-600">
+                    € {totalPrice.toFixed(2)}
+                  </span>
+                </div>
+
+                <button
+                  className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition duration-300 mt-4"
+                  onClick={handleCheckout}
+                >
+                  Checkout
+                </button>
+              </div>
             </div>
           </div>
         </div>

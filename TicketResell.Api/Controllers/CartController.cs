@@ -1,4 +1,5 @@
 using TicketResell.Repositories.Core.Dtos.Cart;
+using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Carts;
 
 namespace Api.Controllers
@@ -17,49 +18,70 @@ namespace Api.Controllers
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetCart(string userId)
         {
-            return ResponseParser.Result(await _cartService.GetCart(userId));
+            return !HttpContext.IsUserIdAuthenticated(userId)
+                ? ResponseParser.Result(
+                    ResponseModel.Unauthorized("You are not authorized to get this cart"))
+                : ResponseParser.Result(await _cartService.GetCart(userId));
         }
 
         [HttpGet("items/{userId}")]
         public async Task<IActionResult> GetCartItems(string userId)
         {
-            return ResponseParser.Result(await _cartService.GetCartItems(userId));
+            return !HttpContext.IsUserIdAuthenticated(userId)
+                ? ResponseParser.Result(
+                    ResponseModel.Unauthorized("You are not authorized to get this cart item"))
+                : ResponseParser.Result(await _cartService.GetCartItems(userId));
         }
 
         [HttpPost("add")]
         public async Task<IActionResult> AddToCart([FromBody] CartItemDto cartItem)
         {
-            return ResponseParser.Result(await _cartService.AddToCart(cartItem));
+            return !HttpContext.IsUserIdAuthenticated(cartItem.UserId)
+                ? ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to add item to this cart"))
+                : ResponseParser.Result(await _cartService.AddToCart(cartItem));
         }
 
         [HttpPut("update")]
         public async Task<IActionResult> UpdateCartItem([FromBody] CartItemDto cartItem)
         {
-            return ResponseParser.Result(await _cartService.UpdateCartItem(cartItem));
+            return !HttpContext.IsUserIdAuthenticated(cartItem.UserId)
+                ? ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to update this cart"))
+                : ResponseParser.Result(await _cartService.UpdateCartItem(cartItem));
         }
-        
+
         [HttpDelete("remove/{userId}/{ticketId}")]
         public async Task<IActionResult> RemoveFromCart(string userId, string ticketId)
         {
-            return ResponseParser.Result(await _cartService.RemoveFromCart(userId, ticketId));
+            return !HttpContext.IsUserIdAuthenticated(userId)
+                ? ResponseParser.Result(
+                    ResponseModel.Unauthorized("You are not authorized to remove item from this cart"))
+                : ResponseParser.Result(await _cartService.RemoveFromCart(userId, ticketId));
         }
 
         [HttpDelete("clear/{userId}")]
         public async Task<IActionResult> ClearCart(string userId)
         {
-            return ResponseParser.Result(await _cartService.ClearCart(userId));
+            return !HttpContext.IsUserIdAuthenticated(userId)
+                ? ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to clear this cart"))
+                : ResponseParser.Result(await _cartService.ClearCart(userId));
         }
 
         [HttpGet("total/{userId}")]
         public async Task<IActionResult> GetCartTotal(string userId)
         {
-            return ResponseParser.Result(await _cartService.GetCartTotal(userId));
+            return !HttpContext.IsUserIdAuthenticated(userId)
+                ? ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to get this cart total"))
+                : ResponseParser.Result(await _cartService.GetCartTotal(userId));
         }
-        
+
         [HttpPost("createOrder")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrderDto)
         {
-            return ResponseParser.Result(await _cartService.CreateOrderFromSelectedItems(createOrderDto.UserId, createOrderDto.SelectedTicketIds));
+            return !HttpContext.IsUserIdAuthenticated(createOrderDto.UserId)
+                ? ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to create this order"))
+                : ResponseParser.Result(
+                    await _cartService.CreateOrderFromSelectedItems(createOrderDto.UserId,
+                        createOrderDto.SelectedTicketIds));
         }
     }
 }

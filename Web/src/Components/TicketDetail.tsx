@@ -96,12 +96,12 @@ const TicketDetail = () => {
   const fetchTicketById = async (id: string | null) => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Ticket/readbyid/${id}`,
-        {
-          method: "GET",
-        }
+        `http://localhost:5296/api/Ticket/readbyid/${id}`
       );
-      return await response.json(); // Parse and return JSON result
+      if (!response.ok) {
+        throw new Error("Failed to fetch ticket details");
+      }
+      return await response.json();
     } catch (error) {
       console.error("Error fetching ticket result:", error);
       return null; // Return null in case of error
@@ -129,7 +129,6 @@ const TicketDetail = () => {
 
   useEffect(() => {
     const loadresult = async () => {
-      console.log("Fetched ID:", id); // Log the ID to check if it's defined
       if (id) {
         // Ensure id is defined
         const result = await fetchTicketById(id); // Use id directly
@@ -187,20 +186,31 @@ const TicketDetail = () => {
 
     getRemainingItems();
 
-    loadresult(); // Call the loadresult function
+    loadresult();
   }, [id]);
 
-  // Render loading or ticket details
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="loader"></div>
+      </div>
+    );
+  }
+
   if (!ticketresult) {
-    return <p>Loading...</p>;
+    return (
+      <p className="text-center text-xl mt-8 text-red-600">
+        Ticket details could not be loaded. Please try again later.
+      </p>
+    );
   }
   console.log(ticketresult.description);
 
   return (
-    <div className="bg-ticket-detail">
-      <main className="container">
-        <div className="row ticket--detail">
-          <div className="col-12 col-lg-5 ticket--intro">
+    <div className="mt-16 bg-gray-50 min-h-screen">
+      <main className="container mx-auto px-6 py-10">
+        <article className="flex flex-col lg:flex-row gap-8 p-6 rounded-lg">
+          <div className="lg:w-5/12">
             <img
               className="rounded ticket--img "
               // src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
@@ -290,7 +300,7 @@ const TicketDetail = () => {
                 </button>
               </div>
             </div>
-            <div className="dropdown">
+            <div className="p-4">
               <Dropdown
                 title={"Review"}
                 content={ticketresult.description}
@@ -299,10 +309,10 @@ const TicketDetail = () => {
               />
             </div>
           </div>
-        </div>
+        </article>
 
-        <div className="ticket--related">
-          <h2 className="ticket--title row justify-content-center">
+        <section className="mt-16">
+          <h2 className="text-3xl font-bold text-center mb-10 text-gray-800">
             Related Tickets
           </h2>
           <div className="col-12 ticket--list justify-content-center">
@@ -371,10 +381,32 @@ const TicketDetail = () => {
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
 };
+
+const RelatedTicketCard = () => (
+  <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105">
+    <img
+      src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
+      className="w-full h-48 object-cover"
+      alt="Related Ticket"
+      loading="lazy"
+    />
+    <div className="p-6">
+      <h5 className="text-xl font-semibold mb-3">Related Ticket</h5>
+      <p className="text-gray-700 font-bold mb-4">100.000 VND</p>
+      <a
+        href="#"
+        className="block text-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+        aria-label="Add related ticket to cart"
+      >
+        Add to cart
+      </a>
+    </div>
+  </div>
+);
 
 export default TicketDetail;
