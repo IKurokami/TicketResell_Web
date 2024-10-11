@@ -1,8 +1,6 @@
-﻿
-using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using TicketResell.Services.Services;
+﻿using AutoMapper;
 using Repositories.Core.Dtos.Role;
+using TicketResell.Repositories.Helper;
 
 namespace Api.Controllers
 {
@@ -10,8 +8,8 @@ namespace Api.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private IRoleService _roleService;
-        private IMapper _mapper { get; }
+        private readonly IRoleService _roleService;
+        private readonly IMapper _mapper;
 
         public RoleController(IServiceProvider serviceProvider, IMapper mapper)
         {
@@ -19,38 +17,56 @@ namespace Api.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost]
-        [Route("create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateRole([FromBody] RoleCreateDto dto)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to create a role"));
+
+            var userId = HttpContext.GetUserId();
+            // Optional: Add role checks if necessary
+            // if (!UserHasPermission(userId, "CreateRole")) return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+
             var response = await _roleService.CreateRoleAsync(dto);
             return ResponseParser.Result(response);
         }
 
-        [HttpGet]
-        [Route("read")]
+        [HttpGet("read")]
         public async Task<IActionResult> ReadRole()
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to read roles"));
+
             var response = await _roleService.GetAllRoleAsync();
             return ResponseParser.Result(response);
-
         }
 
-        [HttpPut]
-        [Route("update/{roleId}")]
+        [HttpPut("update/{roleId}")]
         public async Task<IActionResult> UpdateRole(string roleId, [FromBody] RoleUpdateDto dto)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update roles"));
+
+            var userId = HttpContext.GetUserId();
+            // Optional: Add role checks if necessary
+            // if (!UserHasPermission(userId, "UpdateRole")) return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+
             var response = await _roleService.UpdateRoleAsync(roleId, dto);
             return ResponseParser.Result(response);
         }
 
-        [HttpDelete]
-        [Route("delete/{roleId}")]
-        public async Task<IActionResult> DeleteSellConfig(string roleId)
+        [HttpDelete("delete/{roleId}")]
+        public async Task<IActionResult> DeleteRole(string roleId)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete roles"));
+
+            var userId = HttpContext.GetUserId();
+            // Optional: Add role checks if necessary
+            // if (!UserHasPermission(userId, "DeleteRole")) return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+
             var response = await _roleService.DeleteRoleAsync(roleId);
             return ResponseParser.Result(response);
         }
-
     }
 }

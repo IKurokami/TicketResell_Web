@@ -47,5 +47,10 @@ namespace TicketResell.Services.Services
         {
             return new ResponseModel(401, "Unauthorized", message, data);
         }
+        
+        public static ResponseModel Forbidden(string message, object? data = null)
+        {
+            return new ResponseModel(403, "Forbidden", message, data);
+        }
     }
 }

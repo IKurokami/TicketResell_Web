@@ -2,69 +2,44 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { fetchTickets, getCategoryNames } from "../models/TicketFetch";
-import Link from "next/link";
 import TicketGrid from "./TicketGrid";
 
 const Search: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState(1000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [activeTab, setActiveTab] = useState("search");
-  const [searchTerm, setSearchTerm] = useState("");
-
   const [tickets, setTickets] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 9;
-  useEffect(() => {
-    let searchData = localStorage.getItem("searchData");
-    if (searchData) setSearchTerm(searchData);
+  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
 
+  useEffect(() => {
     const loadTickets = async () => {
       const fetchedTickets = await fetchTickets();
       setTickets(fetchedTickets);
       setFilteredTickets(fetchedTickets);
 
-      // Extract unique categories from all tickets
       const allCategories = fetchedTickets.flatMap((ticket) =>
         ticket.categories.map((category) => category.name)
       );
       const uniqueCategories = Array.from(new Set(allCategories));
       setCategories(uniqueCategories);
     };
+
+    let searchData = localStorage.getItem("searchData");
+    if (searchData) setSearchTerm(searchData);
     loadTickets();
   }, []);
 
-  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const handlePriceRangeChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = Number(event.target.value);
-    setPriceRange(value);
-  };
-
-  const handleGenreChange = (genre: string) => {
-    setSelectedGenres((prevGenres) =>
-      prevGenres.includes(genre)
-        ? prevGenres.filter((g) => g !== genre)
-        : [...prevGenres, genre]
-    );
-  };
-
-  const handleLocationChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setSelectedLocation(event.target.value);
-  };
+  useEffect(() => {
+    localStorage.setItem("searchData", searchTerm);
+    filterTickets();
+    setCurrentPage(1);
+  }, [searchTerm, priceRange, selectedGenres, selectedLocation, tickets]);
 
   const filterTickets = () => {
     let filtered = tickets;
@@ -94,11 +69,19 @@ const Search: React.FC = () => {
     setFilteredTickets(filtered);
   };
 
-  useEffect(() => {
-    localStorage.setItem("searchData", searchTerm);
-    filterTickets();
-    setCurrentPage(1);
-  }, [searchTerm, priceRange, selectedGenres, selectedLocation, tickets]);
+  const handleGenreChange = (genre: string) => {
+    setSelectedGenres((prevGenres) =>
+      prevGenres.includes(genre)
+        ? prevGenres.filter((g) => g !== genre)
+        : [...prevGenres, genre]
+    );
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const paginatedTickets = filteredTickets.slice(
     (currentPage - 1) * itemsPerPage,
@@ -120,7 +103,7 @@ const Search: React.FC = () => {
         <button
           key="first"
           onClick={() => handlePageChange(1)}
-          className="w-10 h-10 mx-1 rounded-full shadow-md transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+          className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
         >
           1
         </button>
@@ -139,7 +122,7 @@ const Search: React.FC = () => {
         <button
           key={i}
           onClick={() => handlePageChange(i)}
-          className={`w-10 h-10 mx-1 rounded-full shadow-md transition-colors duration-200 ${
+          className={`w-10 h-10 mx-1 rounded-full transition-colors duration-200 ${
             currentPage === i
               ? "bg-blue-500 text-white"
               : "bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
@@ -162,7 +145,7 @@ const Search: React.FC = () => {
         <button
           key="last"
           onClick={() => handlePageChange(totalPages)}
-          className="w-10 h-10 mx-1 rounded-full shadow-md transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+          className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
         >
           {totalPages}
         </button>
@@ -173,127 +156,101 @@ const Search: React.FC = () => {
   };
 
   return (
-    <div className="mt-24 min-h-screen p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Left Sidebar */}
-          <div className="w-full md:w-1/4">
-            <div className="bg-transparent rounded-2xl border-r overflow-hidden">
-              <div className="p-4">
-                <h2 className="text-xl font-semibold mb-4">Filters</h2>
-
-                {/* Genre Filter */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-2">Genres</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((genre) => (
-                      <button
-                        key={genre}
-                        onClick={() => handleGenreChange(genre)}
-                        className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                          selectedGenres.includes(genre)
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        }`}
-                      >
-                        {genre}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Filter */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-2">
-                    Price Range: ${priceRange}
-                  </h3>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1000"
-                    value={priceRange}
-                    onChange={handlePriceRangeChange}
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Location Filter */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Location</h3>
-                  <select
-                    value={selectedLocation}
-                    onChange={handleLocationChange}
-                    className="w-full border-gray-300 rounded-lg shadow-sm p-2"
-                  >
-                    <option value="">All Locations</option>
-                    {Array.from(
-                      new Set(tickets.map((ticket) => ticket.location))
-                    ).map((location) => (
-                      <option key={location} value={location}>
-                        {location}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
+    <div className="relative mx-auto flex h-full w-full flex-col lg:flex-row mt-24">
+      {/* Left Sidebar */}
+      <div className="relative w-full bg-surface px-10 py-48 lg:mt-24 lg:w-1/2 lg:rounded-br-lg lg:rounded-tr-lg lg:py-32 xl:w-1/3 2xl:w-1/4">
+        <div
+          className="h-fit min-w-52 text-xs text-muted-foreground lg:mb-0"
+          style={{ position: "sticky", top: "120px" }}
+        >
+          {/* Search Bar */}
+          <div className="mt-10 flex w-full items-center overflow-hidden rounded-full border border-black bg-black/10 p-2 dark:border-muted dark:bg-muted/50">
+            <FaSearch className="mx-4 size-6 text-black dark:text-white" />
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full border-none bg-transparent text-black focus:border-none focus:outline-none focus:ring-0 dark:text-white"
+            />
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Search Bar */}
-            <div className="mb-6">
-              <div className="bg-transparent rounded-2xl border-r overflow-hidden">
-                <div className="p-4">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search for event tickets..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full py-3 px-4 pr-10 rounded-full border-r focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
-                    <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                      <FaSearch size={20} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Genre Filter */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {categories.map((genre) => (
+              <button
+                key={genre}
+                onClick={() => handleGenreChange(genre)}
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-12 py-4 !h-fit !min-w-24 !rounded-full !py-2 px-5 ${
+                  selectedGenres.includes(genre)
+                    ? "bg-black text-white dark:bg-white dark:text-black"
+                    : ""
+                }`}
+              >
+                {genre}
+              </button>
+            ))}
+          </div>
 
-            {/*Ticket Grid*/}
-            <TicketGrid paginatedTickets={paginatedTickets} />
+          {/* Price Filter */}
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">
+              Price Range: ${priceRange}
+            </h3>
+            <input
+              type="range"
+              min="0"
+              max="1000"
+              value={priceRange}
+              onChange={(e) => setPriceRange(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-8">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  &lt;
-                </button>
-                {renderPaginationButtons()}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="w-10 h-10 mx-1 rounded-full shadow-md transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  &gt;
-                </button>
-              </div>
-            )}
+          {/* Location Filter */}
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">Location</h3>
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="w-full border-gray-300 rounded-lg shadow-sm p-2"
+            >
+              <option value="">All Locations</option>
+              {Array.from(
+                new Set(tickets.map((ticket) => ticket.location))
+              ).map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
+      </div>
+      {/* Main Content */}
+      <div className="w-full px-5">
+        <TicketGrid paginatedTickets={paginatedTickets} />
 
-        {/* Promotional Banner */}
-        <div className="relative bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg shadow-md p-6 text-white mt-8">
-          <div>
-            <h2 className="text-2xl font-bold mb-2">Exclusive Deals!</h2>
-            <p>Get the best deals on top events. Limited time only.</p>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              &lt;
+            </button>
+            {renderPaginationButtons()}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              &gt;
+            </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

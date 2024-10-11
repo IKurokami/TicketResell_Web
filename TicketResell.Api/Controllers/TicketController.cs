@@ -1,6 +1,5 @@
 using Repositories.Core.Dtos.Ticket;
-using Microsoft.AspNetCore.Mvc;
-using TicketResell.Services.Services;
+using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Tickets;
 
 namespace TicketResell.Repositories.Controllers
@@ -20,6 +19,9 @@ namespace TicketResell.Repositories.Controllers
         [Route("create")]
         public async Task<IActionResult> CreateTicket([FromBody] TicketCreateDto dto)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to create a ticket"));
+
             var response = await _ticketService.CreateTicketAsync(dto);
             return ResponseParser.Result(response);
         }
@@ -44,9 +46,7 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> GetQrImage(string ticketId)
         {
             var response = await _ticketService.GetQrImageAsBase64Async(ticketId);
-
             return ResponseParser.Result(response);
-
         }
 
         [HttpPost("getrange")]
@@ -102,15 +102,20 @@ namespace TicketResell.Repositories.Controllers
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketUpdateDto dto)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
+
             var response = await _ticketService.UpdateTicketAsync(id, dto);
             return ResponseParser.Result(response);
-
         }
 
         [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteTicket(string id)
         {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
+
             var response = await _ticketService.DeleteTicketAsync(id);
             return ResponseParser.Result(response);
         }
