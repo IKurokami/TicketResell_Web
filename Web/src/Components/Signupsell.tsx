@@ -67,7 +67,7 @@ const ProfileForm: React.FC = () => {
       <div className="profile-container">
         <div className="profile-header">
           <h1>
-            Ticket<span>Resell</span>
+            Ticket<span className="resell-sign-up">Resell</span>
           </h1>
         </div>
 

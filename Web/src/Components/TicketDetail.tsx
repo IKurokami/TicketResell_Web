@@ -4,6 +4,10 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTag } from "@fortawesome/free-solid-svg-icons";
+
+import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { Button } from "react-bootstrap";
 import Dropdown from "./Dropdown";
 
 type Ticket = {
@@ -21,7 +25,8 @@ const TicketDetail = () => {
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
-  const fetchTicketById = async (id: string | string[]) => {
+  // Function to fetch ticket by ID
+  const fetchTicketById = async (id: string) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Ticket/readbyid/${id}`
