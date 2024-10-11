@@ -1,9 +1,10 @@
 "use client";
 import Cookies from "js-cookie";
-import "../Css/TicketDetail.css";
-// import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+import "@/Css/TicketDetail.css";
+import DOMPurify from "dompurify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faCalendar,
   faCartShopping,
   faCashRegister,
   faLocationDot,
@@ -47,7 +48,7 @@ const DEFAULT_IMAGE =
 
 const TicketDetail = () => {
   const [ticketresult, setTicketresult] = useState<Ticket | null>(null);
-  const { id } = useParams<{ id: string }>(); // Get the ID from the URL parameters
+  const { id } = useParams<{ id: string }>();
   const [remainingItems, setRemainingItems] = useState(0);
   const router = useRouter();
   const userId = Cookies.get("id");
@@ -59,9 +60,9 @@ const TicketDetail = () => {
       console.error("id.fullTicketId is undefined or null");
     }
   };
-  const DEFAULT_IMAGE =
-    "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
+
   const [count, setCount] = useState(1);
+
   const fetchRemainingByID = async (id: string | null) => {
     try {
       const response = await fetch(
@@ -70,12 +71,13 @@ const TicketDetail = () => {
           method: "GET",
         }
       );
-      return await response.json(); // Parse and return JSON result
+      return await response.json();
     } catch (error) {
       console.error("Error fetching ticket result:", error);
-      return null; // Return null in case of error
+      return null;
     }
   };
+
   const checkRemainingItem = async () => {
     const idOrigin = splitId();
     if (idOrigin) {
@@ -84,41 +86,41 @@ const TicketDetail = () => {
     }
     return 0;
   };
+
   const increase = () => {
     setCount(count + 1);
   };
+
   const decrease = () => {
     if (count > 1) {
       setCount(count - 1);
     }
   };
-  // Function to fetch ticket by ID
+
   const fetchTicketById = async (id: string | null) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Ticket/readbyid/${id}`
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch ticket details");
-      }
       return await response.json();
     } catch (error) {
       console.error("Error fetching ticket result:", error);
-      return null; // Return null in case of error
+      return null;
     }
   };
-  const { addItem } = addToCart(); // Destructure the addItem function from the hook
+
+  const { addItem } = addToCart();
 
   const handleAddToCart = async () => {
-    const check = await checkLogin(); // Check if user is logged in
+    const check = await checkLogin();
     if (check == "False") {
-      router.push("/login"); // Redirect to login page if not logged in
+      router.push("/login");
     } else {
       const result = await addItem({
         UserId: userId,
         TicketId: id,
         Quantity: count,
-      }); // Correctly passing the argument
+      });
       if (result) {
         console.log("Item added to cart successfully:", result);
       } else {
@@ -129,9 +131,9 @@ const TicketDetail = () => {
 
   useEffect(() => {
     const loadresult = async () => {
+      console.log("Fetched ID:", id);
       if (id) {
-        // Ensure id is defined
-        const result = await fetchTicketById(id); // Use id directly
+        const result = await fetchTicketById(id);
         console.log(result);
 
         result.data.imageUrl = DEFAULT_IMAGE;
@@ -158,8 +160,8 @@ const TicketDetail = () => {
               year: "numeric",
               day: "2-digit",
               month: "2-digit",
-              hour12: true, // Use true if you want AM/PM format
-              timeZone: "Asia/Ho_Chi_Minh", // Vietnam timezone
+              hour12: true,
+              timeZone: "Asia/Ho_Chi_Minh",
             }),
             author: result.data.seller,
             location: `Event at ${result.data.location}`,
@@ -171,31 +173,20 @@ const TicketDetail = () => {
               description: category.description,
             })),
           };
-          console.log(result);
-          console.log(result.data.description);
-          setTicketresult(ticketDetail); // Set the fetched ticket result
+          setTicketresult(ticketDetail);
         }
       } else {
         console.error("ID is undefined or invalid.");
       }
     };
     const getRemainingItems = async () => {
-      const remaining = await checkRemainingItem(); // Call your function
+      const remaining = await checkRemainingItem();
       setRemainingItems(parseInt(remaining, 10));
     };
 
     getRemainingItems();
-
     loadresult();
   }, [id]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="loader"></div>
-      </div>
-    );
-  }
 
   if (!ticketresult) {
     return (
@@ -207,13 +198,12 @@ const TicketDetail = () => {
   console.log(ticketresult.description);
 
   return (
-    <div className="mt-16 bg-gray-50 min-h-screen">
-      <main className="container mx-auto px-6 py-10">
-        <article className="flex flex-col lg:flex-row gap-8 p-6 rounded-lg">
-          <div className="lg:w-5/12">
+    <div className="bg-white min-h-screen pt-20">
+      <main className="containerr mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row justify-center items-start gap-8">
+          <div className="w-full lg:w-5/12 space-y-4">
             <img
-              className="rounded ticket--img "
-              // src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
+              className="rounded-lg ticket--img"
               src={ticketresult.imageUrl}
               alt={ticketresult.name}
             />
@@ -226,76 +216,73 @@ const TicketDetail = () => {
               />
             </div>
           </div>
-          <div className="ticket--info col-12 col-lg-6">
-            <h2 className="ticket--name">{ticketresult.name}</h2>
-            <p>Remaining {remainingItems} item</p>
-            <p className="ticket--seller">
-              <span>
-                <FontAwesomeIcon className="Tag" icon={faUser} />
-              </span>
-              Sold by {}
+          <div className="w-full lg:w-6/12 space-y-4">
+            <h2 className="text-3xl font-bold">{ticketresult.name}</h2>
+            <p className="text-gray-600">Remaining {remainingItems} item</p>
+            <p className="flex items-center space-x-2">
+              <FontAwesomeIcon icon={faUser} className="text-gray-500" />
+              <span>Sold by</span>
               <Link
-                className="seller--link"
+                className="text-600 hover:underline seller--link"
                 href={`/sellshop/${ticketresult.author.userId}`}
               >
                 <strong>{ticketresult.author.fullname}</strong>
               </Link>
             </p>
-            <p>
+            <p className="flex items-center space-x-2">
+              <FontAwesomeIcon icon={faLocationDot} className="text-gray-500" />
               <span>
-                <FontAwesomeIcon className="Tag" icon={faLocationDot} />
+                Location: <strong>{ticketresult.location}</strong>
               </span>
-              Location: {ticketresult.location}{" "}
-            </p>{" "}
-            <ul className="tag--list">
+            </p>
+            <ul className="flex flex-wrap gap-2 tag--list">
               {ticketresult.categories.map((category) => (
-                <li className="tag--list--item" key={category.categoryId}>
-                  <strong># {category.name}</strong>
+                <li
+                  key={category.categoryId}
+                  className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                >
+                  {category.name}
                 </li>
               ))}
             </ul>
-            {/* Replace with actual sold result if available */}
-            <div className="tag--list row">
-              <p className="">Date: {ticketresult.startDate}</p>
-            </div>
-            <div className="ticket--price--block rounded">
-              <p className="ticket--price">
-                <FontAwesomeIcon className="Tag" icon={faTag} />{" "}
-                <strong>{ticketresult.cost} VND</strong> {/* Format cost */}
+            <p className="text-gray-600 flex items-center space-x-2">
+              <FontAwesomeIcon icon={faCalendar} className="text-gray-500" />
+              <span>
+                Date: <strong>{ticketresult.startDate}</strong>
+              </span>
+            </p>
+            <div className="bg-white rounded-lg p-4 shadow-md ticket--price--block">
+              <p className="flex items-center space-x-2 text-3xl font-bold text-green-600 ">
+                <FontAwesomeIcon icon={faTag} />
+                <span>{ticketresult.cost} VND</span>
               </p>
-              <div className="ticket--number mb-3 ml-5">
+              <div className="flex items-center space-x-4 my-4">
                 <button
-                  className="number--btn"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-l"
                   onClick={decrease}
                   disabled={count <= 1}
                 >
                   <FontAwesomeIcon icon={faMinus} />
                 </button>
-                <div className="number--block">{count}</div>
+                <span className="text-xl font-semibold py-2 px-4">{count}</span>
                 <button
-                  className="number--btn"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-r"
                   onClick={increase}
                   disabled={count >= remainingItems}
                 >
                   <FontAwesomeIcon icon={faPlus} />
                 </button>
               </div>
-              <div className="cta">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <button
-                  className="ticket--btn ticket--detail--btn"
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
                   onClick={handleAddToCart}
                 >
-                  <FontAwesomeIcon
-                    className="cart--icon"
-                    icon={faCartShopping}
-                  />
+                  <FontAwesomeIcon icon={faCartShopping} className="mr-2" />
                   Add to cart
                 </button>
-                <button className="ticket--btn ticket--detail--btn">
-                  <FontAwesomeIcon
-                    className="cart--icon"
-                    icon={faCashRegister}
-                  />
+                <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center justify-center">
+                  <FontAwesomeIcon icon={faCashRegister} className="mr-2" />
                   Buy Now
                 </button>
               </div>
@@ -309,79 +296,250 @@ const TicketDetail = () => {
               />
             </div>
           </div>
-        </article>
-
-        <section className="mt-16">
-          <h2 className="text-3xl font-bold text-center mb-10 text-gray-800">
-            Related Tickets
-          </h2>
-          <div className="col-12 ticket--list justify-content-center">
-            <div className="card col-12 col-lg-3 ticket--item shadow">
-              <img
-                src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
-                className="card-img-top ticket--img"
-                alt="..."
-              />
-              <div className="card-body">
-                <h5 className="card-title">Card title</h5>
-                <p className="card-text">
-                  <strong>100.000 VND</strong>
-                </p>
-                <a href="#" className="ticket--btn ticket--related--btn">
-                  Add to cart
-                </a>
+        </div>
+        <div className="ticket--related shadow-md ">
+          <h2 className="text-2xl font-bold text-center ">Related Tickets</h2>
+          <div className=" movie-grid mx-auto px-10 py-8">
+            <div className="movie-card-wrapper cursor-pointer no-underline visited:no-underline">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
+                <div className="relative">
+                  <img
+                    src={ticketresult.imageUrl}
+                    alt={ticketresult.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
+                    ${ticketresult.cost}
+                  </div>
+                </div>
+                <div className="p-4 flex-grow">
+                  <h3 className="text-lg font-semibold mb-1 text-gray-900">
+                    {ticketresult.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {ticketresult.location}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(ticketresult.startDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </p>
+                  <ul className="flex flex-wrap gap-2 tag--list">
+                    {ticketresult.categories.map((category) => (
+                      <li
+                        key={category.categoryId}
+                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="card-content mt-2">
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(ticketresult.description),
+                      }}
+                      className="text-sm text-gray-700"
+                    ></p>
+                  </div>
+                </div>
+                {/* ... (card footer remains the same) */}
               </div>
             </div>
-            <div className="card col-12 col-lg-3 ticket--item shadow">
-              <img
-                src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
-                className="card-img-top ticket--img"
-                alt="..."
-              />
-              <div className="card-body">
-                <h5 className="card-title text-dark">Card title</h5>
-                <p className="card-text text-dark">
-                  <strong>100.000 VND</strong>
-                </p>
-                <a href="#" className=" ticket--btn ticket--related--btn">
-                  Add to cart
-                </a>
+            <div className="movie-card-wrapper cursor-pointer no-underline visited:no-underline">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
+                <div className="relative">
+                  <img
+                    src={ticketresult.imageUrl}
+                    alt={ticketresult.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
+                    ${ticketresult.cost}
+                  </div>
+                </div>
+                <div className="p-4 flex-grow">
+                  <h3 className="text-lg font-semibold mb-1 text-gray-900">
+                    {ticketresult.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {ticketresult.location}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(ticketresult.startDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </p>
+                  <ul className="flex flex-wrap gap-2 tag--list">
+                    {ticketresult.categories.map((category) => (
+                      <li
+                        key={category.categoryId}
+                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="card-content mt-2">
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(ticketresult.description),
+                      }}
+                      className="text-sm text-gray-700"
+                    ></p>
+                  </div>
+                </div>
+                {/* ... (card footer remains the same) */}
               </div>
             </div>
-            <div className="card col-12 col-lg-3 ticket--item shadow">
-              <img
-                src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
-                className="card-img-top ticket--img"
-                alt="..."
-              />
-              <div className="card-body">
-                <h5 className="card-title text-dark">Card title</h5>
-                <p className="card-text text-dark">
-                  <strong>100.000 VND</strong>
-                </p>
-                <a href="#" className="ticket--btn ticket--related--btn">
-                  Add to cart
-                </a>
+            <div className="movie-card-wrapper cursor-pointer no-underline visited:no-underline">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
+                <div className="relative">
+                  <img
+                    src={ticketresult.imageUrl}
+                    alt={ticketresult.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
+                    ${ticketresult.cost}
+                  </div>
+                </div>
+                <div className="p-4 flex-grow">
+                  <h3 className="text-lg font-semibold mb-1 text-gray-900">
+                    {ticketresult.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {ticketresult.location}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(ticketresult.startDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </p>
+                  <ul className="flex flex-wrap gap-2 tag--list">
+                    {ticketresult.categories.map((category) => (
+                      <li
+                        key={category.categoryId}
+                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="card-content mt-2">
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(ticketresult.description),
+                      }}
+                      className="text-sm text-gray-700"
+                    ></p>
+                  </div>
+                </div>
+                {/* ... (card footer remains the same) */}
               </div>
             </div>
-            <div className="card col-12 col-lg-3 ticket--item shadow">
-              <img
-                src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
-                className="card-img-top ticket--img"
-                alt="..."
-              />
-              <div className="card-body">
-                <h5 className="card-title text-dark">Card title</h5>
-                <p className="card-text text-dark">
-                  <strong>100.000 VND</strong>
-                </p>
-                <a href="#" className="ticket--btn ticket--related--btn">
-                  Add to cart
-                </a>
+            <div className="movie-card-wrapper cursor-pointer no-underline visited:no-underline">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
+                <div className="relative">
+                  <img
+                    src={ticketresult.imageUrl}
+                    alt={ticketresult.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
+                    ${ticketresult.cost}
+                  </div>
+                </div>
+                <div className="p-4 flex-grow">
+                  <h3 className="text-lg font-semibold mb-1 text-gray-900">
+                    {ticketresult.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {ticketresult.location}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(ticketresult.startDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </p>
+                  <ul className="flex flex-wrap gap-2 tag--list">
+                    {ticketresult.categories.map((category) => (
+                      <li
+                        key={category.categoryId}
+                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="card-content mt-2">
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(ticketresult.description),
+                      }}
+                      className="text-sm text-gray-700"
+                    ></p>
+                  </div>
+                </div>
+                {/* ... (card footer remains the same) */}
               </div>
             </div>
           </div>
-        </section>
+        </div>
+        {/* <div className="mt-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-md overflow-hidden"
+              >
+                <img
+                  src="https://th.bing.com/th/id/OIP.dAeG-S5NsD8SSUdIXukSlgHaHd?w=197&h=197&c=7&r=0&o=5&dpr=1.1&pid=1.7"
+                  className="w-full h-90 object-cover"
+                  alt="Related ticket"
+                />
+                <div className="p-4">
+                  <h5 className="text-xl font-semibold mb-2">Card title</h5>
+                  <p className="text-gray-700 font-bold mb-4">100.000 VND</p>
+                  <a
+                    href="#"
+                    className="block text-center bg-green-500 no-underline hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Add to cart
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div> */}
       </main>
     </div>
   );

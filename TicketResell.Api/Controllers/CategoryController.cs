@@ -143,4 +143,5 @@ public class CategoryController : ControllerBase
 
         return ResponseParser.Result(response);
     }
+
 }

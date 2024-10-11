@@ -1,7 +1,6 @@
 
 using Repositories.Core.Dtos.Category;
 using Repositories.Core.Dtos.User;
-using Repositories.Core.Dtos.Category;
 
 namespace Repositories.Core.Dtos.Ticket;
 

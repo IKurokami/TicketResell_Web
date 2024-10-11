@@ -51,6 +51,7 @@ namespace Repositories.Core.AutoMapperConfig
             //Ticket
             CreateMap<TicketCreateDto, Ticket>();
             CreateMap<Ticket, TicketReadDto>();
+            CreateMap<Ticket, TicketReadByCateDto>();
             CreateMap<Ticket, TicketTopDto>();
             CreateMap<TicketUpdateDto, Ticket>();
 
@@ -58,6 +59,7 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<CategoryCreateDto, Category>();
             CreateMap<Category, CategoryReadDto>();
             CreateMap<CategoryUpdateDto, Category>();
+            CreateMap<Category, TicketReadDto>();
 
             //Authentication
             CreateMap<LoginDto, User>();

@@ -18,6 +18,7 @@ const addToCart = () => {
     try {
       const response = await fetch("http://localhost:5296/api/Cart/add", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

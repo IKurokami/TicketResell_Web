@@ -1,7 +1,9 @@
 using AutoMapper;
 using Repositories.Core.Dtos.Category;
+using Repositories.Core.Dtos.Ticket;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
+using System.Net.Sockets;
 using TicketResell.Repositories.UnitOfWork;
 
 namespace TicketResell.Services.Services.Categories;
@@ -80,4 +82,6 @@ public class CategoryService : ICategoryService
         if (saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully deleted Category with id: {id}");
     }
+
+
 }

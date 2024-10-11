@@ -2,6 +2,7 @@ using AutoMapper;
 using Repositories.Core.Dtos.Ticket;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
+using System.Net.Sockets;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Tickets;

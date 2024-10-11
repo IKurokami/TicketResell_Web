@@ -29,14 +29,14 @@ namespace TicketResell.Repositories.Controllers
 
         [HttpGet]
         [Route("checkexist/{id}")]
-        
+
         public async Task<IActionResult> CheckExistTicket(string id)
         {
             var response = await _ticketService.CheckExistId(id);
             return ResponseParser.Result(response);
         }
-        
-        
+
+
         [HttpGet]
         [Route("read")]
         public async Task<IActionResult> GetTicket()
@@ -52,8 +52,8 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketBySellerId(id);
             return ResponseParser.Result(response);
         }
-        
-        
+
+
         [HttpGet]
         [Route("gettop/{amount:int}")]
         public async Task<IActionResult> GetTopTicket(int amount)
@@ -173,5 +173,7 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketRemainingAsync(id);
             return ResponseParser.Result(response);
         }
+
+
     }
 }

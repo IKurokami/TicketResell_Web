@@ -1,10 +1,12 @@
-@import "~bootstrap/dist/css/bootstrap.min.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .bg-ticket-detail {
   background: #ffffff;
 }
-.container {
-  margin-top: 10vh;
-  padding-top: 5vh;
+.containerr {
+  padding-top: 7vh;
   padding-bottom: 5vh;
 }
 .ticket--detail {
@@ -83,12 +85,12 @@
   padding-bottom: 10vh;
 }
 .ticket--related {
-  box-sizing: content-box;
+  margin-top: 90px;
   border-radius: 10px;
 }
 .ticket--img {
   object-fit: cover;
-  height: 40vh;
+  height: 31vw;
   width: 100%;
 }
 
@@ -130,4 +132,13 @@
   border: 1px solid rgba(18 18 18 / 12%);
   border-radius: 5px;
   margin: 0 0.25vw;
+}
+.movie-card:hover {
+  opacity: 1;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-gap: 1vw;
 }

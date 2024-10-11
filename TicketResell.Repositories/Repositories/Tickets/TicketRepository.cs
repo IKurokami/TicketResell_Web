@@ -4,6 +4,7 @@ using Repositories.Core.Entities;
 
 namespace Repositories.Repositories;
 
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TicketResell.Repositories.Logger;
@@ -21,7 +22,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public new async Task<List<Ticket>> GetAllAsync()
     {
-        var tickets = await _context.Tickets.ToListAsync();
+        var tickets = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories).ToListAsync();
         if (tickets == null || tickets.Count == 0)
         {
             throw new KeyNotFoundException("No ticket in database");
@@ -48,7 +49,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<Ticket> GetByIdAsync(string id)
     {
-        var ticket = await _context.Tickets.Include(x => x.Seller).FirstAsync(x => x.TicketId.StartsWith(id));
+        var ticket = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories).FirstAsync(x => x.TicketId.StartsWith(id));
         if (ticket == null)
         {
             throw new KeyNotFoundException("Id is not found");
@@ -106,7 +107,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<List<Ticket>> GetTicketBySellerId(string id)
     {
-        var tickets = await _context.Tickets.Include(x=>x.Seller).Include(x=>x.Categories).Where(x => x.SellerId == id).ToListAsync();
+        var tickets = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories).Where(x => x.SellerId == id).ToListAsync();
         if (tickets == null)
         {
             throw new KeyNotFoundException("Ticket not found");
@@ -216,5 +217,14 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     {
         int count = await _context.Tickets.Where(ticket => ticket.TicketId.StartsWith(ticketId)).CountAsync();
         return count;
+    }
+
+    public async Task<List<Ticket>> GetTicketByCateIdAsync(string[] categoriesId)
+    {
+        var tickets = await _context.Tickets
+    .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category
+    .Include(t => t.Categories) // Include the related categories
+    .ToListAsync();
+        return tickets;
     }
 }

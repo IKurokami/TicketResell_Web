@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "dompurify";
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import useDropdown from "@/Hooks/useDropDown";
@@ -50,12 +51,16 @@ const Dropdown: React.FC<ChildComponentProps> = ({
       {checkDropDown ? (
         isDropdownVisible && (
           <div className="dropdown-content">
-            <p>{content}</p>
+            <div
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+            />
           </div>
         )
       ) : (
         <div className="dropdown-content">
-          <p>{content}</p>
+          <div
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+          />
         </div>
       )}
       <style jsx>{`
