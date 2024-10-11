@@ -1,67 +1,164 @@
+using Repositories.Constants;
+using Repositories.Core.Dtos.User;
+using TicketResell.Repositories.Helper;
+
 namespace Api.Controllers
 {
     [Route("/api/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private IOrderService _orderService;
-        public OrderController(IOrderService orderService)
+        private readonly IOrderService _orderService;
+        private readonly IServiceProvider _serviceProvider;
+
+        public OrderController(IOrderService orderService, IServiceProvider serviceProvider)
         {
             _orderService = orderService;
+            _serviceProvider = serviceProvider;
         }
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
         {
-            return ResponseParser.Result(await _orderService.CreateOrder(dto));
+            var response = ResponseModel.Unauthorized("Cannot create order with unknown user");
+
+            var userId = HttpContext.GetUserId();
+            if (string.IsNullOrEmpty(userId)) return ResponseParser.Result(response);
+
+            if (HttpContext.IsUserIdAuthenticated(dto.BuyerId))
+            {
+                var userService = _serviceProvider.GetRequiredService<IUserService>();
+                var user = await userService.GetUserByIdAsync(userId);
+
+                if (user.Data is UserReadDto userReadDto)
+                {
+                    if (userReadDto.Roles.Any(x => RoleHelper.HasEnoughRoleLevel(x.RoleId, UserRole.Buyer)))
+                    {
+                        return ResponseParser.Result(await _orderService.CreateOrder(dto));
+                    }
+                }
+                else
+                {
+                    response = ResponseModel.NotFound("User not found in server");
+                }
+            }
+            else
+            {
+                response = ResponseModel.Unauthorized("You are not authorized to create an order");
+            }
+
+            return ResponseParser.Result(response);
         }
 
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(string orderId)
         {
-            return ResponseParser.Result(await _orderService.GetOrderById(orderId));
-        }
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view orders"));
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllOrders()
-        {
-            return ResponseParser.Result(await _orderService.GetAllOrders());
-        }
+            var order = await _orderService.GetOrderById(orderId);
 
-        [HttpGet("buyer/{buyerId}")]
-        public async Task<IActionResult> GetOrdersByBuyerId(string buyerId)
-        {
-            return ResponseParser.Result(await _orderService.GetOrdersByBuyerId(buyerId));
-        }
+            if (order.Data is not Order orderDto)
+                return ResponseParser.Result(ResponseModel.Forbidden("Access denied: You cannot access this order"));
 
-        [HttpPost("daterange")]
-        public async Task<IActionResult> GetOrdersByDateRange([FromBody] DateRange dateRange)
-        {
-            return ResponseParser.Result(await _orderService.GetOrdersByDateRange(dateRange));
-        }
-
-        [HttpPost("pricerange")]
-        public async Task<IActionResult> GetOrdersByTotalPriceRange([FromBody] DoubleRange priceDoubleRange)
-        {
-            return ResponseParser.Result(await _orderService.GetOrdersByTotalPriceRange(priceDoubleRange));
+            return ResponseParser.Result(HttpContext.IsUserIdAuthenticated(orderDto.BuyerId)
+                ? order
+                : ResponseModel.Forbidden("Access denied: You cannot access this order"));
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateOrder([FromBody] Order order)
         {
-            return ResponseParser.Result(await _orderService.UpdateOrder(order));
+            var response = ResponseModel.Unauthorized("Cannot update order with unknown user");
+
+            var userId = HttpContext.GetUserId();
+            if (string.IsNullOrEmpty(userId)) return ResponseParser.Result(response);
+
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view orders"));
+
+            var orderData = await _orderService.GetOrderById(order.OrderId);
+            if (orderData.Data is not Order orderDto || orderDto.BuyerId != userId)
+                return ResponseParser.Result(ResponseModel.Forbidden("Access denied: You cannot access this order"));
+
+            var userService = _serviceProvider.GetRequiredService<IUserService>();
+            var user = await userService.GetUserByIdAsync(userId);
+
+            if (user.Data is UserReadDto userReadDto)
+            {
+                if (userReadDto.Roles.Any(x => RoleHelper.HasEnoughRoleLevel(x.RoleId, UserRole.Staff)))
+                {
+                    return ResponseParser.Result(await _orderService.UpdateOrder(order));
+                }
+            }
+            else
+            {
+                response = ResponseModel.NotFound("User not found in server");
+            }
+
+            return ResponseParser.Result(response);
         }
 
         [HttpDelete("{orderId}")]
         public async Task<IActionResult> DeleteOrder(string orderId)
         {
-            return ResponseParser.Result(await _orderService.DeleteOrder(orderId));
+            var response = ResponseModel.Unauthorized("Cannot delete order with unknown user");
+
+            var userId = HttpContext.GetUserId();
+            if (string.IsNullOrEmpty(userId)) return ResponseParser.Result(response);
+
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to delete an order"));
+
+            var orderData = await _orderService.GetOrderById(orderId);
+
+            if (orderData.Data is not Order orderDto || orderDto.BuyerId != userId)
+                return ResponseParser.Result(ResponseModel.Forbidden("Access denied: You cannot delete this order"));
+
+            var userService = _serviceProvider.GetRequiredService<IUserService>();
+            var user = await userService.GetUserByIdAsync(userId);
+
+            if (user.Data is not UserReadDto userReadDto)
+                return ResponseParser.Result(ResponseModel.NotFound("User not found in server"));
+            
+            if (userReadDto.Roles.Any(x => RoleHelper.HasEnoughRoleLevel(x.RoleId, UserRole.Staff)))
+            {
+                return ResponseParser.Result(await _orderService.DeleteOrder(orderId));
+            }
+
+            return ResponseParser.Result(
+                ResponseModel.Forbidden("You don't have permission to delete the order"));
+
         }
+
 
         [HttpGet("totalprice/{orderId}")]
         public async Task<IActionResult> CalculateTotalPriceForOrder(string orderId)
         {
-            return ResponseParser.Result(await _orderService.CalculateTotalPriceForOrder(orderId));
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to view order prices"));
+
+            var userId = HttpContext.GetUserId();
+            var order = await _orderService.GetOrderById(orderId);
+
+            if (order.Data is not Order orderDto || orderDto.BuyerId != userId)
+                return ResponseParser.Result(ResponseModel.Forbidden("Access denied: You cannot access this order"));
+
+            var userService = _serviceProvider.GetRequiredService<IUserService>();
+            var user = await userService.GetUserByIdAsync(userId);
+
+            if (user.Data is not UserReadDto userReadDto)
+                return ResponseParser.Result(ResponseModel.NotFound("User not found in server"));
+            
+            if (userReadDto.Roles.Any(x => RoleHelper.HasEnoughRoleLevel(x.RoleId, UserRole.Buyer)))
+            {
+                return ResponseParser.Result(await _orderService.CalculateTotalPriceForOrder(orderId));
+            }
+
+            return ResponseParser.Result(
+                ResponseModel.Forbidden("You don't have permission to delete the order"));
+
         }
     }
 }

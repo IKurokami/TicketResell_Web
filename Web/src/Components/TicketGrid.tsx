@@ -24,7 +24,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({ paginatedTickets }) => {
                   <div className="relative flex-grow">
                     <img
                       src={
-                        // ticket.imageUrl ||
+                        ticket.imageUrl ||
                         "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"
                       }
                       alt={ticket.name}

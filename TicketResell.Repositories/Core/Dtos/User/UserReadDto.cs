@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Repositories.Core.Dtos.Role;
 
 namespace Repositories.Core.Dtos.User

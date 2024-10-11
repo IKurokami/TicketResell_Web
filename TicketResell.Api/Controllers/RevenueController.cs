@@ -1,83 +1,115 @@
-using Microsoft.AspNetCore.Mvc;
 using Repositories.Core.Dtos.Revenue;
-using TicketResell.Services.Services;
+using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Revenues;
 
 namespace TicketResell.Repositories.Controllers
 {
-    [Route("/api/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class RevenueController : ControllerBase
     {
-        private IRevenueService _revenueService;
+        private readonly IRevenueService _revenueService;
 
         public RevenueController(IServiceProvider serviceProvider)
         {
             _revenueService = serviceProvider.GetRequiredService<IRevenueService>();
         }
 
-        [HttpPost]
-        [Route("create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateRevenue([FromBody] RevenueCreateDto dto)
         {
-            var response = await _revenueService.CreateRevenueAsync(dto);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to create revenue"));
 
+            var userId = HttpContext.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return ResponseParser.Result(ResponseModel.Unauthorized("Cannot create revenue with unknown user"));
+
+            //TODO: Check for authenticated UserId is a Staff or Admin
+
+            // Optional: Add role checks if necessary
+            // if (!UserHasPermission(userId, "CreateRevenue")) return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+
+            var response = await _revenueService.CreateRevenueAsync(dto);
             return ResponseParser.Result(response);
         }
 
-        [HttpGet]
-        [Route("read")]
+        [HttpGet("read")]
         public async Task<IActionResult> GetRevenues()
         {
-            var response = await _revenueService.GetRevenuesAsync();
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view revenues"));
 
+            var response = await _revenueService.GetRevenuesAsync();
             return ResponseParser.Result(response);
         }
 
-        [HttpGet]
-        [Route("readbyid/{id}")]
+        [HttpGet("readbyid/{id}")]
         public async Task<IActionResult> GetRevenuesById(string id)
         {
-            var response = await _revenueService.GetRevenuesByIdAsync(id);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view this revenue"));
 
+            var response = await _revenueService.GetRevenuesByIdAsync(id);
             return ResponseParser.Result(response);
         }
 
-        [HttpGet]
-        [Route("readbysellerid/{id}")]
+        [HttpGet("readbysellerid/{id}")]
         public async Task<IActionResult> GetRevenuesBySellerId(string id)
         {
-            var response = await _revenueService.GetRevenuesBySellerIdAsync(id);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view revenues by seller ID"));
 
+            var userId = HttpContext.GetUserId();
+            //TODO: Check for authenticated UserId is a Seller
+
+            // Optional: You can add logic to check if the user is authorized to view revenues for this seller
+            // if (userId != id && !UserHasPermission(userId, "ViewOtherSellerRevenue")) 
+            //     return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+
+            var response = await _revenueService.GetRevenuesBySellerIdAsync(id);
             return ResponseParser.Result(response);
         }
 
-        [HttpPut]
-        [Route("update/{id}")]
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateRevenue(string id, [FromBody] RevenueUpdateDto dto)
         {
-            var response = await _revenueService.UpdateRevenueAsync(id, dto);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update revenue"));
 
+            var userId = HttpContext.GetUserId();
+            // Optional: Add role checks if necessary
+            // if (!UserHasPermission(userId, "UpdateRevenue")) return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+
+            var response = await _revenueService.UpdateRevenueAsync(id, dto);
             return ResponseParser.Result(response);
         }
 
-
-        [HttpDelete]
-        [Route("delete/{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteRevenues(string id)
         {
-            var response = await _revenueService.DeleteRevenuesAsync(id);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete revenue"));
 
+            var userId = HttpContext.GetUserId();
+            // Optional: Add role checks if necessary
+            // if (!UserHasPermission(userId, "DeleteRevenue")) return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+
+            var response = await _revenueService.DeleteRevenuesAsync(id);
             return ResponseParser.Result(response);
         }
 
-
-        [HttpDelete]
-        [Route("deletebysellerid/{id}")]
+        [HttpDelete("deletebysellerid/{id}")]
         public async Task<IActionResult> DeleteRevenuesBySellerId(string id)
         {
-            var response = await _revenueService.DeleteRevenuesBySellerIdAsync(id);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete revenues by seller ID"));
 
+            var userId = HttpContext.GetUserId();
+            // Optional: Add role checks if necessary
+            // if (!UserHasPermission(userId, "DeleteRevenueBySellerId")) return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+
+            var response = await _revenueService.DeleteRevenuesBySellerIdAsync(id);
             return ResponseParser.Result(response);
         }
     }

@@ -89,9 +89,7 @@ namespace Api.Controllers
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
-            var authenData = HttpContext.GetAuthenData();
-
-            if (!authenData.IsAuthenticated || authenData.UserId != changePasswordDto.UserId)
+            if (!HttpContext.IsUserIdAuthenticated(changePasswordDto.UserId))
             {
                 return ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to change this password"));
             }

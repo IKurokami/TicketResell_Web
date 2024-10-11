@@ -2,14 +2,8 @@ import React, { useState, useEffect } from "react";
 import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import {
-  CreditCardClockRegular,
-  WalletRegular,
-  MoneyRegular,
-  GiftRegular,
-  BuildingBankRegular,
-  PhonePageHeaderRegular,
-} from "@fluentui/react-icons";
+import { CheckCircle } from "lucide-react";
+import { fetchImage } from "@/models/FetchImage";
 
 export interface CartItem {
   orderDetailId: string;
@@ -38,22 +32,59 @@ const MyCart: React.FC = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        // Cookies.get("id") 
-        const id = "USER001"; // Get the user ID from cookies
+        const id = Cookies.get("id");
+
+        if (!id) {
+          router.push("/login");
+          return;
+        }
+
         const response = await fetch(
-          `http://localhost:5296/api/cart/items/${id}`
+          `http://localhost:5296/api/cart/items/${id}`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
+
         const data = await response.json();
-        const itemsWithSelection = data.data.map((item: CartItem) => ({
-          ...item,
-          image: item.ticket.imageUrl,
-          isSelected: false,
-        }));
+
+        const itemsWithSelection = await Promise.all(
+          data.data.map(async (item: { ticketId: string }) => {
+            let image =
+              "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"; // default image
+
+            if (item.ticketId) {
+              const { imageUrl: fetchedImageUrl, error } = await fetchImage(
+                item.ticketId
+              );
+
+              if (fetchedImageUrl) {
+                image = fetchedImageUrl;
+              } else {
+                console.error(
+                  `Error fetching image for ticket ${item.ticketId}: ${error}`
+                );
+              }
+            }
+
+            return {
+              ...item,
+              imageUrl: image,
+              isSelected: false,
+            };
+          })
+        );
+
         setItems(itemsWithSelection);
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
     };
+
     fetchCartItems();
   }, []);
 
@@ -159,42 +190,39 @@ const MyCart: React.FC = () => {
                 key={item.orderDetailId}
                 className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-6 sm:gap-4 sm:items-center relative"
               >
-                {/* Delete button positioned absolutely at top right */}
-                <button
-                  onClick={() => handleRemoveItem(item.ticketId)}
-                  className="absolute top-2 right-2 rounded-full group flex items-center justify-center focus-within:outline-red-500"
-                >
-                  <svg
-                    width="34"
-                    height="34"
-                    viewBox="0 0 34 34"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                {/* Delete button positioned absolutely at top right with label */}
+                <div className="absolute bottom-2 right-2 mr-1 group">
+                  <button
+                    onClick={() => handleRemoveItem(item.ticketId)}
+                    className="rounded-full flex items-center justify-center focus-within:outline-red-500"
+                    aria-label="Delete item"
                   >
-                    <circle
-                      className="fill-red-50 transition-all duration-500 group-hover:fill-red-400"
-                      cx="17"
-                      cy="17"
-                      r="17"
-                      fill=""
-                    />
-                    <path
-                      className="stroke-red-500 transition-all duration-500 group-hover:stroke-white"
-                      d="M14.1673 13.5997V12.5923C14.1673 11.8968 14.7311 11.333 15.4266 11.333H18.5747C19.2702 11.333 19.834 11.8968 19.834 12.5923V13.5997M19.834 13.5997C19.834 13.5997 14.6534 13.5997 11.334 13.5997C6.90804 13.5998 27.0933 13.5998 22.6673 13.5997C21.5608 13.5997 19.834 13.5997 19.834 13.5997ZM12.4673 13.5997H21.534V18.8886C21.534 20.6695 21.534 21.5599 20.9807 22.1131C20.4275 22.6664 19.5371 22.6664 17.7562 22.6664H16.2451C14.4642 22.6664 13.5738 22.6664 13.0206 22.1131C12.4673 21.5599 12.4673 20.6695 12.4673 18.8886V13.5997Z"
-                      stroke="#EF4444"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      width="34"
+                      height="34"
+                      viewBox="0 0 34 34"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle
+                        className="fill-red-50 transition-all duration-500 group-hover:fill-red-400"
+                        cx="17"
+                        cy="17"
+                        r="17"
+                        fill=""
+                      />
+                      <path
+                        className="stroke-red-500 transition-all duration-500 group-hover:stroke-white"
+                        d="M14.1673 13.5997V12.5923C14.1673 11.8968 14.7311 11.333 15.4266 11.333H18.5747C19.2702 11.333 19.834 11.8968 19.834 12.5923V13.5997M19.834 13.5997C19.834 13.5997 14.6534 13.5997 11.334 13.5997C6.90804 13.5998 27.0933 13.5998 22.6673 13.5997C21.5608 13.5997 19.834 13.5997 19.834 13.5997ZM12.4673 13.5997H21.534V18.8886C21.534 20.6695 21.534 21.5599 20.9807 22.1131C20.4275 22.6664 19.5371 22.6664 17.7562 22.6664H16.2451C14.4642 22.6664 13.5738 22.6664 13.0206 22.1131C12.4673 21.5599 12.4673 20.6695 12.4673 18.8886V13.5997Z"
+                        stroke="#EF4444"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
 
                 <div className="flex items-center col-span-3 mb-4 sm:mb-0">
-                  <input
-                    type="checkbox"
-                    checked={item.isSelected}
-                    onChange={() => handleSelect(item.orderDetailId)}
-                    className="mr-4 h-4 w-4 text-blue-600"
-                  />
                   <img
                     src={item.imageUrl}
                     alt={item.ticket.name}
@@ -237,6 +265,30 @@ const MyCart: React.FC = () => {
                   <span className="sm:hidden font-medium mr-2">Total:</span>€
                   {(item.price * item.quantity).toFixed(2)}
                 </div>
+
+                <div className="absolute top-2 right-2 mr-1 group">
+                  <label className="inline-flex items-center cursor-pointer">
+                    <span className="mr-2 text-gray-700">Select</span>{" "}
+                    {/* Always visible label on the left */}
+                    <input
+                      type="checkbox"
+                      checked={item.isSelected}
+                      onChange={() => handleSelect(item.orderDetailId)}
+                      className="hidden"
+                    />
+                    <span
+                      className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ease-in-out ${
+                        item.isSelected
+                          ? "bg-green-500 border-green-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {item.isSelected && (
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  </label>
+                </div>
               </div>
             ))}
           </div>
@@ -269,7 +321,7 @@ const MyCart: React.FC = () => {
                         key={method.id}
                         className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
                           selectedPayment === method.id
-                            ? "bg-blue-100 border border-blue-500"
+                            ? "bg-blue-100 border border-green-500"
                             : "bg-gray-100 hover:bg-gray-200"
                         }`}
                         onClick={() => handleSelectPayment(method.id)}
@@ -295,13 +347,13 @@ const MyCart: React.FC = () => {
                   <span className="text-lg font-semibold text-gray-800">
                     Total Price
                   </span>
-                  <span className="text-lg font-semibold text-blue-600">
+                  <span className="text-lg font-semibold text-green-600">
                     € {totalPrice.toFixed(2)}
                   </span>
                 </div>
 
                 <button
-                  className="w-full bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition duration-300 mt-4"
+                  className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition duration-300 mt-4"
                   onClick={handleCheckout}
                 >
                   Checkout
