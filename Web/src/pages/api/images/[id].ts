@@ -66,8 +66,8 @@ export default async function handler(
                 return res.send(imageCache[id]);
             }
 
-        // Explicitly query by the 'id' field, not _id
-        const imageDoc = await TicketImage.find({ id: id });
+            // Explicitly query by the 'id' field, not _id
+            const imageDoc = await TicketImage.findOne({ id: id });
 
             if (!imageDoc) {
                 console.log('Image not found for ID:', id);
