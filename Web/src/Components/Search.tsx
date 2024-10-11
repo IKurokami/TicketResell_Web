@@ -181,7 +181,7 @@ const Search: React.FC = () => {
               <button
                 key={genre}
                 onClick={() => handleGenreChange(genre)}
-                className={`inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-12 py-4 !h-fit !min-w-24 !rounded-full !py-2 px-5 ${
+                className={`inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-12 py-4 !h-fit !min-w-24 !rounded-full !py-2 px-5 ${
                   selectedGenres.includes(genre)
                     ? "bg-black text-white dark:bg-white dark:text-black"
                     : ""
@@ -233,7 +233,7 @@ const Search: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8 mb-8">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}

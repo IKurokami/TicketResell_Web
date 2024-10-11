@@ -147,6 +147,7 @@ const MyCart: React.FC = () => {
       await fetch(
         `http://localhost:5296/api/cart/remove/${userId}/${ticketId}`,
         {
+          credentials: "include",
           method: "DELETE",
         }
       );
