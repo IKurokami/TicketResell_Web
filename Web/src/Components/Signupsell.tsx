@@ -13,7 +13,6 @@ interface ProfileData {
   birthday: string | null;
 }
 
-
 const ProfileForm: React.FC = () => {
   const [profileData, setProfileData] = useState<ProfileData>({
     gmail: null,
@@ -38,16 +37,20 @@ const ProfileForm: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    const id = Cookies.get('id');
+    const id = Cookies.get("id");
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5296/api/user/updateseller/${id}`, {
-        method: "PUT", // Assuming you're updating the seller, hence using PUT
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(profileData),
-      });
+      const response = await fetch(
+        `http://localhost:5296/api/user/updateseller/${id}`,
+        {
+          method: "PUT",
+          credentials: "include", // Assuming you're updating the seller, hence using PUT
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(profileData),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
