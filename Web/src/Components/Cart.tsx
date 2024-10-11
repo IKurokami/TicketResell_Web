@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { BuildingBankRegular } from "@fluentui/react-icons";
 import Cookies from "js-cookie";
 import { CheckCircle } from "lucide-react";
+import { fetchImage } from "@/models/FetchImage";
+
 export interface CartItem {
   orderDetailId: string;
   orderId: string;
@@ -37,7 +39,7 @@ const MyCart: React.FC = () => {
           router.push("/login");
           return;
         }
-        // Get the user ID from cookies
+
         const response = await fetch(
           `http://localhost:5296/api/cart/items/${id}`,
           {
@@ -48,19 +50,42 @@ const MyCart: React.FC = () => {
             },
           }
         );
+
         const data = await response.json();
-        const itemsWithSelection = data.data.map((item: CartItem) => ({
-          ...item,
-          imageUrl:
-            // item.ticket.imageUrl ??
-            "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg",
-          isSelected: false,
-        }));
+
+        const itemsWithSelection = await Promise.all(
+          data.data.map(async (item: { ticketId: string }) => {
+            let image =
+              "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"; // default image
+
+            if (item.ticketId) {
+              const { imageUrl: fetchedImageUrl, error } = await fetchImage(
+                item.ticketId
+              );
+
+              if (fetchedImageUrl) {
+                image = fetchedImageUrl;
+              } else {
+                console.error(
+                  `Error fetching image for ticket ${item.ticketId}: ${error}`
+                );
+              }
+            }
+
+            return {
+              ...item,
+              imageUrl: image,
+              isSelected: false,
+            };
+          })
+        );
+
         setItems(itemsWithSelection);
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
     };
+
     fetchCartItems();
   }, []);
 
