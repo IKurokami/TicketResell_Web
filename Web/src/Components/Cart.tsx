@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
+import { BuildingBankRegular } from "@fluentui/react-icons";
 import Cookies from "js-cookie";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Calendar } from "lucide-react";
 import { fetchImage } from "@/models/FetchImage";
 
 export interface CartItem {
@@ -20,7 +21,7 @@ export interface CartItem {
 
 interface CartItemWithSelection extends CartItem {
   isSelected: boolean;
-  image: string;
+  imageUrl: string;
 }
 
 const MyCart: React.FC = () => {
@@ -28,7 +29,6 @@ const MyCart: React.FC = () => {
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const router = useRouter();
 
-  // Fetch cart items when component loads
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
@@ -53,11 +53,10 @@ const MyCart: React.FC = () => {
         const data = await response.json();
 
         const itemsWithSelection = await Promise.all(
-          data.data.map(async (item: { ticketId: string }) => {
-            let image =
-              "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"; // default image
+          data.data.map(async (item: CartItem) => {
+            let image = item.ticket.imageUrl; // Use the existing imageUrl
 
-            if (item.ticketId) {
+            if (item.ticketId && !image) {
               const { imageUrl: fetchedImageUrl, error } = await fetchImage(
                 item.ticketId
               );
@@ -88,10 +87,6 @@ const MyCart: React.FC = () => {
     fetchCartItems();
   }, []);
 
-  useEffect(() => {
-    console.log("Cart items updated: ", items);
-  }, [items]);
-
   const paymentMethods = [
     { id: "bank-transfer", name: "Bank Transfer", icon: BuildingBankRegular },
     {
@@ -102,7 +97,6 @@ const MyCart: React.FC = () => {
     },
   ];
 
-  // Filter selected items for checkout
   const selectedItems = items.filter((item) => item.isSelected);
   const totalItemsPrice = selectedItems.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -110,24 +104,20 @@ const MyCart: React.FC = () => {
   );
   const totalPrice = totalItemsPrice > 0 ? totalItemsPrice : 0;
 
-  // Select a cart item
   const handleSelect = (id: string) => {
-    const updatedItems = items.map((item) =>
+    setItems(items.map((item) =>
       item.orderDetailId === id
         ? { ...item, isSelected: !item.isSelected }
         : item
-    );
-    setItems(updatedItems);
+    ));
   };
 
-  // Select payment method
   const handleSelectPayment = (id: string) => {
     setSelectedPayment((prev) => (prev === id ? null : id));
   };
 
-  // Change item quantity
   const handleQuantityChange = (id: string, increment: boolean) => {
-    const updatedItems = items.map((item) => {
+    setItems(items.map((item) => {
       if (item.orderDetailId === id) {
         const newQuantity = increment
           ? item.quantity + 1
@@ -135,26 +125,27 @@ const MyCart: React.FC = () => {
         return { ...item, quantity: newQuantity };
       }
       return item;
-    });
-    setItems(updatedItems);
+    }));
   };
 
-  // Remove item from cart
   const handleRemoveItem = async (ticketId: string) => {
-    // Cookies.get("id") 
-    const userId = "USER001"; // Assuming you have the userId in cookies
+    const userId = Cookies.get("id");
     try {
-      await fetch(`http://localhost:5296/api/cart/remove/${userId}/${ticketId}`, {
-        method: "DELETE",
-      });
-      // Remove the item locally from the state after successful deletion
-      setItems((prevItems) => prevItems.filter((item) => item.ticketId !== ticketId));
+      await fetch(
+        `http://localhost:5296/api/cart/remove/${userId}/${ticketId}`,
+        {
+          credentials: "include",
+          method: "DELETE",
+        }
+      );
+      setItems((prevItems) =>
+        prevItems.filter((item) => item.ticketId !== ticketId)
+      );
     } catch (error) {
       console.error("Error removing item from cart:", error);
     }
   };
 
-  // Proceed to checkout
   const handleCheckout = () => {
     const productsForCheckout = items.filter((item) => item.isSelected);
     if (productsForCheckout.length === 0) {
@@ -165,7 +156,10 @@ const MyCart: React.FC = () => {
       alert("Please select a payment method.");
       return;
     }
-    localStorage.setItem("selectedTickets", JSON.stringify(productsForCheckout));
+    localStorage.setItem(
+      "selectedTickets",
+      JSON.stringify(productsForCheckout)
+    );
     localStorage.setItem("paymentMethod", selectedPayment);
     router.push("/checkout");
   };
@@ -174,7 +168,6 @@ const MyCart: React.FC = () => {
     <div className="mt-24 w-full-screen rounded">
       <div className="mx-auto bg-white rounded-t-xl overflow-hidden">
         <div className="p-6 flex flex-col lg:flex-row relative">
-          {/* Left Column: Tickets Table */}
           <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
             <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
               Shopping Cart
@@ -190,7 +183,6 @@ const MyCart: React.FC = () => {
                 key={item.orderDetailId}
                 className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-6 sm:gap-4 sm:items-center relative"
               >
-                {/* Delete button positioned absolutely at top right with label */}
                 <div className="absolute bottom-2 right-2 mr-1 group">
                   <button
                     onClick={() => handleRemoveItem(item.ticketId)}
@@ -268,8 +260,7 @@ const MyCart: React.FC = () => {
 
                 <div className="absolute top-2 right-2 mr-1 group">
                   <label className="inline-flex items-center cursor-pointer">
-                    <span className="mr-2 text-gray-700">Select</span>{" "}
-                    {/* Always visible label on the left */}
+                    <span className="mr-2 text-gray-700">Select</span>
                     <input
                       type="checkbox"
                       checked={item.isSelected}
@@ -293,7 +284,6 @@ const MyCart: React.FC = () => {
             ))}
           </div>
 
-          {/* Right Column: Payment Method and Summary */}
           <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky top-24 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
             <div className="sticky top-0 bg-white z-10 py-4">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6">
