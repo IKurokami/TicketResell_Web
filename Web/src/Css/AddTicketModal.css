@@ -1,58 +1,164 @@
-.modal-style {
-    max-height: 80vh;
+.modal-contentt {
     width: 100%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
+    max-height: 80%;
+    padding: 20vh;
     background-color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
-    border-radius: 8px;
-    overflow: hidden; 
 }
 
-.close-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #666;
-    cursor: pointer;
-  }
-  
-.modal-title{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 16px;
-    border-bottom: 1px solid #e5e5e5;
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .modal-content {
+        margin-top: 5vh; /* Adjusted margin for smaller screens */
+        padding: 10vh; /* Less padding on smaller screens */
+    }
 }
 
-.modal-content {
-    max-height: 70vh; 
-    overflow-y: auto; 
-    padding: 20px; 
+.custom-text-field {
+    background-color: #F5F7FC;
 }
 
-
-.button-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 16px;
+.upload-container {
+    padding: 10px;
 }
 
-.button-container{
-    display: flex;
-    justify-content: space-between;
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .upload-container {
+        padding: 20px; /* Less padding on smaller screens */
+    }
+}
+
+.upload-box {
     margin-top: 2vh;
+    border: 2px dashed #ccc;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    min-height: 200px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: border-color 0.3s;
+    cursor: pointer;
 }
 
-.title-ticket{
-    display: block;
-    margin-top: 4vh;
-    font-size: 5 rem;
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .upload-box {
+        padding: 20px; /* Less padding on smaller screens */
+        min-height: 150px; /* Adjust min-height for smaller screens */
+    }
 }
 
-.image-preview{
-    margin-left: 2vw;
+.button-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .button-container {
+        flex-direction: column; /* Stack buttons on smaller screens */
+        align-items: stretch; /* Ensure buttons stretch to full width */
+    }
+}
+
+.large-box {
+    min-height: 300px;
+    background-color: #F5F7FC;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .large-box {
+        min-height: 200px; /* Adjust min-height for smaller screens */
+    }
+}
+
+.small-box {
+    min-height: 300px;
+    background-color: #F5F7FC;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .small-box {
+        min-height: 100px; /* Adjust min-height for smaller screens */
+    }
+}
+
+.upload-box:hover {
+    border-color: #1976d2;
+}
+
+.image-preview,
+.qr-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .image-preview img,
+    .qr-preview img {
+        width: 30vw; /* Increase width for smaller screens */
+        height: 15vh; /* Adjust height for smaller screens */
+    }
+}
+
+.image-preview img,
+.qr-preview img {
+    width: 100%;
+    height: 30vh;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    object-fit: content;
+}
+
+.text-center {
+    font-size: 16px;
+    color: #888;
+    margin-top: 15px;
+}
+
+/* Add these new styles to ensure no overlays appear on the images */
+.image-preview::before,
+.image-preview::after,
+.qr-preview::before,
+.qr-preview::after {
+    display: none;
+}
+
+.upload-box input[type="file"] {
+    display: none;
+}
+
+.wrapper-class {
+    padding: 1rem;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .wrapper-class {
+        padding: 0.5rem; /* Less padding on smaller screens */
+    }
+}
+
+.editor-class {
+    background-color: white;
+    padding: 1rem;
+    min-height: 200px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .editor-class {
+        min-height: 150px; 
+    }
+}
+
+.toolbar-class {
+    border-bottom: 1px solid #E0E0E0;
 }
