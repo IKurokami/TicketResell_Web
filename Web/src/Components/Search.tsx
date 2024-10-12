@@ -1,10 +1,13 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaSearch } from "react-icons/fa";
+import { MdFilterList, MdKeyboardArrowDown } from "react-icons/md";
 import { fetchTickets, getCategoryNames } from "../models/TicketFetch";
 import TicketGrid from "./TicketGrid";
+import TabNavigation from "./TabNavigation";
 
 const Search: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State to manage sidebar visibility
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState(1000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
@@ -13,9 +16,19 @@ const Search: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOption, setSortOption] = useState("Price low to high");
 
   const itemsPerPage = 9;
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const sortOptions = [
+    "Price low to high",
+    "Price high to low",
+    "Recently listed",
+  ];
 
   useEffect(() => {
     const loadTickets = async () => {
@@ -33,13 +46,55 @@ const Search: React.FC = () => {
     let searchData = localStorage.getItem("searchData");
     if (searchData) setSearchTerm(searchData);
     loadTickets();
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
+
+  const handleSortOptionClick = (option: string) => {
+    setSortOption(option);
+    setIsDropdownOpen(false);
+  };
+
+  const sortTickets = (tickets: any[]) => {
+    switch (sortOption) {
+      case "Price low to high":
+        return tickets.sort((a, b) => a.cost - b.cost);
+      case "Price high to low":
+        return tickets.sort((a, b) => b.cost - a.cost);
+      case "Recently listed":
+        return tickets.sort(
+          (a, b) =>
+            new Date(b.listedDate).getTime() - new Date(a.listedDate).getTime()
+        );
+      default:
+        return tickets;
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem("searchData", searchTerm);
     filterTickets();
     setCurrentPage(1);
-  }, [searchTerm, priceRange, selectedGenres, selectedLocation, tickets]);
+  }, [
+    searchTerm,
+    priceRange,
+    selectedGenres,
+    selectedLocation,
+    tickets,
+    sortOption,
+  ]);
 
   const filterTickets = () => {
     let filtered = tickets;
@@ -66,7 +121,8 @@ const Search: React.FC = () => {
           ticket.location.toLowerCase() === selectedLocation.toLowerCase()
       );
     }
-    setFilteredTickets(filtered);
+
+    setFilteredTickets(sortTickets(filtered)); // Sort tickets after filtering
   };
 
   const handleGenreChange = (genre: string) => {
@@ -155,36 +211,103 @@ const Search: React.FC = () => {
     return pageButtons;
   };
 
-  return (
-    <div className="relative mx-auto flex h-full w-full flex-col lg:flex-row mt-24">
-      {/* Left Sidebar */}
-      <div className="relative w-full bg-surface px-10 py-48 lg:mt-24 lg:w-1/2 lg:rounded-br-lg lg:rounded-tr-lg lg:py-32 xl:w-1/3 2xl:w-1/4">
-        <div
-          className="h-fit min-w-52 text-xs text-muted-foreground lg:mb-0"
-          style={{ position: "sticky", top: "120px" }}
-        >
-          {/* Search Bar */}
-          <div className="mt-10 flex w-full items-center overflow-hidden rounded-full border border-black bg-black/10 p-2 dark:border-muted dark:bg-muted/50">
-            <FaSearch className="mx-4 size-6 text-black dark:text-white" />
-            <input
-              type="text"
-              placeholder="Search events..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border-none bg-transparent text-black focus:border-none focus:outline-none focus:ring-0 dark:text-white"
-            />
-          </div>
+  const [activeTab, setActiveTab] = useState("upcoming");
 
+  const tabs = [
+    { id: "upcoming", label: "Active & upcoming", href: "/drops?tab=upcoming" },
+    { id: "past", label: "Past", href: "/drops?tab=past" },
+  ];
+
+  return (
+    <div className="relative lg:mx-24 md:mx-auto pt-24">
+      {/* Header with TabNavigation, Search Bar, and Sort */}
+      <div className="flex flex-col md:flex-row items-center justify-between p-4">
+        {/* Left: Filter button and Live results */}
+        <div className="flex items-center space-x-4 mb-2">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)} // Toggle sidebar visibility
+            className="inline-flex items-center justify-center whitespace-nowrap transition duration-200 text-md leading-md font-semibold bg-component-gray-1 text-primary hover:bg-component-gray-2 gap-3 rounded-xl py-3 px-3 disabled:pointer-events-none disabled:opacity-40"
+            aria-expanded={isSidebarOpen}
+            aria-label="Filter"
+          >
+            <MdFilterList
+              className="text-primary"
+              style={{ fontSize: "24px" }}
+            />
+          </button>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span className="text-md leading-md font-semibold">Live</span>
+            <span className="text-md leading-md text-gray-600">
+              {filteredTickets.length} results
+            </span>
+          </div>
+        </div>
+
+        {/* Center: Search input */}
+        <div className="relative flex-grow mx-2 max-w-xl mb-2">
+          <input
+            type="text"
+            placeholder="Search by name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="h-12 w-full pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+          />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        </div>
+
+        {/* Right: Sort dropdown */}
+        <div className="flex items-center space-x-4 mb-2">
+          {/* Tab Navigation */}
+          <TabNavigation />
+          <div className="relative mr-3" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="h-12 w-64 pl-4 pr-10 rounded-xl border border-gray-300 bg-white hover:border-gray-400 focus:outline-none flex items-center justify-between transition duration-200"
+            >
+              <span className="w-64">{sortOption}</span>
+              <MdKeyboardArrowDown className="text-2xl text-gray-600" />
+            </button>
+            {isDropdownOpen && (
+              <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-xl shadow-lg">
+                <ul className="py-1">
+                  {sortOptions.map((option) => (
+                    <li key={option}>
+                      <button
+                        onClick={() => handleSortOptionClick(option)}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:outline-none transition duration-200"
+                      >
+                        {option}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex flex-col lg:flex-row">
+        {/* Left Sidebar */}
+        <div
+          className={`w-full lg:w-1/4 p-4 bg-white shadow-md transition-transform ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
           {/* Genre Filter */}
+          <h3 className="font-semibold text-lg mb-2">Genres</h3>
           <div className="mt-4 flex flex-wrap gap-2">
             {categories.map((genre) => (
               <button
                 key={genre}
-                onClick={() => handleGenreChange(genre)}
-                className={`inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-12 py-4 !h-fit !min-w-24 !rounded-full !py-2 px-5 ${
+                onClick={() => handleGenreChange(genre)} // Assuming this function is defined
+                className={`px-3 py-1 rounded-full text-sm ${
                   selectedGenres.includes(genre)
-                    ? "bg-black text-white dark:bg-white dark:text-black"
-                    : ""
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
                 {genre}
@@ -226,31 +349,33 @@ const Search: React.FC = () => {
             </select>
           </div>
         </div>
-      </div>
-      {/* Main Content */}
-      <div className="w-full px-5">
-        <TicketGrid paginatedTickets={paginatedTickets} />
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8 mb-8">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              &lt;
-            </button>
-            {renderPaginationButtons()}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              &gt;
-            </button>
-          </div>
-        )}
+        {/* Main Content Area */}
+        <div className="w-full lg:w-3/4 p-4">
+          <TicketGrid paginatedTickets={paginatedTickets} />{" "}
+          {/* Assuming this component is defined */}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="w-10 h-10 mx-1 rounded-full bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50"
+              >
+                &lt;
+              </button>
+              {renderPaginationButtons()}{" "}
+              {/* Assuming this function is defined */}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="w-10 h-10 mx-1 rounded-full bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50"
+              >
+                &gt;
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
