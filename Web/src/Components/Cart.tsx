@@ -54,7 +54,7 @@ const MyCart: React.FC = () => {
 
         const itemsWithSelection = await Promise.all(
           data.data.map(async (item: CartItem) => {
-            let image = item.ticket.imageUrl; // Use the existing imageUrl
+            let image = item.ticket.imageUrl;
 
             if (item.ticketId && !image) {
               const { imageUrl: fetchedImageUrl, error } = await fetchImage(
