@@ -2,6 +2,7 @@ using AutoMapper;
 using Repositories.Core.Dtos.Ticket;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
+using System.Net.Sockets;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Tickets;
@@ -22,19 +23,44 @@ namespace TicketResell.Services.Services
             _validatorFactory = validatorFactory;
         }
 
+        public async Task<ResponseModel> GetTicketRemainingAsync(string id)
+        {
+            var count = await _unitOfWork.TicketRepository.GetTicketRemainingAsync(id);
+            return ResponseModel.Success($"Successfully get Category of Ticket with id: {id}", count);
+        }
+
+        public async Task<ResponseModel> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsStartingWithinTimeRangeAsync(ticketAmount, timeRange);
+
+            if (tickets == null || !tickets.Any())
+            {
+                return ResponseModel.NotFound("No tickets found in the specified time range.");
+            }
+
+            var ticketDtos = _mapper.Map<List<TicketTopDto>>(tickets);
+            return ResponseModel.Success($"Successfully retrieved {tickets.Count} tickets", ticketDtos);
+        }
+
+        public async Task<ResponseModel> GetTicketsByCategoryAndDateAsync(string categoryName, int amount)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsByCategoryAndDateAsync(categoryName, amount);
+            if (tickets.Count == 0)
+            {
+                return ResponseModel.NotFound($"Not found any ticket with category {categoryName}");
+            }
+            return ResponseModel.Success("Successfully get ticket by category name", tickets);
+        }
 
         public async Task<ResponseModel> CreateTicketAsync(TicketCreateDto dto, bool saveAll)
         {
             var validatorTicket = _validatorFactory.GetValidator<Ticket>();
             Ticket newTicket = _mapper.Map<Ticket>(dto);
             var validationResult = validatorTicket.Validate(newTicket);
-
-
             if (!validationResult.IsValid)
             {
                 return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
             }
-
 
             if (dto.CategoriesId.Count > 0)
             {
@@ -44,65 +70,16 @@ namespace TicketResell.Services.Services
 
                     if (category == null)
                     {
-                        return ResponseModel.BadRequest("Category not found");
+                        return ResponseModel.BadRequest("category not found");
                     }
                 }
             }
 
-
-            byte[] qrCodeBytes = null;
-            if (dto.Qrcode != null)
-            {
-                try
-                {
-                    var mimeTypes = new Dictionary<string, string>
-                    {
-                        { "data:image/png;base64,", ".png" },
-                        { "data:image/jpeg;base64,", ".jpg" },
-                        { "data:image/webp;base64,", ".webp" }
-                    };
-                    
-                    foreach (var mimeType in mimeTypes.Keys)
-                    {
-                        if (dto.Qrcode.StartsWith(mimeType))
-                        {
-                            dto.Qrcode = dto.Qrcode.Substring(mimeType.Length);
-                            break;
-                        }
-                    }
-                    
-                    qrCodeBytes = Convert.FromBase64String(dto.Qrcode);
-                }
-                catch (FormatException)
-                {
-                    return ResponseModel.BadRequest("Invalid QR code format");
-                }
-            }
-
-            newTicket.Qr = qrCodeBytes;
             newTicket.CreateDate = DateTime.UtcNow;
             newTicket.ModifyDate = DateTime.UtcNow;
-
             await _unitOfWork.TicketRepository.CreateTicketAsync(newTicket, dto.CategoriesId);
-
-            if (saveAll)
-            {
-                await _unitOfWork.CompleteAsync();
-            }
-
+            if (saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success("Successfully created Ticket");
-        }
-
-
-        public async Task<ResponseModel> CheckExistId(string id)
-        {
-            var check = await _unitOfWork.TicketRepository.CheckExist(id);
-            if (!check)
-            {
-                return ResponseModel.BadRequest("Id is not Existed");
-            }
-
-            return ResponseModel.Success("Id is existed");
         }
 
         public async Task<ResponseModel> GetTicketByNameAsync(string name)
@@ -113,13 +90,6 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket: {ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> GetTicketBySellerId(string id)
-        {
-            var tickets = await _unitOfWork.TicketRepository.GetTicketBySellerId(id);
-            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
-            return ResponseModel.Success($"Successfully get ticket : {ticketDtos}", ticketDtos);
-        }
-
         public async Task<ResponseModel> GetTopTicket(int amount)
         {
             var ticket = await _unitOfWork.TicketRepository.GetTopTicketBySoldAmount(amount);
@@ -127,13 +97,10 @@ namespace TicketResell.Services.Services
 
             return ResponseModel.Success($"Successfully get top ticket", ticketDtos);
         }
-
         public async Task<ResponseModel> GetQrImageAsBase64Async(string ticketId)
         {
-            return ResponseModel.Success($"Successfully get qr",
-                await _unitOfWork.TicketRepository.GetQrImageAsBase64Async(ticketId));
+            return ResponseModel.Success($"Successfully get qr", await _unitOfWork.TicketRepository.GetQrImageAsBase64Async(ticketId));
         }
-
         public async Task<ResponseModel> GetTicketsAsync()
         {
             var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
@@ -206,5 +173,25 @@ namespace TicketResell.Services.Services
             var cate = await _unitOfWork.TicketRepository.GetTicketCateByIdAsync(id);
             return ResponseModel.Success($"Successfully get Category of Ticket with id: {id}", cate);
         }
+
+        public async Task<ResponseModel> GetTicketBySellerId(string id)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketBySellerId(id);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully get ticket : {ticketDtos}", ticketDtos);
+        }
+
+        public async Task<ResponseModel> CheckExistId(string id)
+        {
+            var check = await _unitOfWork.TicketRepository.CheckExist(id);
+            if (!check)
+            {
+                return ResponseModel.BadRequest("Id is not Existed");
+            }
+
+            return ResponseModel.Success("Id is existed");
+        }
     }
+
 }
+

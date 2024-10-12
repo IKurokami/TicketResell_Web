@@ -1,6 +1,7 @@
 using Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Tickets;
+using TicketResell.Repositories.Core.Dtos.Ticket;
 
 namespace TicketResell.Repositories.Controllers
 {
@@ -28,14 +29,14 @@ namespace TicketResell.Repositories.Controllers
 
         [HttpGet]
         [Route("checkexist/{id}")]
-        
+
         public async Task<IActionResult> CheckExistTicket(string id)
         {
             var response = await _ticketService.CheckExistId(id);
             return ResponseParser.Result(response);
         }
-        
-        
+
+
         [HttpGet]
         [Route("read")]
         public async Task<IActionResult> GetTicket()
@@ -51,8 +52,8 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketBySellerId(id);
             return ResponseParser.Result(response);
         }
-        
-        
+
+
         [HttpGet]
         [Route("gettop/{amount:int}")]
         public async Task<IActionResult> GetTopTicket(int amount)
@@ -65,6 +66,32 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> GetQrImage(string ticketId)
         {
             var response = await _ticketService.GetQrImageAsBase64Async(ticketId);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPost("getticketsbytimerange")]
+        public async Task<IActionResult> GetTicketsStartingWithinTimeRange([FromBody] TicketTimeRangeRequestDto request)
+        {
+            if (request.TicketAmount <= 0)
+            {
+                return ResponseParser.Result(ResponseModel.BadRequest("Ticket amount must be greater than 0"));
+            }
+
+            if (request.TimeRange <= TimeSpan.Zero)
+            {
+                return ResponseParser.Result(ResponseModel.BadRequest("Time range must be greater than 0"));
+            }
+
+            var response = await _ticketService.GetTicketsStartingWithinTimeRangeAsync(request.TicketAmount, request.TimeRange);
+            return ResponseParser.Result(response);
+        }
+
+
+        [HttpGet("getbycategory")]
+        public async Task<IActionResult> GetTicketsByCategoryAndDate(TicketCategoryRequestDto dto)
+        {
+            var response = await _ticketService.GetTicketsByCategoryAndDateAsync(dto.CategoryName, dto.Amount);
+
             return ResponseParser.Result(response);
         }
 
@@ -138,5 +165,15 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.DeleteTicketAsync(id);
             return ResponseParser.Result(response);
         }
+
+        [HttpGet]
+        [Route("count/{id}")]
+        public async Task<IActionResult> GetTicketRemaining(string id)
+        {
+            var response = await _ticketService.GetTicketRemainingAsync(id);
+            return ResponseParser.Result(response);
+        }
+
+
     }
 }

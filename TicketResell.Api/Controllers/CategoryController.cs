@@ -29,6 +29,15 @@ public class CategoryController : ControllerBase
         return ResponseParser.Result(response);
     }
 
+    [HttpGet]
+    [Route("readbyname/{name}")]
+    public async Task<IActionResult> SearchCategoriesByName(string name)
+    {
+        var response = await _categoryService.GetCategoriesByNameAsync(name);
+        return ResponseParser.Result(response);
+    }
+
+
     [HttpGet("read/{id}")]
     public async Task<IActionResult> GetCategoryById(string id)
     {
@@ -134,4 +143,5 @@ public class CategoryController : ControllerBase
 
         return ResponseParser.Result(response);
     }
+
 }

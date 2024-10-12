@@ -5,28 +5,32 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@/Css/Sell.css";
 import { Search } from "lucide-react";
 import { TicketCard, fetchTicketItems } from "@/models/TicketSellCard";
-import AddTicketModal from "@/Components/AddTicketPopup";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {deleteImage} from "@/models/Deleteimage";
+import Link from "next/link";
 
 const TicketsPage = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [ticketItems, setTicketItems] = useState<TicketCard[]>([]);
   
+  const [ticketItems, setTicketItems] = useState<TicketCard[]>([]);
 
   const fetchItems = async () => {
-    const items = await fetchTicketItems();
-    console.log(items);
-    setTicketItems(items);
+    try {
+      const items = await fetchTicketItems(); 
+      console.log(items);
+      setTicketItems(items); 
+    } catch (error) {
+      console.error('Error fetching ticket items:', error);
+     
+    } finally {
+    }
   };
+
   useEffect(() => {
-    fetchItems();
+    fetchItems(); 
   }, []);
 
-  const handleButtonClick = () => {
-    setModalOpen(true);
-  };
+
 
   const handleDeleteTicket = async (ticketId: string) => {
     try {
@@ -97,15 +101,11 @@ const TicketsPage = () => {
               <input type="text" placeholder="Search ticket" />
               <Search className="search-icon" />
             </div>
-            <button className=" add-ticket-btn" onClick={handleButtonClick}>
-              <FontAwesomeIcon icon={faPlus} />
-            </button>
+            <Link href={`/addticket`} className="add-ticket-btn" >
+              <FontAwesomeIcon className="icon-plus" icon={faPlus} />
+            </Link>
           </div>
-          <AddTicketModal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-          />
-
+      
           <div className="tickets-section">
             <div className="row justify-content-left">
               {ticketItems.length > 0 ? (
@@ -147,7 +147,7 @@ const TicketsPage = () => {
                   </div>
                 ))
               ) : (
-                <p>Loading tickets...</p>
+                <p>Not found</p>
               )}
             </div>
           </div>

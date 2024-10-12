@@ -33,6 +33,9 @@
 .ticket-image{
     min-width: 14rem;
     max-width: 14rem;
+    height: 14rem;  /* Set fixed height for consistent appearance */
+    object-fit: cover;  /* This crops the image to fill the container */
+    object-position: center;  /* Centers the cropped view */
 }
 
 .ticket img{
@@ -93,6 +96,7 @@
     align-items: center;
     padding: 10px;
     background-color: white;
+    padding-top: 3rem;
 }
 
 .navbar-left button, .navbar-right button{
@@ -178,7 +182,7 @@
         margin-left: 0rem;
         border-radius: 10px;
         margin-top: 1rem;
-        max-width: 358px;
+        max-width: 480px;
         
     }
     

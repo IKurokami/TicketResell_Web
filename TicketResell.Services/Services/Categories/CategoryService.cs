@@ -1,7 +1,9 @@
 using AutoMapper;
 using Repositories.Core.Dtos.Category;
+using Repositories.Core.Dtos.Ticket;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
+using System.Net.Sockets;
 using TicketResell.Repositories.UnitOfWork;
 
 namespace TicketResell.Services.Services.Categories;
@@ -28,6 +30,14 @@ public class CategoryService : ICategoryService
         return ResponseModel.Success($"Successfully get categories", categoryDto);
     }
 
+    public async Task<ResponseModel> GetCategoriesByNameAsync(string name)
+    {
+        var categories = await _unitOfWork.CategoryRepository.GetCategoriesByNameAsync(name);
+        if (categories.Count == 0)
+            return ResponseModel.NotFound("No categories found.");
+        return ResponseModel.Success($"Successfully get categories by name", categories);
+    }
+
     public async Task<ResponseModel> GetCategoryByIdAsync(string id)
     {
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
@@ -36,7 +46,7 @@ public class CategoryService : ICategoryService
         return ResponseModel.Success($"Successfully get categories", categoryDto);
     }
 
-    public async Task<ResponseModel> CreateCategoryAsync(CategoryCreateDto dto,bool saveAll)
+    public async Task<ResponseModel> CreateCategoryAsync(CategoryCreateDto dto, bool saveAll)
     {
         var validator = _validatorFactory.GetValidator<Category>();
         var newCate = _mapper.Map<Category>(dto);
@@ -46,11 +56,11 @@ public class CategoryService : ICategoryService
             return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
         }
         await _unitOfWork.CategoryRepository.CreateAsync(newCate);
-        if(saveAll) await _unitOfWork.CompleteAsync();
+        if (saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success("Successfully created Category");
     }
 
-    public async Task<ResponseModel> UpdateCategoryAsync(string id, CategoryUpdateDto? dto,bool saveAll)
+    public async Task<ResponseModel> UpdateCategoryAsync(string id, CategoryUpdateDto? dto, bool saveAll)
     {
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
 
@@ -62,14 +72,16 @@ public class CategoryService : ICategoryService
         }
         _mapper.Map(dto, category);
         _unitOfWork.CategoryRepository.Update(category);
-        if(saveAll) await _unitOfWork.CompleteAsync();
+        if (saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully updated Category: {category.CategoryId}");
     }
 
-    public async Task<ResponseModel> DeleteCategoryAsync(string id,bool saveAll)
+    public async Task<ResponseModel> DeleteCategoryAsync(string id, bool saveAll)
     {
         await _unitOfWork.CategoryRepository.DeleteByIdAsync(id);
-        if(saveAll) await _unitOfWork.CompleteAsync();
-        return ResponseModel.Success($"Successfully deleted Category with id: {id}" );
+        if (saveAll) await _unitOfWork.CompleteAsync();
+        return ResponseModel.Success($"Successfully deleted Category with id: {id}");
     }
+
+
 }

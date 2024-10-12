@@ -24,7 +24,7 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<User, UserReadDto>();
             CreateMap<User, SellerTicketReadDto>();
             CreateMap<SellerRegisterDto, User>()
-                .ForMember(dest => dest.Username, opt => opt.Ignore())  
+                .ForMember(dest => dest.Username, opt => opt.Ignore())
                 .ForMember(dest => dest.Password, opt => opt.Ignore());
 
             //Revenue
@@ -51,6 +51,7 @@ namespace Repositories.Core.AutoMapperConfig
             //Ticket
             CreateMap<TicketCreateDto, Ticket>();
             CreateMap<Ticket, TicketReadDto>();
+            CreateMap<Ticket, TicketReadByCateDto>();
             CreateMap<Ticket, TicketTopDto>();
             CreateMap<TicketUpdateDto, Ticket>();
 
@@ -58,6 +59,7 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<CategoryCreateDto, Category>();
             CreateMap<Category, CategoryReadDto>();
             CreateMap<CategoryUpdateDto, Category>();
+            CreateMap<Category, TicketReadDto>();
 
             //Authentication
             CreateMap<LoginDto, User>();

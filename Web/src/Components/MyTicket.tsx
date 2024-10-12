@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import DateFilter from '@/Components/datefilter'; // Đường dẫn đến file chứa DateFilter
 
 // Custom icon components
 
@@ -261,6 +262,10 @@ const MyTicketsPage = () => {
       )
     );
   };
+  const [selectedDate, setSelectedDate] = useState(""); // Thêm trạng thái cho bộ lọc ngày
+  const handleDateChange = (date: string) => {
+    setSelectedDate(date);
+  };
 
   const filteredOrders = orders.filter((order) => {
     const matchesCategory =
@@ -270,9 +275,12 @@ const MyTicketsPage = () => {
     const matchesSearch = order.ticket
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesStatus && matchesSearch;
+    const matchesDate =
+      !selectedDate || order.date.startsWith(selectedDate); // So khớp theo ngày
+    
+    return matchesCategory && matchesStatus && matchesSearch && matchesDate;
   });
-
+  
   return (
     <div className="mt-24 min-h-screen w-full bg-gray-50 py-12 px-6 sm:px-8 lg:px-12">
       <h1 className="text-4xl font-bold mb-8 text-gray-900">My Tickets</h1>
@@ -319,7 +327,10 @@ const MyTicketsPage = () => {
               <option value="Expired">Expired</option>
             </select>
           </div>
+                    <DateFilter selectedDate={selectedDate} onDateChange={handleDateChange} />
+
         </div>
+        
       </div>
 
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
