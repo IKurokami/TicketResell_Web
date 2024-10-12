@@ -1,7 +1,9 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 // Custom icon components
+
 const IconUser = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -243,7 +245,11 @@ const MyTicketsPage = () => {
       rating: 0,
     },
   ]);
+  const router = useRouter(); // Ensure this line is present
 
+  const handleNavigation = () => {
+    router.push('/search'); // Navigate to the /search page
+  };
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
@@ -292,7 +298,7 @@ const MyTicketsPage = () => {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-4 py-2 rounded border-gray-300 focus:outline-none focus:ring focus:ring-blue-300"
             >
-              <option value="All">All Categories</option>
+              <option value="All">Categories</option>
               <option value="Sport">Sport</option>
               <option value="Comedy">Comedy</option>
               <option value="Horror">Horror</option>
@@ -308,7 +314,7 @@ const MyTicketsPage = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-4 py-2 rounded border-gray-300 focus:outline-none focus:ring focus:ring-blue-300"
             >
-              <option value="All">All Status</option>
+              <option value="All"> Status</option>
               <option value="Coming Soon">Coming Soon</option>
               <option value="Expired">Expired</option>
             </select>
@@ -330,15 +336,19 @@ const MyTicketsPage = () => {
             <div className="p-4">
               <h2 className="text-xl font-semibold mb-2">{order.ticket}</h2>
               <p
-                className={`text-sm mb-4 ${order.status === 'Coming Soon'
-                    ? 'text-blue-500 font-bold' // Highlight cho trạng thái 'Coming Soon'
-                    : order.status === 'Expired'
-                      ? 'text-red-500 ' // Highlight cho trạng thái 'Expired'
-                      : 'text-gray-500'
+                className={`text-sm mb-4 p-2 rounded-full w-auto h-auto flex items-center justify-center ${order.status === 'Coming Soon'
+                  ? 'bg-blue-50 text-blue-500 font-bold'
+                  : order.status === 'Expired'
+                    ? 'bg-red-50 text-red-500 font-bold'
+                    : 'bg-gray-100 text-gray-500'
                   }`}
+                style={{ width: 'fit-content', height: 'fit-content' }} // Đảm bảo chiều rộng và chiều cao tự động theo nội dung
               >
                 {order.status}
               </p>
+
+
+
 
               <div className="flex items-center justify-between mb-2">
                 <p className="text-gray-600 text-sm">
@@ -349,13 +359,13 @@ const MyTicketsPage = () => {
               </div>
 
               <div className="flex items-center justify-between mb-4">
-              <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 text-sm">
                   <IconUser className="inline-block mr-2" />
                   Seller: {order.seller}
                 </p>
                 <p className="text-gray-600 text-sm">Qty: {order.quantity}</p>
               </div>
-              
+
 
               <div className="flex items-center space-x-1">
                 {order.tags.map((tag, index) => (
@@ -364,9 +374,9 @@ const MyTicketsPage = () => {
                     className="text-xs text-white bg-blue-600 px-2 py-1 rounded"
                   >
                     {tag}
-                    
+
                   </span>
-                  
+
                 ))}
               </div>
 
@@ -390,6 +400,18 @@ const MyTicketsPage = () => {
           </div>
         ))}
       </div>
+      <div className="text-center p-4">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">
+          Do you want to buy more tickets?</h1>
+        <button
+          onClick={handleNavigation}
+          className="text-blue-500 hover:underline focus:outline-none"
+        >
+          Explore More Tickets
+
+        </button>
+      </div>
+
     </div>
   );
 };
