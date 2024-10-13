@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DateFilter from '@/Components/datefilter'; // Đường dẫn đến file chứa DateFilter
 import { fetchImage } from "@/models/FetchImage";
+import Cookies from "js-cookie";
 
 
 // Custom icon components
@@ -133,7 +134,7 @@ const IconMessageCircle = () => (
   </svg>
 );
 
-const IconStar = ({ filled }) => (
+const IconStar = ( filled :any ) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -187,70 +188,75 @@ const IconSearch = () => (
 );
 
 const MyTicketsPage = () => {
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      ticket: "World cup 2026",
-      status: "Coming Soon",
-      date: "2023-10-31 19:21:21",
-      totalprice: "$50",
-      seller: "Le Minh Quang",
-      quantity: 1,
-      imgURL: "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451",
-      tags: ["Sport"],
-      rating: 0,
-    },
-    {
-      id: 2,
-      ticket: "Get rich with ghosts",
-      status: "Expired",
-      date: "2023-10-31 19:21:21",
-      totalprice: "$75",
-      seller: "Huynh Vuong Khang",
-      quantity: 2,
-      imgURL: "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451",
-      tags: ["Comedy", "Horror"],
-      rating: 0,
-    },
-    {
-      id: 3,
-      ticket: "Anh Trai Say Hi",
-      status: "Coming Soon",
-      date: "2023-10-31 19:21:21",
-      totalprice: "$75",
-      seller: "Cao Dinh Giap",
-      quantity: 2,
-      imgURL: "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451",
-      tags: ["Comedy", "Musical"],
-      rating: 0,
-    },
-    {
-      id: 4,
-      ticket: "Titanic 2",
-      status: "Expired",
-      date: "2023-10-31 19:21:21",
-      totalprice: "$75",
-      seller: "Nguyen Chi Cuong",
-      quantity: 2,
-      imgURL: "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451",
-      tags: ["Romance", "Horror"],
-      rating: 0,
-    },
-    {
-      id: 5,
-      ticket: "Mada",
-      status: "Expired",
-      date: "2023-10-31 19:21:21",
-      totalprice: "$75",
-      seller: "Phu Vinh",
-      quantity: 2,
-      imgURL: "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451",
-      tags: ["Comedy", "Horror"],
-      rating: 0,
-    },
-  ]);
-  const router = useRouter(); // Ensure this line is present
+  const [orders, setOrders] = useState<any[]>([]);
 
+  const router = useRouter(); // Ensure this line is present
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const buyerid = Cookies.get("id");
+        const response = await fetch(
+          `http://localhost:5296/api/orderdetail/buyer/${buyerid}`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+  
+        const result = await response.json();
+        console.log(result);
+  
+        if (response.ok) {
+          const transformedOrders = await Promise.all(
+            result.data.map(async (order: any, index: number) => {
+              let image = 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451';
+  
+              if (order.ticket.ticketId) {
+                const { imageUrl: fetchedImageUrl, error } = await fetchImage(
+                  order.ticket.ticketId
+                );
+  
+                if (fetchedImageUrl) {
+                  image = fetchedImageUrl;
+                } else {
+                  console.error(
+                    `Error fetching image for ticket ${order.ticket.ticketId}: ${error}`
+                  );
+                }
+              }
+  
+              return {
+                id: index + 1,
+                ticket: order.ticket.name,
+                status: new Date(order.ticket.startDate) > new Date() ? "Coming Soon" : "Expired", // Compare startDate with current date
+                date: new Date(order.ticket.startDate).toLocaleString(), // Formatting the date
+                totalprice: `$${order.price * order.quantity}`, // Calculating the total price
+                seller: order.ticket.seller.fullname,
+                quantity: order.quantity,
+                imgURL: image, // Placeholder image URL
+                tags: [], // You can add tags if available in your data
+                rating: 0, // Default rating
+              };
+              
+            })
+          );
+  
+          setOrders(transformedOrders);
+        } else {
+          console.error('Failed to fetch orders:', result.message);
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      }
+    };
+  
+    fetchOrders();
+  }, []);
+  
+  
   const handleNavigation = () => {
     router.push('/search'); // Navigate to the /search page
   };
@@ -258,7 +264,7 @@ const MyTicketsPage = () => {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleRating = (orderId, rating) => {
+  const handleRating = (orderId:any, rating:any) => {
     setOrders(
       orders.map((order) =>
         order.id === orderId ? { ...order, rating } : order
@@ -376,7 +382,7 @@ const MyTicketsPage = () => {
             <img
               src={order.imgURL}
               alt={order.ticket}
-              className="w-full h-auto object-cover"
+              className="w-full h-48 object-cover"
             />
             <div className="p-4">
               <h2 className="text-xl font-semibold mb-2">{order.ticket}</h2>
@@ -413,7 +419,7 @@ const MyTicketsPage = () => {
 
 
               <div className="flex items-center space-x-1">
-                {order.tags.map((tag, index) => (
+                {order.tags.map((tag:any, index:number) => (
                   <span
                     key={index}
                     className="text-xs text-white bg-blue-600 px-2 py-1 rounded"
@@ -439,7 +445,7 @@ const MyTicketsPage = () => {
                 </div>
 
                 <button className="bg-blue-500 text-white px-4 py-2 rounded">
-                  Support
+                  View
                 </button>
               </div>
             </div>

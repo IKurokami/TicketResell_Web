@@ -45,25 +45,29 @@ public class OrderDetailService : IOrderDetailService
     public async Task<ResponseModel> GetOrderDetail(string id)
     {
         var orderDetail = await _unitOfWork.OrderDetailRepository.GetByIdAsync(id);
-        return ResponseModel.Success($"Successfully get order detail: {orderDetail.OrderDetailId}", orderDetail);
+        var data = _mapper.Map<OrderDetailDto>(orderDetail);
+        return ResponseModel.Success($"Successfully get order detail: {orderDetail.OrderDetailId}", data);
     }
 
     public async Task<ResponseModel> GetAllOrderDetails()
     {
         var orderDetails = await _unitOfWork.OrderDetailRepository.GetAllAsync();
-        return ResponseModel.Success($"Successfully get all order detail", orderDetails);
+        var data = _mapper.Map<IEnumerable<OrderDetailDto>>(orderDetails);
+        return ResponseModel.Success($"Successfully get all order detail", data);
     }
 
     public async Task<ResponseModel> GetOrderDetailsByBuyerId(string buyerId)
     {
         var orderDetails = await _unitOfWork.OrderDetailRepository.GetOrderDetailsByBuyerIdAsync(buyerId);
-        return ResponseModel.Success($"Successfully get order detail by buyerId: {buyerId}", orderDetails);
+        var data = _mapper.Map<IEnumerable<OrderDetailDto>>(orderDetails);
+        return ResponseModel.Success($"Successfully get order detail by buyerId: {buyerId}", data);
     }
 
     public async Task<ResponseModel> GetOrderDetailsBySellerId(string sellerId)
     {
         var orderDetails = await _unitOfWork.OrderDetailRepository.GetOrderDetailsBySellerIdAsync(sellerId);
-        return ResponseModel.Success($"Successfully get order detail by sellderId: {sellerId}", orderDetails);
+        var data = _mapper.Map<IEnumerable<OrderDetailDto>>(orderDetails);
+        return ResponseModel.Success($"Successfully get order detail by sellderId: {sellerId}", data);
     }
 
     public async Task<ResponseModel> UpdateOrderDetail(OrderDetailDto? dto, bool saveAll = true)
