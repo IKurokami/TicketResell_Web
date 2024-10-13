@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { getCategoryNames } from "../models/TicketFetch";
 
@@ -11,18 +11,15 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   paginatedTickets,
   maxTicketInRow,
 }) => {
-  const gridClass = `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${Math.min(
-    maxTicketInRow,
-    4
-  )} gap-6`;
-
-  // Function to format VND currency
   const formatVND = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
   };
+
+  const gridColumns = Math.min(maxTicketInRow, 4);
+  const gridClass = `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-${gridColumns} gap-4`;
 
   return (
     <section className="relative">
@@ -43,7 +40,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                 className="movie-card-wrapper cursor-pointer"
                 data-index={index}
               >
-                <div className="bg-transparent rounded-2xl border overflow-hidden movie-card flex flex-col h-full">
+                <div className="bg-transparent rounded-2xl border overflow-hidden movie-card flex flex-col h-full shadow-sm hover:shadow-md transition-shadow duration-300">
                   <div className="relative flex-grow">
                     <img
                       src={
@@ -51,20 +48,20 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                         "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"
                       }
                       alt={ticket.name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-40 sm:h-48 object-cover"
                     />
-                    <div className="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 rounded-bl-2xl">
+                    <div className="absolute top-0 right-0 bg-green-500 text-white px-2 py-1 text-sm sm:px-3 sm:py-1 sm:text-base rounded-bl-2xl">
                       {formatVND(ticket.cost)}
                     </div>
                   </div>
-                  <div className="p-4 flex-grow flex flex-col">
-                    <h3 className="text-lg font-semibold mb-1 text-gray-900">
+                  <div className="p-3 sm:p-4 flex-grow flex flex-col">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1 text-gray-900 line-clamp-2">
                       {ticket.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-1">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">
                       {ticket.location}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-gray-600">
                       {new Date(ticket.startDate).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -73,15 +70,16 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                         minute: "2-digit",
                       })}
                     </p>
-                    <div className="tokenize-wrapper mt-2">
+                    <div className="tokenize-wrapper mt-2 overflow-hidden">
                       <div className="flex flex-wrap">
                         {getCategoryNames(ticket)
                           .split(",")
                           .filter((category) => category.trim() !== "")
+                          .slice(0, 3) // Limit to 3 categories
                           .map((category, catIndex) => (
                             <span
                               key={category}
-                              className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 mb-1 text-sm"
+                              className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 mb-1 text-xs sm:text-sm"
                             >
                               {category.trim()}
                             </span>
@@ -89,7 +87,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                         {getCategoryNames(ticket).trim() === "" && (
                           <span
                             key="No categories"
-                            className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 mb-1 text-sm"
+                            className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 mb-1 text-xs sm:text-sm"
                           >
                             No categories
                           </span>
@@ -97,7 +95,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                       </div>
                     </div>
                     <div className="card-content mt-auto">
-                      <p className="text-sm text-gray-700">
+                      <p className="text-xs sm:text-sm text-gray-700 line-clamp-2">
                         An exciting event you won't want to miss!
                       </p>
                     </div>

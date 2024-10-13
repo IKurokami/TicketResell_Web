@@ -61,13 +61,6 @@ const Search: React.FC = () => {
       ) {
         setIsDropdownOpen(false);
       }
-      if (
-        sidebarRef.current &&
-        !sidebarRef.current.contains(event.target as Node) &&
-        !(event.target as HTMLElement).closest('button[aria-label="Filter"]')
-      ) {
-        setIsSidebarOpen(false);
-      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -423,7 +416,7 @@ const Search: React.FC = () => {
         <div className="p-4">
           <div className="flex flex-col md:flex-row items-center justify-between mb-4">
             {/* Left: Filter button and Live results */}
-            <div className="flex items-center space-x-4 mb-2 md:mb-0">
+            <div className="flex items-center space-x-4 mb-2 md:mb-0 w-full md:w-auto">
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -442,14 +435,14 @@ const Search: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-md leading-md font-semibold">Live</span>
-                <span className="text-md leading-md text-gray-600">
+                <span className="text-md leading-md text-gray-600 text-nowrap">
                   {filteredTickets?.length || 0} results
                 </span>
               </div>
             </div>
 
             {/* Center: Search input */}
-            <div className="relative flex-grow mx-2 max-w-xl mb-2 md:mb-0">
+            <div className="relative flex-grow mx-2 max-w-xl md:mb-0 w-full md:w-auto">
               <input
                 type="text"
                 placeholder="Search by name"
@@ -461,19 +454,17 @@ const Search: React.FC = () => {
             </div>
 
             {/* Right: Sort dropdown */}
-            <div className="flex items-center space-x-4">
-              {/* Tab Navigation */}
-              <TabNavigation />
-              <div className="relative mr-3" ref={dropdownRef}>
+            <div className="flex items-center space-x-4 w-full md:w-auto">
+              <div className="relative mr-3 w-full md:w-64" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="h-12 w-64 pl-4 pr-10 rounded-xl border border-gray-300 bg-white hover:border-gray-400 focus:outline-none flex items-center justify-between transition duration-200"
+                  className="h-12 w-full pl-4 pr-10 rounded-xl border border-gray-300 bg-white hover:border-gray-400 focus:outline-none flex items-center justify-between transition duration-200"
                 >
-                  <span className="w-64">{sortOption}</span>
+                  <span className="truncate">{sortOption}</span>
                   <MdKeyboardArrowDown className="text-2xl text-gray-600" />
                 </button>
                 {isDropdownOpen && (
-                  <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-xl shadow-lg">
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg">
                     <ul className="py-1">
                       {sortOptions.map((option) => (
                         <li key={option.text}>
