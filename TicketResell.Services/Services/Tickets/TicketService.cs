@@ -191,6 +191,13 @@ namespace TicketResell.Services.Services
 
             return ResponseModel.Success("Id is existed");
         }
+
+        public async Task<ResponseModel> GetTicketByCategoryIdAsync(string[] categoryId)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketByCateIdAsync(categoryId);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully get tickets", ticketDtos);
+        }
     }
 
 }
