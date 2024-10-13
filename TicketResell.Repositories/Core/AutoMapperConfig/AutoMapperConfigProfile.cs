@@ -51,7 +51,6 @@ namespace Repositories.Core.AutoMapperConfig
             //Ticket
             CreateMap<TicketCreateDto, Ticket>();
             CreateMap<Ticket, TicketReadDto>();
-            CreateMap<Ticket, TicketReadByCateDto>();
             CreateMap<Ticket, TicketTopDto>();
             CreateMap<TicketUpdateDto, Ticket>();
 

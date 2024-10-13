@@ -221,10 +221,10 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<List<Ticket>> GetTicketByCateIdAsync(string[] categoriesId)
     {
-        var tickets = await _context.Tickets
-    .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category
-    .Include(t => t.Categories) // Include the related categories
-    .ToListAsync();
+        var tickets = await _context.Tickets.Include(t => t.Seller)
+        .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category
+        .Include(t => t.Categories) // Include the related categories
+        .ToListAsync();
         return tickets;
     }
 }
