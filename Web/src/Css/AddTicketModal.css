@@ -1,3 +1,10 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+  }
+  
 .modal-contentt {
     width: 100%;
     max-height: 80%;
@@ -5,37 +12,36 @@
     background-color: white;
 }
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .modal-content {
-        margin-top: 5vh; /* Adjusted margin for smaller screens */
-        padding: 10vh; /* Less padding on smaller screens */
+.address-fields-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+  }
+  
+  .address-field {
+    background-color: #F5F7FC;
+    width: 100%;
+  }
+  
+  @media (max-width: 600px) {
+    .address-fields-container {
+      grid-template-columns: 1fr;
     }
-}
+  }
 
 .custom-text-field {
     background-color: #F5F7FC;
 }
 
-.upload-container {
-    padding: 10px;
-}
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .upload-container {
-        padding: 20px; /* Less padding on smaller screens */
-    }
-}
 
 .upload-box {
-    margin-top: 2vh;
+    overflow-y: hidden; 
     border: 2px dashed #ccc;
-    padding: 30px;
-    border-radius: 12px;
+    border-radius: 1rem; 
     text-align: center;
-    min-height: 200px;
-    position: relative;
+    height: 40vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -43,54 +49,93 @@
     cursor: pointer;
 }
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .upload-box {
-        padding: 20px; /* Less padding on smaller screens */
-        min-height: 150px; /* Adjust min-height for smaller screens */
-    }
+.upload-box img {
+    max-width: 100%;
+    height: auto;
 }
+
+.upload-box:hover {
+    border-color: #888; /* Optional hover effect */
+}
+
+
+
 
 .button-container {
     display: flex;
     justify-content: space-between;
 }
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .button-container {
-        flex-direction: column; /* Stack buttons on smaller screens */
-        align-items: stretch; /* Ensure buttons stretch to full width */
-    }
-}
+
 
 .large-box {
-    min-height: 300px;
+    max-height: 41vh;
     background-color: #F5F7FC;
 }
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .large-box {
-        min-height: 200px; /* Adjust min-height for smaller screens */
-    }
+
+
+.qr-image-box{
+    border: 2px dashed #ccc;
+    padding: 5vw;
+    position: relative;
+    width: 30%;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    transition: border 0.3s ease; 
+}
+
+.border-hidden {
+    border: none; 
+}
+
+.qr-text{
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.small-box:hover {
+    overflow-y: auto; 
+    z-index: 1;
+}
+
+
+.small-box::-webkit-scrollbar {
+    width: 0.6rem;
+}
+
+.small-box::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.5); 
+    border-radius: 10px; 
+}
+
+/* Optional: Style the scrollbar track */
+.small-box::-webkit-scrollbar-track {
+    background: transparent; /* Color of the scrollbar track */
 }
 
 .small-box {
-    min-height: 300px;
-    background-color: #F5F7FC;
+    max-height: 60vh;
+    background-color: #F5F7FC; 
+    display: flex;
+    flex-direction: column; 
+    justify-content:flex-start; 
+    transition: overflow-y 0.3s ease; 
+    box-sizing: border-box;
+    position: relative;
+    
+}
+
+.small-box > * {
+    margin-bottom: 2rem; 
+    flex-shrink: 0;
 }
 
 /* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .small-box {
-        min-height: 100px; /* Adjust min-height for smaller screens */
-    }
-}
 
-.upload-box:hover {
-    border-color: #1976d2;
-}
+
+
 
 .image-preview,
 .qr-preview {
@@ -101,13 +146,7 @@
 }
 
 /* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .image-preview img,
-    .qr-preview img {
-        width: 30vw; /* Increase width for smaller screens */
-        height: 15vh; /* Adjust height for smaller screens */
-    }
-}
+
 
 .image-preview img,
 .qr-preview img {
@@ -117,19 +156,12 @@
     object-fit: content;
 }
 
-.text-center {
+/* .text-center {
     font-size: 16px;
     color: #888;
     margin-top: 15px;
-}
+} */
 
-/* Add these new styles to ensure no overlays appear on the images */
-.image-preview::before,
-.image-preview::after,
-.qr-preview::before,
-.qr-preview::after {
-    display: none;
-}
 
 .upload-box input[type="file"] {
     display: none;
@@ -140,11 +172,7 @@
 }
 
 /* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .wrapper-class {
-        padding: 0.5rem; /* Less padding on smaller screens */
-    }
-}
+
 
 .editor-class {
     background-color: white;
@@ -153,12 +181,162 @@
 }
 
 /* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
+
+
+.toolbar-class {
+    border-bottom: 1px solid #E0E0E0;
+}
+@media (max-width: 1024px) {
+    .modal-contentt {
+        margin-top: 5vh; 
+        padding: 10vh;
+    }
+
+    .upload-container {
+        padding: 20px; 
+    }
+
+    .upload-box {
+        max-height: 5vh; 
+    }
+
+    .button-container {
+        flex-direction: column;
+        align-items: stretch; 
+    }
+
+    .qr-image-box {
+        width: 60%;
+        height: 80%;
+    }
+
+    .large-box {
+        min-height: 30vh; 
+    }
+
+    .small-box {
+        min-height: 30vh; 
+    }
+
+    .image-preview img,
+    .qr-preview img {
+        width: 30vw;
+        height: 15vh;
+    }
+
+    .wrapper-class {
+        padding: 0.5rem; 
+    }
+
     .editor-class {
         min-height: 150px; 
     }
 }
 
-.toolbar-class {
-    border-bottom: 1px solid #E0E0E0;
+@media (max-width: 768px) {
+    .modal-contentt {
+        margin-top: 5vh; 
+        padding: 10vh;
+    }
+
+    .upload-container {
+        padding: 20px; 
+    }
+
+    .upload-box {
+        width: 100%;
+        max-height: 5vh; 
+    }
+
+    .button-container {
+        flex-direction: column;
+        align-items: stretch; 
+    }
+
+    .qr-image-box{
+        width: 60%;
+        height: 80%;
+    }
+
+    .large-box {
+        min-height: 200px; 
+        margin-bottom: 5vh;
+    }
+
+    .small-box {
+        min-height: 30vh; 
+    }
+
+    .image-preview img,
+    .qr-preview img {
+        width: 30vw;
+        height: 15vh;
+    }
+
+    .wrapper-class {
+        padding: 0.5rem; 
+    }
+
+    .editor-class {
+        min-height: 150px; 
+    }
+}
+
+@media (max-width: 375px) {
+    .modal-contentt {
+        margin-top: 2vh; 
+        padding: 5vh; 
+    }
+
+    .upload-container {
+        padding: 10px; 
+    }
+
+    .upload-box {
+        width: 50%;
+        max-height: 5vh; 
+        margin-bottom: 1vh;
+    }
+
+    .button-container {
+        flex-direction: column; 
+        align-items: center; 
+    }
+
+    .qr-image-box {
+        width: 90%;
+        height: auto; 
+    }
+
+    .large-box {
+        min-height: 150px; 
+    }
+
+    .small-box {
+        min-height: 25vh; 
+    }
+
+    .image-preview img,
+    .qr-preview img {
+        width: 90vw; 
+        height: auto; 
+    }
+
+    .wrapper-class {
+        padding: 0.5rem; 
+    }
+
+    .editor-class {
+        min-height: 100px; 
+    }
+
+ 
+    .qr-text {
+        font-size: 14px;
+    }
+
+    .button-container button {
+        width: 100%; 
+        margin-bottom: 1rem; 
+    }
 }

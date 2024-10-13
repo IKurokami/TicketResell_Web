@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import React from "react";
 import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -7,64 +7,32 @@ import { Search } from "lucide-react";
 import { TicketCard, fetchTicketItems } from "@/models/TicketSellCard";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {deleteImage} from "@/models/Deleteimage";
 import Link from "next/link";
+import Popup from './PopupDelete'; // Adjust the path based on your file structure
 
 const TicketsPage = () => {
-  
   const [ticketItems, setTicketItems] = useState<TicketCard[]>([]);
+  const [isPopupVisible, setPopupVisible] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState<string | null>(null);
 
   const fetchItems = async () => {
     try {
-      const items = await fetchTicketItems(); 
+      const items = await fetchTicketItems();
       console.log(items);
-      setTicketItems(items); 
+      setTicketItems(items);
     } catch (error) {
       console.error('Error fetching ticket items:', error);
-     
-    } finally {
     }
   };
 
   useEffect(() => {
-    fetchItems(); 
+    fetchItems();
   }, []);
 
-
-
-  const handleDeleteTicket = async (ticketId: string) => {
-    try {
-       
-        const response = await fetch(
-            `http://localhost:5296/api/Ticket/delete/${ticketId}`,
-            {
-                method: "DELETE",
-            }
-        );
-
-        if (response.ok) {
-           
-            setTicketItems((prevItems) =>
-                prevItems.filter((ticket) => ticket.id !== ticketId)
-            );
-            console.log(`Ticket with ID ${ticketId} deleted successfully.`);
-
-            
-            const imageDeleteResult = await deleteImage(ticketId);
-            if (imageDeleteResult.success) {
-                console.log(`Image with Ticket ID ${ticketId} deleted successfully.`);
-            } else {
-                console.error(`Failed to delete image: ${imageDeleteResult.error}`);
-            }
-        } else {
-            console.error("Failed to delete the ticket.");
-        }
-        fetchItems();
-    } catch (error) {
-        console.error("Error deleting ticket:", error);
-    }
-};
-
+  const handleDeleteTicket = (ticketId: string) => {
+    setTicketToDelete(ticketId);
+    setPopupVisible(true); // Show the confirmation popup
+  };
 
   return (
     <div className="tickets-page-wrapper">
@@ -101,11 +69,11 @@ const TicketsPage = () => {
               <input type="text" placeholder="Search ticket" />
               <Search className="search-icon" />
             </div>
-            <Link href={`/addticket`} className="add-ticket-btn" >
+            <Link href={`/addticket`} className="add-ticket-btn">
               <FontAwesomeIcon className="icon-plus" icon={faPlus} />
             </Link>
           </div>
-      
+
           <div className="tickets-section">
             <div className="row justify-content-left">
               {ticketItems.length > 0 ? (
@@ -138,8 +106,8 @@ const TicketsPage = () => {
                           <FontAwesomeIcon
                             className="bin-icon"
                             icon={faTrash}
-                            onClick={() => handleDeleteTicket(ticketItem.id)} 
-                            style={{ cursor: 'pointer' }} 
+                            onClick={() => handleDeleteTicket(ticketItem.id)}
+                            style={{ cursor: 'pointer' }}
                           />
                         </div>
                       </div>
@@ -153,6 +121,13 @@ const TicketsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Popup for delete confirmation */}
+      <Popup
+        isVisible={isPopupVisible}
+        onClose={() => {setPopupVisible(false) ;fetchItems();}}
+        ticketId={ticketToDelete || ""}
+      />
     </div>
   );
 };
