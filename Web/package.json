@@ -23,6 +23,7 @@
     "bootstrap": "^5.3.3",
     "cookie": "^0.7.1",
     "formidable": "^3.5.1",
+    "framer-motion": "^11.11.8",
     "fs": "^0.0.1-security",
     "html-react-parser": "^5.1.18",
     "idb": "^8.0.0",
@@ -40,6 +41,7 @@
     "react-router-dom": "^6.26.2",
     "react-toastify": "^10.0.5",
     "redis": "^4.7.0",
+    "swiper": "^11.1.14",
     "swr": "2.2.5"
   },
   "devDependencies": {

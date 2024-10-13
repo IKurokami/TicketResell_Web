@@ -75,5 +75,16 @@ export const fetchTickets = async (): Promise<Ticket[]> => {
 };
 
 export const getCategoryNames = (ticket: Ticket): string => {
-  return ticket.categories.map((category) => category.name).join(", ");
+  const { categories } = ticket;
+
+  if (categories.length > 3) {
+    return (
+      categories
+        .slice(0, 3)
+        .map((category) => category.name)
+        .join(", ") + ", . . ."
+    );
+  }
+
+  return categories.map((category) => category.name).join(", ");
 };

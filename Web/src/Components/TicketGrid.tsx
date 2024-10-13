@@ -20,7 +20,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({ paginatedTickets }) => {
               passHref
             >
               <div className="movie-card-wrapper cursor-pointer">
-                <div className="bg-transparent rounded-2xl border-r overflow-hidden movie-card flex flex-col h-full transition-transform duration-300 ease-in-out transform hover:scale-105 hover:z-10">
+                <div className="bg-transparent rounded-2xl shadow overflow-hidden movie-card flex flex-col h-full transition-transform duration-300 ease-in-out transform hover:scale-105 hover:z-10">
                   <div className="relative flex-grow">
                     <img
                       src={
@@ -34,7 +34,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({ paginatedTickets }) => {
                       ${ticket.cost}
                     </div>
                   </div>
-                  <div className="p-4 flex-grow">
+                  <div className="p-4 flex-grow flex flex-col">
                     <h3 className="text-lg font-semibold mb-1 text-gray-900">
                       {ticket.name}
                     </h3>
@@ -50,16 +50,32 @@ const TicketGrid: React.FC<TicketGridProps> = ({ paginatedTickets }) => {
                         minute: "2-digit",
                       })}
                     </p>
-                    <div className="tokenize-wrapper">
-                      {getCategoryNames(ticket)
-                        .split(",")
-                        .map((category) => (
-                          <span key={category} className="token">
-                            {category.trim()}
-                          </span>
-                        ))}
+                    <div className="tokenize-wrapper mt-2">
+                      {/* Ensure the categories section is present, even if empty */}
+                      <div className="flex flex-wrap">
+                        {getCategoryNames(ticket)
+                          .split(",")
+                          .filter((category) => category.trim() !== "")
+                          .map((category) => (
+                            <span
+                              key={category}
+                              className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 text-sm"
+                            >
+                              {category.trim()}
+                            </span>
+                          ))}
+                      </div>
+                      {/* Fallback for empty categories */}
+                      {getCategoryNames(ticket).trim() === "" && (
+                        <span
+                          key="No categories"
+                          className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 text-sm"
+                        >
+                          No categories
+                        </span>
+                      )}
                     </div>
-                    <div className="card-content mt-2 flex-grow">
+                    <div className="card-content mt-auto">
                       <p className="text-sm text-gray-700">
                         An exciting event you won't want to miss!
                       </p>

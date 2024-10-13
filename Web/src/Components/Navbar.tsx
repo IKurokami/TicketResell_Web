@@ -345,7 +345,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 </a>
                 <a
                   href="#"
-                  onClick={(e) => handleMenuItemClick(e, "/myticket")}
+                  onClick={(e) => handleMenuItemClick(e, "/my-ticket")}
                   className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
