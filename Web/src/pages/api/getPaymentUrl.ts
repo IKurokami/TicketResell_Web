@@ -22,8 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       {
         vnp_Amount: 10000, // Amount to be charged
         vnp_IpAddr: "1.1.1.1", // Customer's IP address (asserted as string)
-        vnp_TxnRef: '123456', // Unique transaction reference
-        vnp_OrderInfo: 'Payment for order 123456', // Information about the order
+        vnp_TxnRef: '123456asd', // Unique transaction reference
+        vnp_OrderInfo: 'Payment for order 123456asd', // Information about the order
         vnp_OrderType: ProductCode.Other, // Type of product
         vnp_ReturnUrl: `http://localhost:${port}`, // Return URL after payment
       },

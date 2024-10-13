@@ -64,7 +64,9 @@ const convertToUserProfileCard = (
 export const fetchUserProfile = async (
   id: string | undefined
 ): Promise<UserProfileCard> => {
-  const response = await fetch(`http://localhost:5296/api/user/read/${id}`);
+  const response = await fetch(`http://localhost:5296/api/user/read/${id}`, {
+    credentials: "include",
+  });
   const responseModel = await response.json();
   const userProfile: UserProfileCard = convertToUserProfileCard(
     responseModel.data
@@ -82,7 +84,8 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showSaveButton, setShowSaveButton] = useState(false);
-  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -174,14 +177,14 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
 
     try {
       const response = await fetch(
-          `http://localhost:5296/api/user/update/${profile.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(userUpdateDto),
-          }
+        `http://localhost:5296/api/user/update/${profile.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userUpdateDto),
+        }
       );
 
       if (response.ok) {
@@ -215,24 +218,28 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
 
     try {
       const response = await fetch(
-          `http://localhost:5296/api/Authentication/change-password`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              UserId: profile.id,
-              CurrentPassword: passwordData.currentPassword,
-              NewPassword: passwordData.newPassword,
-            }),
-          }
+        `http://localhost:5296/api/Authentication/change-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            UserId: profile.id,
+            CurrentPassword: passwordData.currentPassword,
+            NewPassword: passwordData.newPassword,
+          }),
+        }
       );
 
       if (response.ok) {
         alert("Password changed successfully!");
         setIsChangePasswordModalOpen(false);
-        setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmNewPassword: "",
+        });
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.title || "Error changing password"}`);
@@ -243,8 +250,10 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
     }
   };
 
-  const handleOpenChangePasswordModal = () => setIsChangePasswordModalOpen(true);
-  const handleCloseChangePasswordModal = () => setIsChangePasswordModalOpen(false);
+  const handleOpenChangePasswordModal = () =>
+    setIsChangePasswordModalOpen(true);
+  const handleCloseChangePasswordModal = () =>
+    setIsChangePasswordModalOpen(false);
 
   return (
     <div className="bg-transparent min-h-96 pb-32 font-sans mt-16">
@@ -252,9 +261,9 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
         {/* Banner */}
         <div className="h-40 -mb-5 rounded-xl shadow-lg overflow-hidden">
           <img
-              src="https://picsum.photos/1000"
-              alt="Banner"
-              className="w-full h-full object-cover"
+            src="https://picsum.photos/1000"
+            alt="Banner"
+            className="w-full h-full object-cover"
           />
         </div>
         {/* Header */}
@@ -322,16 +331,16 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
         {/* Profile Actions */}
         <div className="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <button
-              onClick={() => handleOpenEditModal()}
-              className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between"
+            onClick={() => handleOpenEditModal()}
+            className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between"
           >
             <span>Edit Profile</span>
             <FaChevronRight className="text-gray-400" />
           </button>
           <div className="border-t border-gray-200"></div>
           <button
-              onClick={handleOpenChangePasswordModal}
-              className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between"
+            onClick={handleOpenChangePasswordModal}
+            className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-between"
           >
             <span>Change Password</span>
             <FaChevronRight className="text-gray-400" />
@@ -421,65 +430,65 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
 
       {/* Change Password Modal */}
       {isChangePasswordModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
-            <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
-              <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <button
-                    onClick={handleCloseChangePasswordModal}
-                    className="text-blue-500 font-semibold"
-                >
-                  Cancel
-                </button>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Change Password
-                </h2>
-                <button
-                    onClick={handleChangePassword}
-                    className="text-blue-500 font-semibold"
-                >
-                  Save
-                </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
+          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+              <button
+                onClick={handleCloseChangePasswordModal}
+                className="text-blue-500 font-semibold"
+              >
+                Cancel
+              </button>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Change Password
+              </h2>
+              <button
+                onClick={handleChangePassword}
+                className="text-blue-500 font-semibold"
+              >
+                Save
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
-              <div className="p-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Password
-                  </label>
-                  <input
-                      type="password"
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordChange}
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    New Password
-                  </label>
-                  <input
-                      type="password"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm New Password
-                  </label>
-                  <input
-                      type="password"
-                      name="confirmNewPassword"
-                      value={passwordData.confirmNewPassword}
-                      onChange={handlePasswordChange}
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  name="confirmNewPassword"
+                  value={passwordData.confirmNewPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
             </div>
           </div>
+        </div>
       )}
     </div>
   );

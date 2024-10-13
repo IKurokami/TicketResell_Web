@@ -9,6 +9,7 @@
 }
 
 .dialog-content {
+  margin-top: 2vh;
   position: absolute;
   top: 60px; /* Adjust this value based on your navbar height */
   left: 50%;

@@ -9,6 +9,7 @@ namespace Repositories.Repositories
     {
         private readonly TicketResellManagementContext _context;
         private readonly IAppLogger _logger;
+
         public OrderDetailRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
         {
             _context = context;
@@ -18,22 +19,27 @@ namespace Repositories.Repositories
 
         public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsByUsernameAsync(string username)
         {
-            return await _context.OrderDetails.Where(od => od.Order != null && od.Order.Buyer != null && od.Order.Buyer.Username == username)
+            return await _context.OrderDetails.Where(od =>
+                    od.Order != null && od.Order.Buyer != null && od.Order.Buyer.Username == username)
+                .Include(od => od.Ticket)
+                .ThenInclude(t => t.Seller)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsByBuyerIdAsync(string userId)
         {
             return await _context.OrderDetails.Where(od => od.Order != null && od.Order.BuyerId == userId)
+                .Include(od => od.Ticket)
+                .ThenInclude(t => t.Seller)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<OrderDetail?>> GetOrderDetailsBySellerIdAsync(string sellerId)
         {
             return await _context.OrderDetails.Where(od => od.Ticket != null && od.Ticket.SellerId == sellerId)
+                .Include(od => od.Ticket)
+                .ThenInclude(t => t.Seller)
                 .ToListAsync();
         }
-
-
     }
 }

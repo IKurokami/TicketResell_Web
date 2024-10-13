@@ -205,13 +205,7 @@ const Login: React.FC = () => {
               <ActionButton onClick={handleSignIn}>Sign in</ActionButton>
               <p className="center-text">or</p>
               <div className="social-buttons">
-                <SocialButton
-                  className="facebook"
-                  icon={<FaFacebookF />}
-                  onClick={handleSignIn}
-                >
-                  Continue with Facebook
-                </SocialButton>
+                
                 <SocialButton
                   className="google"
                   icon={<FaGoogle />}
@@ -257,13 +251,7 @@ const Login: React.FC = () => {
               <ActionButton onClick={handleSignUp}>Sign up</ActionButton>
               <p className="center-text">or</p>
               <div className="social-buttons">
-                <SocialButton
-                  className="facebook"
-                  icon={<FaFacebookF />}
-                  onClick={handleSignIn}
-                >
-                  Continue with Facebook
-                </SocialButton>
+               
                 <SocialButton
                   className="google"
                   icon={<FaGoogle />}
