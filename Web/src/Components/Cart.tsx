@@ -96,7 +96,12 @@ const MyCart: React.FC = () => {
   }, [items]);
 
   const paymentMethods = [
-    { id: "bank-transfer", name: "Bank Transfer", icon: BuildingBankRegular },
+    {
+      id: "VNPay",
+      name: "VNPay",
+      imageUrl:
+        "https://downloadlogomienphi.com/sites/default/files/logos/download-logo-vector-vnpayqr-noqr-mien-phi.jpg",
+    },
     {
       id: "momo",
       name: "MoMo",
@@ -182,18 +187,21 @@ const MyCart: React.FC = () => {
 
   // Function to format price to VND
   const formatPriceVND = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
   };
 
   // Function to format date and time
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit'
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -218,7 +226,7 @@ const MyCart: React.FC = () => {
                 className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-6 sm:gap-4 sm:items-center relative"
               >
                 {/* Delete button positioned absolutely at top right with label */}
-                <div className="absolute bottom-2 right-2 mr-1 group">
+                <div className="absolute bottom-2 right-2 mr-4 group">
                   <button
                     onClick={() => handleRemoveItem(item.ticketId)}
                     className="rounded-full flex items-center justify-center focus-within:outline-red-500"
@@ -330,7 +338,7 @@ const MyCart: React.FC = () => {
                   {formatPriceVND(item.price * item.quantity)}
                 </div>
 
-                <div className="absolute top-2 right-2 mr-1 group">
+                <div className="absolute top-2 right-2 mr-4 group">
                   <label className="inline-flex items-center cursor-pointer">
                     <span className="mr-2 text-gray-700">Select</span>
                     <input
