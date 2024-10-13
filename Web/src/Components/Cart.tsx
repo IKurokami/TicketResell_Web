@@ -3,7 +3,7 @@ import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
 import { BuildingBankRegular } from "@fluentui/react-icons";
 import Cookies from "js-cookie";
-import { CheckCircle, Calendar } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { fetchImage } from "@/models/FetchImage";
 
 export interface CartItem {
@@ -30,6 +30,7 @@ const MyCart: React.FC = () => {
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const router = useRouter();
 
+  // Fetch cart items when component loads
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
@@ -58,7 +59,7 @@ const MyCart: React.FC = () => {
             let image =
               "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"; // default image
 
-            if (item.ticketId && !image) {
+            if (item.ticketId) {
               const { imageUrl: fetchedImageUrl, error } = await fetchImage(
                 item.ticketId
               );
@@ -90,12 +91,16 @@ const MyCart: React.FC = () => {
     fetchCartItems();
   }, []);
 
+  useEffect(() => {
+    console.log("Cart items updated: ", items);
+  }, [items]);
+
   const paymentMethods = [
     {
-      id: "VNPay",
-      name: "VNPay",
+      id: "VNpay",
+      name: "VNpay",
       imageUrl:
-        "https://downloadlogomienphi.com/sites/default/files/logos/download-logo-vector-vnpayqr-noqr-mien-phi.jpg",
+        "https://vinadesign.vn/uploads/images/2023/05/vnpay-logo-vinadesign-25-12-57-55.jpg",
     },
     {
       id: "momo",
@@ -103,8 +108,15 @@ const MyCart: React.FC = () => {
       imageUrl:
         "https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png",
     },
+    {
+      id: "Paypal",
+      name: "Paypal",
+      imageUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png",
+    },
   ];
 
+  // Filter selected items for checkout
   const selectedItems = items.filter((item) => item.isSelected);
   const totalItemsPrice = selectedItems.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -112,20 +124,24 @@ const MyCart: React.FC = () => {
   );
   const totalPrice = totalItemsPrice > 0 ? totalItemsPrice : 0;
 
+  // Select a cart item
   const handleSelect = (id: string) => {
-    setItems(items.map((item) =>
+    const updatedItems = items.map((item) =>
       item.orderDetailId === id
         ? { ...item, isSelected: !item.isSelected }
         : item
-    ));
+    );
+    setItems(updatedItems);
   };
 
+  // Select payment method
   const handleSelectPayment = (id: string) => {
     setSelectedPayment((prev) => (prev === id ? null : id));
   };
 
+  // Change item quantity
   const handleQuantityChange = (id: string, increment: boolean) => {
-    setItems(items.map((item) => {
+    const updatedItems = items.map((item) => {
       if (item.orderDetailId === id) {
         const newQuantity = increment
           ? item.quantity + 1
@@ -133,9 +149,11 @@ const MyCart: React.FC = () => {
         return { ...item, quantity: newQuantity };
       }
       return item;
-    }));
+    });
+    setItems(updatedItems);
   };
 
+  // Remove item from cart
   const handleRemoveItem = async (ticketId: string) => {
     const userId = Cookies.get("id");
     try {
@@ -154,6 +172,7 @@ const MyCart: React.FC = () => {
     }
   };
 
+  // Proceed to checkout
   const handleCheckout = () => {
     const productsForCheckout = items.filter((item) => item.isSelected);
     if (productsForCheckout.length === 0) {
@@ -195,7 +214,7 @@ const MyCart: React.FC = () => {
   return (
     <div className="mt-24 w-full-screen rounded">
       <div className="mx-auto bg-white rounded-t-xl overflow-hidden">
-        <div className="p-6 flex flex-col lg:flex-row relative">
+        <div className="px-24 pb-16 flex flex-col lg:flex-row relative">
           {/* Left Column: Tickets Table */}
           <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
             <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
@@ -325,7 +344,7 @@ const MyCart: React.FC = () => {
                   {formatPriceVND(item.price * item.quantity)}
                 </div>
 
-                <div className="absolute top-2 right-2 mr-4 group">
+                <div className="absolute top-2 right-2 mr-1 group">
                   <label className="inline-flex items-center cursor-pointer">
                     <span className="mr-2 text-gray-700">Select</span>
                     <input
@@ -352,7 +371,7 @@ const MyCart: React.FC = () => {
           </div>
 
           {/* Right Column: Payment Method and Summary */}
-          <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky top-24 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+          <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky min-h-full">
             <div className="sticky top-0 bg-white z-10 py-4">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6">
                 Summary
