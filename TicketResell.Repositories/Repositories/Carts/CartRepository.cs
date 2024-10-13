@@ -22,7 +22,7 @@ namespace Repositories.Repositories
 
             return await _context.Orders
                 .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Ticket)
+                .ThenInclude(od => od.Ticket).ThenInclude(t => t.Seller)
                 .FirstOrDefaultAsync(o => o.BuyerId == userId && o.Status == (int)OrderStatus.Pending);
         }
 
