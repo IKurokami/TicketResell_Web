@@ -8,7 +8,7 @@ const TabNavigation = () => {
     { id: "past", label: "Past" },
   ];
 
-  const handleTabClick = (tabId : any) => {
+  const handleTabClick = (tabId: any) => {
     setActiveTab(tabId);
     // You can add additional logic here, like changing the route or fetching data
     console.log(`Tab clicked: ${tabId}`);
@@ -20,7 +20,7 @@ const TabNavigation = () => {
         <li key={tab.id} className="list-none">
           <button
             onClick={() => handleTabClick(tab.id)}
-            className={`no-underline cursor-pointer text-green-600 hover:text-green-800 disabled:pointer-events-none disabled:opacity-40 px-3 py-2 rounded-md transition-colors ${
+            className={`no-underline cursor-pointer text-nowrap text-green-600 hover:text-green-800 disabled:pointer-events-none disabled:opacity-40 px-3 py-2 h-12 rounded-md transition-colors ${
               activeTab === tab.id ? "bg-gray-100 font-semibold" : "font-normal"
             }`}
             aria-selected={activeTab === tab.id}

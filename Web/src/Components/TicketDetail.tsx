@@ -32,6 +32,7 @@ type seller = {
   username: string;
   fullname: string;
 };
+
 type Ticket = {
   name: string;
   cost: number;

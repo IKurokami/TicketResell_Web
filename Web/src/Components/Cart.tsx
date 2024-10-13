@@ -22,6 +22,7 @@ export interface CartItem {
 interface CartItemWithSelection extends CartItem {
   isSelected: boolean;
   imageUrl: string;
+  sellerName: string;
 }
 
 const MyCart: React.FC = () => {
@@ -53,8 +54,9 @@ const MyCart: React.FC = () => {
         const data = await response.json();
 
         const itemsWithSelection = await Promise.all(
-          data.data.map(async (item: CartItem) => {
-            let image = item.ticket.imageUrl;
+          data.data.map(async (item: any) => {
+            let image =
+              "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"; // default image
 
             if (item.ticketId && !image) {
               const { imageUrl: fetchedImageUrl, error } = await fetchImage(
@@ -74,6 +76,7 @@ const MyCart: React.FC = () => {
               ...item,
               imageUrl: image,
               isSelected: false,
+              sellerName: item.ticket.seller.fullname,
             };
           })
         );
@@ -88,7 +91,12 @@ const MyCart: React.FC = () => {
   }, []);
 
   const paymentMethods = [
-    { id: "bank-transfer", name: "Bank Transfer", icon: BuildingBankRegular },
+    {
+      id: "VNPay",
+      name: "VNPay",
+      imageUrl:
+        "https://downloadlogomienphi.com/sites/default/files/logos/download-logo-vector-vnpayqr-noqr-mien-phi.jpg",
+    },
     {
       id: "momo",
       name: "MoMo",
@@ -164,10 +172,31 @@ const MyCart: React.FC = () => {
     router.push("/checkout");
   };
 
+  // Function to format price to VND
+  const formatPriceVND = (price: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  };
+
+  // Function to format date and time
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className="mt-24 w-full-screen rounded">
       <div className="mx-auto bg-white rounded-t-xl overflow-hidden">
         <div className="p-6 flex flex-col lg:flex-row relative">
+          {/* Left Column: Tickets Table */}
           <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
             <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
               Shopping Cart
@@ -183,6 +212,7 @@ const MyCart: React.FC = () => {
                 key={item.orderDetailId}
                 className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-6 sm:gap-4 sm:items-center relative"
               >
+                {/* Delete button positioned absolutely at top right with label */}
                 <div className="absolute bottom-2 right-2 mr-1 group">
                   <button
                     onClick={() => handleRemoveItem(item.ticketId)}
@@ -221,44 +251,81 @@ const MyCart: React.FC = () => {
                     className="w-64 h-32 object-cover rounded mr-4"
                   />
                   <div>
-                    <h3 className="font-medium text-gray-900">
+                    <h3 className="font-bold text-lg text-gray-900">
                       {item.ticket.name}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {new Date(item.ticket.startDate).toLocaleDateString()}
+                      {formatDateTime(item.ticket.startDate)}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Seller: {item.sellerName}
                     </p>
                   </div>
                 </div>
                 <div className="mb-2 sm:mb-0">
-                  <span className="sm:hidden font-medium mr-2">Price:</span>€
-                  {item.price.toFixed(2)}
+                  <span className="sm:hidden font-medium mr-2">Price:</span>
+                  {formatPriceVND(item.price)}
                 </div>
-                <div className="flex items-center mb-2 sm:mb-0">
+                <div className="flex items-center justify-between sm:mb-0">
                   <span className="sm:hidden font-medium mr-2">Quantity:</span>
-                  <button
-                    onClick={() =>
-                      handleQuantityChange(item.orderDetailId, false)
-                    }
-                    className="text-gray-500 hover:text-gray-600"
-                  >
-                    -
-                  </button>
-                  <span className="mx-2">{item.quantity}</span>
-                  <button
-                    onClick={() =>
-                      handleQuantityChange(item.orderDetailId, true)
-                    }
-                    className="text-gray-500 hover:text-gray-600"
-                  >
-                    +
-                  </button>
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleQuantityChange(item.orderDetailId, false)
+                      }
+                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                    >
+                      <svg
+                        className="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 18 2"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M1 1h16"
+                        />
+                      </svg>
+                    </button>
+                    <span className="mx-2 w-10 shrink-0 text-center text-sm font-medium text-gray-900">
+                      {item.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleQuantityChange(item.orderDetailId, true)
+                      }
+                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                    >
+                      <svg
+                        className="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 18 18"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 1v16M1 9h16"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div className="mb-2 sm:mb-0">
-                  <span className="sm:hidden font-medium mr-2">Total:</span>€
-                  {(item.price * item.quantity).toFixed(2)}
+                  <span className="sm:hidden font-medium mr-2">Total:</span>
+                  {formatPriceVND(item.price * item.quantity)}
                 </div>
 
-                <div className="absolute top-2 right-2 mr-1 group">
+                <div className="absolute top-2 right-2 mr-4 group">
                   <label className="inline-flex items-center cursor-pointer">
                     <span className="mr-2 text-gray-700">Select</span>
                     <input
@@ -284,6 +351,7 @@ const MyCart: React.FC = () => {
             ))}
           </div>
 
+          {/* Right Column: Payment Method and Summary */}
           <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky top-24 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
             <div className="sticky top-0 bg-white z-10 py-4">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -299,7 +367,7 @@ const MyCart: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Subtotal</span>
                   <span className="text-sm font-medium text-gray-900">
-                    € {totalItemsPrice.toFixed(2)}
+                    {formatPriceVND(totalItemsPrice)}
                   </span>
                 </div>
 
@@ -338,7 +406,7 @@ const MyCart: React.FC = () => {
                     Total Price
                   </span>
                   <span className="text-lg font-semibold text-green-600">
-                    € {totalPrice.toFixed(2)}
+                    {formatPriceVND(totalPrice)}
                   </span>
                 </div>
 
