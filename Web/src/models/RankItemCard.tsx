@@ -107,7 +107,13 @@ export const RankItemCard: React.FC<RankItemCardProps> = ({
       <div className="left-info">
         <span className="rank">{rank}</span>
         <span className="ticket" style={{ width: "22rem" }}>
-          <img src={ticketImage} alt={ticketText} className="ticket-image" />
+          <Image
+            src={ticketImage}
+            alt={ticketText}
+            className="ticket-image"
+            width={50}
+            height={50}
+          />
           <div>
             <span>{ticketText}</span>
             <span style={{ fontSize: "0.8rem" }}>{date}</span>
@@ -117,7 +123,6 @@ export const RankItemCard: React.FC<RankItemCardProps> = ({
       </div>
       <div className="right-info">
         <span className="price">{price}</span>
-        <span className="amount">{amount}</span>
       </div>
     </div>
   );

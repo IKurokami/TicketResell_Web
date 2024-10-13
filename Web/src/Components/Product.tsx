@@ -1,5 +1,6 @@
 import React from "react";
 import "@/Css/Product.css";
+import Link from "next/link";
 
 const posters = [
   {
@@ -113,10 +114,10 @@ const Product = () => {
       <div className="product-list">
         {posters.map((poster, index) => (
           <div key={index} className="product-item">
-            <a href={poster.eventUrl}>
+            <Link href={poster.eventUrl}>
               <img src={poster.imageUrl} alt={poster.title} />
               <p>{poster.title}</p>
-            </a>
+            </Link>
           </div>
         ))}
       </div>
