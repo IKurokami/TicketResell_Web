@@ -1,4 +1,4 @@
-import { log } from "console";
+
 
 // authService.ts
 export const logoutUser = async (userId: string | undefined) => {
