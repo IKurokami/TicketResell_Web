@@ -1,7 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DateFilter from '@/Components/datefilter'; // Đường dẫn đến file chứa DateFilter
+import { fetchImage } from "@/models/FetchImage";
+
 
 // Custom icon components
 
@@ -17,11 +19,12 @@ const IconUser = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M14.83 14.83a4 4 0 0 0-5.66 0L3 21h18l-5.17-6.17z" />
-    <path d="M9 9a4 4 0 1 0 6 0 4 4 0 0 0-6 0z" />
+    <circle cx="12" cy="12" r="10" stroke="#4A4A4A" strokeWidth="2" fill="#EAEAEA" />
+    <path d="M14.83 14.83a4 4 0 0 0-5.66 0L3 21h18l-5.17-6.17z" stroke="#4A4A4A" />
+    <path d="M9 9a4 4 0 1 0 6 0 4 4 0 0 0-6 0z" stroke="#4A4A4A" fill="#EAEAEA" />
   </svg>
 );
+
 const IconCalendar = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -277,60 +280,91 @@ const MyTicketsPage = () => {
       .includes(searchTerm.toLowerCase());
     const matchesDate =
       !selectedDate || order.date.startsWith(selectedDate); // So khớp theo ngày
-    
+
     return matchesCategory && matchesStatus && matchesSearch && matchesDate;
   });
-  
+
   return (
     <div className="mt-24 min-h-screen w-full bg-gray-50 py-12 px-6 sm:px-8 lg:px-12">
       <h1 className="text-4xl font-bold mb-8 text-gray-900">My Tickets</h1>
 
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-        <div className="relative mb-4 sm:mb-0">
+        <div className="relative w-full sm:w-1/3 mb-4 sm:mb-0">
           <input
             type="text"
             placeholder="Search events or sellers"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 w-full sm:w-64 rounded border-gray-300 focus:outline-none focus:ring focus:ring-blue-300"
+            className="px-4 py-3 w-full rounded-full border border-gray-300 focus:outline-none focus:ring focus:ring-blue-300"
           />
-          <div className="absolute right-3 top-2">
+          <div className="absolute right-3 top-3">
             <IconSearch />
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <div>
+
+
+        <div className="flex flex-wrap items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
+          <div className="w-full sm:w-auto relative mt-4">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 rounded border-gray-300 focus:outline-none focus:ring focus:ring-blue-300"
+              className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300 appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23000000'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E")`,
+                backgroundPosition: 'right 1rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.25rem', // Adjusted size for better visibility
+              }}
             >
-              <option value="All">Categories</option>
+              <option value="All">All</option>
               <option value="Sport">Sport</option>
               <option value="Comedy">Comedy</option>
               <option value="Horror">Horror</option>
               <option value="Romance">Romance</option>
               <option value="Musical">Musical</option>
-
             </select>
           </div>
 
-          <div>
+          <div className="w-full sm:w-auto relative mt-4">
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-4 py-2 rounded border-gray-300 focus:outline-none focus:ring focus:ring-blue-300"
+              className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300 appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23000000'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E")`,
+                backgroundPosition: 'right 1rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.25rem', // Adjusted size for better visibility
+              }}
             >
               <option value="All"> Status</option>
               <option value="Coming Soon">Coming Soon</option>
               <option value="Expired">Expired</option>
             </select>
           </div>
-                    <DateFilter selectedDate={selectedDate} onDateChange={handleDateChange} />
 
+
+          {/* Date Filter */}
+          <DateFilter selectedDate={selectedDate} onDateChange={handleDateChange} />
+
+          {/* Reset Button */}
+          <div className="w-full sm:w-auto">
+            <button
+              onClick={() => {
+                setSelectedCategory("All");
+                setSelectedStatus("All");
+                setSelectedDate("");
+                setSearchTerm("");
+              }}
+              className="mt-4 px-2 py-1 bg-gray-200 text-gray-600 rounded focus:outline-none focus:ring focus:ring-gray-400"
+            >
+              Default
+            </button>
+          </div>
         </div>
-        
+
+
       </div>
 
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
@@ -392,6 +426,7 @@ const MyTicketsPage = () => {
               </div>
 
               <div className="mt-4 flex justify-between items-center">
+
                 <div className="flex items-center space-x-1">
                   {[...Array(5)].map((_, i) => (
                     <button
@@ -422,6 +457,7 @@ const MyTicketsPage = () => {
 
         </button>
       </div>
+
 
     </div>
   );

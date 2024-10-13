@@ -11,9 +11,9 @@ const DateFilter: React.FC<DateFilterProps> = ({ selectedDate, onDateChange }) =
   };
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center space-x-4 mt-4">
       <label htmlFor="date" className="text-gray-700 font-medium">
-        Filter by Date:
+       
       </label>
       <input
         type="date"
