@@ -44,7 +44,7 @@ const ProfileForm: React.FC = () => {
         `http://localhost:5296/api/user/updateseller/${id}`,
         {
           method: "PUT",
-          credentials: "include", // Assuming you're updating the seller, hence using PUT
+          credentials: "include", 
           headers: {
             "Content-Type": "application/json",
           },
