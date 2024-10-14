@@ -18,8 +18,8 @@ export const convertToTicketCards = async (response: any[]): Promise<TicketCard[
     response.map(async (item) => {
       let imageUrl = DEFAULT_IMAGE;
 
-      if (item.ticketId) {
-        const { imageUrl: fetchedImageUrl, error } = await fetchImage(item.ticketId);
+      if (item.image) {
+        const { imageUrl: fetchedImageUrl, error } = await fetchImage(item.image);
 
         if (fetchedImageUrl) {
           imageUrl = fetchedImageUrl;
