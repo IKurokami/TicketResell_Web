@@ -7,9 +7,7 @@ import Background from '@/Components/Background';
 
 const MyCart = () => {
     return (
-       
         <Background test={ <Cart/>} />
-   
     );
 };
 

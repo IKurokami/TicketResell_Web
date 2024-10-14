@@ -17,6 +17,7 @@
     color: gray;
 }
 
+
 .left-rank .rank-bar-container{
     padding-left: 6.5rem;
     background-color: white;
@@ -138,8 +139,15 @@
     display: flex;
     justify-content: space-between;
     background-color: white;
+    cursor: pointer;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 20px;
 }
 
+.rank-item-card:hover{
+    background-color: rgb(242, 242, 242);
+}
 
 
 @media (max-width: 1300px) {

@@ -174,6 +174,13 @@ namespace TicketResell.Repositories.Controllers
             return ResponseParser.Result(response);
         }
 
+        [HttpPost]
+        [Route("getByCate")]
+        public async Task<IActionResult> GetTicketByCateId([FromBody] string [] id)
+        {
+            var response = await _ticketService.GetTicketByCategoryIdAsync(id);
+            return ResponseParser.Result(response);
+        }
 
     }
 }
