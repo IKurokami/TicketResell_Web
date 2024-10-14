@@ -134,7 +134,7 @@ const IconMessageCircle = () => (
   </svg>
 );
 
-const IconStar = ( filled :any ) => (
+const IconStar = (filled: any) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -205,20 +205,20 @@ const MyTicketsPage = () => {
             },
           }
         );
-  
+
         const result = await response.json();
         console.log(result);
-  
+
         if (response.ok) {
           const transformedOrders = await Promise.all(
             result.data.map(async (order: any, index: number) => {
               let image = 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451';
-  
+
               if (order.ticket.ticketId) {
                 const { imageUrl: fetchedImageUrl, error } = await fetchImage(
                   order.ticket.ticketId
                 );
-  
+
                 if (fetchedImageUrl) {
                   image = fetchedImageUrl;
                 } else {
@@ -227,7 +227,7 @@ const MyTicketsPage = () => {
                   );
                 }
               }
-  
+
               return {
                 id: index + 1,
                 ticket: order.ticket.name,
@@ -237,13 +237,13 @@ const MyTicketsPage = () => {
                 seller: order.ticket.seller.fullname,
                 quantity: order.quantity,
                 imgURL: image, // Placeholder image URL
-                tags: [], // You can add tags if available in your data
-                rating: 0, // Default rating
+                tags: order.ticket.tags || [], // Giá trị mặc định nếu không có tags
+                location: order.ticket.location || 'Unknown', // Add the location field
               };
-              
+
             })
           );
-  
+
           setOrders(transformedOrders);
         } else {
           console.error('Failed to fetch orders:', result.message);
@@ -252,11 +252,11 @@ const MyTicketsPage = () => {
         console.error('Error fetching orders:', error);
       }
     };
-  
+
     fetchOrders();
   }, []);
-  
-  
+
+
   const handleNavigation = () => {
     router.push('/search'); // Navigate to the /search page
   };
@@ -264,13 +264,14 @@ const MyTicketsPage = () => {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleRating = (orderId:any, rating:any) => {
+  const handleLocation = (orderId: any, location: string) => {
     setOrders(
       orders.map((order) =>
-        order.id === orderId ? { ...order, rating } : order
+        order.id === orderId ? { ...order, location } : order
       )
     );
   };
+
   const [selectedDate, setSelectedDate] = useState(""); // Thêm trạng thái cho bộ lọc ngày
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
@@ -365,7 +366,7 @@ const MyTicketsPage = () => {
               }}
               className="mt-4 px-2 py-1 bg-gray-200 text-gray-600 rounded focus:outline-none focus:ring focus:ring-gray-400"
             >
-              Default
+              Reset filter
             </button>
           </div>
         </div>
@@ -419,7 +420,7 @@ const MyTicketsPage = () => {
 
 
               <div className="flex items-center space-x-1">
-                {order.tags.map((tag:any, index:number) => (
+                {order.tags.map((tag: any, index: number) => (
                   <span
                     key={index}
                     className="text-xs text-white bg-blue-600 px-2 py-1 rounded"
@@ -432,22 +433,14 @@ const MyTicketsPage = () => {
               </div>
 
               <div className="mt-4 flex justify-between items-center">
-
-                <div className="flex items-center space-x-1">
-                  {[...Array(5)].map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleRating(order.id, i + 1)}
-                    >
-                      <IconStar filled={i + 1 <= order.rating} />
-                    </button>
-                  ))}
+                <div className="text-gray-700">
+                  <p className="font-medium">Location: {order.location}</p>
                 </div>
-
-                <button className="bg-blue-500 text-white px-4 py-2 rounded">
+                <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow">
                   View
                 </button>
               </div>
+
             </div>
           </div>
         ))}

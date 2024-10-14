@@ -3,6 +3,7 @@ import { promises } from "dns";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { fetchImage } from "./FetchImage";
+import Image from "next/image";
 
 export interface BannerItemCard {
   imageUrl: string;
@@ -24,7 +25,7 @@ const convertToBannerItemCards = async (
     response.map(async (item) => {
       let imageUrl = DEFAULT_IMAGE;
 
-      if (item.ticketId) {
+      if (item.image) {
         const { imageUrl: fetchedImageUrl, error } = await fetchImage(
           item.ticketId
         );
@@ -72,7 +73,12 @@ export const fetchBannerItems = async (): Promise<BannerItemCard[]> => {
 const BannerItemCard = ({ itemCart }: { itemCart: BannerItemCard }) => {
   return (
     <div className="category-card">
-      <img src={itemCart.imageUrl} alt={itemCart.name} />
+      <Image
+        src={itemCart.imageUrl}
+        alt={itemCart.name}
+        width={50}
+        height={50}
+      />
       <div className="overlay">
         <div className="description">
           <div>

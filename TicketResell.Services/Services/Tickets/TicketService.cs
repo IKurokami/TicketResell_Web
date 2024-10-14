@@ -74,7 +74,35 @@ namespace TicketResell.Services.Services
                     }
                 }
             }
+            byte[] qrCodeBytes = null;
+            if (dto.Qrcode != null)
+            {
+                try
+                {
+                    var mimeTypes = new Dictionary<string, string>
+                    {
+                        { "data:image/png;base64,", ".png" },
+                        { "data:image/jpeg;base64,", ".jpg" },
+                        { "data:image/webp;base64,", ".webp" }
+                    };
 
+                    foreach (var mimeType in mimeTypes.Keys)
+                    {
+                        if (dto.Qrcode.StartsWith(mimeType))
+                        {
+                            dto.Qrcode = dto.Qrcode.Substring(mimeType.Length);
+                            break;
+                        }
+                    }
+
+                    qrCodeBytes = Convert.FromBase64String(dto.Qrcode);
+                }
+                catch (FormatException)
+                {
+                    return ResponseModel.BadRequest("Invalid QR code format");
+                }
+            }
+            newTicket.Qr = qrCodeBytes;
             newTicket.CreateDate = DateTime.UtcNow;
             newTicket.ModifyDate = DateTime.UtcNow;
             await _unitOfWork.TicketRepository.CreateTicketAsync(newTicket, dto.CategoriesId);

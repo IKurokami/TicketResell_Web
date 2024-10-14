@@ -4,23 +4,43 @@ import { getCategoryNames } from "../models/TicketFetch";
 
 interface TicketGridProps {
   paginatedTickets: any[];
+  maxTicketInRow: number;
 }
 
-const TicketGrid: React.FC<TicketGridProps> = ({ paginatedTickets }) => {
+const TicketGrid: React.FC<TicketGridProps> = ({
+  paginatedTickets,
+  maxTicketInRow,
+}) => {
+  const formatVND = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
+  const gridColumns = Math.min(maxTicketInRow, 4);
+  const gridClass = `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-${gridColumns} gap-4`;
+
   return (
-    <section>
-      {/* Ticket Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    <section className="relative">
+      <div
+        className="absolute h-1 bg-green-500 opacity-0.1"
+        style={{ zIndex: 20 }}
+      ></div>
+      <div className={gridClass}>
         {paginatedTickets.length > 0 ? (
           paginatedTickets.map((ticket, index) => (
             <Link
+              key={ticket.ticketId}
               className="no-underline"
               href={`/ticket/${ticket.ticketId}`}
-              key={index}
               passHref
             >
-              <div className="movie-card-wrapper cursor-pointer">
-                <div className="bg-transparent rounded-2xl shadow overflow-hidden movie-card flex flex-col h-full transition-transform duration-300 ease-in-out transform hover:scale-105 hover:z-10">
+              <div
+                className="movie-card-wrapper cursor-pointer"
+                data-index={index}
+              >
+                <div className="bg-transparent rounded-2xl border overflow-hidden movie-card flex flex-col h-full shadow-sm hover:shadow-md transition-shadow duration-300">
                   <div className="relative flex-grow">
                     <img
                       src={
@@ -28,20 +48,20 @@ const TicketGrid: React.FC<TicketGridProps> = ({ paginatedTickets }) => {
                         "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"
                       }
                       alt={ticket.name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-40 sm:h-48 object-cover"
                     />
-                    <div className="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 rounded-bl-2xl">
-                      ${ticket.cost}
+                    <div className="absolute top-0 right-0 bg-green-500 text-white px-2 py-1 text-sm sm:px-3 sm:py-1 sm:text-base rounded-bl-2xl">
+                      {formatVND(ticket.cost)}
                     </div>
                   </div>
-                  <div className="p-4 flex-grow flex flex-col">
-                    <h3 className="text-lg font-semibold mb-1 text-gray-900">
+                  <div className="p-3 sm:p-4 flex-grow flex flex-col">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1 text-gray-900 line-clamp-2">
                       {ticket.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-1">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">
                       {ticket.location}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-gray-600">
                       {new Date(ticket.startDate).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -50,33 +70,32 @@ const TicketGrid: React.FC<TicketGridProps> = ({ paginatedTickets }) => {
                         minute: "2-digit",
                       })}
                     </p>
-                    <div className="tokenize-wrapper mt-2">
-                      {/* Ensure the categories section is present, even if empty */}
+                    <div className="tokenize-wrapper mt-2 overflow-hidden">
                       <div className="flex flex-wrap">
                         {getCategoryNames(ticket)
                           .split(",")
                           .filter((category) => category.trim() !== "")
-                          .map((category) => (
+                          .slice(0, 3) // Limit to 3 categories
+                          .map((category, catIndex) => (
                             <span
                               key={category}
-                              className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 text-sm"
+                              className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 mb-1 text-xs sm:text-sm"
                             >
                               {category.trim()}
                             </span>
                           ))}
+                        {getCategoryNames(ticket).trim() === "" && (
+                          <span
+                            key="No categories"
+                            className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 mb-1 text-xs sm:text-sm"
+                          >
+                            No categories
+                          </span>
+                        )}
                       </div>
-                      {/* Fallback for empty categories */}
-                      {getCategoryNames(ticket).trim() === "" && (
-                        <span
-                          key="No categories"
-                          className="token bg-gray-200 text-gray-700 rounded-full px-2 py-1 mr-1 text-sm"
-                        >
-                          No categories
-                        </span>
-                      )}
                     </div>
                     <div className="card-content mt-auto">
-                      <p className="text-sm text-gray-700">
+                      <p className="text-xs sm:text-sm text-gray-700 line-clamp-2">
                         An exciting event you won't want to miss!
                       </p>
                     </div>
