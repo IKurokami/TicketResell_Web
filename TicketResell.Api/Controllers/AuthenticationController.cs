@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Helper;
 
@@ -63,6 +64,40 @@ namespace Api.Controllers
             return ResponseParser.Result(result);
         }
         
+        [HttpGet("login-google")]
+        public async Task<IActionResult> LoginWithGoogle([FromQuery] string accessToken)
+        {
+            var client = new HttpClient();
+            var googleUserInfoUrl = $"https://www.googleapis.com/oauth2/v3/userinfo?access_token={accessToken}";
+            var response = await client.GetAsync(googleUserInfoUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return ResponseParser.Result(ResponseModel.Unauthorized("Invalid Google access token"));
+            }
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            
+            var googleUser = JsonConvert.DeserializeObject<GoogleUserInfoDto>(jsonString);
+            
+            if (googleUser == null || string.IsNullOrEmpty(googleUser.Email))
+            {
+                return ResponseParser.Result(ResponseModel.Unauthorized("Unable to retrieve user info from Google"));
+            }
+
+            var result = await _authService.LoginWithGoogleAsync(googleUser.Email);
+            if (result.Data != null && result.Data is LoginInfoDto loginInfo)
+            {
+                if (loginInfo.User != null)
+                    HttpContext.SetUserId(loginInfo.User.UserId);
+
+                HttpContext.SetAccessKey(loginInfo.AccessKey);
+                HttpContext.SetIsAuthenticated(true);
+            }
+
+            return ResponseParser.Result(result);
+        }
+        
         [HttpPost("islogged")]
         public async Task<IActionResult> IsLogged()
         {
@@ -98,18 +133,10 @@ namespace Api.Controllers
             return ResponseParser.Result(result);
         }
 
-        [HttpPost("send-verification-email")]
-        public async Task<IActionResult> SendVerificationEmail([FromBody] string userId)
+        [HttpPost("putOTP")]
+        public async Task<IActionResult> SendVerificationEmail([FromBody] string data)
         {
-            var result = await _authService.SendVerificationEmailAsync(userId);
-            return ResponseParser.Result(result);
-        }
-
-        [HttpGet("confirm-email")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
-        {
-            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
-            var result = await _authService.ConfirmEmailAsync(userId, decodedToken);
+            var result = await _authService.PutOtpAsync(data);
             return ResponseParser.Result(result);
         }
     }
