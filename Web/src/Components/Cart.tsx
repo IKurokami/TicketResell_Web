@@ -59,9 +59,9 @@ const MyCart: React.FC = () => {
             let image =
               "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"; // default image
 
-            if (item.ticketId) {
+            if (item.image) {
               const { imageUrl: fetchedImageUrl, error } = await fetchImage(
-                item.ticketId
+                item.image
               );
 
               if (fetchedImageUrl) {

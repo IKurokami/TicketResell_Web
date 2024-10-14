@@ -18,8 +18,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
     }).format(amount);
   };
 
-  const gridColumns = Math.min(maxTicketInRow, 4);
-  const gridClass = `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-${gridColumns} gap-4`;
+  const gridColumns = Math.min(maxTicketInRow, 5);
 
   return (
     <section className="relative">
@@ -27,7 +26,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
         className="absolute h-1 bg-green-500 opacity-0.1"
         style={{ zIndex: 20 }}
       ></div>
-      <div className={gridClass}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-${gridColumns} lg:grid-cols-${gridColumns} gap-4`}>
         {paginatedTickets.length > 0 ? (
           paginatedTickets.map((ticket, index) => (
             <Link
