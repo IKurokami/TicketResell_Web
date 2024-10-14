@@ -497,7 +497,11 @@ const AddTicketModal: React.FC = () => {
                       (file, idx) =>
                         idx === index &&
                         file && (
-                          <div key={idx} className="qr-preview mt-3">
+                          <div key={idx} className="qr-preview mt-3" onClick={() =>
+                            document
+                              .getElementById(`qrImageInput${index}`)
+                              ?.click()
+                          } >
                             <img
                               src={file}
                               alt={`QR Code ${index + 1}`}

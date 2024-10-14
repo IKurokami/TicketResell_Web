@@ -24,7 +24,7 @@ const convertToBannerItemCards = async (
     response.map(async (item) => {
       let imageUrl = DEFAULT_IMAGE;
 
-      if (item.ticketId) {
+      if (item.image) {
         const { imageUrl: fetchedImageUrl, error } = await fetchImage(
           item.ticketId
         );
