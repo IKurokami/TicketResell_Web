@@ -85,7 +85,7 @@ namespace Api.Controllers
                 return ResponseParser.Result(ResponseModel.Unauthorized("Unable to retrieve user info from Google"));
             }
 
-            var result = await _authService.LoginWithGoogleAsync(googleUser.Email);
+            var result = await _authService.LoginWithGoogleAsync(googleUser);
             if (result.Data != null && result.Data is LoginInfoDto loginInfo)
             {
                 if (loginInfo.User != null)
