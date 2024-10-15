@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import { removeAllCookies } from "./Cookie";
 import { useRouter } from "next/navigation";
 import SellPopup from "./PopUp";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 import { CheckSeller } from "./CheckSeller";
 interface NavbarProps {
@@ -134,7 +135,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     const id = Cookies.get("id");
 
     if (!id) {
-      router.push("/login");
+      // router.push("/login");
       return;
     }
     const fetchCart = async () => {
@@ -179,17 +180,18 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
   // Handle logout
   const handleLogout = async () => {
-    const isLoggedOut = await logoutUser(Cookies.get("id"));
+    await signOut();
 
+    const isLoggedOut = await logoutUser(Cookies.get("id"));
+    removeAllCookies();
     if (isLoggedOut) {
-      removeAllCookies();
       setDropdownVisible(false);
       setIsLoggedIn(false);
-      router.push("/login");
     } else {
       console.log("Failed to log out. Please try again.");
-      // Nếu không hợp lệ, chuyển đến trang login
     }
+
+    removeAllCookies();
   };
 
   return (
@@ -423,7 +425,9 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 </a>
                 <Link
                   href="/login"
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                  }}
                   className="block px-3 py-2 text-xs text-red-600 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
