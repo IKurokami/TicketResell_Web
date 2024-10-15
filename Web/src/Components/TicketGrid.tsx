@@ -19,7 +19,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   };
 
   const gridColumns = Math.min(maxTicketInRow, 4);
-  const gridClass = `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-${gridColumns} gap-4`;
+  const gridClass = `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-${gridColumns} md:grid-cols-${gridColumns} gap-4`;
 
   return (
     <section className="relative">

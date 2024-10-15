@@ -15,51 +15,6 @@ const Trend = () => {
   const [ticketTimeRange, setTicketTimeRange] = useState("60.00:00:00");
   const [error, setError] = useState("");
   const [banks, setBanks] = useState<Bank[]>([]);
-  // const [error, setError] = useState<string | null>(null);
-
-  /* ... */
-
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  useEffect(() => {
-    // Fetch bank list from the API route
-    const fetchBankList = async () => {
-      try {
-        const response = await fetch("/api/getBankList");
-        if (!response.ok) {
-          throw new Error("Failed to fetch bank list");
-        }
-        const data: Bank[] = await response.json();
-        setBanks(data); // Set bank list to state
-
-        console.log(data);
-      } catch (error) {
-        // setError(error.message);
-      }
-    };
-
-    fetchBankList(); // Call the function on component mount
-  }, []);
-
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPaymentUrl = async () => {
-      try {
-        const response = await fetch("/api/getPaymentUrl"); // Adjust path as necessary
-        if (!response.ok) {
-          throw new Error("Failed to fetch payment URL");
-        }
-        const data = await response.json();
-        setPaymentUrl(data.paymentUrl);
-      } catch (error) {
-        console.error("Error fetching payment URL:", error);
-      }
-    };
-
-    fetchPaymentUrl();
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

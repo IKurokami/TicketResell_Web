@@ -12,18 +12,35 @@ const port = process.env.PORT || 3000;
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    // Check if the request method is POST
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     // Retrieve the client's IP address and ensure it's treated as a string
-    // const clientIp = Array.isArray(req.headers['x-forwarded-for']) 
-    //   ? req.headers['x-forwarded-for'][0] // Take the first IP if it's an array
-    //   : req.headers['x-forwarded-for'] || req.connection.remoteAddress || '1.1.1.1';
+    const clientIp = Array.isArray(req.headers['x-forwarded-for']) 
+      ? req.headers['x-forwarded-for'][0] // Take the first IP if it's an array
+      : req.headers['x-forwarded-for'] || req.connection.remoteAddress || '1.1.1.1';
+
+    // Extract amount and vnp_TxnRef from the request body
+    const { amount, vnp_TxnRef } = req.body;
+
+    // Validate the inputs
+    if (typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount. It must be a positive number.' });
+    }
+    
+    if (typeof vnp_TxnRef !== 'string' || vnp_TxnRef.trim() === '') {
+      return res.status(400).json({ error: 'Invalid transaction reference. It must be a non-empty string.' });
+    }
 
     // Build the payment URL
     const paymentUrl = vnpay.buildPaymentUrl(
       {
-        vnp_Amount: 10000, // Amount to be charged
-        vnp_IpAddr: "1.1.1.1", // Customer's IP address (asserted as string)
-        vnp_TxnRef: '123456asd', // Unique transaction reference
-        vnp_OrderInfo: 'Payment for order 123456asd', // Information about the order
+        vnp_Amount: amount, // Amount to be charged from the request
+        vnp_IpAddr: clientIp, // Customer's IP address (asserted as string)
+        vnp_TxnRef: vnp_TxnRef, // Unique transaction reference from the request
+        vnp_OrderInfo: `Payment for order ${vnp_TxnRef}`, // Information about the order
         vnp_OrderType: ProductCode.Other, // Type of product
         vnp_ReturnUrl: `http://localhost:${port}`, // Return URL after payment
       },
@@ -33,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           fields: ['createdAt', 'method', 'paymentUrl'], // Fields to log
           loggerFn: (data) => logToDatabase(data), // Custom logging function to save logs
         },
-        withHash:true,
+        withHash: true,
       },
     );
 
