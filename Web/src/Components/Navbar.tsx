@@ -154,16 +154,17 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   // Handle logout
   const handleLogout = async () => {
     await signOut();
-    removeAllCookies();
 
     const isLoggedOut = await logoutUser(Cookies.get("id"));
+    removeAllCookies();
     if (isLoggedOut) {
       setDropdownVisible(false);
       setIsLoggedIn(false);
     } else {
       console.log("Failed to log out. Please try again.");
-      // Nếu không hợp lệ, chuyển đến trang login
     }
+
+    removeAllCookies();
   };
 
   return (
@@ -398,7 +399,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 <Link
                   href="/login"
                   onClick={() => {
-                    handleLogout;
+                    handleLogout();
                   }}
                   className="block px-3 py-2 text-xs text-red-600 hover:bg-gray-50 transition-colors duration-150"
                 >

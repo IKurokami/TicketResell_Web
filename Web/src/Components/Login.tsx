@@ -62,11 +62,51 @@ const Login: React.FC = () => {
   const session = useSession();
 
   useEffect(() => {
-    if (session.status === "authenticated") {
-      Cookies.set("id", session.data.user?.email as string);
+    const handleLogin = async () => {
+      if (session.status === "authenticated") {
+        try {
+          const response = await fetch(
+            `http://localhost:5296/api/authentication/login-google?accessToken=${session?.data?.token?.accessToken}`,
+            {
+              credentials: "include",
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
-      router.push("/");
-    }
+          const result = await response.json();
+
+          if (!response.ok) {
+            console.error("Login error:", result);
+            setError(result.message || "Login Error.");
+          } else {
+            Cookies.set("id", result.data.user.userId);
+            Cookies.set("accessKey", result.data.accessKey);
+
+            if (Cookies) {
+              console.log("cookie saved");
+            }
+
+            setLoginSuccessMessage("Login successful!");
+            setTimeout(() => {
+              setLoginSuccessMessage(null);
+            }, 3000);
+
+            setTimeout(() => {
+              router.push("/");
+            }, 500);
+          }
+        } catch (error) {
+          console.error("Error during login:", error);
+          setError("An error occurred during login.");
+        }
+      }
+    };
+
+    // Call the async function
+    handleLogin();
   }, [session]);
 
   useEffect(() => {
