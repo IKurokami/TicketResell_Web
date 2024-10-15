@@ -25,6 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const isScrolled = page === "ticket" ? false : adjustedIsScrolled;
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
+  const [countCartItems, setCountCartItems] = useState<number>(0);
   const router = useRouter();
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
@@ -130,6 +131,32 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
         setIsLoggedIn(false); // User is logged out
       }
     };
+    const id = Cookies.get("id");
+
+    if (!id) {
+      router.push("/login");
+      return;
+    }
+    const fetchCart = async () => {
+      const response = await fetch(
+        `http://localhost:5296/api/cart/items/${id}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const result = await response.json();
+      if (result.data == null) {
+        setCountCartItems(0);
+      } else {
+        setCountCartItems(result.data.length);
+      }
+    };
+
+    fetchCart(); // Fetch cart items when the component mounts
 
     // Set up a function to listen for changes in the cookies or storage
     const handleCookieChange = () => {
@@ -158,7 +185,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
       removeAllCookies();
       setDropdownVisible(false);
       setIsLoggedIn(false);
-      router.push("/login"); 
+      router.push("/login");
     } else {
       console.log("Failed to log out. Please try again.");
       // Nếu không hợp lệ, chuyển đến trang login
@@ -251,7 +278,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
       <div className="user-section">
         {!isLoggedIn && (
-         
           <button onClick={handleSignInClick} className="sign-in-btn">
             Sign in
           </button>
@@ -426,7 +452,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
         {/* Cart and Notifications */}
         <a
           href="#"
-          className="icon-link"
+          className="icon-link noti-icon"
           aria-label="Cart"
           onClick={handleCartClick}
         >
@@ -434,6 +460,9 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
             className="fas fa-shopping-cart"
             style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
           ></i>
+          {countCartItems != 0 && (
+            <span className="noti-badge">{countCartItems}</span>
+          )}
         </a>
 
         <a

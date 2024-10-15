@@ -151,8 +151,16 @@ namespace TicketResell.Repositories.Controllers
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
 
-            var response = await _ticketService.UpdateTicketAsync(id, dto);
-            return ResponseParser.Result(response);
+            var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
+            if (ticket != null)
+            {
+                if (ticket.SellerId == HttpContext.GetUserId())
+                {
+                    return ResponseParser.Result(await _ticketService.UpdateTicketAsync(id, dto));
+                }
+            }
+            
+            return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
 
         [HttpDelete]
@@ -175,12 +183,19 @@ namespace TicketResell.Repositories.Controllers
         }
 
         [HttpPost]
-        [Route("getByCate")]
-        public async Task<IActionResult> GetTicketByCateId([FromBody] string [] id)
+        [Route("getByCate/{ticketid}")]
+        public async Task<IActionResult> GetTicketByCateId(string ticketid, [FromBody] string [] id)
         {
-            var response = await _ticketService.GetTicketByCategoryIdAsync(id);
+            var response = await _ticketService.GetTicketByCategoryIdAsync(ticketid, id);
             return ResponseParser.Result(response);
         }
 
+        [HttpPost]
+        [Route("getNotByCate")]
+        public async Task<IActionResult> GetTicketNotByCateId([FromBody] string[] id)
+        {
+            var response = await _ticketService.GetTicketNotByCategoryIdAsync(id);
+            return ResponseParser.Result(response);
+        }
     }
 }

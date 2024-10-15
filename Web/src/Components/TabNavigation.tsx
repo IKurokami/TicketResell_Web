@@ -10,8 +10,6 @@ const TabNavigation = () => {
 
   const handleTabClick = (tabId: any) => {
     setActiveTab(tabId);
-    // You can add additional logic here, like changing the route or fetching data
-    console.log(`Tab clicked: ${tabId}`);
   };
 
   return (

@@ -12,15 +12,11 @@
 .ticket--detail {
   margin-bottom: 10vh;
 }
-.ticket--info {
-  height: 31vw;
-}
 
 .ticket--price--block,
 .ticket--related {
   margin-top: 1vh;
   color: #000;
-  padding: 5.125vh 2vh;
   background-color: #fdfdfd;
   border: 1px solid rgba(18 18 18 / 12%);
 }
@@ -87,9 +83,6 @@
   border-radius: 10px;
 }
 .ticket--img {
-  object-fit: cover;
-  height: 31vw;
-  width: 100%;
 }
 
 .ticket--title {
