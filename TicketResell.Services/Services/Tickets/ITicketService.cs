@@ -25,5 +25,7 @@ public interface ITicketService
     public Task<ResponseModel> GetTicketRemainingAsync(string id);
     public Task<ResponseModel> GetTicketByCategoryIdAsync (string ticketid, string [] categoryId);
     public Task<ResponseModel> GetTicketNotByCategoryIdAsync(string[] categoryId);
+    public Task<ResponseModel> GetTicketByListCategoryIdAsync(string[] categoryId);
+
 
 }
