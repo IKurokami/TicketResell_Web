@@ -23,6 +23,10 @@ import { useRouter } from "next/navigation";
 import RelatedTicket from "./RelatedTicket";
 import Notification_Popup from "./Notification_PopUp";
 
+interface TicketDetail{
+  id: string;
+}
+
 type Category = {
   categoryId: string;
   name: string;
@@ -50,7 +54,8 @@ const DEFAULT_IMAGE =
 
 const TicketDetail = () => {
   const [ticketresult, setTicketresult] = useState<Ticket | null>(null);
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{id: string}>();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [categoriesId, setCategories] = useState<string[]>([]);
   const [remainingItems, setRemainingItems] = useState(0);
   const router = useRouter();
@@ -62,6 +67,7 @@ const TicketDetail = () => {
       return id.split("_")[0];
     } else {
       console.error("id.fullTicketId is undefined or null");
+      return null;
     }
   };
   const baseId = splitId();
@@ -219,7 +225,7 @@ const TicketDetail = () => {
         <div className="flex flex-col lg:flex-row justify-center items-start gap-8">
           <div className="w-full lg:w-5/12 space-y-4 items-stretch ">
             <img
-              className="rounded-lg object-cover w-full ticket--img h:full lg:h-[40vw] xl:h-[32.6vw] 2xl:h-[29vw] "
+              className="rounded-lg object-cover w-full ticket--img h:full lg:h-[35vw] xl:h-[30.6vw] 2xl:h-[29vw] "
               src={ticketresult.imageUrl}
               alt={ticketresult.name}
             />
@@ -227,13 +233,13 @@ const TicketDetail = () => {
               <Dropdown
                 title={"Description"}
                 content={ticketresult.description}
-                dropdownStatus={false} 
+                dropdownStatus={false}
                 iconDropdown="faList"
               />
             </div>
           </div>
           <div className="w-full lg:w-6/12 space-y-[1vw] ">
-            <div className="lg:text-[1.125vw]">
+            <div className="lg:text-[1.125vw] space-y-[0.5vw]">
               <h2 className="lg:text-[2.5vw] font-bold">{ticketresult.name}</h2>
               <p className="text-gray-600">Remaining {remainingItems} item</p>
               <p className="flex items-center space-x-2">
@@ -282,15 +288,15 @@ const TicketDetail = () => {
                 <FontAwesomeIcon icon={faTag} />
                 <span>{ticketresult.cost} VND</span>
               </p>
-              <div className="flex items-center space-x-[3vh] my-[1.5vw] lg:text-[1.5vw]">
+              <div className="flex items-center space-x-[1vw] my-[1.5vw] lg:text-[1.5vw]">
                 <button
-                  className="bg-white-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-[1vw] rounded ticket--detail--btn 	"
+                  className="bg-white-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-[0.75vw] rounded ticket--detail--btn 	"
                   onClick={decrease}
                   disabled={count <= 1}
                 >
                   <FontAwesomeIcon icon={faMinus} />
                 </button>
-                <span className=" font-semibold py-2 px-[2vw] rounded ticket--detail--btn">
+                <span className=" font-semibold py-2 px-[3vw] rounded ticket--detail--btn">
                   {count}
                 </span>
                 <button
