@@ -1,7 +1,6 @@
 "use client";
 import Cookies from "js-cookie";
 import "@/Css/TicketDetail.css";
-import DOMPurify from "dompurify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendar,
@@ -22,6 +21,11 @@ import { fetchImage } from "@/models/FetchImage";
 import addToCart from "@/Hooks/addToCart";
 import { useRouter } from "next/navigation";
 import RelatedTicket from "./RelatedTicket";
+import Notification_Popup from "./Notification_PopUp";
+
+interface TicketDetail{
+  id: string;
+}
 
 type Category = {
   categoryId: string;
@@ -50,21 +54,28 @@ const DEFAULT_IMAGE =
 
 const TicketDetail = () => {
   const [ticketresult, setTicketresult] = useState<Ticket | null>(null);
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{id: string}>();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [categoriesId, setCategories] = useState<string[]>([]);
   const [remainingItems, setRemainingItems] = useState(0);
   const router = useRouter();
   const userId = Cookies.get("id");
-
+  const [checkOwner, setCheckOwner] = useState<boolean>(false);
+  const [showPopup, setShowPopup] = useState(false);
   const splitId = () => {
     if (id) {
       return id.split("_")[0];
     } else {
       console.error("id.fullTicketId is undefined or null");
+      return null;
     }
   };
+  const baseId = splitId();
 
   const [count, setCount] = useState(1);
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
 
   const fetchRemainingByID = async (id: string | null) => {
     try {
@@ -125,6 +136,7 @@ const TicketDetail = () => {
         Quantity: count,
       });
       if (result) {
+        setShowPopup(true);
         console.log("Item added to cart successfully:", result);
       } else {
         console.error("Failed to add item to cart");
@@ -177,7 +189,9 @@ const TicketDetail = () => {
             })),
           };
           setTicketresult(ticketDetail);
-          console.log(ticketDetail.categories);
+          if (result.data.seller.userId == userId) {
+            setCheckOwner(true);
+          }
           const categoryIds = ticketDetail.categories.map(
             (category: any) => category.categoryId
           );
@@ -209,9 +223,9 @@ const TicketDetail = () => {
     <div className="bg-white min-h-screen pt-20">
       <main className="containerr mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row justify-center items-start gap-8">
-          <div className="w-full lg:w-5/12 space-y-4">
+          <div className="w-full lg:w-5/12 space-y-4 items-stretch ">
             <img
-              className="rounded-lg ticket--img"
+              className="rounded-lg object-cover w-full ticket--img h:full lg:h-[35vw] xl:h-[30.6vw] 2xl:h-[29vw] "
               src={ticketresult.imageUrl}
               alt={ticketresult.name}
             />
@@ -224,76 +238,96 @@ const TicketDetail = () => {
               />
             </div>
           </div>
-          <div className="w-full lg:w-6/12 space-y-4">
-            <h2 className="text-3xl font-bold">{ticketresult.name}</h2>
-            <p className="text-gray-600">Remaining {remainingItems} item</p>
-            <p className="flex items-center space-x-2">
-              <FontAwesomeIcon icon={faUser} className="text-gray-500" />
-              <span>Sold by</span>
-              <Link
-                className="text-600 hover:underline seller--link"
-                href={`/sellshop/${ticketresult.author.userId}`}
-              >
-                <strong>{ticketresult.author.fullname}</strong>
-              </Link>
-            </p>
-            <p className="flex items-center space-x-2">
-              <FontAwesomeIcon icon={faLocationDot} className="text-gray-500" />
-              <span>
-                Location: <strong>{ticketresult.location}</strong>
-              </span>
-            </p>
-            <ul className="flex flex-wrap gap-2 tag--list">
-              {ticketresult.categories.map((category) => (
-                <li
-                  key={category.categoryId}
-                  className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+          <div className="w-full lg:w-6/12 space-y-[1vw] ">
+            <div className="lg:text-[1.125vw] space-y-[0.5vw]">
+              <h2 className="lg:text-[2.5vw] font-bold">{ticketresult.name}</h2>
+              <p className="text-gray-600">Remaining {remainingItems} item</p>
+              <p className="flex items-center space-x-2">
+                <FontAwesomeIcon icon={faUser} className="text-gray-500" />
+                <span>Sold by</span>
+                <Link
+                  className="text-600 hover:underline seller--link"
+                  href={`/sellshop/${ticketresult.author.userId}`}
                 >
-                  {category.name}
-                </li>
-              ))}
-            </ul>
+                  <strong>{ticketresult.author.fullname}</strong>
+                </Link>
+              </p>
+              <p className="flex items-center space-x-2">
+                <FontAwesomeIcon
+                  icon={faLocationDot}
+                  className="text-gray-500"
+                />
+                <span>
+                  Location: <strong>{ticketresult.location}</strong>
+                </span>
+              </p>
+              <ul className="flex flex-wrap gap-2 tag--list">
+                {ticketresult.categories.slice(0, 5).map((category) => (
+                  <li
+                    key={category.categoryId}
+                    className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                  >
+                    {category.name}
+                  </li>
+                ))}
+                {ticketresult.categories.length > 5 && (
+                  <li className="bg-gray-300 text-white px-3 rounded-full text-sm font-semibold">
+                    ...
+                  </li>
+                )}
+              </ul>
+            </div>
             <p className="text-gray-600 flex items-center space-x-2">
               <FontAwesomeIcon icon={faCalendar} className="text-gray-500" />
               <span>
                 Date: <strong>{ticketresult.startDate}</strong>
               </span>
             </p>
-            <div className="bg-white rounded-lg p-4 shadow-md ticket--price--block">
-              <p className="flex items-center space-x-2 text-3xl font-bold text-green-600 ">
+            <div className="bg-white rounded-lg px-4 py-[3vh] shadow-md ticket--price--block ">
+              <p className="flex items-center space-x-2 text-2xl lg:text-[2.5vw] font-bold text-green-600 ">
                 <FontAwesomeIcon icon={faTag} />
                 <span>{ticketresult.cost} VND</span>
               </p>
-              <div className="flex items-center space-x-4 my-4">
+              <div className="flex items-center space-x-[1vw] my-[1.5vw] lg:text-[1.5vw]">
                 <button
-                  className="bg-white-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-2.5 rounded ticket--detail--btn 	"
+                  className="bg-white-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-[0.75vw] rounded ticket--detail--btn 	"
                   onClick={decrease}
                   disabled={count <= 1}
                 >
                   <FontAwesomeIcon icon={faMinus} />
                 </button>
-                <span className="text-xl font-semibold py-1.5 px-4 rounded ticket--detail--btn">{count}</span>
+                <span className=" font-semibold py-2 px-[3vw] rounded ticket--detail--btn">
+                  {count}
+                </span>
                 <button
-                  className="bg-white-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-2.5 rounded ticket--detail--btn"
+                  className="bg-white-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-[0.75vw] rounded ticket--detail--btn"
                   onClick={increase}
                   disabled={count >= remainingItems}
                 >
                   <FontAwesomeIcon icon={faPlus} />
                 </button>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
-                  onClick={handleAddToCart}
-                >
-                  <FontAwesomeIcon icon={faCartShopping} className="mr-2" />
-                  Add to cart
-                </button>
-                <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center justify-center">
-                  <FontAwesomeIcon icon={faCashRegister} className="mr-2" />
-                  Buy Now
-                </button>
-              </div>
+              {!checkOwner && (
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
+                    onClick={handleAddToCart}
+                  >
+                    <FontAwesomeIcon icon={faCartShopping} className="mr-2" />
+                    Add to cart
+                  </button>
+                  {/* Show the Success Popup */}
+                  <Notification_Popup
+                    message="Ticket added to cart successfully!"
+                    show={showPopup}
+                    onClose={handleClosePopup}
+                  />
+                  <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center justify-center">
+                    <FontAwesomeIcon icon={faCashRegister} className="mr-2" />
+                    Buy Now
+                  </button>
+                </div>
+              )}
             </div>
             <div className="pt-4">
               <Dropdown
@@ -305,7 +339,7 @@ const TicketDetail = () => {
             </div>
           </div>
         </div>
-        <RelatedTicket categoriesId={categoriesId} />
+        <RelatedTicket categoriesId={categoriesId} ticketID={baseId} />
       </main>
     </div>
   );

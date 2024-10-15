@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import { removeAllCookies } from "./Cookie";
 import { useRouter } from "next/navigation";
 import SellPopup from "./PopUp";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 import { CheckSeller } from "./CheckSeller";
 interface NavbarProps {
@@ -25,6 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const isScrolled = page === "ticket" ? false : adjustedIsScrolled;
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
+  const [countCartItems, setCountCartItems] = useState<number>(0);
   const router = useRouter();
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
@@ -130,6 +132,28 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
         setIsLoggedIn(false); // User is logged out
       }
     };
+    const id = Cookies.get("id");
+
+    const fetchCart = async () => {
+      const response = await fetch(
+        `http://localhost:5296/api/cart/items/${id}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const result = await response.json();
+      if (result.data == null) {
+        setCountCartItems(0);
+      } else {
+        setCountCartItems(result.data.length);
+      }
+    };
+
+    fetchCart(); // Fetch cart items when the component mounts
 
     // Set up a function to listen for changes in the cookies or storage
     const handleCookieChange = () => {
@@ -152,17 +176,18 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
   // Handle logout
   const handleLogout = async () => {
-    const isLoggedOut = await logoutUser(Cookies.get("id"));
+    await signOut();
 
+    const isLoggedOut = await logoutUser(Cookies.get("id"));
+    removeAllCookies();
     if (isLoggedOut) {
-      removeAllCookies();
       setDropdownVisible(false);
       setIsLoggedIn(false);
-      router.push("/login"); 
     } else {
       console.log("Failed to log out. Please try again.");
-      // Nếu không hợp lệ, chuyển đến trang login
     }
+
+    removeAllCookies();
   };
 
   return (
@@ -251,7 +276,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
       <div className="user-section">
         {!isLoggedIn && (
-         
           <button onClick={handleSignInClick} className="sign-in-btn">
             Sign in
           </button>
@@ -397,7 +421,9 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 </a>
                 <Link
                   href="/login"
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                  }}
                   className="block px-3 py-2 text-xs text-red-600 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
@@ -426,7 +452,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
         {/* Cart and Notifications */}
         <a
           href="#"
-          className="icon-link"
+          className="icon-link noti-icon"
           aria-label="Cart"
           onClick={handleCartClick}
         >
@@ -434,6 +460,9 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
             className="fas fa-shopping-cart"
             style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
           ></i>
+          {countCartItems != 0 && (
+            <span className="noti-badge">{countCartItems}</span>
+          )}
         </a>
 
         <a

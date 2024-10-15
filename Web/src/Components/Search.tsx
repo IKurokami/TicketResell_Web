@@ -28,7 +28,7 @@ const Search: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  const itemsPerPage = 12;
+  const itemsPerPage = 15;
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
 
   const sortOptions = [
@@ -298,7 +298,12 @@ const Search: React.FC = () => {
 
     return pageButtons;
   };
-
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length > maxLength) {
+      return text.slice(0, maxLength) + "...";
+    }
+    return text;
+  };
   return (
     <div className="flex flex-col lg:flex-row min-h-screen mt-24">
       {/* Sidebar */}
@@ -369,7 +374,7 @@ const Search: React.FC = () => {
                     new Set(tickets.map((ticket) => ticket.location))
                   ).map((location) => (
                     <option key={location} value={location}>
-                      {location}
+                      {truncateText(location, 20)}
                     </option>
                   ))}
                 </select>
@@ -491,8 +496,8 @@ const Search: React.FC = () => {
         {/* Ticket Grid and Pagination */}
         <div className="flex-1 p-4">
           <TicketGrid
+            maxTicketInRow={isSidebarOpen ? 3 : 5}
             paginatedTickets={paginatedTickets}
-            maxTicketInRow={isSidebarOpen ? 3 : 4}
           />
 
           {totalPages > 1 && (

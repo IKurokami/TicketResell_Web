@@ -125,7 +125,7 @@ namespace TicketResell.Services.Services
         public async Task<ResponseModel> GetTopTicket(int amount)
         {
             var ticket = await _unitOfWork.TicketRepository.GetTopTicketBySoldAmount(amount);
-            var ticketDtos = _mapper.Map<List<TicketTopDto>>(ticket);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(ticket);
 
             return ResponseModel.Success($"Successfully get top ticket", ticketDtos);
         }
@@ -260,11 +260,26 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success("Id is existed");
         }
 
-        public async Task<ResponseModel> GetTicketByCategoryIdAsync(string[] categoryId)
+        public async Task<ResponseModel> GetTicketByCategoryIdAsync(string ticketid, string[] categoryId)
         {
-            var tickets = await _unitOfWork.TicketRepository.GetTicketByCateIdAsync(categoryId);
+            var tickets = await _unitOfWork.TicketRepository.GetTicketByCateIdAsync(ticketid, categoryId);
             var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get tickets", ticketDtos);
         }
+
+        public async Task<ResponseModel> GetTicketNotByCategoryIdAsync(string[] categoryId)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketNotByCateIdAsync(categoryId);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully get tickets", ticketDtos);
+        }
+        public async Task<ResponseModel> GetTicketByListCategoryIdAsync(string[] categoryId)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketByListCateIdAsync(categoryId);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully get tickets", ticketDtos);
+        }
+
+
     }
 }
