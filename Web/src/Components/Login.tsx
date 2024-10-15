@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import Cookies from "js-cookie";
-import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
-import { GoogleLogin } from 'react-google-login'; // Import GoogleLogin
+import OTP from "@/models/OTP"; // Ensure the path is correct to your OTP component
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,25 +52,7 @@ const Login: React.FC = () => {
   const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
   const [rememberMe, setRememberMe] = useState(false);
-  const [otp, setOtp] = useState<number | null>(null);
-  const [enteredOtp, setEnteredOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [timer, setTimer] = useState(60);
-
-
-  useEffect(() => {
-    if (timer > 0 && otpSent) {
-      const countdown = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(countdown);
-    }
-    if (timer === 0) {
-      setOtpSent(false);
-      setOtp(null);
-      alert("OTP has expired. Please request a new one.");
-    }
-  }, [timer, otpSent]);
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -102,24 +83,21 @@ const Login: React.FC = () => {
         setError(result.message || "Invalid email or password.");
       } else {
         if (rememberMe) {
-          Cookies.set("id", result.data.user.userId, { expires: 7 }); // Save user ID for 7 days
-          Cookies.set("accessKey", result.data.accessKey, { expires: 7 }); // Save accessKey for 7 days
+          Cookies.set("id", result.data.user.userId, { expires: 7 });
+          Cookies.set("accessKey", result.data.accessKey, { expires: 7 });
         } else {
-          Cookies.set("id", result.data.user.userId); // Save session cookies (will be removed on browser close)
+          Cookies.set("id", result.data.user.userId);
           Cookies.set("accessKey", result.data.accessKey);
         }
-        if (Cookies) {
-          console.log("cookie saved");
-        }
-        setLoginSuccessMessage("Login successful!"); // Set success message
-        setTimeout(() => {
-          setLoginSuccessMessage(null); // Clear success message after displaying it
-        }, 3000); // Clear after 3 seconds
 
-        // Delay navigation to the home page by 5 seconds
+        setLoginSuccessMessage("Login successful!");
+        setTimeout(() => {
+          setLoginSuccessMessage(null);
+        }, 3000);
+
         setTimeout(() => {
           router.push("/");
-        }, 4000); // Redirect after 5 seconds
+        }, 4000);
       }
     } catch (error) {
       console.error("Network error:", error);
@@ -127,94 +105,62 @@ const Login: React.FC = () => {
     }
   };
 
-
   const handleSignUp = async () => {
-    // Validate email format before proceeding
     if (!validateEmail(email)) {
       setError("Invalid email format.");
       return;
     }
 
     if (!username || !name || !email || !password) {
-      setError("Please fill in all fields and choose a role.");
+      setError("Please fill in all fields.");
       return;
     }
 
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
+    // Trigger OTP sending logic via the OTP component.
+    setOtpSent(true);
+  };
 
-    const templateParams = {
-      to_name: name,
-      to_email: email,
-      otp: generatedOtp,
-    };
-
+  const handleOtpSuccess = async () => {
+    // Proceed with registration after OTP verification
     try {
-      const response = await emailjs.send(
-        "service_d76v3rv", // Service ID
-        "template_juvp2i4", // Template ID
-        templateParams,
-        "RNLODJWvSPCIi0CTv" // Public key
+      const response = await fetch(
+        "http://localhost:5296/api/Authentication/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            UserId: email,
+            Username: username,
+            Password: password,
+            Gmail: email,
+          }),
+        }
       );
 
-      console.log("OTP sent:", response.status, response.text);
+      const result = await response.json();
 
-      if (response.status === 200) {
-        alert(`An OTP has been sent to your email: ${email}`);
-        setOtp(generatedOtp); // Save OTP for verification
-        setOtpSent(true); // Set flag indicating OTP has been sent
-        setTimer(60); // Reset timer to 60 seconds
-      } else {
-        setError("Failed to send OTP. Please try again.");
+      if (!response.ok) {
+        setError(result.message || "Something went wrong.");
+        return;
       }
+
+      setError(null);
+      setSuccessMessage("Registration successful! You can now sign in.");
+      setTimeout(() => {
+        setActiveTab("login");
+        setSuccessMessage(null);
+      }, 3000);
     } catch (error) {
-      console.error("Failed to send OTP:", error);
-      setError("Failed to send OTP. Please try again.");
+      console.error("Sign up error:", error);
+      setError("An error occurred during sign-up. Please try again.");
     }
   };
 
-  const handleVerifyOtp = async () => {
-    if (parseInt(enteredOtp) === otp) {
-      // Proceed with registration if OTP is correct
-      try {
-        const response = await fetch(
-          "http://localhost:5296/api/Authentication/register",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              UserId: email,
-              Username: username,
-              Password: password,
-              Gmail: email,
-            }),
-          }
-        );
-
-        const result = await response.json();
-        console.log(result);
-
-        if (!response.ok) {
-          setError(result.message || "Something went wrong.");
-          return;
-        }
-
-        setError(null);
-        setSuccessMessage("Registration successful! You can now sign in."); // Set success message
-        setTimeout(() => {
-          setActiveTab("login"); // Switch to login tab after a delay
-          setSuccessMessage(null); // Clear success message after displaying it
-        }, 3000); // Switch after 3 seconds
-      } catch (error) {
-        console.error("Sign up error:", error);
-        setError("An error occurred during sign-up. Please try again.");
-      }
-    } else {
-      setError("Invalid OTP. Please try again.");
-    }
+  const handleOtpError = (message: string) => {
+    setError(message);
   };
-
 
   return (
     <div className="flex items-center justify-center min-h-screen p-5">
@@ -300,7 +246,6 @@ const Login: React.FC = () => {
                     <FaGoogle className="mr-2" /> Continue with Google
                   </button>
                 </div>
-
               </>
             ) : (
               <>
@@ -332,37 +277,18 @@ const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                {otpSent ? (
-                  <>
-                    <InputField
-                      icon={<FaLock />}
-                      type="text"
-                      placeholder="Enter OTP"
-                      value={enteredOtp}
-                      onChange={(e) => setEnteredOtp(e.target.value)}
-                    />
-                    <p className="text-gray-600">
-                      OTP will expire in {timer} seconds.
-                    </p>
-                    <ActionButton onClick={handleVerifyOtp}>Verify OTP</ActionButton>
-                  </>
-                ) : (
-                  <ActionButton onClick={handleSignUp}>Sign Up</ActionButton>
-                )}
-                <div className="mt-4 text-center">
-                  <p>or</p>
-                </div>
-
-                {/* Google Login Button */}
-                <div className="mt-4">
-                  <button
-                    className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all"
-                  >
-                    <FaGoogle className="mr-2" /> Continue with Google
-                  </button>
-                </div>
                 {error && <p className="text-red-500">{error}</p>}
                 {successMessage && <p className="text-green-500">{successMessage}</p>}
+                <ActionButton onClick={handleSignUp}>Sign Up</ActionButton>
+
+                {otpSent && (
+                  <OTP
+                    onSuccess={handleOtpSuccess}
+                    onError={handleOtpError} // Pass the onError prop here
+                    email={email}
+                    name={name}
+                  />
+                )}
               </>
             )}
           </motion.div>
