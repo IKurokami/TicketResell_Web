@@ -6,16 +6,17 @@ import { FaGoogle, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import Cookies from "js-cookie";
 import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
+import LoginButton from "./login-btn";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 };
 
-const InputField: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { icon: React.ReactNode }> = ({
-  icon,
-  ...props
-}) => (
+const InputField: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement> & { icon: React.ReactNode }
+> = ({ icon, ...props }) => (
   <div className="relative mt-5">
     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
       {icon}
@@ -49,14 +50,64 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(null);
+  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(
+    null
+  );
   const router = useRouter();
   const [rememberMe, setRememberMe] = useState(false);
   const [otp, setOtp] = useState<number | null>(null);
   const [enteredOtp, setEnteredOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [timer, setTimer] = useState(60);
+  const session = useSession();
 
+  useEffect(() => {
+    const handleLogin = async () => {
+      if (session.status === "authenticated") {
+        try {
+          const response = await fetch(
+            `http://localhost:5296/api/authentication/login-google?accessToken=${session?.data?.token?.accessToken}`,
+            {
+              credentials: "include",
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            console.error("Login error:", result);
+            setError(result.message || "Login Error.");
+          } else {
+            Cookies.set("id", result.data.user.userId);
+            Cookies.set("accessKey", result.data.accessKey);
+
+            if (Cookies) {
+              console.log("cookie saved");
+            }
+
+            setLoginSuccessMessage("Login successful!");
+            setTimeout(() => {
+              setLoginSuccessMessage(null);
+            }, 3000);
+
+            setTimeout(() => {
+              router.push("/");
+            }, 500);
+          }
+        } catch (error) {
+          console.error("Error during login:", error);
+          setError("An error occurred during login.");
+        }
+      }
+    };
+
+    // Call the async function
+    handleLogin();
+  }, [session]);
 
   useEffect(() => {
     if (timer > 0 && otpSent) {
@@ -113,19 +164,18 @@ const Login: React.FC = () => {
         setLoginSuccessMessage("Login successful!"); // Set success message
         setTimeout(() => {
           setLoginSuccessMessage(null); // Clear success message after displaying it
-        }, 3000); // Clear after 3 seconds
+        }, 3000);
 
         // Delay navigation to the home page by 5 seconds
         setTimeout(() => {
           router.push("/");
-        }, 4000); // Redirect after 5 seconds
+        }, 500); // Redirect after 5 seconds
       }
     } catch (error) {
       console.error("Network error:", error);
       setError("An error occurred. Please try again later.");
     }
   };
-
 
   const handleSignUp = async () => {
     // Validate email format before proceeding
@@ -214,7 +264,6 @@ const Login: React.FC = () => {
     }
   };
 
-
   return (
     <div className="flex items-center justify-center min-h-screen p-5">
       <motion.div
@@ -232,19 +281,21 @@ const Login: React.FC = () => {
           </div>
           <div className="flex mb-0">
             <button
-              className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "login"
-                ? "text-white bg-green-500"
-                : "text-gray-600 bg-transparent"
-                } rounded-l-3xl`}
+              className={`w-full py-4 text-lg font-bold transition-all ${
+                activeTab === "login"
+                  ? "text-white bg-green-500"
+                  : "text-gray-600 bg-transparent"
+              } rounded-l-3xl`}
               onClick={() => setActiveTab("login")}
             >
               Sign In
             </button>
             <button
-              className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "register"
-                ? "text-white bg-green-500"
-                : "text-gray-600 bg-transparent"
-                } rounded-r-3xl`}
+              className={`w-full py-4 text-lg font-bold transition-all ${
+                activeTab === "register"
+                  ? "text-white bg-green-500"
+                  : "text-gray-600 bg-transparent"
+              } rounded-r-3xl`}
               onClick={() => setActiveTab("register")}
             >
               Sign Up
@@ -285,21 +336,21 @@ const Login: React.FC = () => {
                   </label>
                 </div>
                 {error && <p className="text-red-500">{error}</p>}
-                {loginSuccessMessage && <p className="text-green-500">{loginSuccessMessage}</p>}
+                {loginSuccessMessage && (
+                  <p className="text-green-500">{loginSuccessMessage}</p>
+                )}
                 <ActionButton onClick={handleSignIn}>Sign In</ActionButton>
                 <div className="mt-4 text-center">
                   <p>or</p>
                 </div>
-
-                {/* Google Login Button */}
                 <div className="mt-4">
                   <button
                     className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all"
+                    onClick={() => signIn("google")}
                   >
                     <FaGoogle className="mr-2" /> Continue with Google
                   </button>
                 </div>
-
               </>
             ) : (
               <>
@@ -343,7 +394,9 @@ const Login: React.FC = () => {
                     <p className="text-gray-600">
                       OTP will expire in {timer} seconds.
                     </p>
-                    <ActionButton onClick={handleVerifyOtp}>Verify OTP</ActionButton>
+                    <ActionButton onClick={handleVerifyOtp}>
+                      Verify OTP
+                    </ActionButton>
                   </>
                 ) : (
                   <ActionButton onClick={handleSignUp}>Sign Up</ActionButton>
@@ -354,14 +407,14 @@ const Login: React.FC = () => {
 
                 {/* Google Login Button */}
                 <div className="mt-4">
-                  <button
-                    className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all"
-                  >
+                  <button className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all">
                     <FaGoogle className="mr-2" /> Continue with Google
                   </button>
                 </div>
                 {error && <p className="text-red-500">{error}</p>}
-                {successMessage && <p className="text-green-500">{successMessage}</p>}
+                {successMessage && (
+                  <p className="text-green-500">{successMessage}</p>
+                )}
               </>
             )}
           </motion.div>

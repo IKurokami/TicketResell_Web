@@ -18,8 +18,14 @@ const TicketGrid: React.FC<TicketGridProps> = ({
     }).format(amount);
   };
 
-  const gridColumns = Math.min(maxTicketInRow, 4);
-  const gridClass = `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-${gridColumns} gap-4`;
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length > maxLength) {
+      return text.slice(0, maxLength) + "...";
+    }
+    return text;
+  };
+
+  const gridColumns = Math.min(maxTicketInRow, 5);
 
   return (
     <section className="relative">
@@ -27,7 +33,9 @@ const TicketGrid: React.FC<TicketGridProps> = ({
         className="absolute h-1 bg-green-500 opacity-0.1"
         style={{ zIndex: 20 }}
       ></div>
-      <div className={gridClass}>
+      <div
+        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-${gridColumns} lg:grid-cols-${gridColumns} gap-4`}
+      >
         {paginatedTickets.length > 0 ? (
           paginatedTickets.map((ticket, index) => (
             <Link
@@ -56,10 +64,10 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                   </div>
                   <div className="p-3 sm:p-4 flex-grow flex flex-col">
                     <h3 className="text-base sm:text-lg font-semibold mb-1 text-gray-900 line-clamp-2">
-                      {ticket.name}
+                      {truncateText(ticket.name, 20)}
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                      {ticket.location}
+                      {truncateText(ticket.location, 20)}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-600">
                       {new Date(ticket.startDate).toLocaleDateString("en-US", {

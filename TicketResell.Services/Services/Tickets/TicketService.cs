@@ -121,7 +121,7 @@ namespace TicketResell.Services.Services
         public async Task<ResponseModel> GetTopTicket(int amount)
         {
             var ticket = await _unitOfWork.TicketRepository.GetTopTicketBySoldAmount(amount);
-            var ticketDtos = _mapper.Map<List<TicketTopDto>>(ticket);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(ticket);
 
             return ResponseModel.Success($"Successfully get top ticket", ticketDtos);
         }

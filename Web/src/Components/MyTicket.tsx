@@ -214,9 +214,9 @@ const MyTicketsPage = () => {
             result.data.map(async (order: any, index: number) => {
               let image = 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451';
 
-              if (order.ticket.ticketId) {
+              if (order.ticket.image) {
                 const { imageUrl: fetchedImageUrl, error } = await fetchImage(
-                  order.ticket.ticketId
+                  order.ticket.image
                 );
 
                 if (fetchedImageUrl) {

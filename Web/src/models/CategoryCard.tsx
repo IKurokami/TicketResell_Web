@@ -43,8 +43,8 @@ const convertToBannerItemCards = async (
         imageUrl,
         name: item.name,
         date: item.createDate,
-        author: "",
-        description: "",
+        author: item.seller.fullname,
+        description: item.description,
         price: item.cost.toString(),
         id: item.ticketId,
       };
@@ -85,7 +85,7 @@ const BannerItemCard = ({ itemCart }: { itemCart: BannerItemCard }) => {
             <h4>{itemCart.name}</h4>
             <p>{itemCart.date}</p>
             <p>By {itemCart.author}</p>
-            <p>{itemCart.description}</p>
+            <p dangerouslySetInnerHTML={{ __html: itemCart.description }} />
           </div>
           <p>{itemCart.price}</p>
         </div>

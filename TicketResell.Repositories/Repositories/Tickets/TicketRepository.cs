@@ -174,6 +174,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<List<Ticket>> GetTopTicketBySoldAmount(int amount)
     {
+        // Group by TicketId and calculate total quantity sold
         var topSellingTickets = await _context.OrderDetails
             .GroupBy(od => od.TicketId)
             .Select(g => new
@@ -182,15 +183,19 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
                 TotalQuantity = g.Sum(od => od.Quantity)
             })
             .OrderByDescending(t => t.TotalQuantity)
-            .Take(amount)  // Adjust this number as needed
+            .Take(amount)
             .ToListAsync();
 
+        // Get the list of TicketIds
         var topSellingTicketIds = topSellingTickets.Select(t => t.TicketId).ToList();
 
+        // Include the seller information when fetching tickets
         var topSellingTicketInfos = await _context.Tickets
+            .Include(t => t.Seller) // Include seller information
             .Where(t => topSellingTicketIds.Contains(t.TicketId))
             .ToListAsync();
 
+        // Order the results to match the original order
         var orderedTopSellingTicketInfos = topSellingTicketIds
             .Select(id => topSellingTicketInfos.First(t => t.TicketId == id))
             .ToList();
