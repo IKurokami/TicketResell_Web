@@ -261,4 +261,23 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         .ToList();
         return filteredTicketsByCategory;
     }
+
+    public async Task<List<Ticket>> GetTicketByListCateIdAsync(string [] categoriesId)
+    {
+        var tickets = await _context.Tickets.Include(t => t.Seller)
+        .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category
+        .Include(t => t.Categories) // Include the related categories
+        .ToListAsync();
+        // Filter to keep only the base ticket IDs (e.g., TICKET001)
+        var uniqueTicketIds = tickets
+            .Select(t => t.TicketId.Split('_')[0]) // Get the base ticket ID (split by '_')
+            .Distinct() // Ensure distinct base IDs
+            .ToList();
+        var filteredTicketsByCategory = tickets
+        .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+        .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
+        .Select(g => g.First()) // Select the first instance of each group
+        .ToList();
+        return filteredTicketsByCategory;
+    }
 }

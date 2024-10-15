@@ -1,7 +1,6 @@
 "use client";
 import Cookies from "js-cookie";
 import "@/Css/TicketDetail.css";
-import DOMPurify from "dompurify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendar,

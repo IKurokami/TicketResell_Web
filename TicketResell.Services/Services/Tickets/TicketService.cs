@@ -233,6 +233,14 @@ namespace TicketResell.Services.Services
             var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get tickets", ticketDtos);
         }
+        public async Task<ResponseModel> GetTicketByListCategoryIdAsync(string[] categoryId)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketByListCateIdAsync(categoryId);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully get tickets", ticketDtos);
+        }
+
+
     }
 
 }
