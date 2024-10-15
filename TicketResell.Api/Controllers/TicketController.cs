@@ -151,8 +151,16 @@ namespace TicketResell.Repositories.Controllers
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
 
-            var response = await _ticketService.UpdateTicketAsync(id, dto);
-            return ResponseParser.Result(response);
+            var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
+            if (ticket != null)
+            {
+                if (ticket.SellerId == HttpContext.GetUserId())
+                {
+                    return ResponseParser.Result(await _ticketService.UpdateTicketAsync(id, dto));
+                }
+            }
+            
+            return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
 
         [HttpDelete]

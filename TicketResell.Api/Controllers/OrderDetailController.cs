@@ -21,12 +21,8 @@ namespace Api.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateOrderDetail([FromBody] OrderDetailDto dto)
         {
-            if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(
-                    ResponseModel.Unauthorized("You need to be authenticated to create order details"));
-
             var userId = HttpContext.GetUserId();
-            if (string.IsNullOrEmpty(userId))
+            if (HttpContext.IsUserIdAuthenticated(userId))
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("Cannot create order detail with unknown user"));
 
