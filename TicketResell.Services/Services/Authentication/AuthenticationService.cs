@@ -1,9 +1,5 @@
-using System.Diagnostics;
 using System.Security.Cryptography;
-using System.Text;
 using AutoMapper;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Entities;
@@ -11,6 +7,7 @@ using Repositories.Core.Validators;
 using StackExchange.Redis;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.UnitOfWork;
+using TicketResell.Services.Services.Crypto;
 
 namespace TicketResell.Services.Services;
 
@@ -35,8 +32,18 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<ResponseModel> RegisterAsync(RegisterDto registerDto)
     {
-        var user = _mapper.Map<User>(registerDto);
+        if (string.IsNullOrEmpty(registerDto.OTP))
+            return ResponseModel.BadRequest("Registration failed", "No OTP provided");
 
+        var cacheOtp = await GetCachedAccessKeyAsync("email_verification", registerDto.UserId);
+        if (!cacheOtp.HasValue)
+            return ResponseModel.BadRequest("Registration failed", "Otp not found for user");
+
+        if (cacheOtp != registerDto.OTP)
+            return ResponseModel.BadRequest("Registration failed", "OTP provided is invalid");
+        
+        var user = _mapper.Map<User>(registerDto);
+        
         var validator = _validatorFactory.GetValidator<User>();
         var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid)
@@ -48,7 +55,7 @@ public class AuthenticationService : IAuthenticationService
         {
             return ResponseModel.BadRequest("Registration failed", "Email already exists");
         }
-
+        
         user.Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
         user.CreateDate = DateTime.UtcNow;
         user.Status = 1;
@@ -58,6 +65,27 @@ public class AuthenticationService : IAuthenticationService
 
         return ResponseModel.Success("User registered successfully", registerDto);
     }
+
+    public async Task<ResponseModel> PutOtpAsync(string data)
+    {
+        try
+        {
+            var decryptedData = (new CryptoService()).Decrypt(data);
+            var splitedData = decryptedData.Split("|");
+            if (await _unitOfWork.UserRepository.GetUserByEmailAsync(splitedData[0]) != null)
+            {
+                await CacheAccessKeyAsync("email_verification", splitedData[0], splitedData[1], TimeSpan.FromMinutes(5));
+                return ResponseModel.Success("Cached", "OTP cache done");
+            }
+        }
+        catch (Exception ex)
+        {
+            return ResponseModel.BadRequest("Decryption failed");
+        }
+
+        return ResponseModel.Error("Something failed");;
+    }
+
     public async Task<ResponseModel> LoginAsync(LoginDto loginDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(loginDto.Gmail);
@@ -133,6 +161,40 @@ public class AuthenticationService : IAuthenticationService
     {
         return await LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
     }
+    public async Task<ResponseModel> LoginWithGoogleAsync(string email)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+        if (user == null)
+        {
+            user = new User
+            {
+                UserId = email,
+                Gmail = email,
+                Password = null,
+                CreateDate = DateTime.UtcNow,
+                Status = 1,
+                Verify = 1 ,
+            };
+            
+            await _unitOfWork.UserRepository.CreateAsync(user);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
+        if (cachedAccessKey.IsNullOrEmpty)
+        {
+            cachedAccessKey = GenerateAccessKey();
+            await CacheAccessKeyAsync(user.UserId, cachedAccessKey!);
+        }
+
+        var response = new LoginInfoDto()
+        {
+            User = _mapper.Map<UserReadDto>(user),
+            AccessKey = cachedAccessKey!
+        };
+
+        return ResponseModel.Success("Login successful", response);
+    }
     public async Task<bool> ValidateAccessKeyAsync(string userId, string accessKey)
     {
         var cachedAccessKey = await GetCachedAccessKeyAsync(userId);
@@ -166,36 +228,6 @@ public class AuthenticationService : IAuthenticationService
 
         return ResponseModel.Success("Password changed successfully");
     }
-    public async Task<ResponseModel> SendVerificationEmailAsync(string userId)
-    {
-        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            return ResponseModel.NotFound("User not found");
-        }
-
-        if (user.Verify == 1)
-        {
-            return ResponseModel.BadRequest("Email already verified");
-        }
-
-        var token = GenerateEmailConfirmationToken();
-        var expirationTime = DateTime.UtcNow.AddMinutes(5);
-
-        // Store token in Redis
-        var db = _redis.GetDatabase();
-        await db.StringSetAsync(
-            $"email_verification:{userId}",
-            JsonConvert.SerializeObject(new { Token = token, Expiration = expirationTime }),
-            TimeSpan.FromMinutes(5)
-        );
-
-        var confirmationLink = $"http://localhost:5296/api/authentication/confirm-email?userId={userId}&token={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token))}";
-
-        await SendEmailAsync(user.Gmail, "Confirm your email", $"Please confirm your email by clicking this link: {confirmationLink}");
-
-        return ResponseModel.Success("Verification email sent");
-    }
 
     public async Task<ResponseModel> ConfirmEmailAsync(string userId, string token)
     {
@@ -210,7 +242,6 @@ public class AuthenticationService : IAuthenticationService
             return ResponseModel.BadRequest("Email already verified");
         }
 
-        // Retrieve token from Redis
         var db = _redis.GetDatabase();
         var storedTokenJson = await db.StringGetAsync($"email_verification:{userId}");
         
@@ -230,26 +261,11 @@ public class AuthenticationService : IAuthenticationService
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CompleteAsync();
 
-        // Remove the token from Redis
         await db.KeyDeleteAsync($"email_verification:{userId}");
 
         return ResponseModel.Success("Email verified successfully");
     }
-
-    private string GenerateEmailConfirmationToken()
-    {
-        return Guid.NewGuid().ToString();
-    }
-
-    private async Task SendEmailAsync(string email, string subject, string message)
-    {
-        // Implement email sending logic here
-        // You might want to use a service like SendGrid, Mailgun, or SMTP
-        // For this example, we'll just simulate sending an email
-        Console.WriteLine($"Sending email to {email}");
-        Console.WriteLine($"Subject: {subject}");
-        Console.WriteLine($"Message: {message}");
-    }
+    
     private string GenerateAccessKey()
     {
         var key = new byte[32];
@@ -260,15 +276,23 @@ public class AuthenticationService : IAuthenticationService
 
         return Convert.ToBase64String(key);
     }
-    private async Task CacheAccessKeyAsync(string userId, string accessKey)
+    private async Task CacheAccessKeyAsync(string cacheName, string userId, string cacheKey, TimeSpan timeSpan)
     {
         var db = _redis.GetDatabase();
-        await db.StringSetAsync($"access_key:{userId}", accessKey, TimeSpan.FromHours(24));
+        await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
+    }
+    private async Task CacheAccessKeyAsync(string userId, string accessKey)
+    {
+        await CacheAccessKeyAsync("access_key", userId, accessKey, TimeSpan.FromHours(24));
+    }
+    private async Task<RedisValue> GetCachedAccessKeyAsync(string cacheName, string userId)
+    {
+        var db = _redis.GetDatabase();
+        return await db.StringGetAsync($"{cacheName}:{userId}");
     }
     private async Task<RedisValue> GetCachedAccessKeyAsync(string userId)
     {
-        var db = _redis.GetDatabase();
-        return await db.StringGetAsync($"access_key:{userId}");
+        return await GetCachedAccessKeyAsync("access_key", userId);
     }
     private async Task RemoveCachedAccessKeyAsync(string userId)
     {
