@@ -183,12 +183,19 @@ namespace TicketResell.Repositories.Controllers
         }
 
         [HttpPost]
-        [Route("getByCate")]
-        public async Task<IActionResult> GetTicketByCateId([FromBody] string [] id)
+        [Route("getByCate/{ticketid}")]
+        public async Task<IActionResult> GetTicketByCateId(string ticketid, [FromBody] string [] id)
         {
-            var response = await _ticketService.GetTicketByCategoryIdAsync(id);
+            var response = await _ticketService.GetTicketByCategoryIdAsync(ticketid, id);
             return ResponseParser.Result(response);
         }
 
+        [HttpPost]
+        [Route("getNotByCate")]
+        public async Task<IActionResult> GetTicketNotByCateId([FromBody] string[] id)
+        {
+            var response = await _ticketService.GetTicketNotByCategoryIdAsync(id);
+            return ResponseParser.Result(response);
+        }
     }
 }

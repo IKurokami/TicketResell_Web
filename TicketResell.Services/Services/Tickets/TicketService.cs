@@ -220,9 +220,16 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success("Id is existed");
         }
 
-        public async Task<ResponseModel> GetTicketByCategoryIdAsync(string[] categoryId)
+        public async Task<ResponseModel> GetTicketByCategoryIdAsync(string ticketid, string[] categoryId)
         {
-            var tickets = await _unitOfWork.TicketRepository.GetTicketByCateIdAsync(categoryId);
+            var tickets = await _unitOfWork.TicketRepository.GetTicketByCateIdAsync(ticketid, categoryId);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully get tickets", ticketDtos);
+        }
+
+        public async Task<ResponseModel> GetTicketNotByCategoryIdAsync(string[] categoryId)
+        {
+            var tickets = await _unitOfWork.TicketRepository.GetTicketNotByCateIdAsync(categoryId);
             var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get tickets", ticketDtos);
         }
