@@ -219,12 +219,41 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         return count;
     }
 
-    public async Task<List<Ticket>> GetTicketByCateIdAsync(string[] categoriesId)
+    public async Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId)
+    {
+        var tickets = await _context.Tickets
+        .Include(t => t.Seller)
+        .Include(t => t.Categories) // Include the related categories
+        .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId)) && !t.TicketId.StartsWith(ticketid)) // Filter tickets by category
+        .ToListAsync();
+        // Filter to keep only the base ticket IDs (e.g., TICKET001)
+        var uniqueTicketIds = tickets
+            .Select(t => t.TicketId.Split('_')[0]) // Get the base ticket ID (split by '_')
+            .Distinct() // Ensure distinct base IDs
+            .ToList();
+        var filteredTicketsByCategory = tickets
+        .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+        .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
+        .Select(g => g.First()) // Select the first instance of each group
+        .ToList();
+        return filteredTicketsByCategory;
+    }
+    public async Task<List<Ticket>> GetTicketNotByCateIdAsync(string[] categoriesId)
     {
         var tickets = await _context.Tickets.Include(t => t.Seller)
-        .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category
+        .Where(t => t.Categories.All(c => !categoriesId.Contains(c.CategoryId))) // Filter tickets by category
         .Include(t => t.Categories) // Include the related categories
         .ToListAsync();
-        return tickets;
+        // Filter to keep only the base ticket IDs (e.g., TICKET001)
+        var uniqueTicketIds = tickets
+            .Select(t => t.TicketId.Split('_')[0]) // Get the base ticket ID (split by '_')
+            .Distinct() // Ensure distinct base IDs
+            .ToList();
+        var filteredTicketsByCategory = tickets
+        .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+        .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
+        .Select(g => g.First()) // Select the first instance of each group
+        .ToList();
+        return filteredTicketsByCategory;
     }
 }

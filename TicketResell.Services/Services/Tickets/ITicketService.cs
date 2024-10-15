@@ -23,5 +23,7 @@ public interface ITicketService
     public Task<ResponseModel> DeleteTicketAsync(string id, bool saveAll = true);
     public Task<ResponseModel> GetTicketByCategoryAsync(string id);
     public Task<ResponseModel> GetTicketRemainingAsync(string id);
-    public Task<ResponseModel>GetTicketByCategoryIdAsync (string [] categoryId);
+    public Task<ResponseModel> GetTicketByCategoryIdAsync (string ticketid, string [] categoryId);
+    public Task<ResponseModel> GetTicketNotByCategoryIdAsync(string[] categoryId);
+
 }

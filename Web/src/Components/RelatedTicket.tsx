@@ -19,9 +19,13 @@ interface Ticket {
 
 interface RelatedTicketsProps {
   categoriesId: string[]; // Pass categoriesId as props
+  ticketID: string;
 }
 
-const RelatedTicket: React.FC<RelatedTicketsProps> = ({ categoriesId }) => {
+const RelatedTicket: React.FC<RelatedTicketsProps> = ({
+  categoriesId,
+  ticketID,
+}) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
 
   const DEFAULT_IMAGE =
@@ -32,22 +36,56 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({ categoriesId }) => {
   useEffect(() => {
     const fetchRelatedTickets = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:5296/api/Ticket/getByCate`,
-          {
+        console.log(ticketID);
+        // Fetch data from both APIs
+        const [notByCateResponse, byCateResponse] = await Promise.all([
+          fetch(`http://localhost:5296/api/Ticket/getnotbyCate/`, {
+            // POST request with the category IDs as the body
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(categoriesId), // Send categoriesId as JSON body
-          }
-        );
+            body: JSON.stringify(categoriesId), // Sending category IDs in the body
+          }), // Assume this is a GET request
+          fetch(`http://localhost:5296/api/Ticket/getbyCate/${ticketID}`, {
+            // POST request with the category IDs as the body
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(categoriesId), // Sending category IDs in the body
+          }),
+        ]);
 
-        const result = await response.json();
+        const notByCateTickets = await notByCateResponse.json();
+        const byCateTickets = await byCateResponse.json();
+        console.log("DG ngu");
+        console.log(byCateTickets);
+
+        // Select at least 2 tickets from each category if possible
+        const result = [];
+
+        // Add 2 tickets from getbyCate first
+        const byCateSelection = byCateTickets.data.slice(0, 2);
+        result.push(...byCateSelection);
+
+        // Add 2 tickets from getnotbyCate
+        const notByCateSelection = notByCateTickets.data.slice(0, 2);
+        result.push(...notByCateSelection);
+
+        // If result has less than 4 items, fill from the remaining tickets from either API
+        if (result.length < 4) {
+          const remainingTickets =
+            notByCateTickets.length > byCateTickets.length
+              ? notByCateTickets.slice(2)
+              : byCateTickets.slice(2);
+
+          result.push(...remainingTickets.slice(0, 4 - result.length));
+        }
         let updatedTickets = await Promise.all(
-          result.data.map(async (ticket: any) => {
+          result.map(async (ticket: any) => {
             let imageUrl = DEFAULT_IMAGE; // Default image
-  
+
             // Check if the ticket has an image and fetch it
             if (ticket.image) {
               const { imageUrl: fetchedImageUrl, error } = await fetchImage(
@@ -61,7 +99,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({ categoriesId }) => {
                 );
               }
             }
-  
+
             // Return updated ticket object
             return {
               ...ticket,
@@ -91,51 +129,58 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({ categoriesId }) => {
   return (
     <div className="ticket--related shadow-md">
       <h2 className="text-2xl font-bold text-center">Related Tickets</h2>
-      <div className="movie-grid mx-auto px-10 py-8 no-underline">
+      <div className=" mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw]">
         {tickets.map((ticket) => (
           <Link className="no-underline" href={`/ticket/${ticket.ticketId}`}>
-          <div
-            key={ticket.ticketId}
-            className="movie-card-wrapper cursor-pointer no-underline visited:no-underline"
-          >
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
-              <div className="relative">
-                <img
-                  src={ticket.imageUrl}
-                  alt={ticket.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
-                  ${ticket.cost}
+            <div
+              key={ticket.ticketId}
+              className="movie-card-wrapper cursor-pointer no-underline visited:no-underline"
+            >
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
+                <div className="relative">
+                  <img
+                    src={ticket.imageUrl}
+                    alt={ticket.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
+                    ${ticket.cost}
+                  </div>
+                </div>
+                <div className="p-4 space-y-2 flex-grow">
+                  <h3 className="text-lg font-semibold mb-1 text-gray-900">
+                    {ticket.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {ticket.location}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(ticket.startDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                  <ul className="flex flex-wrap gap-2 tag--list overflow-hidden">
+                    {ticket.categories.slice(0, 2).map((category) => (
+                      <li
+                        key={category.categoryId}
+                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                    {ticket.categories.length > 2 && (
+                      <li className="bg-gray-300 text-white px-3 rounded-full text-sm font-semibold hidden xl:block">
+                        ...
+                      </li>
+                    )}
+                  </ul>
                 </div>
               </div>
-              <div className="p-4 flex-grow">
-                <h3 className="text-lg font-semibold mb-1 text-gray-900">
-                  {ticket.name}
-                </h3>
-                <p className="text-sm text-gray-600 mb-1">{ticket.location}</p>
-                <p className="text-sm text-gray-600">
-                  {new Date(ticket.startDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-                <ul className="flex flex-wrap gap-2 tag--list overflow-hidden">
-                  {ticket.categories.map((category) => (
-                    <li
-                      key={category.categoryId}
-                      className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold truncate"
-                    >
-                      {category.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
-          </div>
           </Link>
         ))}
       </div>
