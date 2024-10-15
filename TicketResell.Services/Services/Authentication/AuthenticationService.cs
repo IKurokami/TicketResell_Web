@@ -161,19 +161,20 @@ public class AuthenticationService : IAuthenticationService
     {
         return await LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
     }
-    public async Task<ResponseModel> LoginWithGoogleAsync(string email)
+    public async Task<ResponseModel> LoginWithGoogleAsync(GoogleUserInfoDto googleUser)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(googleUser.Email);
         if (user == null)
         {
             user = new User
             {
-                UserId = email,
-                Gmail = email,
-                Password = null,
+                UserId = googleUser.Email,
+                Username = googleUser.Given_Name,
+                Password = BCrypt.Net.BCrypt.HashPassword(GenerateAccessKey()),
+                Gmail = googleUser.Email,
                 CreateDate = DateTime.UtcNow,
                 Status = 1,
-                Verify = 1 ,
+                Verify = 1,
             };
             
             await _unitOfWork.UserRepository.CreateAsync(user);
