@@ -27,7 +27,9 @@ public interface ITicketRepository : IRepository<Ticket>
     Task<string> GetQrImageAsBase64Async(string ticketId);
     Task<int> GetTicketRemainingAsync(string ticketId);
 
-    Task<List<Ticket>> GetTicketByCateIdAsync(string[] categoriesId);
+    Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId);
+    Task<List<Ticket>> GetTicketNotByCateIdAsync(string[] categoriesId);
+
 
 
 
