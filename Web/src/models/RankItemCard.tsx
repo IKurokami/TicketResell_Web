@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { fetchImage } from "./FetchImage";
 import { log } from "console";
+import Link from "next/link";
 
 export interface RankItemCardProps {
   id: string;
@@ -94,6 +95,7 @@ export const fetchTopTicketData = async (
 };
 
 export const RankItemCard: React.FC<RankItemCardProps> = ({
+  id,
   rank,
   ticketImage,
   ticketName: ticketText,
@@ -103,28 +105,30 @@ export const RankItemCard: React.FC<RankItemCardProps> = ({
   amount,
 }) => {
   return (
-    <div className="rank-item-card">
-      <div className="left-info">
-        <span className="rank">{rank}</span>
-        <span className="ticket" style={{ width: "22rem" }}>
-          <Image
-            src={ticketImage}
-            alt={ticketText}
-            className="ticket-image"
-            width={50}
-            height={50}
-          />
-          <div>
-            <span>{ticketText}</span>
-            <span style={{ fontSize: "0.8rem" }}>{date}</span>
-            <span style={{ fontSize: "0.8rem" }}>{time}</span>
-          </div>
-        </span>
+    <Link href={"ticket/" + id}>
+      <div className="rank-item-card">
+        <div className="left-info">
+          <span className="rank">{rank}</span>
+          <span className="ticket" style={{ width: "22rem" }}>
+            <Image
+              src={ticketImage}
+              alt={ticketText}
+              className="ticket-image"
+              width={50}
+              height={50}
+            />
+            <div>
+              <span>{ticketText}</span>
+              <span style={{ fontSize: "0.8rem" }}>{date}</span>
+              <span style={{ fontSize: "0.8rem" }}>{time}</span>
+            </div>
+          </span>
+        </div>
+        <div className="right-info">
+          <span className="price">{price}</span>
+        </div>
       </div>
-      <div className="right-info">
-        <span className="price">{price}</span>
-      </div>
-    </div>
+    </Link>
   );
 };
 

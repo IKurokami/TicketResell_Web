@@ -52,6 +52,8 @@ builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<UserValidator>();
@@ -87,6 +89,13 @@ app.UseMiddleware<ValidatorMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
+    options.DocumentTitle = "Swagger";
+});
 app.Run();
 
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", "default");

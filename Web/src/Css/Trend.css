@@ -164,6 +164,7 @@
         width: 50vw;
     }
 
+
     .navbar-left div{
         background-color:  rgb(237, 237, 237);
         margin-left: 0rem;
@@ -193,6 +194,21 @@
         max-width: 480px;
         
     }
-    
+  }
 
+  @media (max-width: 500px) {
+    .rank-item-card{
+        padding: 0;
+    }
+
+    .left-info img{
+        margin-left: -1.5rem;
+    }
+    .right-info .price{
+        display: none;
+    }
+
+    .ticket div{
+        width: 5rem;
+    }
   }

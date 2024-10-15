@@ -135,7 +135,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     const id = Cookies.get("id");
 
     if (!id) {
-      router.push("/login");
+      // router.push("/login");
       return;
     }
     const fetchCart = async () => {

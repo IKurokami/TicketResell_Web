@@ -29,10 +29,7 @@ public interface ITicketRepository : IRepository<Ticket>
 
     Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId);
     Task<List<Ticket>> GetTicketNotByCateIdAsync(string[] categoriesId);
-
-
-
-
+    Task<List<Ticket>> GetTicketByListCateIdAsync(string [] categoriesId);
 
 }
 

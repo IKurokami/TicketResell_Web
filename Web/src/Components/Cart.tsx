@@ -172,23 +172,134 @@ const MyCart: React.FC = () => {
     }
   };
 
+  const fetchPaypalOrder = async (vndAmount) => {
+    try {
+      const response = await fetch("/api/getPaypalOrder", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ vndAmount }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create PayPal order");
+      }
+
+      const data = await response.json();
+      return data.paymentUrl; // Return the order data
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      throw error; // Re-throw the error for handling elsewhere if needed
+    }
+  };
+
+  const fetchVnPay = async (amount, vnp_TxnRef) => {
+    try {
+      const response = await fetch("/api/getPaymentUrl", {
+        method: "POST", // Specify the method as POST
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount, vnp_TxnRef }), // Include amount and vnp_TxnRef in the request body
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch payment URL");
+      }
+
+      const data = await response.json();
+      return data.paymentUrl; // Return the payment URL
+    } catch (error) {
+      console.error("Error fetching payment URL:", error);
+      throw error; // Re-throw the error for handling elsewhere
+    }
+  };
+
+  const fetchMoMoPayment = async (amount, requestId, orderId) => {
+    try {
+      const response = await fetch("/api/createMoMoPayment", {
+        // Adjust the API endpoint as necessary
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount, requestId, orderId }), // Send the amount, requestId, and orderId
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch MoMo payment URL");
+      }
+
+      const data = await response.json();
+      return data.payUrl; // Return the payment URL from MoMo's response
+    } catch (error) {
+      console.error("Error fetching MoMo payment URL:", error);
+      throw error; // Re-throw the error for handling elsewhere
+    }
+  };
+
   // Proceed to checkout
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     const productsForCheckout = items.filter((item) => item.isSelected);
+
     if (productsForCheckout.length === 0) {
       alert("Please select at least one product to checkout.");
       return;
     }
+
     if (!selectedPayment) {
       alert("Please select a payment method.");
       return;
     }
+
+    // Store selected products and payment method in local storage
     localStorage.setItem(
       "selectedTickets",
       JSON.stringify(productsForCheckout)
     );
     localStorage.setItem("paymentMethod", selectedPayment);
-    router.push("/checkout");
+    const requestId = `requestId_${Date.now()}`; // Generate a unique request ID
+    const orderId = `orderId_${Date.now()}`;
+    if (selectedPayment === "Paypal") {
+      try {
+        const paymentUrl = await fetchPaypalOrder(totalItemsPrice);
+        router.push(paymentUrl);
+      } catch (error) {
+        console.error("Error fetching PayPal order:", error);
+        alert(
+          "There was an error processing your PayPal order. Please try again."
+        );
+      }
+    } else if (selectedPayment === "VNpay") {
+      try {
+        const paymentUrl = await fetchVnPay(totalItemsPrice, orderId); // Fetch the VNPay payment URL
+        console.log("VNPay Payment URL:", paymentUrl);
+        router.push(paymentUrl); // Redirect to VNPay URL
+      } catch (error) {
+        console.error("Error fetching VNPay order:", error);
+        alert(
+          "There was an error processing your VNPay order. Please try again."
+        );
+      }
+    } else if (selectedPayment === "momo") {
+      // Generate a unique order ID
+
+      try {
+        const paymentUrl = await fetchMoMoPayment(
+          totalItemsPrice,
+          requestId,
+          orderId
+        ); // Fetch the MoMo payment URL
+        console.log("MoMo Payment URL:", paymentUrl);
+        router.push(paymentUrl); // Redirect to MoMo URL
+      } catch (error) {
+        console.error("Error fetching MoMo payment URL:", error);
+        alert(
+          "There was an error processing your MoMo order. Please try again."
+        );
+      }
+    }
   };
 
   // Function to format price to VND
