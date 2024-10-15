@@ -1,12 +1,19 @@
 // models/TicketCardModel.ts
 import { fetchImage } from "./FetchImage";
 
+export interface Categories{
+  categoryId:string;
+  name:string;
+  description:string;
+}
+
 export interface TicketCard {
   name: string;
   price: string;
   id: string;
   date: string;
   imageUrl: string;
+  categories:Categories[];
   location: string;
 }
 
@@ -47,7 +54,12 @@ export const convertToTicketCards = async (
           hour12: true,
           timeZone: "Asia/Ho_Chi_Minh",
         }),
-        location: item.location,
+        categories: item.categories.map((category: any) => ({
+          categoryId: category.categoryId,
+          name: category.name,
+          description: category.description,
+        })),
+        location:item.location,
         imageUrl,
       };
     })
