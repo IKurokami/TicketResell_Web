@@ -1,11 +1,11 @@
 import React from "react";
 import Background from "@/Components/Background";
-import TicketDetail from "@/Components/TicketDetail";
-import "bootstrap/dist/css/bootstrap.min.css";
+import UpdateTicket from "@/Components/UpdateTicket";
+
 const Ticket = () => {
   return (
     <div>
-      <Background test={<TicketDetail />} />
+      <Background test={<UpdateTicket/>} />
     </div>
   );
 };

@@ -31,7 +31,8 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange)
         {
-            var tickets = await _unitOfWork.TicketRepository.GetTicketsStartingWithinTimeRangeAsync(ticketAmount, timeRange);
+            var tickets =
+                await _unitOfWork.TicketRepository.GetTicketsStartingWithinTimeRangeAsync(ticketAmount, timeRange);
 
             if (tickets == null || !tickets.Any())
             {
@@ -49,6 +50,7 @@ namespace TicketResell.Services.Services
             {
                 return ResponseModel.NotFound($"Not found any ticket with category {categoryName}");
             }
+
             return ResponseModel.Success("Successfully get ticket by category name", tickets);
         }
 
@@ -74,6 +76,7 @@ namespace TicketResell.Services.Services
                     }
                 }
             }
+
             byte[] qrCodeBytes = null;
             if (dto.Qrcode != null)
             {
@@ -102,6 +105,7 @@ namespace TicketResell.Services.Services
                     return ResponseModel.BadRequest("Invalid QR code format");
                 }
             }
+
             newTicket.Qr = qrCodeBytes;
             newTicket.CreateDate = DateTime.UtcNow;
             newTicket.ModifyDate = DateTime.UtcNow;
@@ -125,10 +129,13 @@ namespace TicketResell.Services.Services
 
             return ResponseModel.Success($"Successfully get top ticket", ticketDtos);
         }
+
         public async Task<ResponseModel> GetQrImageAsBase64Async(string ticketId)
         {
-            return ResponseModel.Success($"Successfully get qr", await _unitOfWork.TicketRepository.GetQrImageAsBase64Async(ticketId));
+            return ResponseModel.Success($"Successfully get qr",
+                await _unitOfWork.TicketRepository.GetQrImageAsBase64Async(ticketId));
         }
+
         public async Task<ResponseModel> GetTicketsAsync()
         {
             var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
@@ -163,15 +170,18 @@ namespace TicketResell.Services.Services
         public async Task<ResponseModel> GetTicketByIdAsync(string id)
         {
             var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
-
             var ticketDtos = _mapper.Map<TicketReadDto>(ticket);
+            if (ticket.Qr != null)
+            {
+                ticketDtos.Qrcode = Convert.ToBase64String(ticket.Qr);
+            }
+
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
 
         public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto, bool saveAll)
         {
             var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
-
 
             ticket.ModifyDate = DateTime.UtcNow;
             _mapper.Map(dto, ticket);
@@ -184,6 +194,36 @@ namespace TicketResell.Services.Services
                 return ResponseModel.BadRequest("Validation error", validationResult.Errors);
             }
 
+            byte[] qrCodeBytes = null;
+            if (dto.Qrcode != null)
+            {
+                try
+                {
+                    var mimeTypes = new Dictionary<string, string>
+                    {
+                        { "data:image/png;base64,", ".png" },
+                        { "data:image/jpeg;base64,", ".jpg" },
+                        { "data:image/webp;base64,", ".webp" }
+                    };
+
+                    foreach (var mimeType in mimeTypes.Keys)
+                    {
+                        if (dto.Qrcode.StartsWith(mimeType))
+                        {
+                            dto.Qrcode = dto.Qrcode.Substring(mimeType.Length);
+                            break;
+                        }
+                    }
+
+                    qrCodeBytes = Convert.FromBase64String(dto.Qrcode);
+                }
+                catch (FormatException)
+                {
+                    return ResponseModel.BadRequest("Invalid QR code format");
+                }
+            }
+
+            ticket.Qr = qrCodeBytes;
             _unitOfWork.TicketRepository.Update(ticket);
             if (saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully updated ticket: {ticket.TicketId}");
@@ -227,6 +267,4 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get tickets", ticketDtos);
         }
     }
-
 }
-

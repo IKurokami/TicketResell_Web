@@ -30,6 +30,8 @@ public class TicketReadDto
 
     public string? Image { get; set; }
 
+    public string? Qrcode { get; set; }
+
     public string? Description { get; set; }
 
     public virtual ICollection<CategoryReadDto> Categories { get; set; }
