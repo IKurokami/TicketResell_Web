@@ -6,7 +6,6 @@ import { FaGoogle, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import Cookies from "js-cookie";
 import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
-import { GoogleLogin } from 'react-google-login'; // Import GoogleLogin
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

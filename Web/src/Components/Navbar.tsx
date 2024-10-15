@@ -133,10 +133,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     };
     const id = Cookies.get("id");
 
-    if (!id) {
-      router.push("/login");
-      return;
-    }
     const fetchCart = async () => {
       const response = await fetch(
         `http://localhost:5296/api/cart/items/${id}`,
