@@ -105,7 +105,10 @@ export const RankItemCard: React.FC<RankItemCardProps> = ({
   amount,
 }) => {
   return (
-    <Link href={"ticket/" + id}>
+    <Link
+      href={"ticket/" + id}
+      style={{ textDecoration: "none", color: "black" }}
+    >
       <div className="rank-item-card">
         <div className="left-info">
           <span className="rank">{rank}</span>
