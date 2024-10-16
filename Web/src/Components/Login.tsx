@@ -4,19 +4,16 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import Cookies from "js-cookie";
-import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
-import LoginButton from "./login-btn";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
+import { getOTP } from '@/pages/api/getOTP';
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 };
 
-const InputField: React.FC<
-  React.InputHTMLAttributes<HTMLInputElement> & { icon: React.ReactNode }
-> = ({ icon, ...props }) => (
+const InputField: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { icon: React.ReactNode }> = ({ icon, ...props }) => (
   <div className="relative mt-5">
     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
       {icon}
@@ -28,10 +25,7 @@ const InputField: React.FC<
   </div>
 );
 
-const ActionButton: React.FC<{
-  children: React.ReactNode;
-  onClick?: () => void;
-}> = ({ children, onClick }) => (
+const ActionButton: React.FC<{ children: React.ReactNode; onClick?: () => void; }> = ({ children, onClick }) => (
   <motion.button
     className="w-full px-4 py-4 mt-6 font-bold text-white bg-green-500 rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition-all"
     onClick={onClick}
@@ -50,9 +44,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(
-    null
-  );
+  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
   const [rememberMe, setRememberMe] = useState(false);
   const [otp, setOtp] = useState<number | null>(null);
@@ -84,16 +76,10 @@ const Login: React.FC = () => {
           } else {
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);
-
-            if (Cookies) {
-              console.log("cookie saved");
-            }
-
             setLoginSuccessMessage("Login successful!");
             setTimeout(() => {
               setLoginSuccessMessage(null);
             }, 3000);
-
             setTimeout(() => {
               router.push("/");
             }, 500);
@@ -105,7 +91,6 @@ const Login: React.FC = () => {
       }
     };
 
-    // Call the async function
     handleLogin();
   }, [session]);
 
@@ -152,24 +137,19 @@ const Login: React.FC = () => {
         setError(result.message || "Invalid email or password.");
       } else {
         if (rememberMe) {
-          Cookies.set("id", result.data.user.userId, { expires: 7 }); // Save user ID for 7 days
-          Cookies.set("accessKey", result.data.accessKey, { expires: 7 }); // Save accessKey for 7 days
+          Cookies.set("id", result.data.user.userId, { expires: 7 });
+          Cookies.set("accessKey", result.data.accessKey, { expires: 7 });
         } else {
-          Cookies.set("id", result.data.user.userId); // Save session cookies (will be removed on browser close)
+          Cookies.set("id", result.data.user.userId);
           Cookies.set("accessKey", result.data.accessKey);
         }
-        if (Cookies) {
-          console.log("cookie saved");
-        }
-        setLoginSuccessMessage("Login successful!"); // Set success message
+        setLoginSuccessMessage("Login successful!");
         setTimeout(() => {
-          setLoginSuccessMessage(null); // Clear success message after displaying it
+          setLoginSuccessMessage(null);
         }, 3000);
-
-        // Delay navigation to the home page by 5 seconds
         setTimeout(() => {
           router.push("/");
-        }, 500); // Redirect after 5 seconds
+        }, 500);
       }
     } catch (error) {
       console.error("Network error:", error);
@@ -178,91 +158,64 @@ const Login: React.FC = () => {
   };
 
   const handleSignUp = async () => {
-    // Validate email format before proceeding
     if (!validateEmail(email)) {
       setError("Invalid email format.");
       return;
     }
 
     if (!username || !name || !email || !password) {
-      setError("Please fill in all fields and choose a role.");
+      setError("Please fill in all fields.");
       return;
     }
 
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
-
-    const templateParams = {
-      to_name: name,
-      to_email: email,
-      otp: generatedOtp,
-    };
-
     try {
-      const response = await emailjs.send(
-        "service_d76v3rv", // Service ID
-        "template_juvp2i4", // Template ID
-        templateParams,
-        "RNLODJWvSPCIi0CTv" // Public key
-      );
-
-      console.log("OTP sent:", response.status, response.text);
-
-      if (response.status === 200) {
-        alert(`An OTP has been sent to your email: ${email}`);
-        setOtp(generatedOtp); // Save OTP for verification
-        setOtpSent(true); // Set flag indicating OTP has been sent
-        setTimer(60); // Reset timer to 60 seconds
+      const response = await getOTP(name, email, username);
+      if (response.success) {
+        setOtpSent(true);
+        setTimer(300);
+        setSuccessMessage("An OTP has been sent to your email. Please check and enter it below.");
       } else {
         setError("Failed to send OTP. Please try again.");
       }
     } catch (error) {
       console.error("Failed to send OTP:", error);
-      setError("Failed to send OTP. Please try again.");
+      setError("An error occurred while sending OTP. Please try again.");
     }
   };
-
   const handleVerifyOtp = async () => {
-    if (parseInt(enteredOtp) === otp) {
-      // Proceed with registration if OTP is correct
-      try {
-        const response = await fetch(
-          "http://localhost:5296/api/Authentication/register",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              UserId: email,
-              Username: username,
-              Password: password,
-              Gmail: email,
-            }),
-          }
-        );
+    if (!enteredOtp) {
+      setError("Please enter the OTP.");
+      return;
+    }
 
-        const result = await response.json();
-        console.log(result);
+    try {
+      const response = await fetch('http://localhost:3000/api/getOTP', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,  // Ensure you have the password variable
+          email: email,
+          otp: enteredOtp,  // Use the entered OTP from the form
+        }),
+      });
 
-        if (!response.ok) {
-          setError(result.message || "Something went wrong.");
-          return;
-        }
+      const data = await response.json();
 
-        setError(null);
-        setSuccessMessage("Registration successful! You can now sign in."); // Set success message
-        setTimeout(() => {
-          setActiveTab("login"); // Switch to login tab after a delay
-          setSuccessMessage(null); // Clear success message after displaying it
-        }, 3000); // Switch after 3 seconds
-      } catch (error) {
-        console.error("Sign up error:", error);
-        setError("An error occurred during sign-up. Please try again.");
+      if (response.ok && data.success) {
+        setSuccessMessage("OTP verified successfully! Proceeding with registration.");
+        // You can add further actions like redirection or updating the user data
+      } else {
+        setError(data.message || "OTP verification failed. Please try again.");
       }
-    } else {
-      setError("Invalid OTP. Please try again.");
+    } catch (error) {
+      console.error("Error during OTP verification:", error);
+      setError("An error occurred while verifying OTP. Please try again.");
     }
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen p-5">
@@ -281,21 +234,13 @@ const Login: React.FC = () => {
           </div>
           <div className="flex mb-0">
             <button
-              className={`w-full py-4 text-lg font-bold transition-all ${
-                activeTab === "login"
-                  ? "text-white bg-green-500"
-                  : "text-gray-600 bg-transparent"
-              } rounded-l-3xl`}
+              className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "login" ? "text-white bg-green-500" : "text-gray-600 bg-transparent"} rounded-l-3xl`}
               onClick={() => setActiveTab("login")}
             >
               Sign In
             </button>
             <button
-              className={`w-full py-4 text-lg font-bold transition-all ${
-                activeTab === "register"
-                  ? "text-white bg-green-500"
-                  : "text-gray-600 bg-transparent"
-              } rounded-r-3xl`}
+              className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "register" ? "text-white bg-green-500" : "text-gray-600 bg-transparent"} rounded-r-3xl`}
               onClick={() => setActiveTab("register")}
             >
               Sign Up
@@ -404,8 +349,6 @@ const Login: React.FC = () => {
                 <div className="mt-4 text-center">
                   <p>or</p>
                 </div>
-
-                {/* Google Login Button */}
                 <div className="mt-4">
                   <button className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all">
                     <FaGoogle className="mr-2" /> Continue with Google
