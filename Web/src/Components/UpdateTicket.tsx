@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import RichTextEditor from "@/Hooks/RichTextEditor";
 import { useRouter } from "next/navigation";
 import ScrollToTopButton from "@/Hooks/useScrollTopButton";
+import "bootstrap/dist/css/bootstrap.min.css";
 import {
   TextField,
   Button,
@@ -12,6 +13,8 @@ import {
 } from "@mui/material";
 import Cookies from "js-cookie";
 import "@/Css/AddTicketModal.css";
+import { useParams } from "next/navigation";
+import { fetchImage } from "@/models/FetchImage";
 
 interface Province {
   Id: number;
@@ -48,7 +51,7 @@ interface Category {
   name: string;
 }
 
-const AddTicketModal: React.FC = () => {
+const UpdateTicketModal: React.FC = () => {
   const initialFormData: FormDataType = {
     name: "",
     cost: "",
@@ -68,6 +71,8 @@ const AddTicketModal: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [qrFileNames, setQrFileNames] = useState(Array(quantity).fill(""));
   const [qrFiles, setQrFiles] = useState(Array(quantity).fill(null));
+  const params = useParams();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const router = useRouter();
 
   const [houseNumber, setHouseNumber] = useState<string>("");
@@ -79,14 +84,24 @@ const AddTicketModal: React.FC = () => {
   const [selectedWard, setSelectedWard] = useState<number | null>(null);
   const [minDateTime, setMinDateTime] = useState("");
 
+  const toDateTimeLocalFormat = (date: string | Date): string => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = `0${d.getMonth() + 1}`.slice(-2);
+    const day = `0${d.getDate()}`.slice(-2);
+    const hours = `0${d.getHours()}`.slice(-2);
+    const minutes = `0${d.getMinutes()}`.slice(-2);
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const fetchProvinces = async () => {
     try {
       const response = await fetch(
         "https://api.npoint.io/ac646cb54b295b9555be"
       );
       const data = await response.json();
-
       setProvinces(data);
+      return data;
     } catch (error) {
       console.error("Error fetching provinces:", error);
     }
@@ -98,13 +113,12 @@ const AddTicketModal: React.FC = () => {
         "https://api.npoint.io/34608ea16bebc5cffd42"
       );
       const data: District[] = await response.json();
-      console.log(data);
 
-      // Filter districts by ProvinceId
       const filteredDistricts = data.filter(
         (district) => district.ProvinceId === provinceId
       );
       setDistricts(filteredDistricts);
+      return filteredDistricts;
     } catch (error) {
       console.error("Error fetching districts:", error);
     }
@@ -116,13 +130,13 @@ const AddTicketModal: React.FC = () => {
         "https://api.npoint.io/dd278dc276e65c68cdf5"
       );
       const data: Ward[] = await response.json();
-      console.log(data);
 
       // Filter wards by DistrictId
       const filteredWards = data.filter(
         (ward) => ward.DistrictId === districtId
       );
       setWards(filteredWards);
+      return filteredWards;
     } catch (error) {
       console.error("Error fetching wards:", error);
     }
@@ -131,10 +145,6 @@ const AddTicketModal: React.FC = () => {
   useEffect(() => {
     fetchProvinces();
   }, []);
-
-  useEffect(() => {
-    console.log("Updated provinces:", provinces);
-  }, [provinces]);
 
   useEffect(() => {
     if (selectedProvince) {
@@ -198,12 +208,148 @@ const AddTicketModal: React.FC = () => {
       const now = new Date();
       return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
         .toISOString()
-        .slice(0, 16); // Format as "YYYY-MM-DDTHH:MM"
+        .slice(0, 16);
     };
 
-    // Set the minimum date to the current date and time
     setMinDateTime(getCurrentDateTime());
   }, []);
+
+  const fetchItems = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5296/api/ticket/readbyid/${id}`
+      );
+      const result = await response.json();
+      console.log("Fetched Ticket Data:", result.data);
+
+      if (!result.data) {
+        console.log("No data found");
+        return;
+      }
+
+      // Format start date if available
+      const formattedDateForInput = result.data.startDate
+        ? toDateTimeLocalFormat(result.data.startDate)
+        : null;
+
+      // Split and extract location details
+      const locationParts = result.data.location
+        ? result.data.location.split(", ").map((part: string) => part.trim())
+        : [];
+      const houseNumber = locationParts[0] || "";
+      const wardName = locationParts[1] || "";
+      const districtName = locationParts[2] || "";
+      const provinceName = locationParts[3] || "";
+
+      setHouseNumber(houseNumber);
+
+      let updatedQrFiles = [];
+
+      if (Array.isArray(result.data.qrcode)) {
+        updatedQrFiles = result.data.qrcode.map((qrCode: string) => {
+          const mimeType = detectMimeType(qrCode);
+          return `data:${mimeType};base64,${qrCode}`;
+        });
+
+        console.log("Updated QR Files:", updatedQrFiles);
+      } else if (typeof result.data.qrcode === "string") {
+        const mimeType = detectMimeType(result.data.qrcode);
+        updatedQrFiles.push(`data:${mimeType};base64,${result.data.qrcode}`);
+
+        console.log("Updated QR Files (single):", updatedQrFiles);
+      } else {
+        console.log(
+          "No valid QR code found or qrcode is not in the expected format"
+        );
+      }
+
+      setFormData((prevData) => ({
+        ...prevData,
+        ...result.data,
+        date: formattedDateForInput,
+        Qrcode: updatedQrFiles,
+      }));
+
+      if (updatedQrFiles.length > 0) {
+        console.log("Updated QR Files:", updatedQrFiles);
+        setQrFiles(updatedQrFiles);
+      }
+
+      // Fetch provinces
+      const fetchedProvinces = await fetchProvinces();
+      console.log("Fetched Provinces:", fetchedProvinces);
+
+      if (!fetchedProvinces.length) {
+        console.log("No provinces available yet.");
+        return;
+      }
+
+      setProvinces(fetchedProvinces);
+
+      // Find the selected province ID
+      const selectedProv =
+        fetchedProvinces.find(
+          (p: Province) =>
+            p.Name.trim().toLowerCase() === provinceName.trim().toLowerCase()
+        )?.Id || null;
+
+      if (selectedProv) {
+        // Fetch districts based on the selected province
+        const fetchedDistricts = await fetchDistricts(selectedProv);
+
+        if (Array.isArray(fetchedDistricts)) {
+          // Find the selected district ID
+          const selectedDist =
+            fetchedDistricts.find(
+              (d) =>
+                d.Name.trim().toLowerCase() ===
+                districtName.trim().toLowerCase()
+            )?.Id || null;
+
+          if (selectedDist) {
+            // Fetch wards based on the selected district
+            const fetchedWards = await fetchWards(selectedDist);
+
+            if (Array.isArray(fetchedWards)) {
+              // Find the selected ward ID
+              const selectedWrd =
+                fetchedWards.find(
+                  (w) =>
+                    w.Name.trim().toLowerCase() ===
+                    wardName.trim().toLowerCase()
+                )?.Id || null;
+
+              // Set selected province, district, and ward
+              setSelectedProvince(selectedProv);
+              setSelectedDistrict(selectedDist);
+              setSelectedWard(selectedWrd);
+            }
+          }
+        } else {
+          console.error("Fetched districts is not an array:", fetchedDistricts);
+        }
+      }
+
+      // Fetch and set the image if available
+      if (result.data.image) {
+        const { imageUrl, error } = await fetchImage(result.data.image);
+        if (imageUrl) {
+          setFormData((prevData) => ({
+            ...prevData,
+            image: imageUrl,
+          }));
+        } else {
+          console.error(`Error fetching image for ticket: ${error}`);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching ticket items:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, [id]);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -261,6 +407,17 @@ const AddTicketModal: React.FC = () => {
     }
   };
 
+  const detectMimeType = (base64String: string) => {
+    if (base64String.startsWith("/9j/")) {
+      return "image/jpeg";
+    } else if (base64String.startsWith("iVBORw0KGgo")) {
+      return "image/png";
+    } else if (base64String.startsWith("UklGR")) {
+      return "image/webp";
+    }
+    return "image/png";
+  };
+
   const handleQrFileChange = async (
     index: number,
     event: React.ChangeEvent<HTMLInputElement>
@@ -270,14 +427,12 @@ const AddTicketModal: React.FC = () => {
       const newQrFiles = [...qrFiles];
       const newQrFileNames = [...qrFileNames];
 
-      // Loop through each selected file and place it into the corresponding array slot
       files.forEach((file, fileIndex) => {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-          const targetIndex = index + fileIndex; // Calculate where to place the file
+          const targetIndex = index + fileIndex;
 
-          // Place the file and file name in the corresponding index
           newQrFiles[targetIndex] = reader.result as string;
           newQrFileNames[targetIndex] = file.name;
 
@@ -470,21 +625,24 @@ const AddTicketModal: React.FC = () => {
                     onChange={handleFileChange}
                     accept="image/*"
                     style={{ display: "none" }}
-                    placeholder="Ticket image"
                     required
                   />
-                  {!imagePreview && (
-                    <div className="text-center mt-3">
-                      <span>Ticket image</span>
+
+                  {/* Show uploaded image preview if available */}
+                  {imagePreview && (
+                    <div className="image-preview">
+                      <img
+                        src={imagePreview}
+                        style={{ width: "100%", height: "42vh" }}
+                      />
                     </div>
                   )}
 
-                  {imagePreview && (
-                    <div className="image-preview mt-3 rounded-lg">
+                  {/* Show fetched image if no uploaded image */}
+                  {!imagePreview && formData.image && (
+                    <div className="image-preview ">
                       <img
-                        src={imagePreview}
-                        alt="Selected image preview"
-                        className="img-fluid"
+                        src={formData.image}
                         style={{ width: "100%", height: "42vh" }}
                       />
                     </div>
@@ -507,7 +665,8 @@ const AddTicketModal: React.FC = () => {
                       <span>QR image {index + 1}</span>
                     </div>
 
-                    {!qrFiles[index] && (
+                    {/* Conditionally show empty box or the QR preview */}
+                    {!qrFiles[index] && !formData.Qrcode?.[index] && (
                       <div
                         className="items-center qr-image-box"
                         onClick={() =>
@@ -585,7 +744,7 @@ const AddTicketModal: React.FC = () => {
                 ) || null
               }
               onChange={(event, newValue: Province | null) => {
-                handleProvinceChange(newValue ? newValue.Id : null); // Pass Id, not Name
+                handleProvinceChange(newValue ? newValue.Id : null);
               }}
               renderInput={(params) => (
                 <TextField
@@ -617,6 +776,11 @@ const AddTicketModal: React.FC = () => {
                   label="District"
                   margin="normal"
                   fullWidth
+                  value={
+                    districts.find(
+                      (district) => district.Id === selectedDistrict
+                    ) || null
+                  }
                   required
                   disabled={!selectedProvince}
                 />
@@ -637,6 +801,7 @@ const AddTicketModal: React.FC = () => {
                   label="Ward"
                   margin="normal"
                   fullWidth
+                  value={wards.find((ward) => ward.Id === selectedWard) || null}
                   required
                   disabled={!selectedDistrict}
                 />
@@ -713,4 +878,4 @@ const AddTicketModal: React.FC = () => {
   );
 };
 
-export default AddTicketModal;
+export default UpdateTicketModal;
