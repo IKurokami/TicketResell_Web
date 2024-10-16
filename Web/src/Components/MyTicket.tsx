@@ -374,7 +374,7 @@ const MyTicketsPage = () => {
 
       </div>
 
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {filteredOrders.map((order) => (
           <div
             key={order.id}
@@ -402,21 +402,26 @@ const MyTicketsPage = () => {
 
 
 
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-gray-600 text-sm">
-                  <IconCalendar className="inline-block mr-2" />
+              <div className="flex items-center justify-between mb-2 p-3 bg-gray-50  ">
+                <p className="text-gray-700 text-sm font-medium flex items-center">
+                  <IconCalendar className="inline-block mr-2 text-blue-500" />
                   {order.date}
                 </p>
-                <p className="text-gray-600 text-sm">{order.totalprice}</p>
+                <p className="text-gray-700 text-sm font-semibold">
+                  {order.totalprice}
+                </p>
               </div>
 
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-gray-600 text-sm">
-                  <IconUser className="inline-block mr-2" />
+              <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg shadow-sm">
+                <p className="text-gray-700 text-sm font-medium flex items-center">
+                  <IconUser className="inline-block mr-2 text-blue-500" />
                   Seller: {order.seller}
                 </p>
-                <p className="text-gray-600 text-sm">Qty: {order.quantity}</p>
+                <p className="text-gray-700 text-sm font-semibold">
+                  Qty: {order.quantity}
+                </p>
               </div>
+
 
 
               <div className="flex items-center space-x-1">
@@ -431,15 +436,15 @@ const MyTicketsPage = () => {
 
                 ))}
               </div>
-
               <div className="mt-4 flex justify-between items-center">
-                <div className="text-gray-700">
-                  <p className="font-medium">Location: {order.location}</p>
-                </div>
+                <p className="text-gray-600 mb-2 truncate" style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  Location: {order.location}
+                </p>
                 <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow">
-                  View
+                  Show QR
                 </button>
               </div>
+
 
             </div>
           </div>
