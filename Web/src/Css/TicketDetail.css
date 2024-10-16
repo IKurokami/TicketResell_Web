@@ -13,8 +13,7 @@
   margin-bottom: 10vh;
 }
 
-.ticket--price--block,
-.ticket--related {
+.ticket--price--block {
   margin-top: 1vh;
   color: #000;
   background-color: #fdfdfd;
@@ -81,8 +80,6 @@
 .ticket--related {
   margin-top: 90px;
   border-radius: 10px;
-}
-.ticket--img {
 }
 
 .ticket--title {

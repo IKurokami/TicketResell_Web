@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 import RelatedTicket from "./RelatedTicket";
 import Notification_Popup from "./Notification_PopUp";
 
-interface TicketDetail{
+interface TicketDetail {
   id: string;
 }
 
@@ -54,7 +54,7 @@ const DEFAULT_IMAGE =
 
 const TicketDetail = () => {
   const [ticketresult, setTicketresult] = useState<Ticket | null>(null);
-  const params = useParams<{id: string}>();
+  const params = useParams<{ id: string }>();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [categoriesId, setCategories] = useState<string[]>([]);
   const [remainingItems, setRemainingItems] = useState(0);
@@ -175,7 +175,7 @@ const TicketDetail = () => {
               year: "numeric",
               day: "2-digit",
               month: "2-digit",
-              hour12: true,
+              hour12: false,
               timeZone: "Asia/Ho_Chi_Minh",
             }),
             author: result.data.seller,
@@ -263,12 +263,22 @@ const TicketDetail = () => {
               </p>
               <ul className="flex flex-wrap gap-2 tag--list">
                 {ticketresult.categories.slice(0, 5).map((category) => (
-                  <li
-                    key={category.categoryId}
-                    className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                  <Link
+                    className="no-underline "
+                    href={{
+                      pathname: `/search`,
+                      query: {
+                        cateName: category.name,
+                      },
+                    }}
                   >
-                    {category.name}
-                  </li>
+                    <li
+                      key={category.categoryId}
+                      className="bg-green-500 hover:bg-green-400 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                    >
+                      {category.name}
+                    </li>
+                  </Link>
                 ))}
                 {ticketresult.categories.length > 5 && (
                   <li className="bg-gray-300 text-white px-3 rounded-full text-sm font-semibold">
@@ -283,7 +293,7 @@ const TicketDetail = () => {
                 Date: <strong>{ticketresult.startDate}</strong>
               </span>
             </p>
-            <div className="bg-white rounded-lg px-4 py-[3vh] shadow-md ticket--price--block ">
+            <div className="bg-white rounded-lg px-4 py-[3vh] ticket--price--block ">
               <p className="flex items-center space-x-2 text-2xl lg:text-[2.5vw] font-bold text-green-600 ">
                 <FontAwesomeIcon icon={faTag} />
                 <span>{ticketresult.cost} VND</span>
@@ -310,7 +320,7 @@ const TicketDetail = () => {
               {!checkOwner && (
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
+                    className="bg-green-500 hover:bg-green-400 grow text-white font-bold py-2 rounded flex items-center justify-center transform transition-transform duration-300 hover:scale-105"
                     onClick={handleAddToCart}
                   >
                     <FontAwesomeIcon icon={faCartShopping} className="mr-2" />
@@ -322,7 +332,7 @@ const TicketDetail = () => {
                     show={showPopup}
                     onClose={handleClosePopup}
                   />
-                  <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center justify-center">
+                  <button className="bg-green-500 hover:bg-green-400 grow text-white font-bold py-2 rounded flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
                     <FontAwesomeIcon icon={faCashRegister} className="mr-2" />
                     Buy Now
                   </button>

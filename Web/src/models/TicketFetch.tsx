@@ -33,9 +33,9 @@ const convertToTickets = async (response: any[]): Promise<Ticket[]> => {
     response.map(async (item) => {
       let image = DEFAULT_IMAGE;
 
-      if (item.image) {
+      if (item.ticketId) {
         const { imageUrl: fetchedImageUrl, error } = await fetchImage(
-          item.image
+          item.ticketId
         );
 
         if (fetchedImageUrl) {
