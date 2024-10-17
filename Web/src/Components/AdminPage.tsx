@@ -1,7 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import TicketManager from "./TicketManager";
 import { fetchTickets } from "@/models/TicketFetch";
+import { UserService, User } from "@/models/UserManagement";
 import {
   Person as UsersIcon,
   Group as RolesIcon,
@@ -9,17 +12,47 @@ import {
   Category as CategoriesIcon,
   ShoppingCart as OrdersIcon,
 } from "@mui/icons-material";
+import UserManager from "./UserManager";
 
 const AdminPage = () => {
   const [tickets, setTickets] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Tickets");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sidebarTabs = [
+    { name: "Users", icon: <UsersIcon /> },
+    { name: "Roles", icon: <RolesIcon /> },
+    { name: "Tickets", icon: <TicketsIcon /> },
+    { name: "Categories", icon: <CategoriesIcon /> },
+    { name: "Orders", icon: <OrdersIcon /> },
+  ];
+  useEffect(() => {
+    if (searchParams) {
+      const page = searchParams.get("page");
+      const validTab = sidebarTabs.find((tab) => tab.name === page);
+      if (page && validTab) {
+        setActiveTab(page);
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const getTickets = async () => {
       const fetchedTickets = await fetchTickets();
       setTickets(fetchedTickets);
     };
+    const getUsers = async () => {
+      try {
+        const fetchedUsers = await UserService.fetchUsers();
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error("Failed to load users:", error);
+      }
+    };
+
+    getUsers();
     getTickets();
   }, []);
 
@@ -31,20 +64,27 @@ const AdminPage = () => {
     setSidebarOpen(false);
   };
 
-  const handleTicketEdit = (ticketId: string) => {
-    console.log("Edit ticket:", ticketId);
-  };
-
-  const handleTicketDelete = async (ticketId: string) => {
-    const url = `http://localhost:5296/api/ticket/delete/${ticketId}`;
+  const handleTicketActive = async (ticketId: string) => {
+    const url = `http://localhost:5296/api/ticket/update/${ticketId}`;
 
     try {
       const response = await fetch(url, {
-        method: "DELETE",
+        method: "PUT", // or PATCH based on your API
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          name: null,
+          cost: null,
+          location: null,
+          status: 1, // Setting the status back to 1 (Active)
+          image: null,
+          qrcode: null,
+          description: null,
+          createDate: null,
+          categories: [], // Sending an empty array or null if no update to categories
+        }),
       });
 
       if (!response.ok) {
@@ -52,24 +92,66 @@ const AdminPage = () => {
       }
 
       const result = await response.json();
-      console.log("Delete ticket response:", result);
+      console.log("Ticket status update response:", result);
+
+      setTickets((prevTickets) =>
+        prevTickets.map((ticket) =>
+          ticket.ticketId === ticketId ? { ...ticket, status: 1 } : ticket
+        )
+      );
     } catch (error) {
-      console.error("Error deleting ticket:", error);
+      console.error("Error updating ticket status:", error);
     }
   };
 
-  const handleNavigation = (tabName: string) => {
-    console.log("Navigate to:", tabName);
-    setActiveTab(tabName);
+  const handleTicketDelete = async (ticketId: string) => {
+    const url = `http://localhost:5296/api/ticket/update/${ticketId}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "PUT", // or PATCH based on your API
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: null,
+          cost: null,
+          location: null,
+          status: 0, // Updating only the status to 0
+          image: null,
+          qrcode: null,
+          description: null,
+          createDate: null,
+          categories: [], // Sending an empty array or null if no update to categories
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Ticket status update response:", result);
+
+      setTickets((prevTickets) =>
+        prevTickets.map((ticket) =>
+          ticket.ticketId === ticketId ? { ...ticket, status: 0 } : ticket
+        )
+      );
+    } catch (error) {
+      console.error("Error updating ticket status:", error);
+    }
   };
 
-  const sidebarTabs = [
-    { name: "Users", icon: <UsersIcon /> },
-    { name: "Roles", icon: <RolesIcon /> },
-    { name: "Tickets", icon: <TicketsIcon /> },
-    { name: "Categories", icon: <CategoriesIcon /> },
-    { name: "Orders", icon: <OrdersIcon /> },
-  ];
+  const handleUserEdit = async (userId: string) => {};
+  const handleUserDelete = async (userId: string) => {};
+
+  const handleNavigation = (tabName: string) => {
+    console.log("Navigate to:", tabName);
+    router.push(`/admin?page=${tabName}`, undefined, { shallow: true });
+    setActiveTab(tabName);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -77,8 +159,16 @@ const AdminPage = () => {
         return (
           <TicketManager
             tickets={tickets}
-            onEdit={handleTicketEdit}
+            onActive={handleTicketActive}
             onDelete={handleTicketDelete}
+          />
+        );
+      case "Users":
+        return (
+          <UserManager
+            users={users}
+            onEdit={handleUserEdit}
+            onDelete={handleUserDelete}
           />
         );
       default:
