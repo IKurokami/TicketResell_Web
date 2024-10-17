@@ -4,15 +4,17 @@ import { FaSearch } from "react-icons/fa";
 import { MdFilterList, MdKeyboardArrowDown, MdClose } from "react-icons/md";
 import { fetchTickets, getCategoryNames } from "../models/TicketFetch";
 import TicketGrid from "./TicketGrid";
-import TabNavigation from "./TabNavigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSortAmountDown,
   faSortAmountUp,
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
+import { useSearchParams } from "next/navigation";
 
 const Search: React.FC = () => {
+  const searchParams = useSearchParams();
+  const cateName = searchParams?.get("cateName") || "";
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState(23000000);
@@ -44,6 +46,7 @@ const Search: React.FC = () => {
   };
 
   useEffect(() => {
+    setSelectedGenres([cateName]);
     const loadTickets = async () => {
       const fetchedTickets = await fetchTickets();
       setTickets(fetchedTickets);
