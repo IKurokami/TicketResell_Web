@@ -7,6 +7,8 @@ import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 import { useSession, signIn } from "next-auth/react";
 import { getOTP } from '@/pages/api/getOTP';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -71,12 +73,12 @@ const Login: React.FC = () => {
           const result = await response.json();
 
           if (!response.ok) {
-            console.error("Login error:", result);
-            setError(result.message || "Login Error.");
+            console.error("Lỗi đăng nhập:", result);
+            setError(result.message || "Lỗi đăng nhập.");
           } else {
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);
-            setLoginSuccessMessage("Login successful!");
+            setLoginSuccessMessage("Đăng nhập thành công!");
             setTimeout(() => {
               setLoginSuccessMessage(null);
             }, 3000);
@@ -85,8 +87,8 @@ const Login: React.FC = () => {
             }, 500);
           }
         } catch (error) {
-          console.error("Error during login:", error);
-          setError("An error occurred during login.");
+          console.error("Lỗi trong quá trình đăng nhập:", error);
+          setError("Đã xảy ra lỗi trong quá trình đăng nhập.");
         }
       }
     };
@@ -104,13 +106,39 @@ const Login: React.FC = () => {
     if (timer === 0) {
       setOtpSent(false);
       setOtp(null);
-      alert("OTP has expired. Please request a new one.");
+      alert("OTP đã hết hạn. Vui lòng yêu cầu một mã mới.");
     }
   }, [timer, otpSent]);
 
+  const notifySuccess = (message: string) => {
+    toast.success(message, {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
+
+  const notifyError = (message: string) => {
+    toast.error(message, {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
+
   const handleSignIn = async () => {
     if (!email || !password) {
-      setError("Please fill in all fields.");
+      notifyError("Vui lòng điền đầy đủ thông tin.");
       return;
     }
 
@@ -133,8 +161,8 @@ const Login: React.FC = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        console.error("Login error:", result);
-        setError(result.message || "Invalid email or password.");
+        console.error("Lỗi đăng nhập:", result);
+        notifyError(result.message || "Email hoặc mật khẩu không hợp lệ.");
       } else {
         if (rememberMe) {
           Cookies.set("id", result.data.user.userId, { expires: 7 });
@@ -143,28 +171,25 @@ const Login: React.FC = () => {
           Cookies.set("id", result.data.user.userId);
           Cookies.set("accessKey", result.data.accessKey);
         }
-        setLoginSuccessMessage("Login successful!");
-        setTimeout(() => {
-          setLoginSuccessMessage(null);
-        }, 3000);
+        notifySuccess("Đăng nhập thành công!");
         setTimeout(() => {
           router.push("/");
         }, 500);
       }
     } catch (error) {
-      console.error("Network error:", error);
-      setError("An error occurred. Please try again later.");
+      console.error("Lỗi mạng:", error);
+      notifyError("Đã xảy ra lỗi. Vui lòng thử lại sau.");
     }
   };
 
   const handleSignUp = async () => {
     if (!validateEmail(email)) {
-      setError("Invalid email format.");
+      notifyError("Định dạng email không hợp lệ.");
       return;
     }
 
     if (!username || !name || !email || !password) {
-      setError("Please fill in all fields.");
+      notifyError("Vui lòng điền đầy đủ thông tin.");
       return;
     }
 
@@ -173,19 +198,19 @@ const Login: React.FC = () => {
       if (response.success) {
         setOtpSent(true);
         setTimer(300);
-        setSuccessMessage("An OTP has been sent to your email. Please check and enter it below.");
+        notifySuccess("Một mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập mã bên dưới.");
       } else {
-        setError("Failed to send OTP. Please try again.");
+        notifyError("Gửi OTP thất bại. Vui lòng thử lại.");
       }
     } catch (error) {
-      console.error("Failed to send OTP:", error);
-      setError("An error occurred while sending OTP. Please try again.");
+      console.error("Gửi OTP thất bại:", error);
+      notifyError("Đã xảy ra lỗi khi gửi OTP. Vui lòng thử lại.");
     }
   };
 
   const handleVerifyOtp = async () => {
     if (!enteredOtp) {
-      setError("Please enter the OTP.");
+      notifyError("Vui lòng nhập mã OTP.");
       return;
     }
 
@@ -206,29 +231,25 @@ const Login: React.FC = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setSuccessMessage("OTP verified successfully! Registration complete.");
-
-        // Alert and switch to login tab
-        alert("Registration successful! Please log in.");
-        setActiveTab("login"); // Switch to login tab
-        setOtpSent(false); // Reset OTP state
-        setEnteredOtp(""); // Clear OTP field
-        setUsername(""); // Clear username
-        setName(""); // Clear name
-        setPassword(""); // Clear password
+        notifySuccess("Xác minh OTP thành công! Đăng ký hoàn tất.");
+        setActiveTab("login"); // Chuyển sang tab đăng nhập
+        setOtpSent(false); // Đặt lại trạng thái OTP
+        setEnteredOtp(""); // Xóa tr��ờng OTP
+        setUsername(""); // Xóa tên người dùng
+        setName(""); // Xóa tên
+        setPassword(""); // Xóa mật khẩu
       } else {
-        setError(data.message || "OTP verification failed. Please try again.");
+        notifyError(data.message || "Xác minh OTP thất bại. Vui lòng thử lại.");
       }
     } catch (error) {
-      console.error("Error during OTP verification:", error);
-      setError("An error occurred while verifying OTP. Please try again.");
+      console.error("Lỗi trong quá trình xác minh OTP:", error);
+      notifyError("Đã xảy ra lỗi khi xác minh OTP. Vui lòng thử lại.");
     }
   };
 
-
-
   return (
     <div className="flex items-center justify-center min-h-screen p-5">
+      <ToastContainer />
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -247,13 +268,13 @@ const Login: React.FC = () => {
               className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "login" ? "text-white bg-green-500" : "text-gray-600 bg-transparent"} rounded-l-3xl`}
               onClick={() => setActiveTab("login")}
             >
-              Sign In
+              Đăng Nhập
             </button>
             <button
               className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "register" ? "text-white bg-green-500" : "text-gray-600 bg-transparent"} rounded-r-3xl`}
               onClick={() => setActiveTab("register")}
             >
-              Sign Up
+              Đăng Ký
             </button>
           </div>
           <motion.div
@@ -267,43 +288,49 @@ const Login: React.FC = () => {
                 <InputField
                   icon={<FaEnvelope />}
                   type="email"
-                  placeholder="Email address"
+                  placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <InputField
                   icon={<FaLock />}
                   type="password"
-                  placeholder="Password"
+                  placeholder="Mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <div className="flex items-center mt-4">
-                  <input
-                    type="checkbox"
-                    id="rememberMe"
-                    checked={rememberMe}
-                    onChange={() => setRememberMe(!rememberMe)}
-                    className="mr-2"
-                  />
-                  <label htmlFor="rememberMe" className="text-gray-600">
-                    Remember Me
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="rememberMe"
+                      checked={rememberMe}
+                      onChange={() => setRememberMe(!rememberMe)}
+                      className="mr-2"
+                    />
+                    <label htmlFor="rememberMe" className="text-gray-600">
+                      Ghi nhớ tôi
+                    </label>
+                  </div>
+                  <label htmlFor="forgot" className="text-gray-600 cursor-pointer">
+                    Quên mật khẩu?
                   </label>
                 </div>
+
                 {error && <p className="text-red-500">{error}</p>}
                 {loginSuccessMessage && (
                   <p className="text-green-500">{loginSuccessMessage}</p>
                 )}
-                <ActionButton onClick={handleSignIn}>Sign In</ActionButton>
+                <ActionButton onClick={handleSignIn}>Đăng Nhập</ActionButton>
                 <div className="mt-4 text-center">
-                  <p>or</p>
+                  <p>hoặc</p>
                 </div>
                 <div className="mt-4">
                   <button
                     className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all"
                     onClick={() => signIn("google")}
                   >
-                    <FaGoogle className="mr-2" /> Continue with Google
+                    <FaGoogle className="mr-2" /> Tiếp tục với Google
                   </button>
                 </div>
               </>
@@ -312,28 +339,28 @@ const Login: React.FC = () => {
                 <InputField
                   icon={<FaUser />}
                   type="text"
-                  placeholder="Username"
+                  placeholder="Tên người dùng"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
                 <InputField
                   icon={<FaUser />}
                   type="text"
-                  placeholder="Name"
+                  placeholder="Tên"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
                 <InputField
                   icon={<FaEnvelope />}
                   type="email"
-                  placeholder="Email address"
+                  placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <InputField
                   icon={<FaLock />}
                   type="password"
-                  placeholder="Password"
+                  placeholder="Mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -342,26 +369,26 @@ const Login: React.FC = () => {
                     <InputField
                       icon={<FaLock />}
                       type="text"
-                      placeholder="Enter OTP"
+                      placeholder="Nhập mã OTP"
                       value={enteredOtp}
                       onChange={(e) => setEnteredOtp(e.target.value)}
                     />
                     <p className="text-gray-600">
-                      OTP will expire in {timer} seconds.
+                      Mã OTP sẽ hết hạn sau {timer} giây.
                     </p>
                     <ActionButton onClick={handleVerifyOtp}>
-                      Verify OTP
+                      Xác minh OTP
                     </ActionButton>
                   </>
                 ) : (
-                  <ActionButton onClick={handleSignUp}>Sign Up</ActionButton>
+                  <ActionButton onClick={handleSignUp}>Đăng Ký</ActionButton>
                 )}
                 <div className="mt-4 text-center">
-                  <p>or</p>
+                  <p>hoặc</p>
                 </div>
                 <div className="mt-4">
                   <button className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all">
-                    <FaGoogle className="mr-2" /> Continue with Google
+                    <FaGoogle className="mr-2" /> Tiếp tục với Google
                   </button>
                 </div>
                 {error && <p className="text-red-500">{error}</p>}
