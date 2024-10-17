@@ -23,12 +23,12 @@ const Home = () => {
         }
       />
       <Trend />
-      <HorizontalCards categoryId={"CAT001"} title={"Music for the day"} />
+      {/* <HorizontalCards categoryId={"CAT001"} title={"Music for the day"} />
       <HorizontalCards categoryId={"CAT003"} title={"Enjoying theater"} />
       <HorizontalCards
         categoryId={"CAT004"}
         title={"Exploding with festival"}
-      />
+      /> */}
       <div style={{ marginBottom: "3vh" }}></div>
       {/* <PaymentStatus success={true} /> */}
       <Footer />

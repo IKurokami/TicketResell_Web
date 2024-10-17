@@ -313,7 +313,7 @@ const MyCart: React.FC = () => {
   // Function to format date and time
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
+    return date.toLocaleString("vi-VN", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -329,13 +329,13 @@ const MyCart: React.FC = () => {
           {/* Left Column: Tickets Table */}
           <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
             <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
-              Shopping Cart
+              Giỏ hàng
             </h2>
             <div className="hidden sm:grid sm:grid-cols-6 gap-4 mb-4 text-sm font-medium text-gray-500 sticky top-16 bg-white z-10 py-2">
-              <div className="col-span-3">Product</div>
-              <div>Price</div>
-              <div>Quantity</div>
-              <div>Total</div>
+              <div className="col-span-3">Sản phẩm</div>
+              <div>Giá</div>
+              <div>Số lượng</div>
+              <div>Tổng</div>
             </div>
             {items.map((item) => (
               <div
@@ -388,16 +388,16 @@ const MyCart: React.FC = () => {
                       {formatDateTime(item.ticket.startDate)}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Seller: {item.sellerName}
+                      Người bán: {item.sellerName}
                     </p>
                   </div>
                 </div>
                 <div className="mb-2 sm:mb-0">
-                  <span className="sm:hidden font-medium mr-2">Price:</span>
+                  <span className="sm:hidden font-medium mr-2">Giá:</span>
                   {formatPriceVND(item.price)}
                 </div>
                 <div className="flex items-center justify-between sm:mb-0">
-                  <span className="sm:hidden font-medium mr-2">Quantity:</span>
+                  <span className="sm:hidden font-medium mr-2">Số lượng:</span>
                   <div className="flex items-center">
                     <button
                       type="button"
@@ -451,13 +451,13 @@ const MyCart: React.FC = () => {
                   </div>
                 </div>
                 <div className="mb-2 sm:mb-0">
-                  <span className="sm:hidden font-medium mr-2">Total:</span>
+                  <span className="sm:hidden font-medium mr-2">Tổng:</span>
                   {formatPriceVND(item.price * item.quantity)}
                 </div>
 
                 <div className="absolute top-2 right-2 mr-1 group">
                   <label className="inline-flex items-center cursor-pointer">
-                    <span className="mr-2 text-gray-700">Select</span>
+                    <span className="mr-2 text-gray-700">Chọn</span>
                     <input
                       type="checkbox"
                       checked={item.isSelected}
@@ -485,24 +485,28 @@ const MyCart: React.FC = () => {
           <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky min-h-full">
             <div className="sticky top-0 bg-white z-10 py-4">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6">
-                Summary
+                Tổng kết đơn hàng
               </h3>
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Selected Items</span>
+                  <span className="text-sm text-gray-600">
+                    Sản phẩm đã chọn
+                  </span>
                   <span className="text-sm font-medium text-gray-900">
                     {selectedItems.length}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Subtotal</span>
+                  <span className="text-sm text-gray-600">Tổng cộng</span>
                   <span className="text-sm font-medium text-gray-900">
                     {formatPriceVND(totalItemsPrice)}
                   </span>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-600 mb-3">Payment Method:</p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Phương thức thanh toán:
+                  </p>
                   <div className="grid grid-cols-2 gap-4">
                     {paymentMethods.map((method) => (
                       <div
@@ -533,7 +537,7 @@ const MyCart: React.FC = () => {
 
                 <div className="flex justify-between items-center pt-6 border-t border-gray-200">
                   <span className="text-lg font-semibold text-gray-800">
-                    Total Price
+                    Tổng cộng
                   </span>
                   <span className="text-lg font-semibold text-green-600">
                     {formatPriceVND(totalPrice)}
@@ -544,7 +548,7 @@ const MyCart: React.FC = () => {
                   className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition duration-300 mt-4"
                   onClick={handleCheckout}
                 >
-                  Checkout
+                  Thành toán
                 </button>
               </div>
             </div>

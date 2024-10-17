@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import DateFilter from '@/Components/datefilter'; // Đường dẫn đến file chứa DateFilter
+import DateFilter from "@/Components/datefilter"; // Đường dẫn đến file chứa DateFilter
 import { fetchImage } from "@/models/FetchImage";
 import Cookies from "js-cookie";
-
 
 // Custom icon components
 
@@ -20,9 +19,23 @@ const IconUser = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <circle cx="12" cy="12" r="10" stroke="#4A4A4A" strokeWidth="2" fill="#EAEAEA" />
-    <path d="M14.83 14.83a4 4 0 0 0-5.66 0L3 21h18l-5.17-6.17z" stroke="#4A4A4A" />
-    <path d="M9 9a4 4 0 1 0 6 0 4 4 0 0 0-6 0z" stroke="#4A4A4A" fill="#EAEAEA" />
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="#4A4A4A"
+      strokeWidth="2"
+      fill="#EAEAEA"
+    />
+    <path
+      d="M14.83 14.83a4 4 0 0 0-5.66 0L3 21h18l-5.17-6.17z"
+      stroke="#4A4A4A"
+    />
+    <path
+      d="M9 9a4 4 0 1 0 6 0 4 4 0 0 0-6 0z"
+      stroke="#4A4A4A"
+      fill="#EAEAEA"
+    />
   </svg>
 );
 
@@ -212,7 +225,8 @@ const MyTicketsPage = () => {
         if (response.ok) {
           const transformedOrders = await Promise.all(
             result.data.map(async (order: any, index: number) => {
-              let image = 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451';
+              let image =
+                "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451";
 
               if (order.ticket.image) {
                 const { imageUrl: fetchedImageUrl, error } = await fetchImage(
@@ -231,34 +245,35 @@ const MyTicketsPage = () => {
               return {
                 id: index + 1,
                 ticket: order.ticket.name,
-                status: new Date(order.ticket.startDate) > new Date() ? "Coming Soon" : "Expired", // Compare startDate with current date
+                status:
+                  new Date(order.ticket.startDate) > new Date()
+                    ? "Coming Soon"
+                    : "Expired", // Compare startDate with current date
                 date: new Date(order.ticket.startDate).toLocaleString(), // Formatting the date
                 totalprice: `$${order.price * order.quantity}`, // Calculating the total price
                 seller: order.ticket.seller.fullname,
                 quantity: order.quantity,
                 imgURL: image, // Placeholder image URL
                 tags: order.ticket.tags || [], // Giá trị mặc định nếu không có tags
-                location: order.ticket.location || 'Unknown', // Add the location field
+                location: order.ticket.location || "Unknown", // Add the location field
               };
-
             })
           );
 
           setOrders(transformedOrders);
         } else {
-          console.error('Failed to fetch orders:', result.message);
+          console.error("Failed to fetch orders:", result.message);
         }
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error("Error fetching orders:", error);
       }
     };
 
     fetchOrders();
   }, []);
 
-
   const handleNavigation = () => {
-    router.push('/search'); // Navigate to the /search page
+    router.push("/search"); // Navigate to the /search page
   };
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -285,8 +300,7 @@ const MyTicketsPage = () => {
     const matchesSearch = order.ticket
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesDate =
-      !selectedDate || order.date.startsWith(selectedDate); // So khớp theo ngày
+    const matchesDate = !selectedDate || order.date.startsWith(selectedDate); // So khớp theo ngày
 
     return matchesCategory && matchesStatus && matchesSearch && matchesDate;
   });
@@ -309,8 +323,6 @@ const MyTicketsPage = () => {
           </div>
         </div>
 
-
-
         <div className="flex flex-wrap items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
           <div className="w-full sm:w-auto relative mt-4">
             <select
@@ -319,9 +331,9 @@ const MyTicketsPage = () => {
               className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300 appearance-none"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23000000'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E")`,
-                backgroundPosition: 'right 1rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.25rem', // Adjusted size for better visibility
+                backgroundPosition: "right 1rem center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "1.25rem", // Adjusted size for better visibility
               }}
             >
               <option value="All">All</option>
@@ -340,9 +352,9 @@ const MyTicketsPage = () => {
               className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300 appearance-none"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23000000'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E")`,
-                backgroundPosition: 'right 1rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.25rem', // Adjusted size for better visibility
+                backgroundPosition: "right 1rem center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "1.25rem", // Adjusted size for better visibility
               }}
             >
               <option value="All"> Status</option>
@@ -351,9 +363,11 @@ const MyTicketsPage = () => {
             </select>
           </div>
 
-
           {/* Date Filter */}
-          <DateFilter selectedDate={selectedDate} onDateChange={handleDateChange} />
+          <DateFilter
+            selectedDate={selectedDate}
+            onDateChange={handleDateChange}
+          />
 
           {/* Reset Button */}
           <div className="w-full sm:w-auto">
@@ -370,11 +384,9 @@ const MyTicketsPage = () => {
             </button>
           </div>
         </div>
-
-
       </div>
 
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {filteredOrders.map((order) => (
           <div
             key={order.id}
@@ -388,36 +400,37 @@ const MyTicketsPage = () => {
             <div className="p-4">
               <h2 className="text-xl font-semibold mb-2">{order.ticket}</h2>
               <p
-                className={`text-sm mb-4 p-2 rounded-full w-auto h-auto flex items-center justify-center ${order.status === 'Coming Soon'
-                  ? 'bg-blue-50 text-blue-500 font-bold'
-                  : order.status === 'Expired'
-                    ? 'bg-red-50 text-red-500 font-bold'
-                    : 'bg-gray-100 text-gray-500'
-                  }`}
-                style={{ width: 'fit-content', height: 'fit-content' }} // Đảm bảo chiều rộng và chiều cao tự động theo nội dung
+                className={`text-sm mb-4 p-2 rounded-full w-auto h-auto flex items-center justify-center ${
+                  order.status === "Coming Soon"
+                    ? "bg-blue-50 text-blue-500 font-bold"
+                    : order.status === "Expired"
+                    ? "bg-red-50 text-red-500 font-bold"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+                style={{ width: "fit-content", height: "fit-content" }} // Đảm bảo chiều rộng và chiều cao tự động theo nội dung
               >
                 {order.status}
               </p>
 
-
-
-
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-gray-600 text-sm">
-                  <IconCalendar className="inline-block mr-2" />
+              <div className="flex items-center justify-between mb-2 p-3 bg-gray-50  ">
+                <p className="text-gray-700 text-sm font-medium flex items-center">
+                  <IconCalendar className="inline-block mr-2 text-blue-500" />
                   {order.date}
                 </p>
-                <p className="text-gray-600 text-sm">{order.totalprice}</p>
+                <p className="text-gray-700 text-sm font-semibold">
+                  {order.totalprice}
+                </p>
               </div>
 
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-gray-600 text-sm">
-                  <IconUser className="inline-block mr-2" />
+              <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg shadow-sm">
+                <p className="text-gray-700 text-sm font-medium flex items-center">
+                  <IconUser className="inline-block mr-2 text-blue-500" />
                   Seller: {order.seller}
                 </p>
-                <p className="text-gray-600 text-sm">Qty: {order.quantity}</p>
+                <p className="text-gray-700 text-sm font-semibold">
+                  Qty: {order.quantity}
+                </p>
               </div>
-
 
               <div className="flex items-center space-x-1">
                 {order.tags.map((tag: any, index: number) => (
@@ -426,38 +439,40 @@ const MyTicketsPage = () => {
                     className="text-xs text-white bg-blue-600 px-2 py-1 rounded"
                   >
                     {tag}
-
                   </span>
-
                 ))}
               </div>
-
               <div className="mt-4 flex justify-between items-center">
-                <div className="text-gray-700">
-                  <p className="font-medium">Location: {order.location}</p>
-                </div>
+                <p
+                  className="text-gray-600 mb-2 truncate"
+                  style={{
+                    maxWidth: "200px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Location: {order.location}
+                </p>
                 <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow">
-                  View
+                  Show QR
                 </button>
               </div>
-
             </div>
           </div>
         ))}
       </div>
       <div className="text-center p-4">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">
-          Do you want to buy more tickets?</h1>
+          Do you want to buy more tickets?
+        </h1>
         <button
           onClick={handleNavigation}
           className="text-blue-500 hover:underline focus:outline-none"
         >
           Explore More Tickets
-
         </button>
       </div>
-
-
     </div>
   );
 };

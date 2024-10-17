@@ -48,12 +48,12 @@ const convertToRankItemCards = async (
         rank: index + 1, // Calculate rank based on index
         ticketImage, // Dynamically fetched image or default image
         ticketName: ticket.name,
-        date: new Date(ticket.startDate).toLocaleString("en-US", {
+        date: new Date(ticket.startDate).toLocaleString("vi-VN", {
           year: "numeric",
           month: "long",
           day: "numeric",
         }), // Format date
-        time: new Date(ticket.startDate).toLocaleString("en-US", {
+        time: new Date(ticket.startDate).toLocaleString("vi-VN", {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
@@ -121,14 +121,22 @@ export const RankItemCard: React.FC<RankItemCardProps> = ({
               height={50}
             />
             <div>
-              <span>{ticketText}</span>
-              <span style={{ fontSize: "0.8rem" }}>{date}</span>
-              <span style={{ fontSize: "0.8rem" }}>{time}</span>
+              <span className="font-medium text-gray-700  max-[400px]:w-[5rem] max-[480px]:w-[8rem] max-[682px]:w-[10rem] max-[884px]:w-[50vw] min-[885px]:w-[15vw]">
+                {ticketText}
+              </span>
+              <span className="text-gray-600" style={{ fontSize: "0.8rem" }}>
+                {date}
+              </span>
+              <span className="text-gray-600" style={{ fontSize: "0.8rem" }}>
+                {time}
+              </span>
             </div>
           </span>
         </div>
         <div className="right-info">
-          <span className="price">{price}</span>
+          <span className="price">
+            {new Intl.NumberFormat("vi-VN").format(price)}đ
+          </span>
         </div>
       </div>
     </Link>
