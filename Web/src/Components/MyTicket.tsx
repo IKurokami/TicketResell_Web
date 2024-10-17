@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import DateFilter from '@/Components/datefilter'; // Đường dẫn đến file chứa DateFilter
 import { fetchImage } from "@/models/FetchImage";
 import Cookies from "js-cookie";
+import { QRCodeCanvas } from "qrcode.react"; // Import QRCode
+
 
 
 // Custom icon components
@@ -189,6 +191,9 @@ const IconSearch = () => (
 
 const MyTicketsPage = () => {
   const [orders, setOrders] = useState<any[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const router = useRouter(); // Ensure this line is present
   useEffect(() => {
@@ -270,6 +275,14 @@ const MyTicketsPage = () => {
         order.id === orderId ? { ...order, location } : order
       )
     );
+  };
+  const handleShowQR = (order: any) => {
+    setSelectedTicket(order); // Set the selected ticket
+    setIsModalOpen(true); // Open the modal
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Close the modal
+    setSelectedTicket(null); // Clear the selected ticket
   };
 
   const [selectedDate, setSelectedDate] = useState(""); // Thêm trạng thái cho bộ lọc ngày
@@ -418,7 +431,7 @@ const MyTicketsPage = () => {
                   Seller: {order.seller}
                 </p>
                 <p className="text-gray-700 text-sm font-semibold">
-                  Qty: {order.quantity}
+                  Quantity: {order.quantity}
                 </p>
               </div>
 
@@ -437,19 +450,45 @@ const MyTicketsPage = () => {
                 ))}
               </div>
               <div className="mt-4 flex justify-between items-center">
-                <p className="text-gray-600 mb-2 truncate" style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  Location: {order.location}
-                </p>
-                <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow">
-                  Show QR
+                <button onClick={() => handleShowQR(order)} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow ml-auto">
+                  View Detail
                 </button>
               </div>
-
-
             </div>
           </div>
         ))}
       </div>
+
+      {/* Modal hiển thị QR và location */}
+
+      {isModalOpen && selectedTicket && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+            {/* Nút X để đóng modal */}
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              &#10005; {/* Ký tự "X" */}
+            </button>
+
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              {selectedTicket.ticket}
+            </h2>
+            <p className="text-sm mb-2">
+              📅 Date: {selectedTicket.date}
+            </p>
+            <p className="text-sm mb-2">
+              📍 Location: {selectedTicket.location}
+            </p>
+            <p className="text-sm mb-2">
+              🎫 Quantity: {selectedTicket.quantity}
+            </p>
+
+            <QRCodeCanvas value={selectedTicket.ticket} className="mx-auto mb-4" />
+          </div>
+        </div>
+      )}
       <div className="text-center p-4">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">
           Do you want to buy more tickets?</h1>
@@ -461,7 +500,6 @@ const MyTicketsPage = () => {
 
         </button>
       </div>
-
 
     </div>
   );

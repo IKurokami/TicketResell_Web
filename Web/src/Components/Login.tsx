@@ -182,6 +182,7 @@ const Login: React.FC = () => {
       setError("An error occurred while sending OTP. Please try again.");
     }
   };
+
   const handleVerifyOtp = async () => {
     if (!enteredOtp) {
       setError("Please enter the OTP.");
@@ -196,17 +197,25 @@ const Login: React.FC = () => {
         },
         body: JSON.stringify({
           username: username,
-          password: password,  // Ensure you have the password variable
+          password: password,
           email: email,
-          otp: enteredOtp,  // Use the entered OTP from the form
+          otp: enteredOtp,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setSuccessMessage("OTP verified successfully! Proceeding with registration.");
-        // You can add further actions like redirection or updating the user data
+        setSuccessMessage("OTP verified successfully! Registration complete.");
+
+        // Alert and switch to login tab
+        alert("Registration successful! Please log in.");
+        setActiveTab("login"); // Switch to login tab
+        setOtpSent(false); // Reset OTP state
+        setEnteredOtp(""); // Clear OTP field
+        setUsername(""); // Clear username
+        setName(""); // Clear name
+        setPassword(""); // Clear password
       } else {
         setError(data.message || "OTP verification failed. Please try again.");
       }
@@ -215,6 +224,7 @@ const Login: React.FC = () => {
       setError("An error occurred while verifying OTP. Please try again.");
     }
   };
+
 
 
   return (
