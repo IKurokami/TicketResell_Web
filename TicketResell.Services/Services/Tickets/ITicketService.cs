@@ -18,7 +18,7 @@ public interface ITicketService
     public Task<ResponseModel> GetTicketByIdAsync(string id);
     public Task<ResponseModel> GetTicketsByCategoryAndDateAsync(string categoryName, int amount);
     public Task<ResponseModel> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange);
-    public Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto, bool saveAll = true);
+    public Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto,List<string> categoryIds, bool saveAll = true);
 
     public Task<ResponseModel> DeleteTicketAsync(string id, bool saveAll = true);
     public Task<ResponseModel> GetTicketByCategoryAsync(string id);

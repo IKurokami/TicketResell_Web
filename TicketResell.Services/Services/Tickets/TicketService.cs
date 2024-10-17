@@ -179,13 +179,12 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto, bool saveAll)
+        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto,List<string> categoryIds, bool saveAll)
         {
             var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
-
+            
             ticket.ModifyDate = DateTime.UtcNow;
             _mapper.Map(dto, ticket);
-
             var validator = _validatorFactory.GetValidator<Ticket>();
 
             var validationResult = validator.Validate(ticket);
@@ -224,7 +223,7 @@ namespace TicketResell.Services.Services
             }
 
             ticket.Qr = qrCodeBytes;
-            _unitOfWork.TicketRepository.Update(ticket);
+            await _unitOfWork.TicketRepository.UpdateTicketAsync(id,ticket,dto.CategoriesId);
             if (saveAll) await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully updated ticket: {ticket.TicketId}");
         }

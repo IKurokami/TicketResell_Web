@@ -16,9 +16,9 @@ public class TicketUpdateDto
     
     public string? Qrcode { get; set; }
     
+    public string? StartDate { get; set; }
+
     public string? Description { get; set; }
     
-    public DateTime? CreateDate { get; set; }
-    
-    public virtual ICollection<CategoryReadDto> Categories { get; set; }
+    public List<string> CategoriesId { get; set; }
 }

@@ -156,7 +156,7 @@ namespace TicketResell.Repositories.Controllers
             {
                 if (ticket.SellerId == HttpContext.GetUserId())
                 {
-                    return ResponseParser.Result(await _ticketService.UpdateTicketAsync(id, dto));
+                    return ResponseParser.Result(await _ticketService.UpdateTicketAsync(id, dto,dto.CategoriesId));
                 }
             }
             

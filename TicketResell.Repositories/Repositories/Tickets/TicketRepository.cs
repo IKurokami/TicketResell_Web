@@ -94,6 +94,29 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         await _context.Tickets.AddAsync(ticket);
     }
 
+    public async Task UpdateTicketAsync(string id, Ticket ticket, List<string> categoryIds)
+    {
+        var ticketUpdate = await _context.Tickets
+            .Include(t => t.Categories)
+            .FirstOrDefaultAsync(t => t.TicketId == id);
+        if (ticketUpdate != null)
+        {
+            ticketUpdate.Categories.Clear();
+        }
+        
+        
+        foreach (var x in categoryIds)
+        {
+            Category? category = await _context.Categories.FindAsync(x);
+            if (category != null)
+            {
+                ticket.Categories.Add(category);
+            }
+        }
+
+        _context.Tickets.Update(ticket);
+    }
+
     public async Task<bool> CheckExist(string id)
     {
         Ticket? ticket = await _context.Tickets.FindAsync(id);

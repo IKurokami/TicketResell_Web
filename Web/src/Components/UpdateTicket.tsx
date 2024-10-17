@@ -15,6 +15,8 @@ import Cookies from "js-cookie";
 import "@/Css/AddTicketModal.css";
 import { useParams } from "next/navigation";
 import { fetchImage } from "@/models/FetchImage";
+import { deleteImage } from "@/models/Deleteimage";
+
 
 interface Province {
   Id: number;
@@ -83,6 +85,7 @@ const UpdateTicketModal: React.FC = () => {
   const [selectedDistrict, setSelectedDistrict] = useState<number | null>(null);
   const [selectedWard, setSelectedWard] = useState<number | null>(null);
   const [minDateTime, setMinDateTime] = useState("");
+  const [imageId, setImageId] = useState<string>("");
 
   const toDateTimeLocalFormat = (date: string | Date): string => {
     const d = new Date(date);
@@ -227,6 +230,7 @@ const UpdateTicketModal: React.FC = () => {
         return;
       }
 
+      setImageId(result.data.image);
       // Format start date if available
       const formattedDateForInput = result.data.startDate
         ? toDateTimeLocalFormat(result.data.startDate)
@@ -472,6 +476,8 @@ const UpdateTicketModal: React.FC = () => {
 
   const handleSave = async () => {
     const sellerId = Cookies.get("id");
+    
+    // Validate required fields
     if (
       !formData.name ||
       !formData.cost ||
@@ -484,102 +490,92 @@ const UpdateTicketModal: React.FC = () => {
       alert("Please fill in all required fields.");
       return;
     }
-
-    const generateTicketId = () => {
-      const randomNum = Math.floor(100 + Math.random() * 900);
-      return `TICKET${randomNum}`;
-    };
-
-    const checkTicketIdExist = async (ticketId: string) => {
-      const response = await fetch(
-        `http://localhost:5296/api/Ticket/checkexist/${ticketId}`
-      );
-      return response.status === 200;
-    };
-
-    const createTickets = async () => {
-      let baseTicketId = generateTicketId();
-      let isValidId = await checkTicketIdExist(baseTicketId);
-
-      while (isValidId) {
-        baseTicketId = generateTicketId();
-        isValidId = await checkTicketIdExist(baseTicketId);
-      }
-
-      const tickets = Array.from({ length: quantity }).map((_, index) => {
-        let ticketId = baseTicketId;
-        if (quantity > 1) {
-          ticketId = `${baseTicketId}_${index + 1}`;
-        }
-
-        return {
-          TicketId: ticketId,
-          SellerId: sellerId,
-          Name: formData.name,
-          Cost: parseFloat(formData.cost),
-          Location: formData.location,
-          StartDate: new Date(formData.date),
-          Status: 1,
-          Image: baseTicketId,
-          Qrcode: qrFiles[index],
-          CategoriesId: formData.categories.map(
-            (category) => category.categoryId
-          ),
-          Description: formData.description,
-        };
-      });
-
+  
+    // Define the updateTickets function
+    const updateTickets = async () => {
+      const tickets = Array.from({ length: quantity }).map((_, index) => ({
+        TicketId: id,
+        SellerId: sellerId,
+        Name: formData.name,
+        Cost: parseFloat(formData.cost),
+        Location: formData.location,
+        StartDate: new Date(formData.date),
+        Status: 1,
+        Image: imageId,
+        Qrcode: qrFiles[index],
+        CategoriesId: formData.categories.map(category => category.categoryId),
+        Description: formData.description,
+      }));
+  
       console.log(tickets);
-
-      const uploadImagePromises = tickets.map((ticket) => {
-        const formData = new FormData();
-        formData.append("id", ticket.Image);
-        formData.append("image", selectedFile as Blob);
-        return fetch("/api/uploadImage", {
-          method: "POST",
-          body: formData,
-        });
+  
+      // Update images first
+      const updateImagePromises = tickets.map(async (ticket) => {
+        const deleteImageResult = await deleteImage(ticket.Image);
+        if (deleteImageResult) {
+          const formData = new FormData();
+          formData.append("id", ticket.Image);
+          formData.append("image", selectedFile as Blob);
+  
+          try {
+            const response = await fetch("/api/uploadImage", {
+              method: "POST",
+              body: formData,
+            });
+  
+            if (!response.ok) {
+              throw new Error(`Error uploading image: ${response.statusText}`);
+            }
+  
+            return response.json(); // Return the response data
+          } catch (error) {
+            console.error("Error during image update:", error);
+            return null; // Handle the error
+          }
+        }
+        return null; // Return null if the image was not deleted
       });
-
+  
       try {
-        await Promise.all(uploadImagePromises);
-        console.log("Images uploaded successfully (simulated).");
-
-        const createTicketPromises = tickets.map(async (ticket) => {
-          await fetch("http://localhost:5296/api/Ticket/create", {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(ticket),
-          });
+        // Wait for all image updates to complete
+        await Promise.all(updateImagePromises);
+        console.log("Images updated successfully.");
+  
+        // Now update the tickets
+        const updateTicketPromises = tickets.map(async (ticket) => {
+          const response = await fetch(
+            `http://localhost:5296/api/Ticket/update/${id}`,
+            {
+              method: "PUT",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(ticket),
+            }
+          );
+  
+          if (!response.ok) {
+            throw new Error(`Failed to update ticket ${ticket.TicketId}: ${response.statusText}`);
+          }
+  
+          return await response.json(); // Assuming you want to return the response data
         });
-
-        await Promise.all(createTicketPromises);
-        console.log("Tickets created successfully.");
+  
+        await Promise.all(updateTicketPromises);
+        console.log("Tickets updated successfully.");
       } catch (error) {
-        console.error("Error creating tickets or uploading images:", error);
+        console.error("Error updating tickets or images:", error);
       }
-      setFormData(initialFormData);
-      setSelectedFile(null);
-      setQrFiles([]);
-      setQuantity(1);
-      setQrFileNames([]);
-      setImagePreview(null);
     };
-    await createTickets();
+
+    await updateTickets();
     router.push("/sell");
-    window.location.href = "/sell";
+    window.location.href = "/sell"; // Uncomment as needed
   };
+  
 
   const handleCancel = () => {
-    setFormData(initialFormData);
-    setSelectedFile(null);
-    setQrFiles([]);
-    setQuantity(1);
-    setQrFileNames([]);
-    setImagePreview(null);
     router.push("/sell");
   };
 
