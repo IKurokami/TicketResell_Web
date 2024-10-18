@@ -325,8 +325,8 @@ const MyCart: React.FC = () => {
 
   return (
     <div className="mt-24 w-full-screen rounded">
-      <div className="mx-auto bg-white rounded-t-xl overflow-hidden">
-        <div className="px-8 lg:px-16 xl:px-24 pb-16 flex flex-col lg:flex-row relative">
+      <div className=" bg-white rounded-t overflow-hidden">
+        <div className="px-8 xl:px-24 pb-16 flex flex-col lg:flex-row relative">
           {/* Left Column: Tickets Table */}
           <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
             <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
@@ -348,20 +348,18 @@ const MyCart: React.FC = () => {
                   <h3 className="font-bold text-lg text-gray-900 mb-2">
                     {item.ticket.name}
                   </h3>
-                  <div className="flex items-center">
+                  <div className="flex flex-col items-start">
                     <img
                       src={item.imageUrl}
                       alt={item.ticket.name}
-                      className="w-64 h-32 object-cover rounded mr-4"
+                      className="w-64 h-32 object-cover rounded mb-2"
                     />
-                    <div>
-                      <p className="text-sm text-gray-500 text-nowrap">
-                        {formatDateTime(item.ticket.startDate)}
-                      </p>
-                      <p className="text-sm text-gray-500 text-nowrap">
-                        Seller: {item.sellerName}
-                      </p>
-                    </div>
+                    <p className="text-sm text-gray-500">
+                      {formatDateTime(item.ticket.startDate)}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Seller: {item.sellerName}
+                    </p>
                   </div>
                 </div>
                 <div className="mb-2">
@@ -369,7 +367,7 @@ const MyCart: React.FC = () => {
                   {formatPriceVND(item.price)}
                 </div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="sm:hidden font-medium mr-2">Quantity:</span>
+                  <span className="sm:hidden font-medium">Quantity:</span>
                   <div className="flex items-center">
                     <button
                       type="button"
@@ -394,7 +392,7 @@ const MyCart: React.FC = () => {
                         />
                       </svg>
                     </button>
-                    <span className="mx-2 w-10 shrink-0 text-center text-sm font-medium text-gray-900">
+                    <span className="w-10 shrink-0 text-center text-sm font-medium text-gray-900">
                       {item.quantity}
                     </span>
                     <button
