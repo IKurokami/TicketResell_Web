@@ -159,7 +159,7 @@ namespace TicketResell.Repositories.Controllers
                     return ResponseParser.Result(await _ticketService.UpdateTicketsByBaseIdAsync(id, dto,dto.CategoriesId,true));
                 }
             }
-            
+
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
         
@@ -206,9 +206,22 @@ namespace TicketResell.Repositories.Controllers
 
         [HttpPost]
         [Route("getByCate/{ticketid}")]
-        public async Task<IActionResult> GetTicketByCateId(string ticketid, [FromBody] string [] id)
+        public async Task<IActionResult> GetTicketByCateId(string ticketid, [FromBody] string[] id)
         {
             var response = await _ticketService.GetTicketByCategoryIdAsync(ticketid, id);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPost]
+        [Route("getByOrder/{status}")]
+        public async Task<IActionResult> GetTicketsByOrderIdWithStatusZero(int status)
+        {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view orders"));
+            string userId = HttpContext.GetUserId();
+            if (HttpContext.IsUserIdAuthenticated(userId))
+                return ResponseParser.Result(ResponseModel.Unauthorized("Access denied: You cannot access this"));
+            var response = await _ticketService.GetTicketsByOrderIdWithStatusZeroAsync(userId, status);
             return ResponseParser.Result(response);
         }
 

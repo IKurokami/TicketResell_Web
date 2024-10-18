@@ -113,8 +113,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         {
             ticketUpdate.Categories.Clear();
         }
-        
-        
+
+
         foreach (var x in categoryIds)
         {
             Category? category = await _context.Categories.FindAsync(x);
@@ -146,8 +146,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             throw new KeyNotFoundException("Ticket not found");
         }
         var uniqueTicketIds = tickets
-            .Select(t => t.TicketId.Split('_')[0]) 
-            .Distinct() 
+            .Select(t => t.TicketId.Split('_')[0])
+            .Distinct()
             .ToList();
         var filteredTicketsByCategory = tickets
             .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
@@ -192,6 +192,14 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Take(amount)
             .ToListAsync();
     }
+
+    public async Task<List<Ticket>> GetTicketsByOrderIdWithStatusAsync(string userId, int status)
+    {
+        return await _context.Tickets
+            .Where(t => t.OrderDetails.Any(od => od.Order.BuyerId == userId && od.Order.Status == status))
+            .ToListAsync();
+    }
+
     public async Task<List<Ticket>> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange)
     {
         var now = DateTime.Now;
@@ -268,12 +276,12 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<List<Ticket>> GetTicketsByBaseIdAsync(string baseId)
     {
         return await _context.Tickets
-            .Include(x=>x.Seller)
-            .Include(x=>x.Categories)
+            .Include(x => x.Seller)
+            .Include(x => x.Categories)
             .Where(t => t.TicketId.StartsWith(baseId))
             .ToListAsync();
     }
-    
+
     public async Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId)
     {
         var tickets = await _context.Tickets
@@ -312,7 +320,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         return filteredTicketsByCategory;
     }
 
-    public async Task<List<Ticket>> GetTicketByListCateIdAsync(string [] categoriesId)
+    public async Task<List<Ticket>> GetTicketByListCateIdAsync(string[] categoriesId)
     {
         var tickets = await _context.Tickets.Include(t => t.Seller)
         .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category

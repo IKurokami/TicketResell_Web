@@ -124,13 +124,13 @@ const Trend = () => {
                 }
                 onClick={() => handleLeftButtonClick(0)}
               >
-                Trending
+                Xu hướng
               </button>
               <button
                 className={buttonLeftActive === 1 ? "soon isactivate" : "soon"}
                 onClick={() => handleLeftButtonClick(1)}
               >
-                Starting Soon
+                Sắp bắt đầu
               </button>
             </div>
           </div>
@@ -217,11 +217,11 @@ const Trend = () => {
           <div className="rank-bar-container">
             <div className="rank-bar">
               <div className="left-info">
-                <span className="rank">Rank</span>
-                <span className="ticket">Ticket</span>
+                <span className="rank">Hạng</span>
+                <span className="ticket">Vé</span>
               </div>
               <div className="right-info">
-                <span className="price">Price</span>
+                <span className="price">Giá</span>
               </div>
             </div>
             <div className="rank-item">
@@ -233,11 +233,11 @@ const Trend = () => {
           <div className="rank-bar-container">
             <div className="rank-bar">
               <div className="left-info">
-                <span className="rank">Rank</span>
-                <span className="ticket">Ticket</span>
+                <span className="rank">Hạng</span>
+                <span className="ticket">Vé</span>
               </div>
               <div className="right-info">
-                <span className="price">Price</span>
+                <span className="price">Giá</span>
               </div>
             </div>
             <div className="rank-item">
