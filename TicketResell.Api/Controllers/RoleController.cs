@@ -34,9 +34,6 @@ namespace Api.Controllers
         [HttpGet("read")]
         public async Task<IActionResult> ReadRole()
         {
-            if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to read roles"));
-
             var response = await _roleService.GetAllRoleAsync();
             return ResponseParser.Result(response);
         }

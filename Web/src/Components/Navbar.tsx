@@ -32,7 +32,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
   };
-  console.log(page);
 
   const handleMenuToggle = () => {
     setMenuActive(!menuActive);

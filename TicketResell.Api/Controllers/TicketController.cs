@@ -154,10 +154,7 @@ namespace TicketResell.Repositories.Controllers
             var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
             if (ticket != null)
             {
-                if (ticket.SellerId == HttpContext.GetUserId())
-                {
-                    return ResponseParser.Result(await _ticketService.UpdateTicketAsync(id, dto));
-                }
+                return ResponseParser.Result(await _ticketService.UpdateTicketAsync(id, dto));
             }
             
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
