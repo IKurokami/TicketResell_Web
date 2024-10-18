@@ -31,7 +31,12 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
   const DEFAULT_IMAGE =
     "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
+  const formatVND = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
   // Fetch related tickets based on categoriesId
   useEffect(() => {
     const fetchRelatedTickets = async () => {
@@ -144,7 +149,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                     className="w-full h-48 object-cover"
                   />
                   <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
-                    ${ticket.cost}
+                    {formatVND(ticket.cost)} 
                   </div>
                 </div>
                 <div className="p-4 space-y-2 flex-grow">
@@ -162,6 +167,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                       hour: "2-digit",
                       minute: "2-digit",
                       hour12: false,
+                      timeZone: "Asia/Ho_Chi_Minh",
                     })}
                   </p>
                   <ul className="flex flex-wrap gap-2 tag--list overflow-hidden">
