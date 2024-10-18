@@ -127,14 +127,14 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
   }
 
   return (
-    <div className="ticket--related shadow-md">
+    <div className="ticket--related">
       <h2 className="text-2xl font-bold text-center">Related Tickets</h2>
-      <div className=" mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw]">
+      <div className=" mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw] ">
         {tickets.map((ticket) => (
           <Link className="no-underline" href={`/ticket/${ticket.ticketId}`}>
             <div
               key={ticket.ticketId}
-              className="movie-card-wrapper cursor-pointer no-underline visited:no-underline"
+              className="movie-card-wrapper cursor-pointer no-underline visited:no-underline transform transition-transform duration-300 hover:scale-105"
             >
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
                 <div className="relative">
@@ -161,19 +161,28 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                       day: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
+                      hour12: false,
                     })}
                   </p>
                   <ul className="flex flex-wrap gap-2 tag--list overflow-hidden">
-                    {ticket.categories.slice(0, 2).map((category) => (
+                    {ticket.categories.slice(0, 1).map((category) => (
                       <li
                         key={category.categoryId}
-                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
+                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold"
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                    {ticket.categories.slice(0, 1).map((category) => (
+                      <li
+                        key={category.categoryId}
+                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold hidden xl:block"
                       >
                         {category.name}
                       </li>
                     ))}
                     {ticket.categories.length > 2 && (
-                      <li className="bg-gray-300 text-white px-3 rounded-full text-sm font-semibold hidden xl:block">
+                      <li className="bg-gray-300 text-white px-3 rounded-full text-sm font-semibold hidden sm:block">
                         ...
                       </li>
                     )}

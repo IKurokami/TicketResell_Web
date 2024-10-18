@@ -135,8 +135,16 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         {
             throw new KeyNotFoundException("Ticket not found");
         }
-
-        return tickets;
+        var uniqueTicketIds = tickets
+            .Select(t => t.TicketId.Split('_')[0]) 
+            .Distinct() 
+            .ToList();
+        var filteredTicketsByCategory = tickets
+            .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+            .GroupBy(t => t.TicketId.Split('_')[0])
+            .Select(g => g.First())
+            .ToList();
+        return filteredTicketsByCategory;
     }
 
     public async Task DeleteTicketAsync(string id)
@@ -229,7 +237,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<string> GetQrImageAsBase64Async(string ticketId)
     {
         var ticket = await _context.Tickets
-            .Where(t => t.TicketId == ticketId)
+            .Where(t => t.TicketId.StartsWith(ticketId))
             .Select(t => t.Qr)
             .FirstOrDefaultAsync();
 
@@ -247,6 +255,15 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         return count;
     }
 
+    public async Task<List<Ticket>> GetTicketsByBaseIdAsync(string baseId)
+    {
+        return await _context.Tickets
+            .Include(x=>x.Seller)
+            .Include(x=>x.Categories)
+            .Where(t => t.TicketId.StartsWith(baseId))
+            .ToListAsync();
+    }
+    
     public async Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId)
     {
         var tickets = await _context.Tickets

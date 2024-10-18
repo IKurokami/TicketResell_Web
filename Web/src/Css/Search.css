@@ -406,6 +406,8 @@
     width: 100vw;
  
 }
+
+
 /* Responsiveness */
 @media (max-width: 768px) {
     .search-header {
@@ -443,5 +445,11 @@
     .slide-show{
         width: 480px;
         height: 500px;
+    }
+    .add-btn-seller-as{
+        margin-top: 2vh;
+        width: 30vw;
+        display: flex;
+        justify-content: center;
     }
 }

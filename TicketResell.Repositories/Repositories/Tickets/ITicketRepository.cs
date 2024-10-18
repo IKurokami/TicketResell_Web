@@ -26,6 +26,8 @@ public interface ITicketRepository : IRepository<Ticket>
 
     Task<List<Ticket>> GetTicketsByCategoryAndDateAsync(string categoryName, int amount);
 
+    Task<List<Ticket>> GetTicketsByBaseIdAsync(string baseId);
+    
     Task<string> GetQrImageAsBase64Async(string ticketId);
     Task<int> GetTicketRemainingAsync(string ticketId);
 

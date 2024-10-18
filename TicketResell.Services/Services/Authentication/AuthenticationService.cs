@@ -41,9 +41,9 @@ public class AuthenticationService : IAuthenticationService
 
         if (cacheOtp != registerDto.OTP)
             return ResponseModel.BadRequest("Registration failed", "OTP provided is invalid");
-        
+
         var user = _mapper.Map<User>(registerDto);
-        
+
         var validator = _validatorFactory.GetValidator<User>();
         var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid)
@@ -55,37 +55,55 @@ public class AuthenticationService : IAuthenticationService
         {
             return ResponseModel.BadRequest("Registration failed", "Email already exists");
         }
-        
+
         user.Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
         user.CreateDate = DateTime.UtcNow;
         user.Status = 1;
-        
+        await RemoveCachedAsync("email_verification",registerDto.Gmail);
         await _unitOfWork.UserRepository.CreateAsync(user);
         await _unitOfWork.CompleteAsync();
-
+        
         return ResponseModel.Success("User registered successfully", registerDto);
     }
 
-    public async Task<ResponseModel> PutOtpAsync(string data)
+    public async Task<ResponseModel> PutOtpAsync(string encryptedData)
     {
         try
         {
-            var decryptedData = (new CryptoService()).Decrypt(data);
-            var splitedData = decryptedData.Split("|");
-            if (await _unitOfWork.UserRepository.GetUserByEmailAsync(splitedData[0]) != null)
+            if (string.IsNullOrEmpty(encryptedData))
             {
-                await CacheAccessKeyAsync("email_verification", splitedData[0], splitedData[1], TimeSpan.FromMinutes(5));
-                return ResponseModel.Success("Cached", "OTP cache done");
+                return ResponseModel.BadRequest("Encrypted data cannot be null or empty");
             }
+
+            var cryptoService = new CryptoService();
+            var decryptedData = cryptoService.Decrypt(encryptedData);
+            Console.WriteLine($"Decrypted Data: {decryptedData}"); // Log decrypted data
+
+            var splitedData = decryptedData.Split("|");
+            if (splitedData.Length != 2)
+            {
+                return ResponseModel.BadRequest("Invalid decrypted data format");
+            }
+
+            var email = splitedData[0];
+            var otp = splitedData[1];
+
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(otp))
+            {
+                return ResponseModel.BadRequest("Email or OTP cannot be null or empty");
+            }
+
+           
+
+            await CacheAccessKeyAsync("email_verification", email, otp, TimeSpan.FromMinutes(5));
+            return ResponseModel.Success("OTP cached successfully");
         }
         catch (Exception ex)
         {
-            return ResponseModel.BadRequest("Decryption failed");
+            Console.WriteLine($"Error in PutOtpAsync: {ex.Message}"); // Log error
+            return ResponseModel.Error("An error occurred while processing the request: " + ex.Message);
         }
-
-        return ResponseModel.Error("Something failed");;
     }
-
     public async Task<ResponseModel> LoginAsync(LoginDto loginDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(loginDto.Gmail);
@@ -98,7 +116,7 @@ public class AuthenticationService : IAuthenticationService
         {
             return ResponseModel.BadRequest("Login failed", "Password wrong");
         }
-        
+
         var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
 
         if (cachedAccessKey.IsNullOrEmpty)
@@ -161,21 +179,22 @@ public class AuthenticationService : IAuthenticationService
     {
         return await LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
     }
-    public async Task<ResponseModel> LoginWithGoogleAsync(string email)
+    public async Task<ResponseModel> LoginWithGoogleAsync(GoogleUserInfoDto googleUser)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(googleUser.Email);
         if (user == null)
         {
             user = new User
             {
-                UserId = email,
-                Gmail = email,
-                Password = null,
+                UserId = googleUser.Email,
+                Username = googleUser.Given_Name,
+                Password = BCrypt.Net.BCrypt.HashPassword(GenerateAccessKey()),
+                Gmail = googleUser.Email,
                 CreateDate = DateTime.UtcNow,
                 Status = 1,
-                Verify = 1 ,
+                Verify = 1,
             };
-            
+
             await _unitOfWork.UserRepository.CreateAsync(user);
             await _unitOfWork.CompleteAsync();
         }
@@ -198,17 +217,17 @@ public class AuthenticationService : IAuthenticationService
     public async Task<bool> ValidateAccessKeyAsync(string userId, string accessKey)
     {
         var cachedAccessKey = await GetCachedAccessKeyAsync(userId);
-        
+
         if (cachedAccessKey.IsNullOrEmpty || !cachedAccessKey.HasValue)
             return false;
-        
+
         return cachedAccessKey == accessKey;
     }
     public async Task<bool> ValidateAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto)
     {
         return await ValidateAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
     }
-    
+
     public async Task<ResponseModel> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
     {
         var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
@@ -244,7 +263,7 @@ public class AuthenticationService : IAuthenticationService
 
         var db = _redis.GetDatabase();
         var storedTokenJson = await db.StringGetAsync($"email_verification:{userId}");
-        
+
         if (!storedTokenJson.HasValue)
         {
             return ResponseModel.BadRequest("Invalid or expired token");
@@ -265,7 +284,7 @@ public class AuthenticationService : IAuthenticationService
 
         return ResponseModel.Success("Email verified successfully");
     }
-    
+
     private string GenerateAccessKey()
     {
         var key = new byte[32];
@@ -298,5 +317,13 @@ public class AuthenticationService : IAuthenticationService
     {
         var db = _redis.GetDatabase();
         await db.KeyDeleteAsync($"access_key:{userId}");
+
     }
+      private async Task RemoveCachedAsync(string cachedkey, string userId)
+    {
+        var db = _redis.GetDatabase();
+        await db.KeyDeleteAsync($"{cachedkey}:{userId}");
+        
+    }
+    
 }

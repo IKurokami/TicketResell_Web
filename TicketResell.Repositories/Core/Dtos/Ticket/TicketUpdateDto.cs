@@ -13,8 +13,7 @@ public class TicketUpdateDto
     public int? Status { get; set; }
 
     public string? Image { get; set; }
-    
-    public string? Qrcode { get; set; }
+
     
     public string? StartDate { get; set; }
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Helper;
+using Api.Controllers.Models; // Thêm namespace cho lớp DTO
 
 namespace Api.Controllers
 {
@@ -41,10 +42,10 @@ namespace Api.Controllers
                     HttpContext.SetIsAuthenticated(true);
                 }
             }
-            
+
             return ResponseParser.Result(result);
         }
-        
+
         [HttpPost("login-key")]
         public async Task<IActionResult> Login([FromBody] AccessKeyLoginDto accessKeyLoginDto)
         {
@@ -53,17 +54,17 @@ namespace Api.Controllers
             {
                 if (result.Data is LoginInfoDto loginInfo)
                 {
-                    if (loginInfo.User != null) 
+                    if (loginInfo.User != null)
                         HttpContext.SetUserId(loginInfo.User.UserId);
-                    
+
                     HttpContext.SetAccessKey(loginInfo.AccessKey);
                     HttpContext.SetIsAuthenticated(true);
                 }
             }
-            
+
             return ResponseParser.Result(result);
         }
-        
+
         [HttpGet("login-google")]
         public async Task<IActionResult> LoginWithGoogle([FromQuery] string accessToken)
         {
@@ -77,15 +78,15 @@ namespace Api.Controllers
             }
 
             var jsonString = await response.Content.ReadAsStringAsync();
-            
+
             var googleUser = JsonConvert.DeserializeObject<GoogleUserInfoDto>(jsonString);
-            
+
             if (googleUser == null || string.IsNullOrEmpty(googleUser.Email))
             {
                 return ResponseParser.Result(ResponseModel.Unauthorized("Unable to retrieve user info from Google"));
             }
 
-            var result = await _authService.LoginWithGoogleAsync(googleUser.Email);
+            var result = await _authService.LoginWithGoogleAsync(googleUser);
             if (result.Data != null && result.Data is LoginInfoDto loginInfo)
             {
                 if (loginInfo.User != null)
@@ -97,7 +98,7 @@ namespace Api.Controllers
 
             return ResponseParser.Result(result);
         }
-        
+
         [HttpPost("islogged")]
         public async Task<IActionResult> IsLogged()
         {
@@ -134,10 +135,25 @@ namespace Api.Controllers
         }
 
         [HttpPost("putOTP")]
-        public async Task<IActionResult> SendVerificationEmail([FromBody] string data)
+        public async Task<IActionResult> SendVerificationEmail([FromBody] SendOtpRequest request)
         {
-            var result = await _authService.PutOtpAsync(data);
-            return ResponseParser.Result(result);
+            if (string.IsNullOrEmpty(request.EncryptedData))
+            {
+                return BadRequest("Encrypted data is required");
+            }
+
+            try
+            {
+                var result = await _authService.PutOtpAsync(request.EncryptedData);
+                return ResponseParser.Result(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in PutOtpAsync: {ex.Message}"); // Log error
+                return StatusCode(500, "Internal server error");
+            }
         }
+        
+        
     }
 }
