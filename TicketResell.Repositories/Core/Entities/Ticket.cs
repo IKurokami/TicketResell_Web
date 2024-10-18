@@ -25,9 +25,9 @@ public partial class Ticket
 
     public string? Image { get; set; }
 
-    public byte[]? Qr { get; set; }
-
     public string? Description { get; set; }
+
+    public byte[]? Qr { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 

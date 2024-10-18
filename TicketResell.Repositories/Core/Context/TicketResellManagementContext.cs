@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Entities;
-
 namespace Repositories.Core.Context;
 
 public partial class TicketResellManagementContext : DbContext
@@ -159,7 +158,6 @@ public partial class TicketResellManagementContext : DbContext
             entity.Property(e => e.TicketId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-            entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.Image)
                 .HasMaxLength(255)
                 .IsUnicode(false);
