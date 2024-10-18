@@ -3,7 +3,7 @@ import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
 import { BuildingBankRegular } from "@fluentui/react-icons";
 import Cookies from "js-cookie";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Trash2 } from "lucide-react";
 import { fetchImage } from "@/models/FetchImage";
 
 export interface CartItem {
@@ -14,7 +14,7 @@ export interface CartItem {
   quantity: number;
   ticket: {
     name: string;
-    imageUrl: string;
+    image: string;
     startDate: string;
   };
 }
@@ -59,9 +59,10 @@ const MyCart: React.FC = () => {
             let image =
               "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"; // default image
 
-            if (item.ticketId) {
+            console.log("ticket", item.ticket.image);
+            if (item.ticket.image) {
               const { imageUrl: fetchedImageUrl, error } = await fetchImage(
-                item.ticketId
+                item.ticket.image
               );
 
               if (fetchedImageUrl) {
@@ -325,79 +326,50 @@ const MyCart: React.FC = () => {
   return (
     <div className="mt-24 w-full-screen rounded">
       <div className="mx-auto bg-white rounded-t-xl overflow-hidden">
-        <div className="px-24 pb-16 flex flex-col lg:flex-row relative">
+        <div className="px-8 lg:px-16 xl:px-24 pb-16 flex flex-col lg:flex-row relative">
           {/* Left Column: Tickets Table */}
           <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
             <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
               Giỏ hàng
             </h2>
-            <div className="hidden sm:grid sm:grid-cols-6 gap-4 mb-4 text-sm font-medium text-gray-500 sticky top-16 bg-white z-10 py-2">
-              <div className="col-span-3">Sản phẩm</div>
-              <div>Giá</div>
-              <div>Số lượng</div>
-              <div>Tổng</div>
+            <div className="hidden sm:grid sm:grid-cols-7 gap-4 mb-4 min-w-full text-sm font-medium text-gray-500 sticky top-16 bg-white z-10 py-2">
+              <div className="col-span-3">Product</div>
+              <div>Price</div>
+              <div>Quantity</div>
+              <div>Total</div>
+              <div>Actions</div>
             </div>
             {items.map((item) => (
               <div
                 key={item.orderDetailId}
-                className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-6 sm:gap-4 sm:items-center relative"
+                className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-7 sm:gap-4 sm:items-center relative"
               >
-                {/* Delete button positioned absolutely at top right with label */}
-                <div className="absolute bottom-2 right-2 mr-1 group">
-                  <button
-                    onClick={() => handleRemoveItem(item.ticketId)}
-                    className="rounded-full flex items-center justify-center focus-within:outline-red-500"
-                    aria-label="Delete item"
-                  >
-                    <svg
-                      width="34"
-                      height="34"
-                      viewBox="0 0 34 34"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <circle
-                        className="fill-red-50 transition-all duration-500 group-hover:fill-red-400"
-                        cx="17"
-                        cy="17"
-                        r="17"
-                        fill=""
-                      />
-                      <path
-                        className="stroke-red-500 transition-all duration-500 group-hover:stroke-white"
-                        d="M14.1673 13.5997V12.5923C14.1673 11.8968 14.7311 11.333 15.4266 11.333H18.5747C19.2702 11.333 19.834 11.8968 19.834 12.5923V13.5997M19.834 13.5997C19.834 13.5997 14.6534 13.5997 11.334 13.5997C6.90804 13.5998 27.0933 13.5998 22.6673 13.5997C21.5608 13.5997 19.834 13.5997 19.834 13.5997ZM12.4673 13.5997H21.534V18.8886C21.534 20.6695 21.534 21.5599 20.9807 22.1131C20.4275 22.6664 19.5371 22.6664 17.7562 22.6664H16.2451C14.4642 22.6664 13.5738 22.6664 13.0206 22.1131C12.4673 21.5599 12.4673 20.6695 12.4673 18.8886V13.5997Z"
-                        stroke="#EF4444"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="flex items-center col-span-3 mb-4 sm:mb-0">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.ticket.name}
-                    className="w-64 h-32 object-cover rounded mr-4"
-                  />
-                  <div>
-                    <h3 className="font-bold text-lg text-gray-900">
-                      {item.ticket.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {formatDateTime(item.ticket.startDate)}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Người bán: {item.sellerName}
-                    </p>
+                <div className="flex flex-col col-span-3 mb-4 sm:mb-0">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">
+                    {item.ticket.name}
+                  </h3>
+                  <div className="flex items-center">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.ticket.name}
+                      className="w-64 h-32 object-cover rounded mr-4"
+                    />
+                    <div>
+                      <p className="text-sm text-gray-500 text-nowrap">
+                        {formatDateTime(item.ticket.startDate)}
+                      </p>
+                      <p className="text-sm text-gray-500 text-nowrap">
+                        Seller: {item.sellerName}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="mb-2 sm:mb-0">
-                  <span className="sm:hidden font-medium mr-2">Giá:</span>
+                <div className="mb-2">
+                  <span className="sm:hidden font-medium mr-2">Price:</span>
                   {formatPriceVND(item.price)}
                 </div>
-                <div className="flex items-center justify-between sm:mb-0">
-                  <span className="sm:hidden font-medium mr-2">Số lượng:</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="sm:hidden font-medium mr-2">Quantity:</span>
                   <div className="flex items-center">
                     <button
                       type="button"
@@ -415,9 +387,9 @@ const MyCart: React.FC = () => {
                       >
                         <path
                           stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
                           d="M1 1h16"
                         />
                       </svg>
@@ -441,23 +413,21 @@ const MyCart: React.FC = () => {
                       >
                         <path
                           stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
                           d="M9 1v16M1 9h16"
                         />
                       </svg>
                     </button>
                   </div>
                 </div>
-                <div className="mb-2 sm:mb-0">
-                  <span className="sm:hidden font-medium mr-2">Tổng:</span>
+                <div className="mb-2">
+                  <span className="sm:hidden font-medium mr-2">Total:</span>
                   {formatPriceVND(item.price * item.quantity)}
                 </div>
-
-                <div className="absolute top-2 right-2 mr-1 group">
+                <div className="flex items-center justify-center space-x-4">
                   <label className="inline-flex items-center cursor-pointer">
-                    <span className="mr-2 text-gray-700">Chọn</span>
                     <input
                       type="checkbox"
                       checked={item.isSelected}
@@ -476,6 +446,13 @@ const MyCart: React.FC = () => {
                       )}
                     </span>
                   </label>
+                  <button
+                    onClick={() => handleRemoveItem(item.ticketId)}
+                    className="text-red-500 hover:text-red-700 focus:outline-none"
+                    aria-label="Delete item"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
             ))}

@@ -1,7 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import TicketManager from "./TicketManager";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { fetchTickets } from "@/models/TicketFetch";
+import { UserService, User } from "@/models/UserManagement";
 import {
   Person as UsersIcon,
   Group as RolesIcon,
@@ -9,18 +11,90 @@ import {
   Category as CategoriesIcon,
   ShoppingCart as OrdersIcon,
 } from "@mui/icons-material";
+import UserManager from "./UserManager";
+import RoleManager from "./RoleManager";
+import TicketManager from "./TicketManager";
+import CategoryManager from "./CategoryManager";
 
 const AdminPage = () => {
   const [tickets, setTickets] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Tickets");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sidebarTabs = [
+    { name: "Users", icon: <UsersIcon /> },
+    { name: "Roles", icon: <RolesIcon /> },
+    { name: "Tickets", icon: <TicketsIcon /> },
+    { name: "Categories", icon: <CategoriesIcon /> },
+    { name: "Orders", icon: <OrdersIcon /> },
+  ];
+  useEffect(() => {
+    if (searchParams) {
+      const page = searchParams.get("page");
+      const validTab = sidebarTabs.find((tab) => tab.name === page);
+      if (page && validTab) {
+        setActiveTab(page);
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const getTickets = async () => {
       const fetchedTickets = await fetchTickets();
       setTickets(fetchedTickets);
     };
+    const getUsers = async () => {
+      try {
+        const fetchedUsers = await UserService.fetchUsers();
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error("Failed to load users:", error);
+      }
+    };
+
+    const getRoles = async () => {
+      try {
+        const response = await fetch("http://localhost:5296/api/Role/read", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch roles");
+        }
+        const data = await response.json();
+        setRoles(data.data);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    };
+
+    const getCategories = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5296/api/Category/read",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        const data = await response.json();
+        setCategories(data.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    getUsers();
     getTickets();
+    getRoles();
+    getCategories();
   }, []);
 
   const toggleSidebar = () => {
@@ -31,20 +105,27 @@ const AdminPage = () => {
     setSidebarOpen(false);
   };
 
-  const handleTicketEdit = (ticketId: string) => {
-    console.log("Edit ticket:", ticketId);
-  };
-
-  const handleTicketDelete = async (ticketId: string) => {
-    const url = `http://localhost:5296/api/ticket/delete/${ticketId}`;
+  const handleTicketActive = async (ticketId: string) => {
+    const url = `http://localhost:5296/api/ticket/update/${ticketId}`;
 
     try {
       const response = await fetch(url, {
-        method: "DELETE",
+        method: "PUT", // or PATCH based on your API
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          name: null,
+          cost: null,
+          location: null,
+          status: 1, // Setting the status back to 1 (Active)
+          image: null,
+          qrcode: null,
+          description: null,
+          createDate: null,
+          categories: [], // Sending an empty array or null if no update to categories
+        }),
       });
 
       if (!response.ok) {
@@ -52,24 +133,74 @@ const AdminPage = () => {
       }
 
       const result = await response.json();
-      console.log("Delete ticket response:", result);
+      console.log("Ticket status update response:", result);
+
+      setTickets((prevTickets) =>
+        prevTickets.map((ticket) =>
+          ticket.ticketId === ticketId ? { ...ticket, status: 1 } : ticket
+        )
+      );
     } catch (error) {
-      console.error("Error deleting ticket:", error);
+      console.error("Error updating ticket status:", error);
     }
   };
 
-  const handleNavigation = (tabName: string) => {
-    console.log("Navigate to:", tabName);
-    setActiveTab(tabName);
+  const handleTicketDelete = async (ticketId: string) => {
+    const url = `http://localhost:5296/api/ticket/update/${ticketId}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "PUT", // or PATCH based on your API
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: null,
+          cost: null,
+          location: null,
+          status: 0, // Updating only the status to 0
+          image: null,
+          qrcode: null,
+          description: null,
+          createDate: null,
+          categories: [], // Sending an empty array or null if no update to categories
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Ticket status update response:", result);
+
+      setTickets((prevTickets) =>
+        prevTickets.map((ticket) =>
+          ticket.ticketId === ticketId ? { ...ticket, status: 0 } : ticket
+        )
+      );
+    } catch (error) {
+      console.error("Error updating ticket status:", error);
+    }
   };
 
-  const sidebarTabs = [
-    { name: "Users", icon: <UsersIcon /> },
-    { name: "Roles", icon: <RolesIcon /> },
-    { name: "Tickets", icon: <TicketsIcon /> },
-    { name: "Categories", icon: <CategoriesIcon /> },
-    { name: "Orders", icon: <OrdersIcon /> },
-  ];
+  const handleUserEdit = async (userId: string) => {};
+  const handleUserDelete = async (userId: string) => {};
+
+  const handleRoleAdd = async () => {};
+  const handleRoleEdit = async (roleId: string) => {};
+  const handleRoleDelete = async (roleId: string) => {};
+
+  const handleCategoryAdd = async () => {};
+  const handleCategoryEdit = async (categoryId: string) => {};
+  const handleCategoryDelete = async (categoryId: string) => {};
+
+  const handleNavigation = (tabName: string) => {
+    console.log("Navigate to:", tabName);
+    router.push(`/admin?page=${tabName}`, undefined, { shallow: true });
+    setActiveTab(tabName);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -77,8 +208,34 @@ const AdminPage = () => {
         return (
           <TicketManager
             tickets={tickets}
-            onEdit={handleTicketEdit}
+            onActive={handleTicketActive}
             onDelete={handleTicketDelete}
+          />
+        );
+      case "Users":
+        return (
+          <UserManager
+            users={users}
+            onEdit={handleUserEdit}
+            onDelete={handleUserDelete}
+          />
+        );
+      case "Roles":
+        return (
+          <RoleManager
+            roles={roles}
+            onEdit={handleRoleEdit}
+            onDelete={handleRoleDelete}
+            onAdd={handleRoleAdd}
+          />
+        );
+      case "Categories":
+        return (
+          <CategoryManager
+            categories={categories}
+            onEdit={handleCategoryEdit}
+            onDelete={handleCategoryDelete}
+            onAdd={handleCategoryAdd}
           />
         );
       default:

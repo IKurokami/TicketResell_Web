@@ -37,7 +37,13 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully created user: {dto.Username}");
         }
 
-        
+        public async Task<ResponseModel> GetAllUser()
+        {
+            var user = await _unitOfWork.UserRepository.GetAllAsync();
+
+            var users = _mapper.Map<IEnumerable<UserReadDto>>(user);
+            return ResponseModel.Success($"Successfully get all user", users);
+        }
         
         public async Task<ResponseModel> GetUserByIdAsync(string id)
         {

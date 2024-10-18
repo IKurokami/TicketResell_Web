@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getCategoryNames, Ticket } from "@/models/TicketFetch";
-import { FaTrash, FaEdit, FaSearch, FaCheck } from "react-icons/fa";
+import { FaSearch, FaTrash, FaEdit } from "react-icons/fa";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -8,32 +7,33 @@ import {
   faSortAmountUp,
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
+import { User } from "@/models/UserManagement";
 
-interface TicketListProps {
-  tickets: Ticket[];
-  onActive: (ticketId: string) => void;
-  onDelete: (ticketId: string) => void;
+interface UserManagerProps {
+  users: User[];
+  onDelete: (userId: string) => void;
+  onEdit: (userId: string) => void;
 }
 
-const TicketManager: React.FC<TicketListProps> = ({
-  tickets,
-  onActive,
+const UserManager: React.FC<UserManagerProps> = ({
+  users,
   onDelete,
+  onEdit,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [sortOption, setSortOption] = useState("Sort By");
-  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>(tickets);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // Adjust this value to change items per page
-  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const sortOptions = [
-    { text: "Price low to high", icon: faSortAmountUp },
-    { text: "Price high to low", icon: faSortAmountDown },
-    { text: "Recently listed", icon: faClock },
+    { text: "Name A to Z", icon: faSortAmountUp },
+    { text: "Name Z to A", icon: faSortAmountDown },
+    { text: "Recently joined", icon: faClock },
   ];
 
   const handleSortOptionClick = (option: string) => {
@@ -41,44 +41,43 @@ const TicketManager: React.FC<TicketListProps> = ({
     setIsDropdownOpen(false);
   };
 
-  const sortTickets = (tickets: Ticket[]) => {
-    const sortedTickets = [...tickets]; // Create a shallow copy to avoid mutation
+  const sortUsers = (users: User[]) => {
+    const sortedUsers = [...users];
     switch (sortOption) {
-      case "Price low to high":
-        return sortedTickets.sort((a, b) => a.cost - b.cost);
-      case "Price high to low":
-        return sortedTickets.sort((a, b) => b.cost - a.cost);
-      case "Recently listed":
-        return sortedTickets.sort(
+      case "Name A to Z":
+        return sortedUsers.sort((a, b) => a.fullname.localeCompare(b.fullname));
+      case "Name Z to A":
+        return sortedUsers.sort((a, b) => b.fullname.localeCompare(a.fullname));
+      case "Recently joined":
+        return sortedUsers.sort(
           (a, b) =>
-            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+            new Date(b.createDate).getTime() - new Date(a.createDate).getTime()
         );
       default:
-        return sortedTickets;
+        return sortedUsers;
     }
   };
 
-  const filterTickets = () => {
-    let filtered = tickets;
+  const filterUsers = () => {
+    let filtered = users;
 
-    // Search Filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (ticket) =>
-          ticket.name.toLowerCase().includes(searchLower) ||
-          getCategoryNames(ticket).toLowerCase().includes(searchLower) ||
-          ticket.location.toLowerCase().includes(searchLower)
+        (user) =>
+          user.fullname.toLowerCase().includes(searchLower) ||
+          user.username.toLowerCase().includes(searchLower) ||
+          user.gmail.toLowerCase().includes(searchLower)
       );
     }
 
-    setFilteredTickets(sortTickets(filtered));
-    setCurrentPage(1); // Reset to first page on new search/sort
+    setFilteredUsers(sortUsers(filtered));
+    setCurrentPage(1);
   };
 
   useEffect(() => {
-    filterTickets();
-  }, [searchTerm, tickets, sortOption]);
+    filterUsers();
+  }, [searchTerm, users, sortOption]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -86,7 +85,7 @@ const TicketManager: React.FC<TicketListProps> = ({
     }
   };
 
-  const paginatedTickets = filteredTickets.slice(
+  const paginatedUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -167,16 +166,11 @@ const TicketManager: React.FC<TicketListProps> = ({
       year: "numeric",
       month: "long",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
-  const formatVND = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
+  const getUserRoles = (user: User) => {
+    return user.roles.map((role) => role.rolename).join(", ");
   };
 
   const getStatusBadge = (status: number) => {
@@ -211,7 +205,7 @@ const TicketManager: React.FC<TicketListProps> = ({
           <div className="relative flex-grow mx-2 w-full mb-4">
             <input
               type="text"
-              placeholder="Search by name"
+              placeholder="Search by name or email"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-12 w-full pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
@@ -252,76 +246,103 @@ const TicketManager: React.FC<TicketListProps> = ({
             </div>
           </div>
         </div>
-      </div>  
-
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
-        {paginatedTickets.map((ticket) => (
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-8 justify-items-center">
+        {paginatedUsers.map((user) => (
           <div
-            key={ticket.ticketId}
-            className="relative border border-gray-200 rounded-lg shadow-md overflow-hidden min-w-[250px]"
+            key={user.userId}
+            className="relative bg-emerald-800 rounded-lg w-full max-w-sm shadow-lg group overflow-hidden"
           >
-            {/* Conditionally Render Edit/Delete or Active Icon */}
-            <div className="absolute bottom-2 right-2 flex flex-col space-y-1">
-              {ticket.status === 1 ? (
-                <button
-                  onClick={() => onDelete(ticket.ticketId)}
-                  className="text-red-500 hover:text-red-700"
-                  title="Delete"
-                >
-                  <FaTrash />
-                </button>
-              ) : (
-                <button
-                  onClick={() => onActive(ticket.ticketId)}
-                  className="text-green-500 hover:text-green-700"
-                  title="Edit Inactive Ticket"
-                >
-                  <FaCheck />
-                </button>
-              )}
+            <svg
+              className="absolute bottom-0 left-0 mb-8 scale-100 group-hover:scale-[1.65] transition-transform"
+              viewBox="0 0 375 283"
+              fill="none"
+              style={{ opacity: 0.1 }}
+            >
+              <rect
+                x="159.52"
+                y="175"
+                width="152"
+                height="152"
+                rx="8"
+                transform="rotate(-45 159.52 175)"
+                fill="white"
+              />
+              <rect
+                y="107.48"
+                width="152"
+                height="152"
+                rx="8"
+                transform="rotate(-45 0 107.48)"
+                fill="white"
+              />
+            </svg>
+            <div className="pt-12 px-12 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div
+                className="block absolute w-full h-56 bottom-0 left-0 -mb-24 ml-3"
+                style={{
+                  background: "radial-gradient(black, transparent 60%)",
+                  transform: "rotate3d(0, 0, 1, 20deg) scale3d(1, 0.6, 1)",
+                  opacity: 0.2,
+                }}
+              ></div>
+              <img
+                src={
+                  user.avatar ||
+                  "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"
+                }
+                alt={user.fullname}
+                className="relative w-48 h-48 rounded-full object-cover"
+              />
             </div>
-
-            {/* Ticket Image */}
-            <img
-              src={ticket.imageUrl || ticket.image}
-              alt={ticket.name}
-              className="w-full h-48 object-cover"
-            />
-
-            {/* Ticket Information */}
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-bold">
-                  {truncateText(ticket.name, 20)}
-                </h2>
-                {getStatusBadge(ticket.status)}
+            <div className="relative text-white px-8 pb-16 mt-8">
+              <div className="flex justify-between items-start">
+                <div className="w-3/4">
+                  <h2
+                    className="block font-semibold text-xl mb-1 truncate"
+                    title={user.fullname || user.username}
+                  >
+                    {truncateText(user.fullname || user.username, 20)}
+                  </h2>
+                  <p className="text-sm truncate" title={user.gmail}>
+                    {truncateText(user.gmail, 25)}
+                  </p>
+                </div>
+                {getStatusBadge(user.status)}
               </div>
-              <p className="text-xl font-bold mb-2">{formatVND(ticket.cost)}</p>
-              <p className="text-sm text-gray-600 mb-1">
-                {truncateText(ticket.location, 20)}
-              </p>
-              <p className="text-sm text-gray-600 mb-4">
-                Date: {formatDate(ticket.startDate)}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {getCategoryNames(ticket)
+              <div className="flex flex-wrap py-1">
+                {getUserRoles(user)
                   .split(",")
-                  .filter((category) => category.trim() !== "")
-                  .slice(0, 3)
-                  .map((category) => (
+                  .filter((role) => role.trim() !== "")
+                  .map((role) => (
                     <span
-                      key={category}
-                      className="bg-emerald-400 text-white rounded-full px-2 py-1 text-xs"
+                      key={role}
+                      className="bg-blue-400 text-black rounded-full px-2 py-1 text-xs mr-1 mb-1"
                     >
-                      {category.trim()}
+                      {role.trim()}
                     </span>
                   ))}
-                {getCategoryNames(ticket).trim() === "" && (
-                  <span className="bg-gray-200 text-gray-700 rounded-full px-2 py-1 text-xs">
-                    No categories
-                  </span>
-                )}
               </div>
+              <p className="text-sm mt-2">{user.phone || "No phone"}</p>
+              <p className="text-sm mt-1">
+                Joined: {formatDate(user.createDate)}
+              </p>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-emerald-600 py-3 px-8 flex justify-between items-center">
+              <button
+                onClick={() => onEdit(user.userId)}
+                className="text-white hover:text-blue-200 transition-colors duration-200"
+                title="Edit"
+              >
+                <FaEdit size={20} />
+              </button>
+              <button
+                onClick={() => onDelete(user.userId)}
+                className="text-white hover:text-red-200 transition-colors duration-200"
+                title="Delete"
+              >
+                <FaTrash size={20} />
+              </button>
             </div>
           </div>
         ))}
@@ -351,4 +372,4 @@ const TicketManager: React.FC<TicketListProps> = ({
   );
 };
 
-export default TicketManager;
+export default UserManager;

@@ -3,6 +3,7 @@ using Repositories.Core.Dtos.Ticket;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
 using System.Net.Sockets;
+using Repositories.Core.Dtos.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Tickets;
@@ -197,8 +198,51 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto, bool saveAll)
         {
-            var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
+                var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
 
+            if(dto == null || ticket == null)
+                return ResponseModel.BadRequest("Ticket not found");
+            
+            if (string.IsNullOrEmpty(dto.Name))
+            {
+                dto.Name = ticket.Name;
+            }
+
+            if (!dto.Cost.HasValue)
+            {
+                dto.Cost = ticket.Cost;
+            }
+
+            if (string.IsNullOrEmpty(dto.Location))
+            {
+                dto.Location = ticket.Location;
+            }
+
+            if (!dto.Status.HasValue)
+            {
+                dto.Status = ticket.Status;
+            }
+
+            if (string.IsNullOrEmpty(dto.Image))
+            {
+                dto.Image = ticket.Image;
+            }
+
+            if (string.IsNullOrEmpty(dto.Qrcode) && ticket.Qr != null)
+            {
+                dto.Qrcode = System.Convert.ToBase64String(ticket.Qr);
+            }
+
+            if (dto.CreateDate == null)
+            {
+                dto.CreateDate = ticket.CreateDate;
+            }
+
+            if (string.IsNullOrEmpty(dto.Description))
+            {
+                dto.Description = ticket.Description;
+            }
+            
             ticket.ModifyDate = DateTime.UtcNow;
             _mapper.Map(dto, ticket);
 

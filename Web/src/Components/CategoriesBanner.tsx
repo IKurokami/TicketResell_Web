@@ -109,88 +109,47 @@ const HorizontalCards = ({ categoryId, title }) => {
           {title}
         </h1>
 
-        <div className="relative overflow-hidden h-[calc(100%+4rem)] py-8">
-          <button
-            onClick={slideLeft}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-20 hover:bg-opacity-40 rounded-full p-2 z-10 transition-colors"
-          >
-            <FontAwesomeIcon
-              icon={faChevronLeft}
-              className="text-white text-2xl"
-            />
-          </button>
-          <button
-            onClick={slideRight}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-20 hover:bg-opacity-40 rounded-full p-2 z-10 transition-colors"
-          >
-            <FontAwesomeIcon
-              icon={faChevronRight}
-              className="text-white text-2xl"
-            />
-          </button>
-          <div
-            ref={sliderRef}
-            className="flex transition-transform duration-300 ease-in-out pt-2"
-            style={{
-              transform: `translateX(-${(currentIndex * 100) / visibleCards}%)`,
-            }}
-          >
-            {cardsData.map((card, index) => (
-              <Link
-                href={"/ticket/" + card.ticketId}
-                style={{ textDecoration: "none", color: "black" }}
-                key={`${card.ticketId}-${index}`}
-                className={`flex-shrink-0 px-2 hover:scale-105 transition-transform duration-300 ${
-                  visibleCards === 1
-                    ? "w-full"
-                    : visibleCards === 2
-                    ? "w-1/2"
-                    : visibleCards === 3
-                    ? "w-1/3"
-                    : visibleCards === 4
-                    ? "w-1/4"
-                    : "w-1/5"
-                }`}
-              >
-                <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow ">
-                  <div className="aspect-[4/3] relative overflow-hidden">
-                    <Image
-                      src={`/api/images/${card.ticketId}`}
-                      alt={`${card.name} cover`}
-                      layout="fill"
-                      objectFit="cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-sm mb-2 line-clamp-2">
-                      {card.name}
-                    </h3>
-                    <p className="text-xs text-gray-600">
-                      By {card.seller.fullname}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(card.startDate).toLocaleDateString()}
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {card.categories.slice(0, 3).map((category) => (
-                        <span
-                          key={category.categoryId}
-                          className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs font-semibold text-gray-700"
-                        >
-                          {category.name}
-                        </span>
-                      ))}
-                      {card.categories.length > 3 && (
-                        <span className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs font-semibold text-gray-700">
-                          ...
-                        </span>
-                      )}
-                    </div>
-                  </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {cardsData.map((card) => (
+            <div
+              key={card.ticketId}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+            >
+              <div className="aspect-[4/3] overflow-hidden">
+                <img
+                  src="https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"
+                  alt={`${card.name} cover`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-sm mb-2 line-clamp-2">
+                  {card.name}
+                </h3>
+                <p className="text-xs text-gray-600">
+                  By {card.seller.fullname}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(card.startDate).toLocaleDateString()}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {card.categories.slice(0, 3).map((category) => (
+                    <span
+                      key={category.categoryId}
+                      className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs font-semibold text-gray-700"
+                    >
+                      {category.name}
+                    </span>
+                  ))}
+                  {card.categories.length > 3 && (
+                    <span className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs font-semibold text-gray-700">
+                      ...
+                    </span>
+                  )}
                 </div>
-              </Link>
-            ))}
-          </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

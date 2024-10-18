@@ -22,14 +22,24 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public new async Task<List<Ticket>> GetAllAsync()
     {
-        var tickets = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories).ToListAsync();
-        if (tickets == null || tickets.Count == 0)
+        var tickets = await _context.Tickets
+            .Include(x => x.Seller)
+            .Include(x => x.Categories)
+            .ToListAsync();
+
+        var groupedTickets = tickets
+            .GroupBy(t => t.TicketId.Split('_')[0])
+            .Select(g => g.First())
+            .ToList();
+
+        if (groupedTickets == null || !groupedTickets.Any())
         {
             throw new KeyNotFoundException("No ticket in database");
         }
 
-        return tickets;
+        return groupedTickets;
     }
+
 
     public async Task<List<Ticket>> GetTicketRangeAsync(int start, int count)
     {
@@ -154,7 +164,6 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<List<Ticket>> GetTicketsByOrderIdWithStatusAsync(string userId, int status)
     {
-        _logger.LogInformation(status.ToString());
         return await _context.Tickets
             .Where(t => t.OrderDetails.Any(od => od.Order.BuyerId == userId && od.Order.Status == status))
             .ToListAsync();
