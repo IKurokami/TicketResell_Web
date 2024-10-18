@@ -53,7 +53,7 @@ const HorizontalCards = () => {
             >
               <div className="aspect-[4/3] overflow-hidden">
                 <img
-                  src={`/api/placeholder/400/300`}
+                  src="https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"
                   alt={`${card.name} cover`}
                   className="w-full h-full object-cover"
                 />

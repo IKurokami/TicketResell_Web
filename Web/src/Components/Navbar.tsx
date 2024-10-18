@@ -11,6 +11,7 @@ import { removeAllCookies } from "./Cookie";
 import { useRouter } from "next/navigation";
 import SellPopup from "./PopUp";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { LogIn } from 'lucide-react';
 
 import { CheckSeller } from "./CheckSeller";
 interface NavbarProps {
@@ -31,7 +32,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
   };
-  console.log(page);
 
   const handleMenuToggle = () => {
     setMenuActive(!menuActive);
@@ -224,7 +224,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
               href="/"
               style={{ color: page === "ticket" ? "black" : undefined }}
             >
-              Home
+              Trang chủ
             </Link>
           </li>
           <li>
@@ -233,7 +233,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
               style={{ color: page === "ticket" ? "black" : undefined }}
               onClick={handleSellClick}
             >
-              Sell
+              Bán vé
             </Link>
             <SellPopup isVisible={isPopupVisible} onClose={closeDropdown} />
           </li>
@@ -242,7 +242,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
               href="/contact"
               style={{ color: page === "ticket" ? "black" : undefined }}
             >
-              Contact Us
+              Liên Hệ
             </Link>
           </li>
         </ul>
@@ -254,7 +254,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
       >
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Tìm kiếm..."
           value={searchTerm}
           onChange={handleSearchChange}
           className="search-input"
@@ -277,7 +277,8 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
       <div className="user-section">
         {!isLoggedIn && (
           <button onClick={handleSignInClick} className="sign-in-btn">
-            Sign in
+      <LogIn size={24} />
+      
           </button>
         )}
 
@@ -318,32 +319,10 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                       ></path>
                     </svg>
-                    Profile
+                    Hồ sơ
                   </div>
                 </a>
-                <a
-                  href="#"
-                  onClick={(e) => handleMenuItemClick(e, "/favorites")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className="w-4 h-4 mr-2 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                      ></path>
-                    </svg>
-                    Favorites
-                  </div>
-                </a>
+             
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/history")}
@@ -364,7 +343,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       ></path>
                     </svg>
-                    History
+                    Lịch sử mua vé
                   </div>
                 </a>
                 <a
@@ -387,38 +366,10 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                         d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
                       ></path>
                     </svg>
-                    My Ticket
+                    Vé của bạn
                   </div>
                 </a>
-                <a
-                  href="#"
-                  onClick={(e) => handleMenuItemClick(e, "/settings")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className="w-4 h-4 mr-2 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                      ></path>
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      ></path>
-                    </svg>
-                    Settings
-                  </div>
-                </a>
+             
                 <Link
                   href="/login"
                   onClick={() => {
@@ -441,7 +392,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                       ></path>
                     </svg>
-                    Logout
+                    Đăng xuất
                   </div>
                 </Link>
               </div>
@@ -475,7 +426,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
             className="fas fa-bell"
             style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
           ></i>
-          <span className="noti-badge">3</span> {/* Notification count */}
         </a>
       </div>
     </header>

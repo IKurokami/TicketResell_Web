@@ -4,19 +4,18 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import Cookies from "js-cookie";
-import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
-import LoginButton from "./login-btn";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
+import { getOTP } from '@/pages/api/getOTP';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 };
 
-const InputField: React.FC<
-  React.InputHTMLAttributes<HTMLInputElement> & { icon: React.ReactNode }
-> = ({ icon, ...props }) => (
+const InputField: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { icon: React.ReactNode }> = ({ icon, ...props }) => (
   <div className="relative mt-5">
     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
       {icon}
@@ -28,10 +27,7 @@ const InputField: React.FC<
   </div>
 );
 
-const ActionButton: React.FC<{
-  children: React.ReactNode;
-  onClick?: () => void;
-}> = ({ children, onClick }) => (
+const ActionButton: React.FC<{ children: React.ReactNode; onClick?: () => void; }> = ({ children, onClick }) => (
   <motion.button
     className="w-full px-4 py-4 mt-6 font-bold text-white bg-green-500 rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition-all"
     onClick={onClick}
@@ -50,9 +46,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(
-    null
-  );
+  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
   const [rememberMe, setRememberMe] = useState(false);
   const [otp, setOtp] = useState<number | null>(null);
@@ -79,33 +73,26 @@ const Login: React.FC = () => {
           const result = await response.json();
 
           if (!response.ok) {
-            console.error("Login error:", result);
-            setError(result.message || "Login Error.");
+            console.error("Lỗi đăng nhập:", result);
+            setError(result.message || "Lỗi đăng nhập.");
           } else {
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);
-
-            if (Cookies) {
-              console.log("cookie saved");
-            }
-
-            setLoginSuccessMessage("Login successful!");
+            setLoginSuccessMessage("Đăng nhập thành công!");
             setTimeout(() => {
               setLoginSuccessMessage(null);
             }, 3000);
-
             setTimeout(() => {
               router.push("/");
             }, 500);
           }
         } catch (error) {
-          console.error("Error during login:", error);
-          setError("An error occurred during login.");
+          console.error("Lỗi trong quá trình đăng nhập:", error);
+          setError("Đã xảy ra lỗi trong quá trình đăng nhập.");
         }
       }
     };
 
-    // Call the async function
     handleLogin();
   }, [session]);
 
@@ -119,13 +106,39 @@ const Login: React.FC = () => {
     if (timer === 0) {
       setOtpSent(false);
       setOtp(null);
-      alert("OTP has expired. Please request a new one.");
+      alert("OTP đã hết hạn. Vui lòng yêu cầu một mã mới.");
     }
   }, [timer, otpSent]);
 
+  const notifySuccess = (message: string) => {
+    toast.success(message, {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
+
+  const notifyError = (message: string) => {
+    toast.error(message, {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
+
   const handleSignIn = async () => {
     if (!email || !password) {
-      setError("Please fill in all fields.");
+      notifyError("Vui lòng điền đầy đủ thông tin.");
       return;
     }
 
@@ -148,124 +161,95 @@ const Login: React.FC = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        console.error("Login error:", result);
-        setError(result.message || "Invalid email or password.");
+        console.error("Lỗi đăng nhập:", result);
+        notifyError(result.message || "Email hoặc mật khẩu không hợp lệ.");
       } else {
         if (rememberMe) {
-          Cookies.set("id", result.data.user.userId, { expires: 7 }); // Save user ID for 7 days
-          Cookies.set("accessKey", result.data.accessKey, { expires: 7 }); // Save accessKey for 7 days
+          Cookies.set("id", result.data.user.userId, { expires: 7 });
+          Cookies.set("accessKey", result.data.accessKey, { expires: 7 });
         } else {
-          Cookies.set("id", result.data.user.userId); // Save session cookies (will be removed on browser close)
+          Cookies.set("id", result.data.user.userId);
           Cookies.set("accessKey", result.data.accessKey);
         }
-        if (Cookies) {
-          console.log("cookie saved");
-        }
-        setLoginSuccessMessage("Login successful!"); // Set success message
-        setTimeout(() => {
-          setLoginSuccessMessage(null); // Clear success message after displaying it
-        }, 3000);
-
-        // Delay navigation to the home page by 5 seconds
+        notifySuccess("Đăng nhập thành công!");
         setTimeout(() => {
           router.push("/");
-        }, 500); // Redirect after 5 seconds
+        }, 500);
       }
     } catch (error) {
-      console.error("Network error:", error);
-      setError("An error occurred. Please try again later.");
+      console.error("Lỗi mạng:", error);
+      notifyError("Đã xảy ra lỗi. Vui lòng thử lại sau.");
     }
   };
 
   const handleSignUp = async () => {
-    // Validate email format before proceeding
     if (!validateEmail(email)) {
-      setError("Invalid email format.");
+      notifyError("Định dạng email không hợp lệ.");
       return;
     }
 
     if (!username || !name || !email || !password) {
-      setError("Please fill in all fields and choose a role.");
+      notifyError("Vui lòng điền đầy đủ thông tin.");
       return;
     }
 
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
-
-    const templateParams = {
-      to_name: name,
-      to_email: email,
-      otp: generatedOtp,
-    };
-
     try {
-      const response = await emailjs.send(
-        "service_d76v3rv", // Service ID
-        "template_juvp2i4", // Template ID
-        templateParams,
-        "RNLODJWvSPCIi0CTv" // Public key
-      );
-
-      console.log("OTP sent:", response.status, response.text);
-
-      if (response.status === 200) {
-        alert(`An OTP has been sent to your email: ${email}`);
-        setOtp(generatedOtp); // Save OTP for verification
-        setOtpSent(true); // Set flag indicating OTP has been sent
-        setTimer(60); // Reset timer to 60 seconds
+      const response = await getOTP(name, email, username);
+      if (response.success) {
+        setOtpSent(true);
+        setTimer(300);
+        notifySuccess("Một mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập mã bên dưới.");
       } else {
-        setError("Failed to send OTP. Please try again.");
+        notifyError("Gửi OTP thất bại. Vui lòng thử lại.");
       }
     } catch (error) {
-      console.error("Failed to send OTP:", error);
-      setError("Failed to send OTP. Please try again.");
+      console.error("Gửi OTP thất bại:", error);
+      notifyError("Đã xảy ra lỗi khi gửi OTP. Vui lòng thử lại.");
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (parseInt(enteredOtp) === otp) {
-      // Proceed with registration if OTP is correct
-      try {
-        const response = await fetch(
-          "http://localhost:5296/api/Authentication/register",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              UserId: email,
-              Username: username,
-              Password: password,
-              Gmail: email,
-            }),
-          }
-        );
+    if (!enteredOtp) {
+      notifyError("Vui lòng nhập mã OTP.");
+      return;
+    }
 
-        const result = await response.json();
-        console.log(result);
+    try {
+      const response = await fetch('http://localhost:3000/api/getOTP', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+          email: email,
+          otp: enteredOtp,
+        }),
+      });
 
-        if (!response.ok) {
-          setError(result.message || "Something went wrong.");
-          return;
-        }
+      const data = await response.json();
 
-        setError(null);
-        setSuccessMessage("Registration successful! You can now sign in."); // Set success message
-        setTimeout(() => {
-          setActiveTab("login"); // Switch to login tab after a delay
-          setSuccessMessage(null); // Clear success message after displaying it
-        }, 3000); // Switch after 3 seconds
-      } catch (error) {
-        console.error("Sign up error:", error);
-        setError("An error occurred during sign-up. Please try again.");
+      if (response.ok && data.success) {
+        notifySuccess("Xác minh OTP thành công! Đăng ký hoàn tất.");
+        setActiveTab("login"); // Chuyển sang tab đăng nhập
+        setOtpSent(false); // Đặt lại trạng thái OTP
+        setEnteredOtp(""); // Xóa tr��ờng OTP
+        setUsername(""); // Xóa tên người dùng
+        setName(""); // Xóa tên
+        setPassword(""); // Xóa mật khẩu
+      } else {
+        notifyError(data.message || "Xác minh OTP thất bại. Vui lòng thử lại.");
       }
-    } else {
-      setError("Invalid OTP. Please try again.");
+    } catch (error) {
+      console.error("Lỗi trong quá trình xác minh OTP:", error);
+      notifyError("Đã xảy ra lỗi khi xác minh OTP. Vui lòng thử lại.");
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen p-5">
+      <ToastContainer />
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -281,24 +265,16 @@ const Login: React.FC = () => {
           </div>
           <div className="flex mb-0">
             <button
-              className={`w-full py-4 text-lg font-bold transition-all ${
-                activeTab === "login"
-                  ? "text-white bg-green-500"
-                  : "text-gray-600 bg-transparent"
-              } rounded-l-3xl`}
+              className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "login" ? "text-white bg-green-500" : "text-gray-600 bg-transparent"} rounded-l-3xl`}
               onClick={() => setActiveTab("login")}
             >
-              Sign In
+              Đăng Nhập
             </button>
             <button
-              className={`w-full py-4 text-lg font-bold transition-all ${
-                activeTab === "register"
-                  ? "text-white bg-green-500"
-                  : "text-gray-600 bg-transparent"
-              } rounded-r-3xl`}
+              className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "register" ? "text-white bg-green-500" : "text-gray-600 bg-transparent"} rounded-r-3xl`}
               onClick={() => setActiveTab("register")}
             >
-              Sign Up
+              Đăng Ký
             </button>
           </div>
           <motion.div
@@ -312,43 +288,49 @@ const Login: React.FC = () => {
                 <InputField
                   icon={<FaEnvelope />}
                   type="email"
-                  placeholder="Email address"
+                  placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <InputField
                   icon={<FaLock />}
                   type="password"
-                  placeholder="Password"
+                  placeholder="Mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <div className="flex items-center mt-4">
-                  <input
-                    type="checkbox"
-                    id="rememberMe"
-                    checked={rememberMe}
-                    onChange={() => setRememberMe(!rememberMe)}
-                    className="mr-2"
-                  />
-                  <label htmlFor="rememberMe" className="text-gray-600">
-                    Remember Me
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="rememberMe"
+                      checked={rememberMe}
+                      onChange={() => setRememberMe(!rememberMe)}
+                      className="mr-2"
+                    />
+                    <label htmlFor="rememberMe" className="text-gray-600">
+                      Ghi nhớ tôi
+                    </label>
+                  </div>
+                  <label htmlFor="forgot" className="text-gray-600 cursor-pointer">
+                    Quên mật khẩu?
                   </label>
                 </div>
+
                 {error && <p className="text-red-500">{error}</p>}
                 {loginSuccessMessage && (
                   <p className="text-green-500">{loginSuccessMessage}</p>
                 )}
-                <ActionButton onClick={handleSignIn}>Sign In</ActionButton>
+                <ActionButton onClick={handleSignIn}>Đăng Nhập</ActionButton>
                 <div className="mt-4 text-center">
-                  <p>or</p>
+                  <p>hoặc</p>
                 </div>
                 <div className="mt-4">
                   <button
                     className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all"
                     onClick={() => signIn("google")}
                   >
-                    <FaGoogle className="mr-2" /> Continue with Google
+                    <FaGoogle className="mr-2" /> Tiếp tục với Google
                   </button>
                 </div>
               </>
@@ -357,28 +339,28 @@ const Login: React.FC = () => {
                 <InputField
                   icon={<FaUser />}
                   type="text"
-                  placeholder="Username"
+                  placeholder="Tên người dùng"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
                 <InputField
                   icon={<FaUser />}
                   type="text"
-                  placeholder="Name"
+                  placeholder="Tên"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
                 <InputField
                   icon={<FaEnvelope />}
                   type="email"
-                  placeholder="Email address"
+                  placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <InputField
                   icon={<FaLock />}
                   type="password"
-                  placeholder="Password"
+                  placeholder="Mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -387,28 +369,26 @@ const Login: React.FC = () => {
                     <InputField
                       icon={<FaLock />}
                       type="text"
-                      placeholder="Enter OTP"
+                      placeholder="Nhập mã OTP"
                       value={enteredOtp}
                       onChange={(e) => setEnteredOtp(e.target.value)}
                     />
                     <p className="text-gray-600">
-                      OTP will expire in {timer} seconds.
+                      Mã OTP sẽ hết hạn sau {timer} giây.
                     </p>
                     <ActionButton onClick={handleVerifyOtp}>
-                      Verify OTP
+                      Xác minh OTP
                     </ActionButton>
                   </>
                 ) : (
-                  <ActionButton onClick={handleSignUp}>Sign Up</ActionButton>
+                  <ActionButton onClick={handleSignUp}>Đăng Ký</ActionButton>
                 )}
                 <div className="mt-4 text-center">
-                  <p>or</p>
+                  <p>hoặc</p>
                 </div>
-
-                {/* Google Login Button */}
                 <div className="mt-4">
                   <button className="w-full flex items-center justify-center px-4 py-4 mt-6 font-bold text-white bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all">
-                    <FaGoogle className="mr-2" /> Continue with Google
+                    <FaGoogle className="mr-2" /> Tiếp tục với Google
                   </button>
                 </div>
                 {error && <p className="text-red-500">{error}</p>}

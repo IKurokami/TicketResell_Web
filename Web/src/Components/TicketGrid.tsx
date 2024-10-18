@@ -45,7 +45,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
               passHref
             >
               <div
-                className="movie-card-wrapper cursor-pointer"
+                className="movie-card-wrapper cursor-pointer w-full h-full"
                 data-index={index}
               >
                 <div className="bg-transparent rounded-2xl border overflow-hidden movie-card flex flex-col h-full shadow-sm hover:shadow-md transition-shadow duration-300">

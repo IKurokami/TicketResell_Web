@@ -53,6 +53,9 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<Ticket, TicketReadDto>();
             CreateMap<Ticket, TicketTopDto>();
             CreateMap<TicketUpdateDto, Ticket>();
+            CreateMap<TicketQrDto, Ticket>()
+                .ForMember(dest => dest.Qr, opt => opt.Ignore());
+            
 
             //Category
             CreateMap<CategoryCreateDto, Category>();

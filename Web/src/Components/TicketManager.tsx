@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { getCategoryNames, Ticket } from "@/models/TicketFetch";
-import { FaTrash, FaEdit, FaSearch } from "react-icons/fa";
+import { FaTrash, FaEdit, FaSearch, FaCheck } from "react-icons/fa";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,13 +11,13 @@ import {
 
 interface TicketListProps {
   tickets: Ticket[];
-  onEdit: (ticketId: string) => void;
+  onActive: (ticketId: string) => void;
   onDelete: (ticketId: string) => void;
 }
 
 const TicketManager: React.FC<TicketListProps> = ({
   tickets,
-  onEdit,
+  onActive,
   onDelete,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,7 +51,7 @@ const TicketManager: React.FC<TicketListProps> = ({
       case "Recently listed":
         return sortedTickets.sort(
           (a, b) =>
-            new Date(b.listedDate).getTime() - new Date(a.listedDate).getTime()
+            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
         );
       default:
         return sortedTickets;
@@ -172,6 +172,13 @@ const TicketManager: React.FC<TicketListProps> = ({
     });
   };
 
+  const formatVND = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
   const getStatusBadge = (status: number) => {
     switch (status) {
       case 0:
@@ -245,23 +252,33 @@ const TicketManager: React.FC<TicketListProps> = ({
             </div>
           </div>
         </div>
-      </div>
+      </div>  
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
         {paginatedTickets.map((ticket) => (
           <div
             key={ticket.ticketId}
-            className="relative border border-gray-200 rounded-lg shadow-md overflow-hidden"
+            className="relative border border-gray-200 rounded-lg shadow-md overflow-hidden min-w-[250px]"
           >
-            {/* Edit and Delete Icons */}
-            <div className="absolute top-2 right-2 flex flex-col space-y-1">
-              <button
-                onClick={() => onDelete(ticket.ticketId)}
-                className="text-red-500 hover:text-red-700"
-                title="Delete"
-              >
-                <FaTrash />
-              </button>
+            {/* Conditionally Render Edit/Delete or Active Icon */}
+            <div className="absolute bottom-2 right-2 flex flex-col space-y-1">
+              {ticket.status === 1 ? (
+                <button
+                  onClick={() => onDelete(ticket.ticketId)}
+                  className="text-red-500 hover:text-red-700"
+                  title="Delete"
+                >
+                  <FaTrash />
+                </button>
+              ) : (
+                <button
+                  onClick={() => onActive(ticket.ticketId)}
+                  className="text-green-500 hover:text-green-700"
+                  title="Edit Inactive Ticket"
+                >
+                  <FaCheck />
+                </button>
+              )}
             </div>
 
             {/* Ticket Image */}
@@ -279,9 +296,7 @@ const TicketManager: React.FC<TicketListProps> = ({
                 </h2>
                 {getStatusBadge(ticket.status)}
               </div>
-              <p className="text-xl font-bold mb-2">
-                ${ticket.cost.toFixed(2)}
-              </p>
+              <p className="text-xl font-bold mb-2">{formatVND(ticket.cost)}</p>
               <p className="text-sm text-gray-600 mb-1">
                 {truncateText(ticket.location, 20)}
               </p>

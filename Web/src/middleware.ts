@@ -8,8 +8,8 @@ export async function middleware(request: NextRequest) {
   // Get the access key from cookies
   const accessKey = request.cookies.get('.AspNetCore.Session')?.value;
 
-  // Define the paths that require authentication
-  const protectedRoutes = ['/profile', '/favorites', '/history', '/myticket', '/settings'];
+  // Define the paths that require authentication 
+  const protectedRoutes = ['/profile', '/favorites', '/history', '/myticket', '/settings', '/admin'];
   
   const validate = await fetch('http://localhost:5296/api/Authentication/islogged', {
     method: 'POST',
@@ -21,7 +21,6 @@ export async function middleware(request: NextRequest) {
       accessKey: accessKey,
     }),
   });
-
 
   const response = await validate.json(); // Parse the JSON response
   // Check if the current route is protected and the accessKey is missing

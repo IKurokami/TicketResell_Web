@@ -3,6 +3,7 @@ using Repositories.Core.Dtos.Ticket;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
 using System.Net.Sockets;
+using Repositories.Core.Dtos.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Tickets;
@@ -132,8 +133,9 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> GetQrImageAsBase64Async(string ticketId)
         {
-            return ResponseModel.Success($"Successfully get qr",
-                await _unitOfWork.TicketRepository.GetQrImageAsBase64Async(ticketId));
+            var baseId = ticketId.Split('_')[0];
+            var qr = await _unitOfWork.TicketRepository.GetQrImageAsBase64Async(baseId);
+            return ResponseModel.Success($"Successfully get qr", qr);
         }
 
         public async Task<ResponseModel> GetTicketsAsync()
@@ -169,19 +171,65 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> GetTicketByIdAsync(string id)
         {
-            var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
-            var ticketDtos = _mapper.Map<TicketReadDto>(ticket);
-            if (ticket.Qr != null)
+            
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsByBaseIdAsync(id);
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            int index = 0;
+            foreach (var ticket in tickets)
             {
-                ticketDtos.Qrcode = Convert.ToBase64String(ticket.Qr);
+                if (ticket.Qr!= null)
+                ticketDtos[index].Qrcode = Convert.ToBase64String(ticket.Qr);
+                index++;
             }
-
+            
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
 
-        public async Task<ResponseModel> UpdateTicketAsync(string id, TicketUpdateDto? dto, bool saveAll)
+        public async Task<ResponseModel> UpdateTicketsByBaseIdAsync(string ticketId, TicketUpdateDto? dto,
+            List<string> categoryIds, bool saveAll)
         {
-            var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(id);
+            var baseId = ticketId.Split('_')[0];
+
+
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsByBaseIdAsync(baseId);
+
+            if (tickets == null || !tickets.Any())
+            {
+                return ResponseModel.BadRequest("No tickets found with the base ID.");
+            }
+
+
+            foreach (var ticket in tickets)
+            {
+                ticket.ModifyDate = DateTime.UtcNow;
+                _mapper.Map(dto, ticket);
+                var validator = _validatorFactory.GetValidator<Ticket>();
+
+                var validationResult = validator.Validate(ticket);
+                if (!validationResult.IsValid)
+                {
+                    return ResponseModel.BadRequest("Validation error", validationResult.Errors);
+                }
+
+
+                await _unitOfWork.TicketRepository.UpdateTicketAsync(ticket.TicketId, ticket, dto.CategoriesId);
+            }
+
+
+            if (saveAll) await _unitOfWork.CompleteAsync();
+
+            return ResponseModel.Success($"Successfully updated all tickets with base ID: {baseId}");
+        }
+
+
+        public async Task<ResponseModel> UpdateQrTicketByIdAsync(string ticketId, TicketQrDto dto, bool saveAll)
+        {
+            var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(ticketId);
+
+            if (ticket == null)
+            {
+                return ResponseModel.BadRequest("No tickets found with the base ID.");
+            }
 
             ticket.ModifyDate = DateTime.UtcNow;
             _mapper.Map(dto, ticket);
@@ -195,7 +243,7 @@ namespace TicketResell.Services.Services
             }
 
             byte[] qrCodeBytes = null;
-            if (dto.Qrcode != null)
+            if (dto.Qr != null)
             {
                 try
                 {
@@ -208,26 +256,31 @@ namespace TicketResell.Services.Services
 
                     foreach (var mimeType in mimeTypes.Keys)
                     {
-                        if (dto.Qrcode.StartsWith(mimeType))
+                        if (dto.Qr.StartsWith(mimeType))
                         {
-                            dto.Qrcode = dto.Qrcode.Substring(mimeType.Length);
+                            dto.Qr = dto.Qr.Substring(mimeType.Length);
                             break;
                         }
                     }
 
-                    qrCodeBytes = Convert.FromBase64String(dto.Qrcode);
+                    qrCodeBytes = Convert.FromBase64String(dto.Qr);
+
+                    ticket.Qr = qrCodeBytes;
                 }
+
+
                 catch (FormatException)
                 {
                     return ResponseModel.BadRequest("Invalid QR code format");
                 }
             }
 
-            ticket.Qr = qrCodeBytes;
             _unitOfWork.TicketRepository.Update(ticket);
             if (saveAll) await _unitOfWork.CompleteAsync();
-            return ResponseModel.Success($"Successfully updated ticket: {ticket.TicketId}");
+
+            return ResponseModel.Success($"Successfully updated all tickets with ID: {ticketId}");
         }
+
 
         public async Task<ResponseModel> DeleteTicketAsync(string id, bool saveAll)
         {
@@ -273,13 +326,12 @@ namespace TicketResell.Services.Services
             var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get tickets", ticketDtos);
         }
+
         public async Task<ResponseModel> GetTicketByListCategoryIdAsync(string[] categoryId)
         {
             var tickets = await _unitOfWork.TicketRepository.GetTicketByListCateIdAsync(categoryId);
             var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
             return ResponseModel.Success($"Successfully get tickets", ticketDtos);
         }
-
-
     }
 }

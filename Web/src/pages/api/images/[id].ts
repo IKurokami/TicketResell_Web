@@ -91,6 +91,39 @@ export default async function handler(
             return res.status(500).json({ message: "Error retrieving image" });
         }
     }
+    
+    if (req.method === "PUT") {
+        try {
+            if (!req.body.image) {
+                return res.status(400).json({ message: "Image data is required" });
+            }
+
+            const imageBuffer = await new Promise<Buffer>((resolve, reject) => {
+                const chunks: Buffer[] = [];
+                req.body.image.on('data', (chunk: Buffer) => chunks.push(chunk));
+                req.body.image.on('end', () => resolve(Buffer.concat(chunks)));
+                req.body.image.on('error', reject);
+            });
+
+            const updatedImage = await TicketImage.findOneAndUpdate(
+                { id: id },
+                { image: imageBuffer },
+                { new: true } // Return the updated document
+            );
+
+            if (!updatedImage) {
+                console.log('Image not found for ID:', id);
+                return res.status(404).json({ message: "Image not found" });
+            }
+
+            console.log('Image updated:', updatedImage.id);
+            return res.status(200).json({ message: "Image updated successfully" });
+
+        } catch (error) {
+            console.error("Error updating image:", error);
+            return res.status(500).json({ message: "Error updating image" });
+        }
+    }
 
     // If the method is not allowed
     res.setHeader("Allow", ["GET", "DELETE"]);
