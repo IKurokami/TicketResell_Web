@@ -169,6 +169,10 @@ const UserManager: React.FC<UserManagerProps> = ({
     });
   };
 
+  const getUserRoles = (user: User) => {
+    return user.roles.map((role) => role.rolename).join(", ");
+  };
+
   const getStatusBadge = (status: number) => {
     switch (status) {
       case 0:
@@ -247,10 +251,10 @@ const UserManager: React.FC<UserManagerProps> = ({
         {paginatedUsers.map((user) => (
           <div
             key={user.userId}
-            className="relative bg-emerald-500 rounded-lg w-full max-w-sm shadow-lg group overflow-hidden"
+            className="relative bg-emerald-800 rounded-lg w-full max-w-sm shadow-lg group overflow-hidden"
           >
             <svg
-              className="absolute bottom-0 left-0 mb-8 scale-150 group-hover:scale-[1.65] transition-transform"
+              className="absolute bottom-0 left-0 mb-8 scale-100 group-hover:scale-[1.65] transition-transform"
               viewBox="0 0 375 283"
               fill="none"
               style={{ opacity: 0.1 }}
@@ -291,7 +295,7 @@ const UserManager: React.FC<UserManagerProps> = ({
                 className="relative w-48 h-48 rounded-full object-cover"
               />
             </div>
-            <div className="relative text-white px-8 pb-8 mt-8">
+            <div className="relative text-white px-8 pb-16 mt-8">
               <div className="flex justify-between items-start">
                 <div className="w-3/4">
                   <h2
@@ -306,26 +310,39 @@ const UserManager: React.FC<UserManagerProps> = ({
                 </div>
                 {getStatusBadge(user.status)}
               </div>
+              <div className="flex flex-wrap py-1">
+                {getUserRoles(user)
+                  .split(",")
+                  .filter((role) => role.trim() !== "")
+                  .map((role) => (
+                    <span
+                      key={role}
+                      className="bg-blue-400 text-black rounded-full px-2 py-1 text-xs mr-1 mb-1"
+                    >
+                      {role.trim()}
+                    </span>
+                  ))}
+              </div>
               <p className="text-sm mt-2">{user.phone || "No phone"}</p>
               <p className="text-sm mt-1">
                 Joined: {formatDate(user.createDate)}
               </p>
-              <div className="mt-6 flex justify-between items-center">
-                <button
-                  onClick={() => onEdit(user.userId)}
-                  className="text-white hover:text-blue-200 transition-colors duration-200"
-                  title="Edit"
-                >
-                  <FaEdit size={20} />
-                </button>
-                <button
-                  onClick={() => onDelete(user.userId)}
-                  className="text-white hover:text-red-200 transition-colors duration-200"
-                  title="Delete"
-                >
-                  <FaTrash size={20} />
-                </button>
-              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-emerald-600 py-3 px-8 flex justify-between items-center">
+              <button
+                onClick={() => onEdit(user.userId)}
+                className="text-white hover:text-blue-200 transition-colors duration-200"
+                title="Edit"
+              >
+                <FaEdit size={20} />
+              </button>
+              <button
+                onClick={() => onDelete(user.userId)}
+                className="text-white hover:text-red-200 transition-colors duration-200"
+                title="Delete"
+              >
+                <FaTrash size={20} />
+              </button>
             </div>
           </div>
         ))}

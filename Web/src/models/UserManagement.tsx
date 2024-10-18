@@ -1,6 +1,12 @@
 import axios from "axios";
 import { fetchImage } from "./FetchImage";
 
+export interface Role {
+  roleId: string;
+  rolename: string;
+  description: string;
+}
+
 export interface User {
   userId: string;
   username: string;
@@ -14,8 +20,9 @@ export interface User {
   avatar: string;
   birthday: string;
   bio: string;
-  roles: { roleId: string; rolename: string; description: string }[];
+  roles: Role[];
 }
+
 
 export interface ApiResponse<T> {
   data: T;

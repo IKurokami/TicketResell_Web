@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import TicketManager from "./TicketManager";
 import { fetchTickets } from "@/models/TicketFetch";
 import { UserService, User } from "@/models/UserManagement";
 import {
@@ -13,10 +12,15 @@ import {
   ShoppingCart as OrdersIcon,
 } from "@mui/icons-material";
 import UserManager from "./UserManager";
+import RoleManager from "./RoleManager";
+import TicketManager from "./TicketManager";
+import CategoryManager from "./CategoryManager";
 
 const AdminPage = () => {
   const [tickets, setTickets] = useState<any[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Tickets");
   const router = useRouter();
@@ -52,8 +56,45 @@ const AdminPage = () => {
       }
     };
 
+    const getRoles = async () => {
+      try {
+        const response = await fetch("http://localhost:5296/api/Role/read", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch roles");
+        }
+        const data = await response.json();
+        setRoles(data.data);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    };
+
+    const getCategories = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5296/api/Category/read",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        const data = await response.json();
+        setCategories(data.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
     getUsers();
     getTickets();
+    getRoles();
+    getCategories();
   }, []);
 
   const toggleSidebar = () => {
@@ -147,6 +188,14 @@ const AdminPage = () => {
   const handleUserEdit = async (userId: string) => {};
   const handleUserDelete = async (userId: string) => {};
 
+  const handleRoleAdd = async () => {};
+  const handleRoleEdit = async (roleId: string) => {};
+  const handleRoleDelete = async (roleId: string) => {};
+
+  const handleCategoryAdd = async () => {};
+  const handleCategoryEdit = async (categoryId: string) => {};
+  const handleCategoryDelete = async (categoryId: string) => {};
+
   const handleNavigation = (tabName: string) => {
     console.log("Navigate to:", tabName);
     router.push(`/admin?page=${tabName}`, undefined, { shallow: true });
@@ -169,6 +218,24 @@ const AdminPage = () => {
             users={users}
             onEdit={handleUserEdit}
             onDelete={handleUserDelete}
+          />
+        );
+      case "Roles":
+        return (
+          <RoleManager
+            roles={roles}
+            onEdit={handleRoleEdit}
+            onDelete={handleRoleDelete}
+            onAdd={handleRoleAdd}
+          />
+        );
+      case "Categories":
+        return (
+          <CategoryManager
+            categories={categories}
+            onEdit={handleCategoryEdit}
+            onDelete={handleCategoryDelete}
+            onAdd={handleCategoryAdd}
           />
         );
       default:
