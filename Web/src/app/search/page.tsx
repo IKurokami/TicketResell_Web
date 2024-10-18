@@ -6,7 +6,7 @@ import "@/Css/Search.css";
 
 const Search = () => {
   return (
-    <div className="home">
+    <div className="home">  
       {/* <Background test={<Ads />} /> */}
       <SearchPage />
 
