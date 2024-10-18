@@ -67,11 +67,16 @@ namespace Repositories.Controllers
         [HttpGet]
         [Route("read/{id}")]
         public async Task<IActionResult> GetUser(string id)
-        {
-            if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to get user information."));
-
+        {   
             var response = await _userService.GetUserByIdAsync(id);
+            return ResponseParser.Result(response);
+        }
+        
+        [HttpGet]
+        [Route("read")]
+        public async Task<IActionResult> GetUsers()
+        {
+            var response = await _userService.GetAllUser();
             return ResponseParser.Result(response);
         }
 
