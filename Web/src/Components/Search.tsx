@@ -15,14 +15,16 @@ import { useSearchParams } from "next/navigation";
 const Search: React.FC = () => {
   const searchParams = useSearchParams();
   const cateName = searchParams?.get("cateName") || "";
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [priceRange, setPriceRange] = useState(1000);
+  const [priceRange, setPriceRange] = useState(23000000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedDateFilter, setSelectedDateFilter] = useState("all");
   const [tickets, setTickets] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [uniqueCities, setUniqueCities] = useState<string[]>([]);
+  const [selectedTime, setSelectedTime] = useState<string>("");
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("Price low to high");
@@ -38,6 +40,10 @@ const Search: React.FC = () => {
     { text: "Price high to low", icon: faSortAmountDown },
     { text: "Recently listed", icon: faClock },
   ];
+  const extractCity = (location: string): string => {
+    const parts = location.split(",");
+    return parts[parts.length - 1].trim();
+  };
 
   useEffect(() => {
     setSelectedGenres([cateName]);
@@ -51,6 +57,12 @@ const Search: React.FC = () => {
       );
       const uniqueCategories = Array.from(new Set(allCategories));
       setCategories(uniqueCategories);
+
+      const cities = fetchedTickets.map((ticket) =>
+        extractCity(ticket.location)
+      );
+      const uniqueCitiesList = Array.from(new Set(cities));
+      setUniqueCities(uniqueCitiesList);
     };
 
     const searchData = localStorage.getItem("searchData");
@@ -86,7 +98,7 @@ const Search: React.FC = () => {
       case "Recently listed":
         return tickets.sort(
           (a, b) =>
-            new Date(b.listedDate).getTime() - new Date(a.listedDate).getTime()
+            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
         );
       default:
         return tickets;
@@ -139,7 +151,8 @@ const Search: React.FC = () => {
     selectedLocation,
     tickets,
     sortOption,
-    selectedDateFilter, // Add this line
+    selectedDateFilter,
+    selectedTime, // Add this line
   ]);
 
   const filterTickets = () => {
@@ -168,11 +181,23 @@ const Search: React.FC = () => {
       );
     }
 
+    // Time Filter
+    if (selectedTime) {
+      const [filterHour, filterMinute] = selectedTime.split(":").map(Number);
+      filtered = filtered.filter((ticket) => {
+        const ticketDate = new Date(ticket.startDate);
+        const ticketHour = ticketDate.getHours();
+        const ticketMinute = ticketDate.getMinutes();
+        return ticketHour === filterHour && ticketMinute >= filterMinute;
+      });
+    }
+
     // Location Filter
     if (selectedLocation) {
       filtered = filtered.filter(
         (ticket) =>
-          ticket.location.toLowerCase() === selectedLocation.toLowerCase()
+          extractCity(ticket.location).toLowerCase() ===
+          selectedLocation.toLowerCase()
       );
     }
 
@@ -373,11 +398,9 @@ const Search: React.FC = () => {
                   className="w-full border-gray-300 rounded-lg shadow-sm p-2"
                 >
                   <option value="">All Locations</option>
-                  {Array.from(
-                    new Set(tickets.map((ticket) => ticket.location))
-                  ).map((location) => (
-                    <option key={location} value={location}>
-                      {truncateText(location, 20)}
+                  {uniqueCities.map((city) => (
+                    <option key={city} value={city}>
+                      {truncateText(city, 30)}
                     </option>
                   ))}
                 </select>
@@ -402,6 +425,20 @@ const Search: React.FC = () => {
                     Next 2 months ({getTwoMonthsAheadName()})
                   </option>
                 </select>
+              </div>
+              {/* Time Filter */}
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-2">Select Time</h3>
+                <label htmlFor="time" className="sr-only">
+                  Select Time
+                </label>
+                <input
+                  id="time"
+                  type="time"
+                  value={selectedTime}
+                  onChange={(e) => setSelectedTime(e.target.value)}
+                  className="w-64 ml-4 border-gray-300 rounded-lg shadow-sm p-2 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                />
               </div>
             </div>
 

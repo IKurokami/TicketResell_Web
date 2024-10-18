@@ -5,13 +5,12 @@ namespace TicketResell.Services.Services.Crypto;
 
 public class CryptoService : ICryptoService
 {
-    private readonly string key = "qxdBfW31GnjfHG621DCSquug8bRiFy38";
+    private readonly string key = "qxdBfW31GnjfHG621DCSquug8bRiFy38xCjZdbOoqCo07wOQDc";
 
     public string Decrypt(string cipherText)
     {
-        var parts = cipherText.Split(':');
-        byte[] iv = Convert.FromHexString(parts[0]);
-        byte[] buffer = Convert.FromHexString(parts[1]);
+        byte[] iv = new byte[16];
+        byte[] buffer = Convert.FromBase64String(cipherText);
 
         using (Aes aes = Aes.Create())
         {

@@ -3,6 +3,7 @@ using Repositories.Core.Dtos.Ticket;
 using Repositories.Core.Entities;
 using Repositories.Core.Validators;
 using System.Net.Sockets;
+using Repositories.Core.Dtos.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Tickets;
