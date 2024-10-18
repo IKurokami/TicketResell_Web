@@ -560,7 +560,7 @@ const AddTicketModal: React.FC = () => {
             value={formData.cost}
             onChange={handleChange}
             margin="normal"
-            type="string"
+            type="number"
             required
           />
           {/* Location (Province, District, Ward) */}
