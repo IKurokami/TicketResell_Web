@@ -88,3 +88,18 @@ export const getCategoryNames = (ticket: Ticket): string => {
 
   return categories.map((category) => category.name).join(", ");
 };
+export const fetchTicketsBySeller = async (): Promise<Ticket[]> => {
+  try {
+    const response = await fetch(`${baseUrl}/api/Ticket/readbySellerId`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("Ticket fetch: ", data.data);
+    const tickets = await convertToTickets(data.data);
+    return tickets;
+  } catch (error) {
+    console.error("Error fetching tickets:", error);
+    return [];
+  }
+};

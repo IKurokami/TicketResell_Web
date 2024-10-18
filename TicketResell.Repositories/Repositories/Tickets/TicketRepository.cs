@@ -112,8 +112,17 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         {
             throw new KeyNotFoundException("Ticket not found");
         }
+        var uniqueTicketIds = tickets
+            .Select(t => t.TicketId.Split('_')[0]) // Get the base ticket ID (split by '_')
+            .Distinct() // Ensure distinct base IDs
+            .ToList();
+        var filteredTickets = tickets
+        .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+        .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
+        .Select(g => g.First()) // Select the first instance of each group
+        .ToList();
 
-        return tickets;
+        return filteredTickets;
     }
 
     public async Task DeleteTicketAsync(string id)

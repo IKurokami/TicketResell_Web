@@ -30,7 +30,9 @@ namespace Repositories.Repositories
         {
             return await _context.OrderDetails.Where(od => od.Order != null && od.Order.BuyerId == userId)
                 .Include(od => od.Ticket)
-                .ThenInclude(t => t.Seller)
+                    .ThenInclude(t => t.Seller)
+                .Include(od => od.Ticket)
+                    .ThenInclude(t => t.Categories)
                 .ToListAsync();
         }
 

@@ -17,7 +17,7 @@ const Search: React.FC = () => {
   const cateName = searchParams?.get("cateName") || "";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [priceRange, setPriceRange] = useState(1000);
+  const [priceRange, setPriceRange] = useState(23000000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedDateFilter, setSelectedDateFilter] = useState("all");
