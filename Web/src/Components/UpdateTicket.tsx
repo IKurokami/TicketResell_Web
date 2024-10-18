@@ -217,7 +217,7 @@ const UpdateTicketModal: React.FC = () => {
   const fetchItems = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/ticket/readbyid/${id}`
+        `http://localhost:5296/api/ticket/readbybaseid/${id}`
       );
       const result = await response.json();
       console.log("Fetched Ticket Data:", result.data);

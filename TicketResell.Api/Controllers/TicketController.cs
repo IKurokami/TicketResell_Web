@@ -45,6 +45,8 @@ namespace TicketResell.Repositories.Controllers
             return ResponseParser.Result(response);
         }
 
+        
+        
         [HttpGet]
         [Route("readbySellerId/{id}")]
         public async Task<IActionResult> GetTicketBySellerId(string id)
@@ -119,6 +121,14 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketByIdAsync(id);
             return ResponseParser.Result(response);
         }
+        
+        [HttpGet]
+        [Route("readbybaseid/{id}")]
+        public async Task<IActionResult> GetTicketBaseById(string id)
+        {
+            var response = await _ticketService.GetTicketByBaseIdAsync(id);
+            return ResponseParser.Result(response);
+        }
 
         [HttpGet]
         [Route("readcatebyid/{id}")]
@@ -164,21 +174,24 @@ namespace TicketResell.Repositories.Controllers
         }
         
         
+        
+        
+        
         [HttpPut]
         [Route("update/qr/{id}")]
         public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketQrDto dto)
         {
-            // if (!HttpContext.GetIsAuthenticated())
-            //     return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
 
-            // var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
-            // if (ticket != null)
-            // {
-            //     if (ticket.SellerId == HttpContext.GetUserId())
-                // {
+            var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
+            if (ticket != null)
+            {
+                if (ticket.SellerId == HttpContext.GetUserId())
+                {
                     return ResponseParser.Result(await _ticketService.UpdateQrTicketByIdAsync(id,dto));
-            //     }
-            // }
+                }
+            }
             
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
