@@ -151,6 +151,15 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Take(amount)
             .ToListAsync();
     }
+
+    public async Task<List<Ticket>> GetTicketsByOrderIdWithStatusAsync(string userId, int status)
+    {
+        _logger.LogInformation(status.ToString());
+        return await _context.Tickets
+            .Where(t => t.OrderDetails.Any(od => od.Order.BuyerId == userId && od.Order.Status == status))
+            .ToListAsync();
+    }
+
     public async Task<List<Ticket>> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange)
     {
         var now = DateTime.Now;
@@ -262,7 +271,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         return filteredTicketsByCategory;
     }
 
-    public async Task<List<Ticket>> GetTicketByListCateIdAsync(string [] categoriesId)
+    public async Task<List<Ticket>> GetTicketByListCateIdAsync(string[] categoriesId)
     {
         var tickets = await _context.Tickets.Include(t => t.Seller)
         .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category

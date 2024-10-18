@@ -11,7 +11,7 @@ public interface ITicketRepository : IRepository<Ticket>
     Task<List<Ticket>> GetTopTicketBySoldAmount(int amount);
     Task<List<Ticket>> GetTicketByDateAsync(DateTime date);
     Task CreateTicketAsync(Ticket ticket, List<string> categoryIds);
-
+    Task<List<Ticket>> GetTicketsByOrderIdWithStatusAsync(string userId, int status);
     Task<Boolean> CheckExist(string id);
 
     Task<List<Ticket>> GetTicketBySellerId(string id);
@@ -29,7 +29,7 @@ public interface ITicketRepository : IRepository<Ticket>
 
     Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId);
     Task<List<Ticket>> GetTicketNotByCateIdAsync(string[] categoriesId);
-    Task<List<Ticket>> GetTicketByListCateIdAsync(string [] categoriesId);
+    Task<List<Ticket>> GetTicketByListCateIdAsync(string[] categoriesId);
 
 }
 

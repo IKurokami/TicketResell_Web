@@ -159,7 +159,7 @@ namespace TicketResell.Repositories.Controllers
                     return ResponseParser.Result(await _ticketService.UpdateTicketAsync(id, dto));
                 }
             }
-            
+
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
 
@@ -184,9 +184,17 @@ namespace TicketResell.Repositories.Controllers
 
         [HttpPost]
         [Route("getByCate/{ticketid}")]
-        public async Task<IActionResult> GetTicketByCateId(string ticketid, [FromBody] string [] id)
+        public async Task<IActionResult> GetTicketByCateId(string ticketid, [FromBody] string[] id)
         {
             var response = await _ticketService.GetTicketByCategoryIdAsync(ticketid, id);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPost]
+        [Route("getByOrder")]
+        public async Task<IActionResult> GetTicketsByOrderIdWithStatusZero([FromBody] TicketOrderRequestDto dto)
+        {
+            var response = await _ticketService.GetTicketsByOrderIdWithStatusZeroAsync(dto.userId, dto.status);
             return ResponseParser.Result(response);
         }
 
