@@ -104,6 +104,29 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         await _context.Tickets.AddAsync(ticket);
     }
 
+    public async Task UpdateTicketAsync(string id, Ticket ticket, List<string> categoryIds)
+    {
+        var ticketUpdate = await _context.Tickets
+            .Include(t => t.Categories)
+            .FirstOrDefaultAsync(t => t.TicketId == id);
+        if (ticketUpdate != null)
+        {
+            ticketUpdate.Categories.Clear();
+        }
+        
+        
+        foreach (var x in categoryIds)
+        {
+            Category? category = await _context.Categories.FindAsync(x);
+            if (category != null)
+            {
+                ticket.Categories.Add(category);
+            }
+        }
+
+        _context.Tickets.Update(ticket);
+    }
+
     public async Task<bool> CheckExist(string id)
     {
         Ticket? ticket = await _context.Tickets.FindAsync(id);
@@ -122,8 +145,16 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         {
             throw new KeyNotFoundException("Ticket not found");
         }
-
-        return tickets;
+        var uniqueTicketIds = tickets
+            .Select(t => t.TicketId.Split('_')[0]) 
+            .Distinct() 
+            .ToList();
+        var filteredTicketsByCategory = tickets
+            .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+            .GroupBy(t => t.TicketId.Split('_')[0])
+            .Select(g => g.First())
+            .ToList();
+        return filteredTicketsByCategory;
     }
 
     public async Task DeleteTicketAsync(string id)
@@ -216,7 +247,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<string> GetQrImageAsBase64Async(string ticketId)
     {
         var ticket = await _context.Tickets
-            .Where(t => t.TicketId == ticketId)
+            .Where(t => t.TicketId.StartsWith(ticketId))
             .Select(t => t.Qr)
             .FirstOrDefaultAsync();
 
@@ -234,6 +265,15 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         return count;
     }
 
+    public async Task<List<Ticket>> GetTicketsByBaseIdAsync(string baseId)
+    {
+        return await _context.Tickets
+            .Include(x=>x.Seller)
+            .Include(x=>x.Categories)
+            .Where(t => t.TicketId.StartsWith(baseId))
+            .ToListAsync();
+    }
+    
     public async Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId)
     {
         var tickets = await _context.Tickets

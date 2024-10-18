@@ -154,11 +154,36 @@ namespace TicketResell.Repositories.Controllers
             var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
             if (ticket != null)
             {
-                return ResponseParser.Result(await _ticketService.UpdateTicketAsync(id, dto));
+                if (ticket.SellerId == HttpContext.GetUserId())
+                {
+                    return ResponseParser.Result(await _ticketService.UpdateTicketsByBaseIdAsync(id, dto,dto.CategoriesId,true));
+                }
             }
             
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
+        
+        
+        [HttpPut]
+        [Route("update/qr/{id}")]
+        public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketQrDto dto)
+        {
+            // if (!HttpContext.GetIsAuthenticated())
+            //     return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
+
+            // var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
+            // if (ticket != null)
+            // {
+            //     if (ticket.SellerId == HttpContext.GetUserId())
+                // {
+                    return ResponseParser.Result(await _ticketService.UpdateQrTicketByIdAsync(id,dto));
+            //     }
+            // }
+            
+            return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
+        }
+        
+        
 
         [HttpDelete]
         [Route("delete/{id}")]

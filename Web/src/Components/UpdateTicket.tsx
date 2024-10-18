@@ -15,6 +15,7 @@ import Cookies from "js-cookie";
 import "@/Css/AddTicketModal.css";
 import { useParams } from "next/navigation";
 import { fetchImage } from "@/models/FetchImage";
+import { deleteImage } from "@/models/Deleteimage";
 
 interface Province {
   Id: number;
@@ -83,6 +84,7 @@ const UpdateTicketModal: React.FC = () => {
   const [selectedDistrict, setSelectedDistrict] = useState<number | null>(null);
   const [selectedWard, setSelectedWard] = useState<number | null>(null);
   const [minDateTime, setMinDateTime] = useState("");
+  const [imageId, setImageId] = useState<string>("");
 
   const toDateTimeLocalFormat = (date: string | Date): string => {
     const d = new Date(date);
@@ -188,7 +190,6 @@ const UpdateTicketModal: React.FC = () => {
     return ward ? ward.Name : "";
   };
 
-  // Generate full location string when province, district, and ward are selected
   useEffect(() => {
     if (selectedProvince && selectedDistrict && selectedWard) {
       const provinceName = getProvinceName(selectedProvince);
@@ -203,7 +204,6 @@ const UpdateTicketModal: React.FC = () => {
   }, [houseNumber, selectedProvince, selectedDistrict, selectedWard]);
 
   useEffect(() => {
-    // Function to format the current date and time to the 'datetime-local' format
     const getCurrentDateTime = () => {
       const now = new Date();
       return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
@@ -222,19 +222,22 @@ const UpdateTicketModal: React.FC = () => {
       const result = await response.json();
       console.log("Fetched Ticket Data:", result.data);
 
-      if (!result.data) {
+      if (!result.data || result.data.length === 0) {
         console.log("No data found");
         return;
       }
 
+      const firstTicket = result.data[0];
+
+      setImageId(firstTicket.image);
       // Format start date if available
-      const formattedDateForInput = result.data.startDate
-        ? toDateTimeLocalFormat(result.data.startDate)
+      const formattedDateForInput = firstTicket.startDate
+        ? toDateTimeLocalFormat(firstTicket.startDate)
         : null;
 
       // Split and extract location details
-      const locationParts = result.data.location
-        ? result.data.location.split(", ").map((part: string) => part.trim())
+      const locationParts = firstTicket.location
+        ? firstTicket.location.split(", ").map((part: string) => part.trim())
         : [];
       const houseNumber = locationParts[0] || "";
       const wardName = locationParts[1] || "";
@@ -243,38 +246,33 @@ const UpdateTicketModal: React.FC = () => {
 
       setHouseNumber(houseNumber);
 
-      let updatedQrFiles = [];
+      const updatedQrFiles: string[] = [];
 
-      if (Array.isArray(result.data.qrcode)) {
-        updatedQrFiles = result.data.qrcode.map((qrCode: string) => {
-          const mimeType = detectMimeType(qrCode);
-          return `data:${mimeType};base64,${qrCode}`;
-        });
-
-        console.log("Updated QR Files:", updatedQrFiles);
-      } else if (typeof result.data.qrcode === "string") {
-        const mimeType = detectMimeType(result.data.qrcode);
-        updatedQrFiles.push(`data:${mimeType};base64,${result.data.qrcode}`);
-
-        console.log("Updated QR Files (single):", updatedQrFiles);
-      } else {
-        console.log(
-          "No valid QR code found or qrcode is not in the expected format"
-        );
-      }
+      result.data.forEach((ticket: any) => {
+        if (Array.isArray(ticket.qrcode)) {
+          // If qrcode is an array, map over each QR code and push it to updatedQrFiles
+          ticket.qrcode.forEach((qrCode: string) => {
+            const mimeType = detectMimeType(qrCode);
+            updatedQrFiles.push(`data:${mimeType};base64,${qrCode}`);
+          });
+        } else if (typeof ticket.qrcode === "string") {
+          // If qrcode is a single string, push it to updatedQrFiles
+          const mimeType = detectMimeType(ticket.qrcode);
+          updatedQrFiles.push(`data:${mimeType};base64,${ticket.qrcode}`);
+        }
+      });
 
       setFormData((prevData) => ({
         ...prevData,
-        ...result.data,
+        ...firstTicket, 
         date: formattedDateForInput,
-        Qrcode: updatedQrFiles,
+        Qrcode: updatedQrFiles, 
       }));
 
       if (updatedQrFiles.length > 0) {
-        console.log("Updated QR Files:", updatedQrFiles);
         setQrFiles(updatedQrFiles);
       }
-
+      setQuantity(updatedQrFiles.length);
       // Fetch provinces
       const fetchedProvinces = await fetchProvinces();
       console.log("Fetched Provinces:", fetchedProvinces);
@@ -294,11 +292,11 @@ const UpdateTicketModal: React.FC = () => {
         )?.Id || null;
 
       if (selectedProv) {
-        // Fetch districts based on the selected province
+        
         const fetchedDistricts = await fetchDistricts(selectedProv);
 
         if (Array.isArray(fetchedDistricts)) {
-          // Find the selected district ID
+          
           const selectedDist =
             fetchedDistricts.find(
               (d) =>
@@ -307,11 +305,11 @@ const UpdateTicketModal: React.FC = () => {
             )?.Id || null;
 
           if (selectedDist) {
-            // Fetch wards based on the selected district
+            
             const fetchedWards = await fetchWards(selectedDist);
 
             if (Array.isArray(fetchedWards)) {
-              // Find the selected ward ID
+             
               const selectedWrd =
                 fetchedWards.find(
                   (w) =>
@@ -319,7 +317,7 @@ const UpdateTicketModal: React.FC = () => {
                     wardName.trim().toLowerCase()
                 )?.Id || null;
 
-              // Set selected province, district, and ward
+              
               setSelectedProvince(selectedProv);
               setSelectedDistrict(selectedDist);
               setSelectedWard(selectedWrd);
@@ -331,8 +329,8 @@ const UpdateTicketModal: React.FC = () => {
       }
 
       // Fetch and set the image if available
-      if (result.data.image) {
-        const { imageUrl, error } = await fetchImage(result.data.image);
+      if (firstTicket.image) {
+        const { imageUrl, error } = await fetchImage(firstTicket.image);
         if (imageUrl) {
           setFormData((prevData) => ({
             ...prevData,
@@ -342,6 +340,7 @@ const UpdateTicketModal: React.FC = () => {
           console.error(`Error fetching image for ticket: ${error}`);
         }
       }
+
     } catch (error) {
       console.error("Error fetching ticket items:", error);
     }
@@ -424,32 +423,41 @@ const UpdateTicketModal: React.FC = () => {
   ) => {
     if (event.target.files && event.target.files.length > 0) {
       const files = Array.from(event.target.files);
-      const newQrFiles = [...qrFiles];
-      const newQrFileNames = [...qrFileNames];
-
-      files.forEach((file, fileIndex) => {
-        const reader = new FileReader();
-
-        reader.onloadend = () => {
-          const targetIndex = index + fileIndex;
-
-          newQrFiles[targetIndex] = reader.result as string;
-          newQrFileNames[targetIndex] = file.name;
-
-          setQrFiles([...newQrFiles]);
-          setQrFileNames([...newQrFileNames]);
-
-          setFormData((prevData) => ({
-            ...prevData,
-            qr: newQrFiles,
-          }));
-        };
-
-        reader.readAsDataURL(file);
-      });
+      const newQrFiles = [...qrFiles]; // Copy existing QR files
+      const newQrFileNames = [...qrFileNames]; // Copy existing QR file names
+  
+      // Process each selected file
+      await Promise.all(
+        files.map((file, fileIndex) => {
+          return new Promise<void>((resolve) => { // Specify the return type as void
+            const reader = new FileReader();
+  
+            reader.onloadend = () => {
+              const targetIndex = index + fileIndex; // Calculate the target index
+  
+              newQrFiles[targetIndex] = reader.result as string; // Set the QR file data
+              newQrFileNames[targetIndex] = file.name; // Set the file name
+  
+              resolve(); // Resolve the promise when done
+            };
+  
+            reader.readAsDataURL(file); // Read the file
+          });
+        })
+      );
+  
+      // Update state after all files are processed
+      setQrFiles(newQrFiles);
+      setQrFileNames(newQrFileNames);
+  
+      // Update form data to reflect the new QR files
+      setFormData((prevData) => ({
+        ...prevData,
+        Qrcode: newQrFiles, // Assuming you're storing QR codes in this field
+      }));
     }
   };
-
+  
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(newQuantity);
 
@@ -472,6 +480,8 @@ const UpdateTicketModal: React.FC = () => {
 
   const handleSave = async () => {
     const sellerId = Cookies.get("id");
+
+    // Validate required fields
     if (
       !formData.name ||
       !formData.cost ||
@@ -485,101 +495,128 @@ const UpdateTicketModal: React.FC = () => {
       return;
     }
 
-    const generateTicketId = () => {
-      const randomNum = Math.floor(100 + Math.random() * 900);
-      return `TICKET${randomNum}`;
-    };
+    // Define the updateTickets function
+    const updateTickets = async () => {
+      const tickets = Array.from({ length: quantity }).map((_, index) => ({
+        TicketId: `${id}_${index+1}`, 
+        SellerId: sellerId,
+        Name: formData.name,
+        Cost: parseFloat(formData.cost),
+        Location: formData.location,
+        StartDate: new Date(formData.date),
+        Status: 1,
+        Image: id,
+        Qrcode: qrFiles[index] || formData.Qrcode[index], 
+        CategoriesId: formData.categories.map((category) => category.categoryId),
+        Description: formData.description,
+      }));
 
-    const checkTicketIdExist = async (ticketId: string) => {
-      const response = await fetch(
-        `http://localhost:5296/api/Ticket/checkexist/${ticketId}`
-      );
-      return response.status === 200;
-    };
+      console.log("ticket",tickets);
 
-    const createTickets = async () => {
-      let baseTicketId = generateTicketId();
-      let isValidId = await checkTicketIdExist(baseTicketId);
-
-      while (isValidId) {
-        baseTicketId = generateTicketId();
-        isValidId = await checkTicketIdExist(baseTicketId);
-      }
-
-      const tickets = Array.from({ length: quantity }).map((_, index) => {
-        let ticketId = baseTicketId;
-        if (quantity > 1) {
-          ticketId = `${baseTicketId}_${index + 1}`;
-        }
-
-        return {
-          TicketId: ticketId,
-          SellerId: sellerId,
-          Name: formData.name,
-          Cost: parseFloat(formData.cost),
-          Location: formData.location,
-          StartDate: new Date(formData.date),
-          Status: 1,
-          Image: baseTicketId,
-          Qrcode: qrFiles[index],
-          CategoriesId: formData.categories.map(
-            (category) => category.categoryId
-          ),
-          Description: formData.description,
-        };
+      const ticketsToUpdate = tickets.filter((ticket, index) => {
+        const shouldUpdate = qrFiles[index] && qrFiles[index] !== formData.Qrcode[index];
+        console.log(`Ticket ${ticket.TicketId} should update: ${shouldUpdate}`);
+        return shouldUpdate;
       });
+      
 
-      console.log(tickets);
+      const updateQrPromises = ticketsToUpdate.map(async (ticket) => {
+        try {
+          const response = await fetch(
+            `http://localhost:5296/api/Ticket/update/qr/${ticket.TicketId}`,
+            {
+              method: "PUT",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ Qrcode: ticket.Qrcode }), // Send only the updated QR
+            }
+          );
+  
+          if (!response.ok) {
+            throw new Error(`Failed to update QR code for ticket ${ticket.TicketId}: ${response.statusText}`);
+          }
+  
+          return await response.json(); // Return response data if needed
+        } catch (error) {
+          console.error("Error updating QR code:", error);
+          return null; // Handle errors
+        }
+      });
+  
 
-      const uploadImagePromises = tickets.map((ticket) => {
-        const formData = new FormData();
-        formData.append("id", ticket.Image);
-        formData.append("image", selectedFile as Blob);
-        return fetch("/api/uploadImage", {
-          method: "POST",
-          body: formData,
-        });
+      // Update images first
+      const updateImagePromises = tickets.map(async () => {
+        const deleteImageResult = await deleteImage(id);
+        if (deleteImageResult) {
+          const formData = new FormData();
+          formData.append("id", id);
+          formData.append("image", selectedFile as Blob);
+
+          try {
+            const response = await fetch("/api/uploadImage", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              throw new Error(`Error uploading image: ${response.statusText}`);
+            }
+
+            return response.json(); // Return the response data
+          } catch (error) {
+            console.error("Error during image update:", error);
+            return null; // Handle the error
+          }
+        }
+        return null; // Return null if the image was not deleted
       });
 
       try {
-        await Promise.all(uploadImagePromises);
-        console.log("Images uploaded successfully (simulated).");
 
-        const createTicketPromises = tickets.map(async (ticket) => {
-          await fetch("http://localhost:5296/api/Ticket/create", {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(ticket),
-          });
+        await Promise.all(updateImagePromises);
+        console.log("Images updated successfully.");
+
+        await Promise.all(updateQrPromises);
+        console.log("QR codes updated successfully.");
+
+        // Now update the tickets
+        const updateTicketPromises = tickets.map(async (ticket) => {
+          const response = await fetch(
+            `http://localhost:5296/api/Ticket/update/${id}`,
+            {
+              method: "PUT",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(ticket),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to update ticket ${ticket.TicketId}: ${response.statusText}`
+            );
+          }
+
+          return await response.json();
         });
 
-        await Promise.all(createTicketPromises);
-        console.log("Tickets created successfully.");
+        await Promise.all(updateTicketPromises);
+        console.log("Tickets updated successfully.");
       } catch (error) {
-        console.error("Error creating tickets or uploading images:", error);
+        console.error("Error updating tickets or images:", error);
       }
-      setFormData(initialFormData);
-      setSelectedFile(null);
-      setQrFiles([]);
-      setQuantity(1);
-      setQrFileNames([]);
-      setImagePreview(null);
     };
-    await createTickets();
-    router.push("/sell");
-    window.location.href = "/sell";
+
+    await updateTickets();
+    // router.push("/sell");
+    // window.location.href = "/sell"; 
   };
 
   const handleCancel = () => {
-    setFormData(initialFormData);
-    setSelectedFile(null);
-    setQrFiles([]);
-    setQuantity(1);
-    setQrFileNames([]);
-    setImagePreview(null);
     router.push("/sell");
   };
 
@@ -598,6 +635,7 @@ const UpdateTicketModal: React.FC = () => {
             type="number"
             margin="normal"
             inputProps={{ min: 1 }}
+            disabled
           />
 
           {/* File input for image */}
@@ -719,7 +757,8 @@ const UpdateTicketModal: React.FC = () => {
             value={formData.cost}
             onChange={handleChange}
             margin="normal"
-            type="string"
+            type="number"
+            inputProps={{ min: 1 }}
             required
           />
           {/* Location (Province, District, Ward) */}

@@ -65,7 +65,7 @@ const Search: React.FC = () => {
       setUniqueCities(uniqueCitiesList);
     };
 
-    let searchData = localStorage.getItem("searchData");
+    const searchData = localStorage.getItem("searchData");
     if (searchData) setSearchTerm(searchData);
     loadTickets();
 
