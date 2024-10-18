@@ -172,15 +172,15 @@ namespace TicketResell.Services.Services
         public async Task<ResponseModel> GetTicketByIdAsync(string id)
         {
             
-            var tickets = await _unitOfWork.TicketRepository.GetTicketsByBaseIdAsync(id);
+            var tickets = await _unitOfWork.TicketRepository.GetByIdAsync(id);
             var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
-            int index = 0;
-            foreach (var ticket in tickets)
-            {
-                if (ticket.Qr!= null)
-                ticketDtos[index].Qrcode = Convert.ToBase64String(ticket.Qr);
-                index++;
-            }
+            // int index = 0;
+            // foreach (var ticket in tickets)
+            // {
+            //     if (ticket.Qr!= null)
+            //     ticketDtos[index].Qrcode = Convert.ToBase64String(ticket.Qr);
+            //     index++;
+            // }
             
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
