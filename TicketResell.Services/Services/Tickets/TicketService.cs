@@ -123,6 +123,22 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket: {ticketDtos}", ticketDtos);
         }
 
+        public async Task<ResponseModel> GetTicketsByOrderIdWithStatusZeroAsync(string userId, int status)
+        {
+
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsByOrderIdWithStatusAsync(userId, status);
+
+            if (tickets == null || !tickets.Any())
+            {
+                return ResponseModel.Error($"No tickets found for orders with status zero.");
+            }
+
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully retrieved tickets for orders with status zero.", ticketDtos);
+
+        }
+
+
         public async Task<ResponseModel> GetTopTicket(int amount)
         {
             var ticket = await _unitOfWork.TicketRepository.GetTopTicketBySoldAmount(amount);
@@ -171,17 +187,10 @@ namespace TicketResell.Services.Services
 
         public async Task<ResponseModel> GetTicketByIdAsync(string id)
         {
-            
+
             var tickets = await _unitOfWork.TicketRepository.GetByIdAsync(id);
-            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
-            // int index = 0;
-            // foreach (var ticket in tickets)
-            // {
-            //     if (ticket.Qr!= null)
-            //     ticketDtos[index].Qrcode = Convert.ToBase64String(ticket.Qr);
-            //     index++;
-            // }
-            
+            var ticketDtos = _mapper.Map<TicketReadDto>(tickets);
+
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
         }
 

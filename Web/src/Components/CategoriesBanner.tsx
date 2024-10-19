@@ -1,10 +1,23 @@
 "use client";
-import React, { useState, useEffect } from "react";
-
-const HorizontalCards = () => {
+import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
+const HorizontalCards = ({ categoryId, title }) => {
   const [cardsData, setCardsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [visibleCards, setVisibleCards] = useState(5);
+  const sliderRef = useRef(null);
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [visibleCards]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,7 +29,7 @@ const HorizontalCards = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(["CAT001"]),
+            body: JSON.stringify([categoryId]),
           }
         );
         if (!response.ok) {
@@ -34,15 +47,66 @@ const HorizontalCards = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCards(1);
+      } else if (window.innerWidth < 768) {
+        setVisibleCards(2);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCards(3);
+      } else if (window.innerWidth < 1280) {
+        setVisibleCards(4);
+      } else {
+        setVisibleCards(5);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const slideLeft = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? cardsData.length - visibleCards : prevIndex - 1
+    );
+    setTimeout(() => setIsAnimating(false), 300);
+  };
+
+  const slideRight = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prevIndex) =>
+      prevIndex === cardsData.length - visibleCards ? 0 : prevIndex + 1
+    );
+    setTimeout(() => setIsAnimating(false), 300);
+  };
+
+  const getVisibleCards = () => {
+    if (cardsData.length <= visibleCards) return cardsData;
+
+    const visibleCardsArray = [];
+    for (let i = 0; i < visibleCards; i++) {
+      const index = (currentIndex + i) % cardsData.length;
+      visibleCardsArray.push(cardsData[index]);
+    }
+    return visibleCardsArray;
+  };
+
   if (isLoading) return <div className="text-center py-8">Loading...</div>;
   if (error)
     return <div className="text-center py-8 text-red-500">Error: {error}</div>;
 
+  const visibleCardsData = getVisibleCards();
+
   return (
-    <div className="w-full min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
+    <div className="w-full h-[70vh] bg-white-50 py-8">
+      <div className="container pd-5">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Featured Events
+          {title}
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
