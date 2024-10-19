@@ -16,11 +16,16 @@ namespace Repositories.Repositories
             _logger = logger;
         }
 
+        public async Task<List<Order>> GetAllAsync()
+        {
+            return await _context.Orders.Include(o => o.OrderDetails).ToListAsync();
+        }
 
         public async Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId)
         {
             return await _context.Orders
                 .Where(o => o != null && o.BuyerId == buyerId)
+                .Include(o => o.OrderDetails)
                 .ToListAsync();
         }
 
@@ -28,6 +33,7 @@ namespace Repositories.Repositories
         {
             return await _context.Orders
                 .Where(o => o != null && o.Date >= dateRange.StartDate && o.Date <= dateRange.EndDate)
+                .Include(o => o.OrderDetails)
                 .ToListAsync();
         }
 
@@ -35,6 +41,7 @@ namespace Repositories.Repositories
         {
             return await _context.Orders
                 .Where(o => o != null && o.Total >= priceDoubleRange.Min && o.Total <= priceDoubleRange.Max)
+                .Include(o => o.OrderDetails)
                 .ToListAsync();
         }
 
