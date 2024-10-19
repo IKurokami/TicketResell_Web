@@ -50,7 +50,7 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> GetAllOrders()
     {
-        var orders = await _unitOfWork.OrderRepository.GetAllAsync();
+        var orders = _mapper.Map<List<OrderDto>>(await _unitOfWork.OrderRepository.GetAllAsync());
         return ResponseModel.Success($"Successfully get all order", orders);
     }
 
