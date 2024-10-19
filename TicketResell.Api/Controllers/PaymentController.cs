@@ -11,22 +11,33 @@ namespace Api.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IMomoService _momoService;
+        private readonly IVnpayService _vnpayService;
         private readonly IOrderService _orderService;
 
         public PaymentController(IServiceProvider serviceProvider)
         {
             _momoService = serviceProvider.GetRequiredService<IMomoService>();
             _orderService = serviceProvider.GetRequiredService<IOrderService>();
+            _vnpayService = serviceProvider.GetRequiredService<IVnpayService>();
         }
 
         [HttpPost("momo")]
-        public async Task<IActionResult> CreatePayment([FromBody] PaymentDto dto)
+        public async Task<IActionResult> CreatePaymentMomo([FromBody] PaymentDto dto)
         {
-
-
             var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
             double amount = (double)orderResponse.Data;
             var response = await _momoService.CreatePaymentAsync(dto, amount);
+
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPost("vnpay")]
+        public async Task<IActionResult> CreatePaymentVnpay([FromBody] PaymentDto dto)
+        {
+            var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
+
+            double amount = (double)orderResponse.Data;
+            var response = await _vnpayService.CreatePaymentAsync(dto, amount);
 
             return ResponseParser.Result(response);
         }

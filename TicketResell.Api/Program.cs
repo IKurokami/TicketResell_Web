@@ -27,6 +27,9 @@ builder.Services.Configure<AppConfig>(config =>
     config.MomoAccessKey = Environment.GetEnvironmentVariable("MOMO_ACCESS_KEY") ?? "default";
     config.MomoSecretKey = Environment.GetEnvironmentVariable("MOMO_SECRET_KEY") ?? "default";
     config.MomoApiUrl = Environment.GetEnvironmentVariable("MOMO_API_URL") ?? "https://test-payment.momo.vn/";
+    config.TmnCode = Environment.GetEnvironmentVariable("VNPAY_TMN_CODE") ?? "default";
+    config.HashSecret = Environment.GetEnvironmentVariable("VNPAY_HASH_SECRET") ?? "default";
+    config.VnpayApiUrl = Environment.GetEnvironmentVariable("VNPAY_API_URL") ?? "default";
 });
 builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
 
@@ -63,6 +66,7 @@ builder.Services.AddScoped<ISellConfigService, SellConfigService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddHttpClient<IMomoService, MomoService>();
+builder.Services.AddHttpClient<IVnpayService, VnpayService>();
 
 
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);
