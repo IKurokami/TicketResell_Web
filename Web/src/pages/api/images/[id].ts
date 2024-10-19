@@ -1,4 +1,3 @@
-// pages/api/images/[id].ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongoose";
 import { Schema, model, models, Model } from 'mongoose';
@@ -94,20 +93,26 @@ export default async function handler(
     
     if (req.method === "PUT") {
         try {
-            if (!req.body.image) {
+            // Check if the content type is multipart/form-data
+            if (!req.headers['content-type']?.startsWith('multipart/form-data')) {
+                return res.status(400).json({ message: "Content type must be multipart/form-data" });
+            }
+
+            // Use the built-in body parser to handle multipart form data
+            const data = await new Promise((resolve, reject) => {
+                const chunks: Buffer[] = [];
+                req.on('data', chunk => chunks.push(Buffer.from(chunk)));
+                req.on('end', () => resolve(Buffer.concat(chunks)));
+                req.on('error', reject);
+            });
+
+            if (!data) {
                 return res.status(400).json({ message: "Image data is required" });
             }
 
-            const imageBuffer = await new Promise<Buffer>((resolve, reject) => {
-                const chunks: Buffer[] = [];
-                req.body.image.on('data', (chunk: Buffer) => chunks.push(chunk));
-                req.body.image.on('end', () => resolve(Buffer.concat(chunks)));
-                req.body.image.on('error', reject);
-            });
-
             const updatedImage = await TicketImage.findOneAndUpdate(
                 { id: id },
-                { image: imageBuffer },
+                { image: data },
                 { new: true } // Return the updated document
             );
 
@@ -126,6 +131,6 @@ export default async function handler(
     }
 
     // If the method is not allowed
-    res.setHeader("Allow", ["GET", "DELETE"]);
+    res.setHeader("Allow", ["GET", "DELETE", "PUT"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
 }
