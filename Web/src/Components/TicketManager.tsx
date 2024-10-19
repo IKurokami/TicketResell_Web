@@ -203,7 +203,8 @@ const TicketManager: React.FC<TicketListProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-32">
+    <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-24">
+      {" "}
       {/* Header */}
       <div className="p-4">
         <div className="flex flex-col md:flex-row items-center justify-between mb-4">
@@ -252,16 +253,16 @@ const TicketManager: React.FC<TicketListProps> = ({
             </div>
           </div>
         </div>
-      </div>  
-
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 auto-rows-fr">
         {paginatedTickets.map((ticket) => (
           <div
             key={ticket.ticketId}
-            className="relative border border-gray-200 rounded-lg shadow-md overflow-hidden min-w-[250px]"
+            className="relative border border-gray-200 rounded-lg shadow-md overflow-hidden flex flex-col"
           >
             {/* Conditionally Render Edit/Delete or Active Icon */}
-            <div className="absolute bottom-2 right-2 flex flex-col space-y-1">
+            <div className="absolute bottom-2 right-2 flex flex-col space-y-1 z-10">
+              {" "}
               {ticket.status === 1 ? (
                 <button
                   onClick={() => onDelete(ticket.ticketId)}
@@ -289,20 +290,26 @@ const TicketManager: React.FC<TicketListProps> = ({
             />
 
             {/* Ticket Information */}
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-bold">
-                  {truncateText(ticket.name, 20)}
-                </h2>
-                {getStatusBadge(ticket.status)}
+            <div className="p-4 flex-grow flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="text-lg font-bold truncate mr-2 flex-grow">
+                    {ticket.name}
+                  </h2>
+                  <div className="flex-shrink-0">
+                    {getStatusBadge(ticket.status)}
+                  </div>
+                </div>
+                <p className="text-xl font-bold mb-2">
+                  {formatVND(ticket.cost)}
+                </p>
+                <p className="text-sm text-gray-600 mb-1">
+                  {truncateText(ticket.location, 20)}
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  Date: {formatDate(ticket.startDate)}
+                </p>
               </div>
-              <p className="text-xl font-bold mb-2">{formatVND(ticket.cost)}</p>
-              <p className="text-sm text-gray-600 mb-1">
-                {truncateText(ticket.location, 20)}
-              </p>
-              <p className="text-sm text-gray-600 mb-4">
-                Date: {formatDate(ticket.startDate)}
-              </p>
               <div className="flex flex-wrap gap-2">
                 {getCategoryNames(ticket)
                   .split(",")
@@ -326,7 +333,6 @@ const TicketManager: React.FC<TicketListProps> = ({
           </div>
         ))}
       </div>
-
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-8">
