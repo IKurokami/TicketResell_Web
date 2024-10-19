@@ -6,16 +6,18 @@ import { FaGoogle, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 import { useSession, signIn } from "next-auth/react";
-import { getOTP } from '@/pages/api/getOTP';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { getOTP } from "@/pages/api/getOTP";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 };
 
-const InputField: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { icon: React.ReactNode }> = ({ icon, ...props }) => (
+const InputField: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement> & { icon: React.ReactNode }
+> = ({ icon, ...props }) => (
   <div className="relative mt-5">
     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
       {icon}
@@ -27,7 +29,10 @@ const InputField: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { icon:
   </div>
 );
 
-const ActionButton: React.FC<{ children: React.ReactNode; onClick?: () => void; }> = ({ children, onClick }) => (
+const ActionButton: React.FC<{
+  children: React.ReactNode;
+  onClick?: () => void;
+}> = ({ children, onClick }) => (
   <motion.button
     className="w-full px-4 py-4 mt-6 font-bold text-white bg-green-500 rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition-all"
     onClick={onClick}
@@ -46,7 +51,9 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(null);
+  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(
+    null
+  );
   const router = useRouter();
   const [rememberMe, setRememberMe] = useState(false);
   const [otp, setOtp] = useState<number | null>(null);
@@ -198,7 +205,9 @@ const Login: React.FC = () => {
       if (response.success) {
         setOtpSent(true);
         setTimer(300);
-        notifySuccess("Một mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập mã bên dưới.");
+        notifySuccess(
+          "Một mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập mã bên dưới."
+        );
       } else {
         notifyError("Gửi OTP thất bại. Vui lòng thử lại.");
       }
@@ -215,10 +224,10 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/getOTP', {
-        method: 'POST',
+      const response = await fetch("/api/getOTP", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username: username,
@@ -265,13 +274,21 @@ const Login: React.FC = () => {
           </div>
           <div className="flex mb-0">
             <button
-              className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "login" ? "text-white bg-green-500" : "text-gray-600 bg-transparent"} rounded-l-3xl`}
+              className={`w-full py-4 text-lg font-bold transition-all ${
+                activeTab === "login"
+                  ? "text-white bg-green-500"
+                  : "text-gray-600 bg-transparent"
+              } rounded-l-3xl`}
               onClick={() => setActiveTab("login")}
             >
               Đăng Nhập
             </button>
             <button
-              className={`w-full py-4 text-lg font-bold transition-all ${activeTab === "register" ? "text-white bg-green-500" : "text-gray-600 bg-transparent"} rounded-r-3xl`}
+              className={`w-full py-4 text-lg font-bold transition-all ${
+                activeTab === "register"
+                  ? "text-white bg-green-500"
+                  : "text-gray-600 bg-transparent"
+              } rounded-r-3xl`}
               onClick={() => setActiveTab("register")}
             >
               Đăng Ký
@@ -312,7 +329,10 @@ const Login: React.FC = () => {
                       Ghi nhớ tôi
                     </label>
                   </div>
-                  <label htmlFor="forgot" className="text-gray-600 cursor-pointer">
+                  <label
+                    htmlFor="forgot"
+                    className="text-gray-600 cursor-pointer"
+                  >
                     Quên mật khẩu?
                   </label>
                 </div>

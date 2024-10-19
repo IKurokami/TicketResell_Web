@@ -4,8 +4,8 @@ import crypto from 'crypto';
 const partnerCode = "MOMONPMB20210629";
 const accessKey = "Q2XhhSdgpKUlQ4Ky";
 const secretKey = "k6B53GQKSjktZGJBK2MyrDa7w9S6RyCf";
-const ipnUrl = "http://localhost:3000";
-const redirectUrl = "http://localhost:3000";
+const ipnUrl = process.env.BASE_URL + "/payment-return?method=momo";
+const redirectUrl = process.env.BASE_URL + "/payment-return?method=momo";
 const orderInfo = "Demo tích hợp SDK MOMO";
 const extraData = "eyJ1c2VybmFtZSI6ICJtb21vIn0=";
 

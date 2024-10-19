@@ -12,12 +12,26 @@ using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Categories;
 using TicketResell.Services.Services.Tickets;
-using TicketResell.Services.Services.Categories;
 using TicketResell.Repositories.Logger;
+using TicketResell.Services.Services.Payments;
+using Repositories.Config;
 
 Env.Load();
-
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<AppConfig>(config =>
+{
+    config.SQLServer = Environment.GetEnvironmentVariable("SQLSERVER") ?? "default";
+    config.BaseUrl = Environment.GetEnvironmentVariable("BASE_URL") ?? "http://localhost:3000";
+    config.MomoPartnerCode = Environment.GetEnvironmentVariable("MOMO_PARTNER_CODE") ?? "default";
+    config.MomoAccessKey = Environment.GetEnvironmentVariable("MOMO_ACCESS_KEY") ?? "default";
+    config.MomoSecretKey = Environment.GetEnvironmentVariable("MOMO_SECRET_KEY") ?? "default";
+    config.MomoApiUrl = Environment.GetEnvironmentVariable("MOMO_API_URL") ?? "https://test-payment.momo.vn/";
+});
+builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
+
+
+
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", Environment.GetEnvironmentVariable("SQLServer"));
 
 
@@ -48,6 +62,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ISellConfigService, SellConfigService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddHttpClient<IMomoService, MomoService>();
 
 
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);

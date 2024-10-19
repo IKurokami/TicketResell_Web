@@ -156,14 +156,14 @@ namespace TicketResell.Repositories.Controllers
             {
                 if (ticket.SellerId == HttpContext.GetUserId())
                 {
-                    return ResponseParser.Result(await _ticketService.UpdateTicketsByBaseIdAsync(id, dto,dto.CategoriesId,true));
+                    return ResponseParser.Result(await _ticketService.UpdateTicketsByBaseIdAsync(id, dto, dto.CategoriesId, true));
                 }
             }
 
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
-        
-        
+
+
         [HttpPut]
         [Route("update/qr/{id}")]
         public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketQrDto dto)
@@ -175,15 +175,15 @@ namespace TicketResell.Repositories.Controllers
             // if (ticket != null)
             // {
             //     if (ticket.SellerId == HttpContext.GetUserId())
-                // {
-                    return ResponseParser.Result(await _ticketService.UpdateQrTicketByIdAsync(id,dto));
+            // {
+            return ResponseParser.Result(await _ticketService.UpdateQrTicketByIdAsync(id, dto));
             //     }
             // }
-            
+
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
-        
-        
+
+
 
         [HttpDelete]
         [Route("delete/{id}")]
@@ -219,7 +219,7 @@ namespace TicketResell.Repositories.Controllers
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view orders"));
             string userId = HttpContext.GetUserId();
-            if (HttpContext.IsUserIdAuthenticated(userId))
+            if (!HttpContext.IsUserIdAuthenticated(userId))
                 return ResponseParser.Result(ResponseModel.Unauthorized("Access denied: You cannot access this"));
             var response = await _ticketService.GetTicketsByOrderIdWithStatusZeroAsync(userId, status);
             return ResponseParser.Result(response);
