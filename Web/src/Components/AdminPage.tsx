@@ -238,6 +238,15 @@ const AdminPage = () => {
             onAdd={handleCategoryAdd}
           />
         );
+      case "Orders":
+        return (
+          <CategoryManager
+            categories={categories}
+            onEdit={handleCategoryEdit}
+            onDelete={handleCategoryDelete}
+            onAdd={handleCategoryAdd}
+          />
+        );
       default:
         return <div>{activeTab} content goes here</div>;
     }
