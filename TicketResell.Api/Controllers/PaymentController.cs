@@ -13,12 +13,14 @@ namespace Api.Controllers
         private readonly IMomoService _momoService;
         private readonly IVnpayService _vnpayService;
         private readonly IOrderService _orderService;
+        private readonly IPaypalService _paypalService;
 
         public PaymentController(IServiceProvider serviceProvider)
         {
             _momoService = serviceProvider.GetRequiredService<IMomoService>();
             _orderService = serviceProvider.GetRequiredService<IOrderService>();
             _vnpayService = serviceProvider.GetRequiredService<IVnpayService>();
+            _paypalService = serviceProvider.GetRequiredService<IPaypalService>();
         }
 
         [HttpPost("momo")]
@@ -38,6 +40,17 @@ namespace Api.Controllers
 
             double amount = (double)orderResponse.Data;
             var response = await _vnpayService.CreatePaymentAsync(dto, amount);
+
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPost("paypal")]
+        public async Task<IActionResult> CreatePaymentPaypal([FromBody] PaymentDto dto)
+        {
+            var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
+
+            double amount = (double)orderResponse.Data;
+            var response = await _paypalService.CreatePaymentAsync(dto, amount);
 
             return ResponseParser.Result(response);
         }

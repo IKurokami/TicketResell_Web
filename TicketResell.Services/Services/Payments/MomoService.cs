@@ -1,11 +1,8 @@
 using AutoMapper;
 using Microsoft.Extensions.Options;
 using Repositories.Core.Dtos.Payment;
-using Repositories.Core.Helper;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using TicketResell.Repositories.UnitOfWork;
 using System.Net.Http.Json;
 using TicketResell.Services.Services.Payments;

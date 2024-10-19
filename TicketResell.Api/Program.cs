@@ -30,6 +30,9 @@ builder.Services.Configure<AppConfig>(config =>
     config.TmnCode = Environment.GetEnvironmentVariable("VNPAY_TMN_CODE") ?? "default";
     config.HashSecret = Environment.GetEnvironmentVariable("VNPAY_HASH_SECRET") ?? "default";
     config.VnpayApiUrl = Environment.GetEnvironmentVariable("VNPAY_API_URL") ?? "default";
+    config.PayPalClientId = Environment.GetEnvironmentVariable("PAYPAL_CLIENT_ID") ?? "default";
+    config.PayPalSecret = Environment.GetEnvironmentVariable("PAYPAL_SECRET") ?? "default";
+    config.PayPalApiUrl = Environment.GetEnvironmentVariable("PAYPAL_API_URL") ?? "https://api-m.sandbox.paypal.com";
 });
 builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
 
@@ -67,6 +70,7 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddHttpClient<IMomoService, MomoService>();
 builder.Services.AddHttpClient<IVnpayService, VnpayService>();
+builder.Services.AddHttpClient<IPaypalService, PaypalService>();
 
 
 builder.Services.AddSingleton<IServiceProvider>(provider => provider);

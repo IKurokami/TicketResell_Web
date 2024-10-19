@@ -20,6 +20,11 @@ namespace Repositories.Config
         public string HashSecret { get; set; } = null!;
         public string VnpayApiUrl { get; set; } = null!;
 
+
+        //Paypal
+        public string PayPalClientId { get; set; } = null!;
+        public string PayPalSecret { get; set; } = null!;
+        public string PayPalApiUrl { get; set; } = null!;
     }
 
 }
