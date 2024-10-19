@@ -576,7 +576,6 @@ const SellerShop = () => {
                   </span>
                 </div>
               </div>
-              ``
               {/* Center: Search input */}
               <div className="relative flex-grow mx-2 max-w-xl md:mb-0 w-full md:w-auto">
                 <input
