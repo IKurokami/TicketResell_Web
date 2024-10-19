@@ -80,7 +80,7 @@ const TicketDetail = () => {
   const fetchRemainingByID = async (id: string | null) => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Ticket/count/${id}`,
+        `http://localhost:5296/api/Ticket/count/${baseId}`,
         {
           method: "GET",
         }
@@ -143,7 +143,12 @@ const TicketDetail = () => {
       }
     }
   };
-
+  const formatVND = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
   useEffect(() => {
     const loadresult = async () => {
       console.log("Fetched ID:", id);
@@ -179,7 +184,7 @@ const TicketDetail = () => {
               timeZone: "Asia/Ho_Chi_Minh",
             }),
             author: result.data.seller,
-            location: `Event at ${result.data.location}`,
+            location: `${result.data.location}`,
             cost: result.data.cost,
             description: result.data.description,
             categories: result.data.categories.map((category: any) => ({
@@ -296,7 +301,7 @@ const TicketDetail = () => {
             <div className="bg-white rounded-lg px-4 py-[3vh] ticket--price--block ">
               <p className="flex items-center space-x-2 text-2xl lg:text-[2.5vw] font-bold text-green-600 ">
                 <FontAwesomeIcon icon={faTag} />
-                <span>{ticketresult.cost} VND</span>
+                <span>{formatVND(ticketresult.cost)}</span>
               </p>
               <div className="flex items-center space-x-[1vw] my-[1.5vw] lg:text-[1.5vw]">
                 <button

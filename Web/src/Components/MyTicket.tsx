@@ -1,17 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import DateFilter from '@/Components/datefilter'; // Đường dẫn đến file chứa DateFilter
+import DateFilter from "@/Components/datefilter"; // Đường dẫn đến file chứa DateFilter
 import { fetchImage } from "@/models/FetchImage";
 import Cookies from "js-cookie";
 import { QRCodeCanvas } from "qrcode.react"; // Import QRCode
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
-
-
 // Custom icon components
-
-
 
 const IconSearch = () => (
   <svg
@@ -59,7 +55,8 @@ const MyTicketsPage = () => {
         if (response.ok) {
           const transformedOrders = await Promise.all(
             result.data.map(async (order: any, index: number) => {
-              let image = 'https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451';
+              let image =
+                "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/8932451";
 
               if (order.ticket.image) {
                 const { imageUrl: fetchedImageUrl, error } = await fetchImage(
@@ -78,34 +75,35 @@ const MyTicketsPage = () => {
               return {
                 id: index + 1,
                 ticket: order.ticket.name,
-                status: new Date(order.ticket.startDate) > new Date() ? "Sắp Diễn Ra" : "Đã Hết Hạn", // Compare startDate with current date
+                status:
+                  new Date(order.ticket.startDate) > new Date()
+                    ? "Sắp Diễn Ra"
+                    : "Đã Hết Hạn", // Compare startDate with current date
                 date: new Date(order.ticket.startDate).toLocaleString(), // Formatting the date
                 totalprice: `${order.price * order.quantity} VND`, // Calculating the total price
                 seller: order.ticket.seller.fullname,
                 quantity: order.quantity,
                 imgURL: image, // Placeholder image URL
                 Categorys: order.ticket.Categorys || [], // Giá trị mặc định nếu không có Categorys
-                location: order.ticket.location || 'Unknown', // Add the location field
+                location: order.ticket.location || "Unknown", // Add the location field
               };
-
             })
           );
 
           setOrders(transformedOrders);
         } else {
-          console.error('Failed to fetch orders:', result.message);
+          console.error("Failed to fetch orders:", result.message);
         }
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error("Error fetching orders:", error);
       }
     };
 
     fetchOrders();
   }, []);
 
-
   const handleNavigation = () => {
-    router.push('/search'); // Navigate to the /search page
+    router.push("/search"); // Navigate to the /search page
   };
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -136,7 +134,6 @@ const MyTicketsPage = () => {
     setSelectedTicket(null); // Clear the selected ticket
   };
 
-
   const [selectedDate, setSelectedDate] = useState(""); // Thêm trạng thái cho bộ lọc ngày
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
@@ -150,15 +147,15 @@ const MyTicketsPage = () => {
     const matchesSearch = order.ticket
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesDate =
-      !selectedDate || order.date.startsWith(selectedDate); // So khớp theo ngày
+    const matchesDate = !selectedDate || order.date.startsWith(selectedDate); // So khớp theo ngày
 
     return matchesCategory && matchesStatus && matchesSearch && matchesDate;
   });
 
   return (
     <div className="mt-24 min-h-screen w-full bg-gray-50 py-12 px-6 sm:px-8 lg:px-12">
-      <h1 className="text-4xl font-bold mb-8 text-gray-900">Danh Sách Vé Của Tôi
+      <h1 className="text-4xl font-bold mb-8 text-gray-900">
+        Danh Sách Vé Của Tôi
       </h1>
 
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
@@ -175,8 +172,6 @@ const MyTicketsPage = () => {
           </div>
         </div>
 
-
-
         <div className="flex flex-wrap items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
           <div className="w-full sm:w-auto relative mt-4">
             <select
@@ -185,9 +180,9 @@ const MyTicketsPage = () => {
               className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300 appearance-none"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23000000'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E")`,
-                backgroundPosition: 'right 1rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.25rem', // Adjusted size for better visibility
+                backgroundPosition: "right 1rem center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "1.25rem", // Adjusted size for better visibility
               }}
             >
               <option value="All">Thể Loại</option>
@@ -196,7 +191,6 @@ const MyTicketsPage = () => {
               <option value="Horror">Kinh Dị</option>
               <option value="Romance">Tình Cảm</option>
               <option value="Musical">Âm Nhạc</option>
-
             </select>
           </div>
 
@@ -207,9 +201,9 @@ const MyTicketsPage = () => {
               className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300 appearance-none"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23000000'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E")`,
-                backgroundPosition: 'right 1rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.25rem', // Adjusted size for better visibility
+                backgroundPosition: "right 1rem center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "1.25rem", // Adjusted size for better visibility
               }}
             >
               <option value="All"> Trạng Thái</option>
@@ -218,9 +212,11 @@ const MyTicketsPage = () => {
             </select>
           </div>
 
-
           {/* Date Filter */}
-          <DateFilter selectedDate={selectedDate} onDateChange={handleDateChange} />
+          <DateFilter
+            selectedDate={selectedDate}
+            onDateChange={handleDateChange}
+          />
 
           {/* Reset Button */}
           <div className="w-full sm:w-auto">
@@ -237,8 +233,6 @@ const MyTicketsPage = () => {
             </button>
           </div>
         </div>
-
-
       </div>
 
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -255,13 +249,14 @@ const MyTicketsPage = () => {
             <div className="p-4">
               <h2 className="text-xl font-semibold mb-2">{order.ticket}</h2>
               <p
-                className={`text-sm mb-4 p-2 rounded-full w-auto h-auto flex items-center justify-center ${order.status === 'Sắp Diễn Ra'
-                  ? 'bg-blue-50 text-blue-500 font-bold'
-                  : order.status === 'Đã Hết Hạn'
-                    ? 'bg-red-50 text-red-500 font-bold'
-                    : 'bg-gray-100 text-gray-500'
-                  }`}
-                style={{ width: 'fit-content', height: 'fit-content' }} // Đảm bảo chiều rộng và chiều cao tự động theo nội dung
+                className={`text-sm mb-4 p-2 rounded-full w-auto h-auto flex items-center justify-center ${
+                  order.status === "Sắp Diễn Ra"
+                    ? "bg-blue-50 text-blue-500 font-bold"
+                    : order.status === "Đã Hết Hạn"
+                    ? "bg-red-50 text-red-500 font-bold"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+                style={{ width: "fit-content", height: "fit-content" }} // Đảm bảo chiều rộng và chiều cao tự động theo nội dung
               >
                 {order.status}
               </p>
@@ -291,13 +286,6 @@ const MyTicketsPage = () => {
                 </div>
               </div>
 
-
-
-
-
-
-
-
               <div className="flex items-center space-x-1">
                 {order.Categorys.map((Category: any, index: number) => (
                   <span
@@ -305,17 +293,20 @@ const MyTicketsPage = () => {
                     className="text-xs text-white bg-blue-600 px-2 py-1 rounded"
                   >
                     {Category}
-
                   </span>
-
                 ))}
               </div>
               <div className="mt-4 flex justify-between items-center">
-
-                <button onClick={() => handleShowQR(order)} className="w-50% bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow transition-colors duration-200">
+                <button
+                  onClick={() => handleShowQR(order)}
+                  className="w-50% bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow transition-colors duration-200"
+                >
                   Mã vé của bạn
                 </button>
-                <button onClick={() => handleShowDetail(order)} className="w-50% bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow transition-colors duration-200">
+                <button
+                  onClick={() => handleShowDetail(order)}
+                  className="w-50% bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow transition-colors duration-200"
+                >
                   Chi tiết
                 </button>
               </div>
@@ -350,8 +341,7 @@ const MyTicketsPage = () => {
             </p>
             {/* Google Map hiển thị dưới thông tin vé */}
             <div className="mb-4">
-              <LoadScript googleMapsApiKey= "AIzaSyDFmwUleiGh4WLHqClLPPu8OgQTuUIzfQY">
-                
+              <LoadScript googleMapsApiKey="AlzaSyZm3kzU9IJgXD3oBUdsCjTDiyxushApIYq">
                 <GoogleMap
                   mapContainerStyle={{ width: "100%", height: "350px" }}
                   center={{ lat: 10.762622, lng: 106.660172 }} // Tọa độ trung tâm (có thể thay đổi theo vị trí thực tế)
@@ -361,7 +351,6 @@ const MyTicketsPage = () => {
                 </GoogleMap>
               </LoadScript>
             </div>
-
           </div>
         </div>
       )}
@@ -382,8 +371,11 @@ const MyTicketsPage = () => {
 
             {/* Scrolling container for QR Codes */}
             <div
-              className={`flex flex-col items-center mb-4 ${selectedTicket.quantity === 1 ? 'max-h-none' : 'max-h-[300px] overflow-y-auto'
-                }`}
+              className={`flex flex-col items-center mb-4 ${
+                selectedTicket.quantity === 1
+                  ? "max-h-none"
+                  : "max-h-[300px] overflow-y-auto"
+              }`}
             >
               {Array.from({ length: selectedTicket.quantity }, (_, index) => (
                 <div key={index} className="mb-2">
@@ -399,9 +391,6 @@ const MyTicketsPage = () => {
         </div>
       )}
 
-
-
-
       <div className="text-center p-4">
         <h1 className="text-2xl font-bold text-gray-800 mb-4 mt-12">
           Bạn có muốn khám phá thêm những lựa chọn khác?
@@ -413,8 +402,6 @@ const MyTicketsPage = () => {
           Xem thêm vé
         </button>
       </div>
-
-
     </div>
   );
 };

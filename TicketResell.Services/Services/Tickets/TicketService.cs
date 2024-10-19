@@ -123,6 +123,22 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get ticket: {ticketDtos}", ticketDtos);
         }
 
+        public async Task<ResponseModel> GetTicketsByOrderIdWithStatusZeroAsync(string userId, int status)
+        {
+
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsByOrderIdWithStatusAsync(userId, status);
+
+            if (tickets == null || !tickets.Any())
+            {
+                return ResponseModel.Error($"No tickets found for orders with status zero.");
+            }
+
+            var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+            return ResponseModel.Success($"Successfully retrieved tickets for orders with status zero.", ticketDtos);
+
+        }
+
+
         public async Task<ResponseModel> GetTopTicket(int amount)
         {
             var ticket = await _unitOfWork.TicketRepository.GetTopTicketBySoldAmount(amount);
@@ -184,10 +200,11 @@ namespace TicketResell.Services.Services
         }
         
         
+        
         public async Task<ResponseModel> GetTicketByIdAsync(string id)
         {
             
-            var tickets = await _unitOfWork.TicketRepository.GetTicketsByBaseIdAsync(id);
+            var tickets = await _unitOfWork.TicketRepository.GetByIdAsync(id);
             var ticketDtos = _mapper.Map<TicketReadDto>(tickets);
             
             return ResponseModel.Success($"Successfully get ticket:{ticketDtos}", ticketDtos);
@@ -227,6 +244,20 @@ namespace TicketResell.Services.Services
             if (saveAll) await _unitOfWork.CompleteAsync();
 
             return ResponseModel.Success($"Successfully updated all tickets with base ID: {baseId}");
+        }
+
+        public async Task<ResponseModel>  DeleteManyTicketAsync(string ticketId, List<string> ticketIds, bool saveAll)
+        {
+            await _unitOfWork.TicketRepository.DeleteManyTicket(ticketId,ticketIds);
+            if (saveAll) await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully deleted Ticket(s) with id: {ticketId}");
+        }
+
+        public async Task<ResponseModel> DeleteTicketByBaseId(string ticketId, bool saveAll)
+        {
+            await _unitOfWork.TicketRepository.DeleteTicketByBaseId(ticketId);
+            if (saveAll) await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully deleted Ticket(s) with id: {ticketId}");
         }
 
 

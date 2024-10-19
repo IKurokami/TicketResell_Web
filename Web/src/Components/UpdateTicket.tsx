@@ -15,7 +15,7 @@ import Cookies from "js-cookie";
 import "@/Css/AddTicketModal.css";
 import { useParams } from "next/navigation";
 import { fetchImage } from "@/models/FetchImage";
-import { deleteImage } from "@/models/Deleteimage";
+import { updateImage } from "@/models/UpdateImage";
 
 interface Province {
   Id: number;
@@ -85,6 +85,8 @@ const UpdateTicketModal: React.FC = () => {
   const [selectedWard, setSelectedWard] = useState<number | null>(null);
   const [minDateTime, setMinDateTime] = useState("");
   const [imageId, setImageId] = useState<string>("");
+  const [initialquantity, setInitialquantity] = useState(quantity);
+
 
   const toDateTimeLocalFormat = (date: string | Date): string => {
     const d = new Date(date);
@@ -264,14 +266,15 @@ const UpdateTicketModal: React.FC = () => {
 
       setFormData((prevData) => ({
         ...prevData,
-        ...firstTicket, 
+        ...firstTicket,
         date: formattedDateForInput,
-        Qrcode: updatedQrFiles, 
+        Qrcode: updatedQrFiles,
       }));
 
       if (updatedQrFiles.length > 0) {
         setQrFiles(updatedQrFiles);
       }
+      setInitialquantity(updatedQrFiles.length)
       setQuantity(updatedQrFiles.length);
       // Fetch provinces
       const fetchedProvinces = await fetchProvinces();
@@ -292,11 +295,9 @@ const UpdateTicketModal: React.FC = () => {
         )?.Id || null;
 
       if (selectedProv) {
-        
         const fetchedDistricts = await fetchDistricts(selectedProv);
 
         if (Array.isArray(fetchedDistricts)) {
-          
           const selectedDist =
             fetchedDistricts.find(
               (d) =>
@@ -305,11 +306,9 @@ const UpdateTicketModal: React.FC = () => {
             )?.Id || null;
 
           if (selectedDist) {
-            
             const fetchedWards = await fetchWards(selectedDist);
 
             if (Array.isArray(fetchedWards)) {
-             
               const selectedWrd =
                 fetchedWards.find(
                   (w) =>
@@ -317,7 +316,6 @@ const UpdateTicketModal: React.FC = () => {
                     wardName.trim().toLowerCase()
                 )?.Id || null;
 
-              
               setSelectedProvince(selectedProv);
               setSelectedDistrict(selectedDist);
               setSelectedWard(selectedWrd);
@@ -340,7 +338,6 @@ const UpdateTicketModal: React.FC = () => {
           console.error(`Error fetching image for ticket: ${error}`);
         }
       }
-
     } catch (error) {
       console.error("Error fetching ticket items:", error);
     }
@@ -425,31 +422,32 @@ const UpdateTicketModal: React.FC = () => {
       const files = Array.from(event.target.files);
       const newQrFiles = [...qrFiles]; // Copy existing QR files
       const newQrFileNames = [...qrFileNames]; // Copy existing QR file names
-  
+
       // Process each selected file
       await Promise.all(
         files.map((file, fileIndex) => {
-          return new Promise<void>((resolve) => { // Specify the return type as void
+          return new Promise<void>((resolve) => {
+            // Specify the return type as void
             const reader = new FileReader();
-  
+
             reader.onloadend = () => {
               const targetIndex = index + fileIndex; // Calculate the target index
-  
+
               newQrFiles[targetIndex] = reader.result as string; // Set the QR file data
               newQrFileNames[targetIndex] = file.name; // Set the file name
-  
+
               resolve(); // Resolve the promise when done
             };
-  
+
             reader.readAsDataURL(file); // Read the file
           });
         })
       );
-  
+
       // Update state after all files are processed
       setQrFiles(newQrFiles);
       setQrFileNames(newQrFileNames);
-  
+
       // Update form data to reflect the new QR files
       setFormData((prevData) => ({
         ...prevData,
@@ -457,7 +455,7 @@ const UpdateTicketModal: React.FC = () => {
       }));
     }
   };
-  
+
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(newQuantity);
 
@@ -478,6 +476,27 @@ const UpdateTicketModal: React.FC = () => {
     });
   };
 
+  const deleteManyTickets = async (ticketIds:string[]) => {
+    try {
+      const response = await fetch(`http://localhost:5296/api/Ticket/deletemany/${id}`, {
+        method: 'DELETE',
+        credentials: "include",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify( ticketIds ), 
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to delete tickets');
+      }
+  
+      console.log('Successfully deleted tickets');
+    } catch (error) {
+      console.error('Error deleting tickets:', error);
+    }
+  };
+
   const handleSave = async () => {
     const sellerId = Cookies.get("id");
 
@@ -489,16 +508,15 @@ const UpdateTicketModal: React.FC = () => {
       !formData.date ||
       !formData.image ||
       !formData.description ||
-      !formData.Qrcode
+      !formData.Qrcode // Make sure this is an array and has values
     ) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    // Define the updateTickets function
     const updateTickets = async () => {
       const tickets = Array.from({ length: quantity }).map((_, index) => ({
-        TicketId: `${id}_${index+1}`, 
+        TicketId: `${id}_${index + 1}`,
         SellerId: sellerId,
         Name: formData.name,
         Cost: parseFloat(formData.cost),
@@ -506,85 +524,107 @@ const UpdateTicketModal: React.FC = () => {
         StartDate: new Date(formData.date),
         Status: 1,
         Image: id,
-        Qrcode: qrFiles[index] || formData.Qrcode[index], 
-        CategoriesId: formData.categories.map((category) => category.categoryId),
+        Qrcode: qrFiles[index] || formData.Qrcode[index], // Ensure these are properly initialized
+        CategoriesId: formData.categories.map(
+          (category) => category.categoryId
+        ),
         Description: formData.description,
       }));
 
-      console.log("ticket",tickets);
+      console.log("Tickets to update:", tickets);
 
-      const ticketsToUpdate = tickets.filter((ticket, index) => {
-        const shouldUpdate = qrFiles[index] && qrFiles[index] !== formData.Qrcode[index];
-        console.log(`Ticket ${ticket.TicketId} should update: ${shouldUpdate}`);
-        return shouldUpdate;
-      });
+
+
+      const ticketIdsToDelete = tickets.map(ticket => ticket.TicketId);
+      console.log("list of ticket :",ticketIdsToDelete);
+      
       
 
-      const updateQrPromises = ticketsToUpdate.map(async (ticket) => {
-        try {
-          const response = await fetch(
-            `http://localhost:5296/api/Ticket/update/qr/${ticket.TicketId}`,
-            {
-              method: "PUT",
-              credentials: "include",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ Qrcode: ticket.Qrcode }), // Send only the updated QR
+      // Function to update QR codes
+      const updateQrCodesSequentially = async (tickets) => {
+        for (const ticket of tickets) {
+          if (ticket.Qrcode) {
+            try {
+
+              const response = await fetch(
+                `http://localhost:5296/api/Ticket/update/qr/${ticket.TicketId}`,
+                {
+                  method: "PUT",
+                  credentials: "include",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ Qr: ticket.Qrcode }),
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error(
+                  `Failed to update QR code for ticket ${ticket.TicketId}: ${response.statusText}`
+                );
+              }
+
+              const result = await response.json();
+              console.log("QR code update result:", result);
+
+              if (result.statuscode === 200) {
+                console.log(
+                  `QR code for ticket ${ticket.TicketId} updated successfully.`
+                );
+              }
+            } catch (error) {
+              console.error(
+                `Error updating QR code for ticket ${ticket.TicketId}:`,
+                error
+              );
             }
-          );
-  
-          if (!response.ok) {
-            throw new Error(`Failed to update QR code for ticket ${ticket.TicketId}: ${response.statusText}`);
-          }
-  
-          return await response.json(); // Return response data if needed
-        } catch (error) {
-          console.error("Error updating QR code:", error);
-          return null; // Handle errors
-        }
-      });
-  
-
-      // Update images first
-      const updateImagePromises = tickets.map(async () => {
-        const deleteImageResult = await deleteImage(id);
-        if (deleteImageResult) {
-          const formData = new FormData();
-          formData.append("id", id);
-          formData.append("image", selectedFile as Blob);
-
-          try {
-            const response = await fetch("/api/uploadImage", {
-              method: "POST",
-              body: formData,
-            });
-
-            if (!response.ok) {
-              throw new Error(`Error uploading image: ${response.statusText}`);
-            }
-
-            return response.json(); // Return the response data
-          } catch (error) {
-            console.error("Error during image update:", error);
-            return null; // Handle the error
+          } else {
+            console.log(`No QR code provided for ticket: ${ticket.TicketId}`);
           }
         }
-        return null; // Return null if the image was not deleted
-      });
+      };
+
+      const updateImageForTicket = async (ticket, selectedFile) => {
+        const imageId = ticket.Image; 
+        const imageFile = selectedFile; 
+      
+        // Log the details of the image being updated
+        console.log("Updating image for ticket:", {
+          ticketId: ticket.TicketId,
+          imageId: imageId,
+          imageFileName: imageFile ? imageFile.name : "No file selected",
+        });
+      
+        // Call the updateImage function with the image ID and the selected file
+        const updateResult = await updateImage(imageId, imageFile);
+      
+        // Handle the result of the update operation
+        if (updateResult.success) {
+          console.log(`Image for ticket ${ticket.TicketId} updated successfully.`);
+        } else {
+          console.error(`Failed to update image for ticket ${ticket.TicketId}: ${updateResult.error}`);
+        }
+      };
 
       try {
+        if (selectedFile && tickets.length > 0) {
+          const ticketImage = tickets[0]; 
+          updateImageForTicket(ticketImage, selectedFile);
+        } else {
+          console.error("No file selected or no tickets available.");
+        }
+      
+        deleteManyTickets(ticketIdsToDelete);
+        await updateQrCodesSequentially(tickets); 
+      } catch (error) {
+        console.error("Error updating images or QR codes:", error);
+      }
 
-        await Promise.all(updateImagePromises);
-        console.log("Images updated successfully.");
-
-        await Promise.all(updateQrPromises);
-        console.log("QR codes updated successfully.");
-
-        // Now update the tickets
-        const updateTicketPromises = tickets.map(async (ticket) => {
+      // Now update each ticket
+      const updateTicketPromises = tickets.map(async (ticket) => {
+        try {
           const response = await fetch(
-            `http://localhost:5296/api/Ticket/update/${id}`,
+            `http://localhost:5296/api/Ticket/update/${ticket.TicketId}`,
             {
               method: "PUT",
               credentials: "include",
@@ -601,19 +641,22 @@ const UpdateTicketModal: React.FC = () => {
             );
           }
 
-          return await response.json();
-        });
+          const result = await response.json();
+          if (result.successfully) {
+            console.log(`Ticket ${ticket.TicketId} updated successfully.`);
+          }
+        } catch (error) {
+          console.error(`Error updating ticket ${ticket.TicketId}:`, error);
+        }
+      });
 
-        await Promise.all(updateTicketPromises);
-        console.log("Tickets updated successfully.");
-      } catch (error) {
-        console.error("Error updating tickets or images:", error);
-      }
+      await Promise.all(updateTicketPromises);
+      console.log("All tickets updated successfully.");
     };
 
     await updateTickets();
     // router.push("/sell");
-    // window.location.href = "/sell"; 
+    // window.location.href = "/sell";
   };
 
   const handleCancel = () => {
@@ -631,13 +674,16 @@ const UpdateTicketModal: React.FC = () => {
             fullWidth
             label="Quantity"
             value={quantity}
-            onChange={(e) => handleQuantityChange(Number(e.target.value))}
+            onChange={(e) => {
+              const newQuantity = Number(e.target.value);
+              if (newQuantity <= initialquantity) {
+                handleQuantityChange(newQuantity); // Allow decrease only
+              }
+            }}
             type="number"
             margin="normal"
-            inputProps={{ min: 1 }}
-            disabled
+            inputProps={{ min: 1, max:initialquantity }} // Disable if the quantity reaches the minimum
           />
-
           {/* File input for image */}
 
           <div className="upload-container">

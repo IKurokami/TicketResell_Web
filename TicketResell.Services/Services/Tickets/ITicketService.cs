@@ -7,7 +7,7 @@ public interface ITicketService
 {
     public Task<ResponseModel> CreateTicketAsync(TicketCreateDto dto, bool saveAll = true);
     public Task<ResponseModel> GetTicketBySellerId(string id);
-
+    public Task<ResponseModel> GetTicketsByOrderIdWithStatusZeroAsync(string userId, int status);
     public Task<ResponseModel> CheckExistId(string id);
 
     public Task<ResponseModel> GetTicketByNameAsync(string name);
@@ -23,12 +23,16 @@ public interface ITicketService
     public Task<ResponseModel> UpdateTicketsByBaseIdAsync(string ticketId, TicketUpdateDto? dto,
         List<string> categoryIds, bool saveAll);
 
+    public Task<ResponseModel> DeleteManyTicketAsync(string ticketId, List<string> ticketIds, bool saveAll = true);
+
+    public Task<ResponseModel> DeleteTicketByBaseId(string ticketId, bool saveAll = true);
+    
     public Task<ResponseModel> UpdateQrTicketByIdAsync(string ticketId, TicketQrDto dto,bool saveAll=true);
 
     public Task<ResponseModel> DeleteTicketAsync(string id, bool saveAll = true);
     public Task<ResponseModel> GetTicketByCategoryAsync(string id);
     public Task<ResponseModel> GetTicketRemainingAsync(string id);
-    public Task<ResponseModel> GetTicketByCategoryIdAsync (string ticketid, string [] categoryId);
+    public Task<ResponseModel> GetTicketByCategoryIdAsync(string ticketid, string[] categoryId);
     public Task<ResponseModel> GetTicketNotByCategoryIdAsync(string[] categoryId);
     public Task<ResponseModel> GetTicketByListCategoryIdAsync(string[] categoryId);
 

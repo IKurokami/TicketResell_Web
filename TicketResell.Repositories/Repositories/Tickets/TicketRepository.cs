@@ -59,7 +59,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<Ticket> GetByIdAsync(string id)
     {
-        var ticket = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories).FirstAsync(x => x.TicketId.StartsWith(id));
+        var ticket = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories)
+            .FirstAsync(x => x.TicketId.StartsWith(id));
         if (ticket == null)
         {
             throw new KeyNotFoundException("Id is not found");
@@ -113,8 +114,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         {
             ticketUpdate.Categories.Clear();
         }
-        
-        
+
+
         foreach (var x in categoryIds)
         {
             Category? category = await _context.Categories.FindAsync(x);
@@ -140,14 +141,16 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<List<Ticket>> GetTicketBySellerId(string id)
     {
-        var tickets = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories).Where(x => x.SellerId == id).ToListAsync();
+        var tickets = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories)
+            .Where(x => x.SellerId == id).ToListAsync();
         if (tickets == null)
         {
             throw new KeyNotFoundException("Ticket not found");
         }
+
         var uniqueTicketIds = tickets
-            .Select(t => t.TicketId.Split('_')[0]) 
-            .Distinct() 
+            .Select(t => t.TicketId.Split('_')[0])
+            .Distinct()
             .ToList();
         var filteredTicketsByCategory = tickets
             .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
@@ -182,8 +185,56 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Select(t => t.Categories)
             .FirstOrDefaultAsync();
         return categories;
-
     }
+
+    public async Task DeleteManyTicket(string baseId, List<string> ticketIds)
+    {
+        var tickets = await _context.Tickets
+            .Include(x => x.Seller)
+            .Include(x => x.Categories)
+            .Where(t => t.TicketId.StartsWith(baseId))
+            .ToListAsync();
+
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("Tickets not found");
+        }
+
+        foreach (var ticket in tickets)
+        {
+            if (!ticketIds.Contains(ticket.TicketId))
+            {
+                ticket.Categories.Clear();
+                _context.Tickets.Remove(ticket);
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteTicketByBaseId(string baseId)
+    {
+        var tickets = await _context.Tickets
+            .Include(x => x.Seller)
+            .Include(x => x.Categories)
+            .Where(t => t.TicketId.StartsWith(baseId))
+            .ToListAsync();
+
+        if (tickets == null || tickets.Count == 0)
+        {
+            throw new KeyNotFoundException("Tickets not found");
+        }
+
+        foreach (var ticket in tickets)
+        {
+            ticket.Categories.Clear();
+            _context.Tickets.Remove(ticket);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+
     public async Task<List<Ticket>> GetTicketsByCategoryAndDateAsync(string categoryName, int amount)
     {
         return await _context.Tickets
@@ -192,6 +243,14 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Take(amount)
             .ToListAsync();
     }
+
+    public async Task<List<Ticket>> GetTicketsByOrderIdWithStatusAsync(string userId, int status)
+    {
+        return await _context.Tickets
+            .Where(t => t.OrderDetails.Any(od => od.Order.BuyerId == userId && od.Order.Status == status))
+            .ToListAsync();
+    }
+
     public async Task<List<Ticket>> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange)
     {
         var now = DateTime.Now;
@@ -210,7 +269,6 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
         return tickets;
     }
-
 
 
     public async Task<List<Ticket>> GetTopTicketBySoldAmount(int amount)
@@ -268,66 +326,68 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<List<Ticket>> GetTicketsByBaseIdAsync(string baseId)
     {
         return await _context.Tickets
-            .Include(x=>x.Seller)
-            .Include(x=>x.Categories)
+            .Include(x => x.Seller)
+            .Include(x => x.Categories)
             .Where(t => t.TicketId.StartsWith(baseId))
             .ToListAsync();
     }
-    
+
     public async Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId)
     {
         var tickets = await _context.Tickets
-        .Include(t => t.Seller)
-        .Include(t => t.Categories) // Include the related categories
-        .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId)) && !t.TicketId.StartsWith(ticketid)) // Filter tickets by category
-        .ToListAsync();
+            .Include(t => t.Seller)
+            .Include(t => t.Categories) // Include the related categories
+            .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId)) &&
+                        !t.TicketId.StartsWith(ticketid)) // Filter tickets by category
+            .ToListAsync();
         // Filter to keep only the base ticket IDs (e.g., TICKET001)
         var uniqueTicketIds = tickets
             .Select(t => t.TicketId.Split('_')[0]) // Get the base ticket ID (split by '_')
             .Distinct() // Ensure distinct base IDs
             .ToList();
         var filteredTicketsByCategory = tickets
-        .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
-        .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
-        .Select(g => g.First()) // Select the first instance of each group
-        .ToList();
-        return filteredTicketsByCategory;
-    }
-    public async Task<List<Ticket>> GetTicketNotByCateIdAsync(string[] categoriesId)
-    {
-        var tickets = await _context.Tickets.Include(t => t.Seller)
-        .Where(t => t.Categories.All(c => !categoriesId.Contains(c.CategoryId))) // Filter tickets by category
-        .Include(t => t.Categories) // Include the related categories
-        .ToListAsync();
-        // Filter to keep only the base ticket IDs (e.g., TICKET001)
-        var uniqueTicketIds = tickets
-            .Select(t => t.TicketId.Split('_')[0]) // Get the base ticket ID (split by '_')
-            .Distinct() // Ensure distinct base IDs
+            .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+            .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
+            .Select(g => g.First()) // Select the first instance of each group
             .ToList();
-        var filteredTicketsByCategory = tickets
-        .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
-        .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
-        .Select(g => g.First()) // Select the first instance of each group
-        .ToList();
         return filteredTicketsByCategory;
     }
 
-    public async Task<List<Ticket>> GetTicketByListCateIdAsync(string [] categoriesId)
+    public async Task<List<Ticket>> GetTicketNotByCateIdAsync(string[] categoriesId)
     {
         var tickets = await _context.Tickets.Include(t => t.Seller)
-        .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category
-        .Include(t => t.Categories) // Include the related categories
-        .ToListAsync();
+            .Where(t => t.Categories.All(c => !categoriesId.Contains(c.CategoryId))) // Filter tickets by category
+            .Include(t => t.Categories) // Include the related categories
+            .ToListAsync();
         // Filter to keep only the base ticket IDs (e.g., TICKET001)
         var uniqueTicketIds = tickets
             .Select(t => t.TicketId.Split('_')[0]) // Get the base ticket ID (split by '_')
             .Distinct() // Ensure distinct base IDs
             .ToList();
         var filteredTicketsByCategory = tickets
-        .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
-        .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
-        .Select(g => g.First()) // Select the first instance of each group
-        .ToList();
+            .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+            .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
+            .Select(g => g.First()) // Select the first instance of each group
+            .ToList();
+        return filteredTicketsByCategory;
+    }
+
+    public async Task<List<Ticket>> GetTicketByListCateIdAsync(string[] categoriesId)
+    {
+        var tickets = await _context.Tickets.Include(t => t.Seller)
+            .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))) // Filter tickets by category
+            .Include(t => t.Categories) // Include the related categories
+            .ToListAsync();
+        // Filter to keep only the base ticket IDs (e.g., TICKET001)
+        var uniqueTicketIds = tickets
+            .Select(t => t.TicketId.Split('_')[0]) // Get the base ticket ID (split by '_')
+            .Distinct() // Ensure distinct base IDs
+            .ToList();
+        var filteredTicketsByCategory = tickets
+            .Where(t => uniqueTicketIds.Contains(t.TicketId.Split('_')[0]))
+            .GroupBy(t => t.TicketId.Split('_')[0]) // Group by base ticket ID
+            .Select(g => g.First()) // Select the first instance of each group
+            .ToList();
         return filteredTicketsByCategory;
     }
 }

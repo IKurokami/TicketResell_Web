@@ -67,6 +67,7 @@
     text-align: right;
 }
 
+
 .left-info span {
     display: flex;
     min-width: 3rem;
@@ -123,15 +124,18 @@
 }
 
 
-.navbar-left div, .navbar-right{
+.navbar-left div{
     padding: 3px;
     background-color:  rgb(237, 237, 237);
-    margin-left: 6rem;
+    margin-left: 5rem;
     border-radius: 10px;
 }
 
 .navbar-right{
-    margin-right: 6rem;
+    margin-right: 5rem;
+    padding: 3px;
+    background-color:  rgb(237, 237, 237);
+    border-radius: 10px;
 }
 
 .rank-item-card{
@@ -141,7 +145,6 @@
     background-color: white;
     cursor: pointer;
     padding-left: 20px;
-    padding-right: 20px;
     border-radius: 20px;
 }
 
@@ -210,5 +213,15 @@
 
     .ticket div{
         width: 5rem;
+    }
+    .navbar-right button{
+        width: 4rem;
+        text-align: center;
+        display: flex;
+        justify-content: center; /* Center text horizontally */
+        align-items: center;
+    }
+    .navbar-right{
+        width: 22.8rem;
     }
   }
