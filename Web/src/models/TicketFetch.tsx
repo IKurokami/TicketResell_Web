@@ -94,12 +94,28 @@ export const fetchTicketsBySeller = async (): Promise<Ticket[]> => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const data = await response.json();
-    console.log("Ticket fetch: ", data.data);
-    const tickets = await convertToTickets(data.data);
+    const result = await response.json();
+    console.log("Ticket fetch: ", result.data);
+    const tickets = await convertToTickets(result.data);
     return tickets;
   } catch (error) {
     console.error("Error fetching tickets:", error);
     return [];
+  }
+};
+export const fetchRemainingByID = async (id: string | null) => {
+  try {
+    const response = await fetch(
+      `http://localhost:5296/api/Ticket/count/${id}`,
+      {
+        method: "GET",
+      }
+    );
+    const result = await response.json();
+    const count = parseInt(result.data, 10);
+    return count;
+  } catch (error) {
+    console.error("Error fetching ticket result:", error);
+    return 0;
   }
 };
