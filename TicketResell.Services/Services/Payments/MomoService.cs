@@ -7,6 +7,7 @@ using TicketResell.Repositories.UnitOfWork;
 using System.Net.Http.Json;
 using TicketResell.Services.Services.Payments;
 using Repositories.Config;
+using System.Text.Json;
 
 namespace TicketResell.Services.Services
 {
@@ -71,19 +72,31 @@ namespace TicketResell.Services.Services
             try
             {
                 var response = await _httpClient.PostAsJsonAsync($"{_momoApiUrl}/v2/gateway/api/create", payload);
-                var responseData = await response.Content.ReadAsStringAsync();
-
+                string paymentUrl = await GetPayUrl(response);
                 if (response.IsSuccessStatusCode)
                 {
-                    return ResponseModel.Success("Payment created successfully", responseData);
+                    return ResponseModel.Success("Payment created successfully", paymentUrl);
                 }
 
-                return ResponseModel.Error("Failed to create MoMo payment", responseData);
+                return ResponseModel.Error("Failed to create MoMo payment");
             }
             catch (Exception ex)
             {
                 return ResponseModel.Error("Error occurred while processing payment.", ex.Message);
             }
+        }
+
+        public async Task<string> GetPayUrl(HttpResponseMessage response)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Deserialize the JSON content into a JsonDocument
+            var jsonDoc = JsonDocument.Parse(content);
+
+            // Directly access the payUrl property
+            string payUrl = jsonDoc.RootElement.GetProperty("payUrl").GetString();
+
+            return payUrl;
         }
 
         private string CreateSignature(string signatureString, string secretKey)

@@ -29,9 +29,7 @@ namespace TicketResell.Services.Services.Payments
             try
             {
                 var accessToken = await GenerateAccessTokenAsync();
-                _logger.LogInformation(accessToken);
                 var order = await CreatePayPalOrderAsync(accessToken, amount);
-                _logger.LogInformation("TESTttt");
 
                 return ResponseModel.Success("PayPal order created successfully", order);
             }
@@ -54,10 +52,10 @@ namespace TicketResell.Services.Services.Payments
 
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
-
             var content = await response.Content.ReadAsStringAsync();
-            var tokenResponse = JsonSerializer.Deserialize<AccessTokenResponse>(content);
-            return tokenResponse.AccessToken;
+            var jsonDoc = JsonDocument.Parse(content);
+            string accessToken = jsonDoc.RootElement.GetProperty("access_token").GetString();
+            return accessToken;
         }
 
 
@@ -103,31 +101,27 @@ namespace TicketResell.Services.Services.Payments
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
+            string paymentUrl = await GetApprovalLink(response);
+
+            return paymentUrl;
+        }
+
+        public async Task<string> GetApprovalLink(HttpResponseMessage response)
+        {
             var content = await response.Content.ReadAsStringAsync();
-            var orderResponse = JsonSerializer.Deserialize<PayPalOrderResponse>(content);
 
-            return orderResponse.Links.FirstOrDefault(l => l.Rel == "approve")?.Href;
-        }
+            // Deserialize the JSON content into a JsonDocument
+            var jsonDoc = JsonDocument.Parse(content);
 
-        private class AccessTokenResponse
-        {
-            public string AccessToken { get; set; }
-            public string TokenType { get; set; }
-            public int ExpiresIn { get; set; }
-        }
+            // Find the link with "approve" rel
+            string? approvalLink = jsonDoc.RootElement
+                .GetProperty("links")
+                .EnumerateArray()
+                .First(link => link.GetProperty("rel").GetString() == "approve")
+                .GetProperty("href")
+                .GetString();
 
-        private class PayPalOrderResponse
-        {
-            public string Id { get; set; }
-            public string Status { get; set; }
-            public List<PayPalLink> Links { get; set; }
-        }
-
-        private class PayPalLink
-        {
-            public string Href { get; set; }
-            public string Rel { get; set; }
-            public string Method { get; set; }
+            return approvalLink;
         }
     }
 
