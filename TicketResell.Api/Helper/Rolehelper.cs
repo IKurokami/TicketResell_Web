@@ -6,10 +6,10 @@ public static class RoleHelper
 {
     public static Dictionary<string, UserRole> RolesTable = new()
     {
-        { "RO1", UserRole.Admin },
-        { "RO2", UserRole.Staff },
-        { "RO3", UserRole.Buyer },
-        { "RO4", UserRole.Seller },
+        { "RO1", UserRole.Buyer },
+        { "RO2", UserRole.Seller },
+        { "RO3", UserRole.Staff },
+        { "RO4", UserRole.Admin },
     };
 
     public static UserRole ConvertToRole(string role)
@@ -34,6 +34,11 @@ public static class RoleHelper
     {
         var userRole = GetUserRole(userRoleId);
 
+        return userRole >= requiredRole;
+    }
+    
+    public static bool HasEnoughRoleLevel(UserRole userRole, UserRole requiredRole)
+    {
         return userRole >= requiredRole;
     }
 }
