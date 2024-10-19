@@ -12,7 +12,7 @@ public interface ITicketRepository : IRepository<Ticket>
     Task<List<Ticket>> GetTicketByDateAsync(DateTime date);
     Task CreateTicketAsync(Ticket ticket, List<string> categoryIds);
     Task<List<Ticket>> GetTicketsByOrderIdWithStatusAsync(string userId, int status);
-
+    
     Task UpdateTicketAsync(string id, Ticket ticket, List<string> categoryIds);
 
     Task<Boolean> CheckExist(string id);
@@ -25,6 +25,9 @@ public interface ITicketRepository : IRepository<Ticket>
 
     Task<List<Ticket>> GetTicketsStartingWithinTimeRangeAsync(int ticketAmount, TimeSpan timeRange);
 
+    Task DeleteManyTicket(string baseId,List<string> ticketId);
+
+    Task DeleteTicketByBaseId(string baseId);
     Task<List<Ticket>> GetTicketsByCategoryAndDateAsync(string categoryName, int amount);
     Task<List<Ticket>> GetTicketsByBaseIdAsync(string baseId);
 

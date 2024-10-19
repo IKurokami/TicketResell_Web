@@ -12,12 +12,12 @@ export async function updateImage(imageId: string, imageFile: File): Promise<Upd
   }
 
   const formData = new FormData();
-  formData.append("image", imageFile);
+  formData.append("image", imageFile); // Ensure 'image' matches what your server expects
 
   try {
     const response = await fetch(`/api/images/${imageId}`, {
       method: "PUT",
-      body: formData,
+      body: formData, // No Content-Type header is set for FormData
     });
 
     if (!response.ok) {
@@ -38,10 +38,8 @@ export async function updateImage(imageId: string, imageFile: File): Promise<Upd
     console.error("Error updating image:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Error updating image. Please try again.",
+      error: error instanceof Error ? error.message : "Error updating image. Please try again.",
     };
   }
 }
+
