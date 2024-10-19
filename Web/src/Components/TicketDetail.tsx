@@ -22,6 +22,7 @@ import addToCart from "@/Hooks/addToCart";
 import { useRouter } from "next/navigation";
 import RelatedTicket from "./RelatedTicket";
 import Notification_Popup from "./Notification_PopUp";
+import { fetchRemainingByID } from "@/models/TicketFetch";
 
 interface TicketDetail {
   id: string;
@@ -77,30 +78,6 @@ const TicketDetail = () => {
     setShowPopup(false);
   };
 
-  const fetchRemainingByID = async (id: string | null) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5296/api/Ticket/count/${baseId}`,
-        {
-          method: "GET",
-        }
-      );
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching ticket result:", error);
-      return null;
-    }
-  };
-
-  const checkRemainingItem = async () => {
-    const idOrigin = splitId();
-    if (idOrigin) {
-      const temp = await fetchRemainingByID(idOrigin);
-      return temp.data;
-    }
-    return 0;
-  };
-
   const increase = () => {
     setCount(count + 1);
   };
@@ -117,6 +94,15 @@ const TicketDetail = () => {
         `http://localhost:5296/api/Ticket/readbyid/${id}`
       );
       return await response.json();
+    } catch (error) {
+      console.error("Error fetching ticket result:", error);
+      return null;
+    }
+  };
+  const checkRemaining = async () => {
+    try {
+      const response = await fetchRemainingByID(baseId);
+      setRemainingItems(response);
     } catch (error) {
       console.error("Error fetching ticket result:", error);
       return null;
@@ -207,12 +193,7 @@ const TicketDetail = () => {
         console.error("ID is undefined or invalid.");
       }
     };
-    const getRemainingItems = async () => {
-      const remaining = await checkRemainingItem();
-      setRemainingItems(parseInt(remaining, 10));
-    };
-
-    getRemainingItems();
+    checkRemaining();
     loadresult();
   }, [id]);
 

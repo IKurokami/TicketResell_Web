@@ -15,12 +15,14 @@ import UserManager from "./UserManager";
 import RoleManager from "./RoleManager";
 import TicketManager from "./TicketManager";
 import CategoryManager from "./CategoryManager";
+import OrderManager from "./OrderManager";
 
 const AdminPage = () => {
   const [tickets, setTickets] = useState<any[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Tickets");
   const router = useRouter();
@@ -91,10 +93,27 @@ const AdminPage = () => {
       }
     };
 
+    const getOrders = async () => {
+      try {
+        const response = await fetch("http://localhost:5296/api/Order/read", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders");
+        }
+        const data = await response.json();
+        setOrders(data.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
     getUsers();
     getTickets();
     getRoles();
     getCategories();
+    getOrders();
   }, []);
 
   const toggleSidebar = () => {
@@ -196,6 +215,9 @@ const AdminPage = () => {
   const handleCategoryEdit = async (categoryId: string) => {};
   const handleCategoryDelete = async (categoryId: string) => {};
 
+  const handleOrderCancel = async (orderID: string) => {};
+  const handleOrderComplete = async (orderID: string) => {};
+
   const handleNavigation = (tabName: string) => {
     console.log("Navigate to:", tabName);
     router.push(`/admin?page=${tabName}`, undefined, { shallow: true });
@@ -238,6 +260,14 @@ const AdminPage = () => {
             onAdd={handleCategoryAdd}
           />
         );
+      case "Orders":
+        return (
+          <OrderManager
+            orders={orders}
+            onCancel={handleOrderCancel}
+            onComplete={handleOrderComplete}
+          />
+        );
       default:
         return <div>{activeTab} content goes here</div>;
     }
@@ -274,8 +304,10 @@ const AdminPage = () => {
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           <div className="flex justify-between items-center mb-5">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-              TicketResell Admin
+            <h2 className="text-xl font-semibold text-border">
+              <span className="text-emerald-500 text-2xl">Ticket </span>
+              <span className="resell text-black text-2xl">Resell </span>
+              Admin
             </h2>
             <button
               onClick={closeSidebar}

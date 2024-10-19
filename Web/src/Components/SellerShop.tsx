@@ -1,9 +1,11 @@
 "use client";
 import {
   faBars,
+  faCheck,
   faClock,
   faSortAmountDown,
   faSortAmountUp,
+  faTag,
 } from "@fortawesome/free-solid-svg-icons";
 import "../Css/SellerShop.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
@@ -26,6 +28,14 @@ export interface Category {
   name: string;
   description: string;
 }
+export interface Seller {
+  userId: string | undefined;
+  username: string | undefined;
+  fullname: string | undefined;
+  address: string | undefined;
+  avatar: string | undefined;
+  phone: string | undefined;
+}
 export interface Ticket {
   ticketId: string;
   sellerId: string;
@@ -44,7 +54,7 @@ export interface Ticket {
 const SellerShop = () => {
   const searchParams = useSearchParams();
   const cateName = searchParams?.get("cateName") || "";
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState(23000000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
@@ -55,7 +65,9 @@ const SellerShop = () => {
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("Price low to high");
+  const [statusOption, setStatusOption] = useState("Sắp diễn ra");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [sellerResult, setSellerResult] = useState<Seller | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const DEFAULT_IMAGE =
@@ -100,6 +112,11 @@ const SellerShop = () => {
     { text: "Recently listed", icon: faClock },
   ];
 
+  const statusOptions = [
+    { text: "Sắp diễn ra", icon: faCheck },
+    { text: "Hết hạn", icon: faClock },
+  ];
+
   const fetchTicketsBySeller = async (): Promise<Ticket[]> => {
     try {
       const response = await fetch(
@@ -117,11 +134,27 @@ const SellerShop = () => {
       return [];
     }
   };
+  const fetchSeller = async (): Promise<Seller | null> => {
+    try {
+      const response = await fetch(`${baseUrl}/api/User/read/${id}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Seller fetch: ", data.data);
+      return data.data;
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     setSelectedGenres([cateName]);
     const loadTickets = async () => {
+      const seller = await fetchSeller();
       const fetchedTickets = await fetchTicketsBySeller();
+      setSellerResult(seller);
       setTickets(fetchedTickets);
       setFilteredTickets(fetchedTickets);
 
@@ -153,6 +186,12 @@ const SellerShop = () => {
 
   const handleSortOptionClick = (option: string) => {
     setSortOption(option);
+    setIsDropdownOpen(false);
+  };
+  const handleStatusChange = (newStatus: string) => {
+    // Logic to update the status
+    // You may need to update some state or pass the status back to your data handling logic
+    setStatusOption(newStatus);
     setIsDropdownOpen(false);
   };
 
@@ -218,6 +257,7 @@ const SellerShop = () => {
     selectedLocation,
     tickets,
     sortOption,
+    statusOption,
     selectedDateFilter, // Add this line
   ]);
 
@@ -388,7 +428,14 @@ const SellerShop = () => {
   };
   return (
     <main className="bg-white text-black pb-[5vh]">
-      <SellProfile />
+      <SellProfile
+        userId={sellerResult?.userId}
+        username={sellerResult?.fullname}
+        address={sellerResult?.address}
+        avatar={sellerResult?.avatar}
+        fullname={sellerResult?.fullname}
+        phoneNumber={sellerResult?.phone}
+      />
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Sidebar */}
         {isSidebarOpen && (
@@ -529,7 +576,6 @@ const SellerShop = () => {
                   </span>
                 </div>
               </div>
-
               {/* Center: Search input */}
               <div className="relative flex-grow mx-2 max-w-xl md:mb-0 w-full md:w-auto">
                 <input
@@ -541,7 +587,32 @@ const SellerShop = () => {
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
-
+              {/* Status dropdown
+              <div className="relative mr-3 w-full md:w-64" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="h-12 w-full pl-4 pr-10 rounded-xl border border-gray-300 bg-white hover:border-gray-400 focus:outline-none flex items-center justify-between transition duration-200"
+                >
+                  <span className="truncate">{statusOption}</span>
+                  <MdKeyboardArrowDown className="text-2xl text-gray-600" />
+                </button>
+                {isDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg">
+                    <ul className="py-1">
+                      {statusOptions.map((option) => (
+                        <li key={option.text}>
+                          <button
+                            onClick={() => handleStatusChange(option.text)} // This function will handle the change in status
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:outline-none transition duration-200 flex items-center"
+                          >
+                            {option.text}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div> */}
               {/* Right: Sort dropdown */}
               <div className="flex items-center space-x-4 w-full md:w-auto">
                 <div className="relative mr-3 w-full md:w-64" ref={dropdownRef}>
