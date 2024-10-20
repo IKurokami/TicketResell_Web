@@ -33,6 +33,7 @@ builder.Services.Configure<AppConfig>(config =>
     config.PayPalClientId = Environment.GetEnvironmentVariable("PAYPAL_CLIENT_ID") ?? "default";
     config.PayPalSecret = Environment.GetEnvironmentVariable("PAYPAL_SECRET") ?? "default";
     config.PayPalApiUrl = Environment.GetEnvironmentVariable("PAYPAL_API_URL") ?? "https://api-m.sandbox.paypal.com";
+    config.RapidapiKey = Environment.GetEnvironmentVariable("RAPIDAPI_KEY") ?? "default";
 });
 builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
 

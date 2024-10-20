@@ -25,6 +25,10 @@ namespace Repositories.Config
         public string PayPalClientId { get; set; } = null!;
         public string PayPalSecret { get; set; } = null!;
         public string PayPalApiUrl { get; set; } = null!;
+
+        //Rapidapi
+        public string RapidapiKey { get; set; } = null!;
+
     }
 
 }

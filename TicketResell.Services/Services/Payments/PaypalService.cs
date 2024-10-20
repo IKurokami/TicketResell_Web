@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Repositories.Config;
 using Repositories.Core.Dtos.Payment;
 using TicketResell.Repositories.Logger;
@@ -24,12 +25,39 @@ namespace TicketResell.Services.Services.Payments
             _logger = logger;
         }
 
+        public async Task<ResponseModel> CheckTransactionStatus(string orderId)
+        {
+            var accessToken = await GenerateAccessTokenAsync();
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v2/checkout/orders/{orderId}/capture");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            string requestId = Guid.NewGuid().ToString();
+            request.Headers.Add("PayPal-Request-Id", requestId);
+
+            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(content);
+            string status = jsonDoc.RootElement.GetProperty("status").GetString();
+            if (status == "COMPLETED")
+            {
+                return ResponseModel.Success("PayPal order captured successfully");
+            }
+            return ResponseModel.Error("Error capturing PayPal order");
+        }
+
         public async Task<ResponseModel> CreatePaymentAsync(PaymentDto paymentRequest, double amount)
         {
             try
             {
                 var accessToken = await GenerateAccessTokenAsync();
-                var order = await CreatePayPalOrderAsync(accessToken, amount);
+                double rate = await GetConversionRateVndToUsd();
+                var order = await CreatePayPalOrderAsync(paymentRequest.OrderId, accessToken, amount * rate);
 
                 return ResponseModel.Success("PayPal order created successfully", order);
             }
@@ -38,6 +66,28 @@ namespace TicketResell.Services.Services.Payments
                 return ResponseModel.Error($"Error creating PayPal payment: {ex.Message}");
             }
         }
+
+        private async Task<double> GetConversionRateVndToUsd()
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("x-rapidapi-host", "currency-converter5.p.rapidapi.com");
+                client.DefaultRequestHeaders.Add("x-rapidapi-key", _config.RapidapiKey);
+
+                var url = "https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=VND&to=USD&amount=1&language=en";
+
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                dynamic data = JsonConvert.DeserializeObject(content);
+                double rate = data.rates.USD.rate;
+
+                return rate;
+            }
+        }
+
 
         private async Task<string> GenerateAccessTokenAsync()
         {
@@ -59,7 +109,7 @@ namespace TicketResell.Services.Services.Payments
         }
 
 
-        private async Task<string> CreatePayPalOrderAsync(string accessToken, double amount)
+        private async Task<string> CreatePayPalOrderAsync(string orderId, string accessToken, double amount)
         {
             var orderRequest = new
             {
@@ -96,7 +146,7 @@ namespace TicketResell.Services.Services.Payments
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v2/checkout/orders");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            request.Content = new StringContent(JsonSerializer.Serialize(orderRequest), Encoding.UTF8, "application/json");
+            request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(orderRequest), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();

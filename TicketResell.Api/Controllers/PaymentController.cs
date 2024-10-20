@@ -23,7 +23,7 @@ namespace Api.Controllers
             _paypalService = serviceProvider.GetRequiredService<IPaypalService>();
         }
 
-        [HttpPost("momo")]
+        [HttpPost("momo/payment")]
         public async Task<IActionResult> CreatePaymentMomo([FromBody] PaymentDto dto)
         {
             var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
@@ -33,7 +33,14 @@ namespace Api.Controllers
             return ResponseParser.Result(response);
         }
 
-        [HttpPost("vnpay")]
+        [HttpPost("momo/verify")]
+        public async Task<IActionResult> CheckMomoTransaction([FromBody] PaymentDto dto)
+        {
+            var response = await _momoService.CheckTransactionStatus(dto.OrderId);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPost("vnpay/payment")]
         public async Task<IActionResult> CreatePaymentVnpay([FromBody] PaymentDto dto)
         {
             var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
@@ -44,7 +51,14 @@ namespace Api.Controllers
             return ResponseParser.Result(response);
         }
 
-        [HttpPost("paypal")]
+        [HttpPost("vnpay/verify")]
+        public async Task<IActionResult> CheckVnpayTransaction([FromBody] PaymentDto dto)
+        {
+            var response = await _vnpayService.CheckTransactionStatus(dto.OrderId);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPost("paypal/payment")]
         public async Task<IActionResult> CreatePaymentPaypal([FromBody] PaymentDto dto)
         {
             var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
@@ -52,6 +66,12 @@ namespace Api.Controllers
             double amount = (double)orderResponse.Data;
             var response = await _paypalService.CreatePaymentAsync(dto, amount);
 
+            return ResponseParser.Result(response);
+        }
+        [HttpPost("paypal/verify")]
+        public async Task<IActionResult> CheckPaypalTransaction([FromBody] PaymentDto dto)
+        {
+            var response = await _paypalService.CheckTransactionStatus(dto.OrderId);
             return ResponseParser.Result(response);
         }
     }

@@ -3,10 +3,12 @@ using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using AutoMapper;
 using Microsoft.Extensions.Options;
 using Repositories.Config;
 using Repositories.Core.Dtos.Payment;
+using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
 
 namespace TicketResell.Services.Services.Payments
@@ -21,16 +23,19 @@ namespace TicketResell.Services.Services.Payments
         private readonly AppConfig _config;
         private readonly string _redirectUrl;
         private readonly string _vnpayApiUrl;
-
         private readonly string _tmnCode;
         private readonly string _hashSecret;
 
-        public VnpayService(IUnitOfWork unitOfWork, IMapper mapper, HttpClient httpClient, IOptions<AppConfig> config)
+        private readonly IAppLogger _logger;
+
+        public VnpayService(IUnitOfWork unitOfWork, IMapper mapper, HttpClient httpClient, IOptions<AppConfig> config, IAppLogger logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpClient = httpClient;
             _config = config.Value;
+            _logger = logger;
+
 
             _redirectUrl = $"{_config.BaseUrl}/payment-return?method=vnpay";
             _vnpayApiUrl = _config.VnpayApiUrl;
@@ -38,6 +43,47 @@ namespace TicketResell.Services.Services.Payments
             // Initialize environment variables
             _tmnCode = _config.TmnCode;
             _hashSecret = _config.HashSecret;
+        }
+
+        public async Task<ResponseModel> CheckTransactionStatus(string orderId)
+        {
+            _requestData.Clear();
+            string requestId = DateTime.Now.Ticks.ToString();
+            string createDate = DateTime.Now.ToString("yyyyMMddHHmmss");
+            string clientIp = GetClientIPAddress();
+
+            AddRequestData("vnp_RequestId", requestId);
+            AddRequestData("vnp_Version", "2.1.0");
+            AddRequestData("vnp_Command", "querydr");
+            AddRequestData("vnp_TmnCode", _tmnCode);
+            AddRequestData("vnp_TxnRef", orderId);
+            AddRequestData("vnp_OrderInfo", $"Query transaction {orderId}");
+            AddRequestData("vnp_TransactionNo", "123456");
+            AddRequestData("vnp_TransactionDate", createDate);
+            AddRequestData("vnp_CreateDate", createDate);
+            AddRequestData("vnp_IpAddr", clientIp);
+
+            // Create checksum
+            string data = $"{requestId}|2.1.0|querydr|{_tmnCode}|{orderId}|{createDate}|{createDate}|{clientIp}|Query transaction {orderId}";
+            string secureHash = HmacSHA512(_hashSecret, data);
+            AddRequestData("vnp_SecureHash", secureHash);
+
+            var content = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(_requestData),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await _httpClient.PostAsync("https://sandbox.vnpayment.vn/merchant_webapi/api/transaction", content);
+            var result = await response.Content.ReadAsStringAsync();
+
+            var jsonDoc = JsonDocument.Parse(result);
+            string resultCode = jsonDoc.RootElement.GetProperty("vnp_ResponseCode").GetString();
+            string message = jsonDoc.RootElement.GetProperty("vnp_Message").GetString();
+            if (resultCode == "00")
+                return ResponseModel.Success(message);
+
+            return ResponseModel.Error(message);
         }
 
         public Task<ResponseModel> CreatePaymentAsync(PaymentDto dto, double amount)
@@ -55,7 +101,7 @@ namespace TicketResell.Services.Services.Payments
             AddRequestData("vnp_Locale", "vn");
             AddRequestData("vnp_OrderInfo", "Payment for " + dto.OrderId);
             AddRequestData("vnp_OrderType", "other");
-            AddRequestData("vnp_ReturnUrl", _redirectUrl);
+            AddRequestData("vnp_ReturnUrl", $"{_redirectUrl}&orderId={dto.OrderId}");
             AddRequestData("vnp_TxnRef", dto.OrderId);
 
             string paymentUrl = CreateRequestUrl(_vnpayApiUrl, _hashSecret);  // Use the environment variable
