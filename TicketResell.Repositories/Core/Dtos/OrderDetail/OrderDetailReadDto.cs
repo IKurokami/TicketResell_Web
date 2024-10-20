@@ -9,6 +9,5 @@ public class OrderDetailDto
     public string? TicketId { get; set; }
     public double? Price { get; set; }
     public int? Quantity { get; set; }
-    
     public virtual TicketReadDto? Ticket { get; set; }
 }

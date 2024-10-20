@@ -2,6 +2,7 @@
 import React from "react";
 import "@/Css/SellBox.css"
 import { deleteImage } from "@/models/Deleteimage";
+import { log } from "console";
 
 interface PopupProps {
   isVisible: boolean;
@@ -11,11 +12,13 @@ interface PopupProps {
 
 const Popup: React.FC<PopupProps> = ({ isVisible, onClose, ticketId }) => {
   if (!isVisible) return null;
-
+  if(ticketId!=null){
+    console.log(ticketId);
+  }
   const handleClick = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Ticket/delete/${ticketId}`,
+        `http://localhost:5296/api/Ticket/deletebybaseid/${ticketId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -27,7 +30,7 @@ const Popup: React.FC<PopupProps> = ({ isVisible, onClose, ticketId }) => {
       }
 
       const imageDeleteResult = await deleteImage(ticketId);
-      if (imageDeleteResult.success && response.ok) {
+      if (imageDeleteResult.success == true && response.ok) {
         console.log(`ticket with Ticket ID ${ticketId} deleted successfully.`);
       } else {
         console.error(`Failed to delete image: ${imageDeleteResult.error}`);

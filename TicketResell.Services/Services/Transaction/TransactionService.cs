@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Repositories.Core.Dtos.OrderDetail;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
 using TicketResell.Repositories.UnitOfWork;
@@ -41,15 +42,15 @@ public class TransactionService : ITransactionService
         return ResponseModel.Success($"Successfully calculated total for seller {sellerId} from {dateRange.StartDate} to {dateRange.EndDate}", total);
     }
 
-    public async Task<ResponseModel> GetBuyer(string sellerId)
+    public async Task<ResponseModel> GetTicketOrderDetailsBySeller(string sellerId)
     {
-        var buyers = await _unitOfWork.TransactionRepository.GetUserBuyTicket(sellerId);
+        var buyers = await _unitOfWork.TransactionRepository.GetTicketOrderDetailsBySeller(sellerId);
 
         if (buyers == null || !buyers.Any())
         {
             return ResponseModel.NotFound($"No buyers found for seller {sellerId}.");
         }
-
-        return ResponseModel.Success($"Successfully retrieved buyers for seller {sellerId}", buyers);
+        var orderDtos = _mapper.Map<List<OrderDetailTransactionDto>>(buyers);
+        return ResponseModel.Success($"Successfully retrieved buyers for seller {sellerId}", orderDtos );
     }
 }
