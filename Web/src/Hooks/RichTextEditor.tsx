@@ -35,14 +35,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ name, value, onChange }
       handleContentChange(); 
       updateActiveFormats(); 
 
-    
-      setActiveFormats((prevFormats) => ({
-        ...prevFormats,
+      // Update formatting state
+      setActiveFormats({
         bold: document.queryCommandState('bold'),
         italic: document.queryCommandState('italic'),
         underline: document.queryCommandState('underline'),
         strikethrough: document.queryCommandState('strikeThrough'),
-      }));
+      });
     }
   };
 
@@ -59,21 +58,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ name, value, onChange }
       default: tag = 'p';
     }
 
-    
     handleFormat('formatBlock', tag);
     setSelectedFormat(format);
     setIsDropdownOpen(false);
-    
-
-    if (editorRef.current) {
-      const range = document.createRange();
-      const selection = window.getSelection();
-      range.selectNodeContents(editorRef.current);
-      range.collapse(false); 
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-      editorRef.current.focus(); 
-    }
   };
 
   const handleContentChange = () => {
@@ -89,20 +76,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ name, value, onChange }
     }
   };
 
-
   useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.innerHTML = value; 
-      const range = document.createRange();
-      const selection = window.getSelection();
-      range.selectNodeContents(editorRef.current);
-      range.collapse(false); 
-      selection?.removeAllRanges();
-      selection?.addRange(range);
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
+      editorRef.current.innerHTML = value; // Update innerHTML only if content has changed
     }
-    updateActiveFormats(); 
+    updateActiveFormats();
   }, [value]);
-
 
   const updateActiveFormats = () => {
     const selection = window.getSelection();

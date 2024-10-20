@@ -22,7 +22,10 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<UserCreateDto, User>();
             CreateMap<UserUpdateDto, User>();
             CreateMap<User, UserReadDto>();
-            CreateMap<User, SellerTicketReadDto>();
+            CreateMap<User, SellerTicketReadDto>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.Fullname));
             CreateMap<SellerRegisterDto, User>()
                 .ForMember(dest => dest.Username, opt => opt.Ignore())
                 .ForMember(dest => dest.Password, opt => opt.Ignore());
@@ -36,10 +39,27 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<Order, OrderDto>();
             CreateMap<OrderDto, Order>();
             CreateMap<CartItemDto, OrderDetailDto>();
-
+            CreateMap<Order, OrderTransactionDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.user, opt => opt.MapFrom(src => src.Buyer));
+            
+            
             //OrderDetail
             CreateMap<OrderDetailDto, OrderDetail>();
             CreateMap<OrderDetail, OrderDetailDto>();
+            CreateMap<OrderDetail, OrderDetailTransactionDto>()
+                .ForMember(dest => dest.OrderDetailId, opt => opt.MapFrom(src => src.OrderDetailId))
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
+                .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Ticket))
+                .ForMember(dest => dest.order, opt => opt.MapFrom(src => src.Order));
+
+               
+            
+            
             //Cart
             CreateMap<Order, CartDto>();
 
@@ -56,7 +76,7 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<TicketUpdateDto, Ticket>();
             CreateMap<TicketQrDto, Ticket>()
                 .ForMember(dest => dest.Qr, opt => opt.Ignore());
-            
+            CreateMap<Ticket, TicketTransactionDto>();
 
             //Category
             CreateMap<CategoryCreateDto, Category>();

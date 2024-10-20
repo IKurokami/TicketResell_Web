@@ -45,8 +45,8 @@ namespace TicketResell.Repositories.Controllers
             return ResponseParser.Result(response);
         }
 
-        
-        
+
+
         [HttpGet]
         [Route("readbySellerId/{id}")]
         public async Task<IActionResult> GetTicketBySellerId(string id)
@@ -121,7 +121,7 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketByIdAsync(id);
             return ResponseParser.Result(response);
         }
-        
+
         [HttpGet]
         [Route("readbybaseid/{id}")]
         public async Task<IActionResult> GetTicketBaseById(string id)
@@ -166,17 +166,17 @@ namespace TicketResell.Repositories.Controllers
             {
                 if (ticket.SellerId == HttpContext.GetUserId())
                 {
-                    return ResponseParser.Result(await _ticketService.UpdateTicketsByBaseIdAsync(id, dto,dto.CategoriesId,true));
+                    return ResponseParser.Result(await _ticketService.UpdateTicketsByBaseIdAsync(id, dto, dto.CategoriesId, true));
                 }
             }
 
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
-        
-        
-        
-        
-        
+
+
+
+
+
         [HttpPut]
         [Route("update/qr/{id}")]
         public async Task<IActionResult> UpdateQrTicket(string id, [FromBody] TicketQrDto dto)
@@ -189,17 +189,17 @@ namespace TicketResell.Repositories.Controllers
             {
                 if (ticket.SellerId == HttpContext.GetUserId())
                 {
-                    return ResponseParser.Result(await _ticketService.UpdateQrTicketByIdAsync(id,dto));
+                    return ResponseParser.Result(await _ticketService.UpdateQrTicketByIdAsync(id, dto));
                 }
             }
-            
+
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
-        
-        
+
+
         [HttpDelete]
         [Route("deletemany/{id}")]
-        public async Task<IActionResult> DeleteManyTicket(string id,[FromBody] List<string> ticketIds)
+        public async Task<IActionResult> DeleteManyTicket(string id, [FromBody] List<string> ticketIds)
         {
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
@@ -213,17 +213,17 @@ namespace TicketResell.Repositories.Controllers
                     return ResponseParser.Result(response);
                 }
             }
-            
+
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
-        
+
         [HttpDelete]
         [Route("deletebybaseid/{id}")]
         public async Task<IActionResult> DeleteTicketByBaseId(string id)
         {
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
-            
+
             var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
             if (ticket != null)
             {
@@ -233,10 +233,10 @@ namespace TicketResell.Repositories.Controllers
                     return ResponseParser.Result(response);
                 }
             }
-            
+
             return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
         }
-        
+
 
         [HttpDelete]
         [Route("delete/{id}")]
@@ -272,7 +272,7 @@ namespace TicketResell.Repositories.Controllers
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view orders"));
             string userId = HttpContext.GetUserId();
-            if (HttpContext.IsUserIdAuthenticated(userId))
+            if (!HttpContext.IsUserIdAuthenticated(userId))
                 return ResponseParser.Result(ResponseModel.Unauthorized("Access denied: You cannot access this"));
             var response = await _ticketService.GetTicketsByOrderIdWithStatusZeroAsync(userId, status);
             return ResponseParser.Result(response);
@@ -285,6 +285,7 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketNotByCategoryIdAsync(id);
             return ResponseParser.Result(response);
         }
+        
         [HttpPost]
         [Route("getByListCate")]
         public async Task<IActionResult> GetTicketByListCateId([FromBody] string[] id)
