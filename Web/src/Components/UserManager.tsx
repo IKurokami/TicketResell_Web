@@ -247,11 +247,11 @@ const UserManager: React.FC<UserManagerProps> = ({
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-8 justify-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 auto-rows-fr">
         {paginatedUsers.map((user) => (
           <div
             key={user.userId}
-            className="relative bg-emerald-800 rounded-lg w-full max-w-sm shadow-lg group overflow-hidden"
+            className="relative bg-emerald-800 rounded-lg shadow-lg group overflow-hidden"
           >
             <svg
               className="absolute bottom-0 left-0 mb-8 scale-100 group-hover:scale-[1.65] transition-transform"
@@ -302,10 +302,10 @@ const UserManager: React.FC<UserManagerProps> = ({
                     className="block font-semibold text-xl mb-1 truncate"
                     title={user.fullname || user.username}
                   >
-                    {truncateText(user.fullname || user.username, 20)}
+                    {user.fullname || user.username}
                   </h2>
                   <p className="text-sm truncate" title={user.gmail}>
-                    {truncateText(user.gmail, 25)}
+                    {user.gmail}
                   </p>
                 </div>
                 {getStatusBadge(user.status)}

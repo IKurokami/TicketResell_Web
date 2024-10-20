@@ -1,6 +1,21 @@
 import React from "react";
 
-const SellProfile = () => {
+interface props {
+  userId: string | undefined;
+  username: string | undefined;
+  fullname: string | undefined;
+  phoneNumber: string | undefined;
+  address: string | undefined;
+  avatar: string | undefined;
+}
+const SellProfile: React.FC<props> = ({
+  userId,
+  address,
+  avatar,
+  fullname,
+  phoneNumber,
+  username,
+}) => {
   return (
     <div className=" relative profile">
       <img
@@ -17,9 +32,11 @@ const SellProfile = () => {
       </div>
       <div className="px-[3vw] mt-[10vh]">
         <div className="seller-desc">
-          <p className="text-2xl font-medium">Giap Cao Dinh</p>
+          <p className="text-2xl font-medium">{fullname}</p>
         </div>
-        <p className="text-lg font-300">Join at </p>
+        <div className="flex gap-x-2 mt-2">
+          <p className="text-md text-gray-500">Phone: {phoneNumber}</p>
+        </div>
       </div>
     </div>
   );

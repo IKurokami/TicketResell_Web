@@ -1,0 +1,179 @@
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Repositories.Config;
+using Repositories.Core.Dtos.Payment;
+using TicketResell.Repositories.Logger;
+
+namespace TicketResell.Services.Services.Payments
+{
+    public class PaypalService : IPaypalService
+    {
+        private readonly AppConfig _config;
+        private readonly HttpClient _httpClient;
+        private readonly IAppLogger _logger;
+        public PaypalService(IOptions<AppConfig> config, HttpClient httpClient, IAppLogger logger)
+        {
+            _config = config.Value;
+            _httpClient = httpClient;
+            _logger = logger;
+        }
+
+        public async Task<ResponseModel> CheckTransactionStatus(string orderId)
+        {
+            var accessToken = await GenerateAccessTokenAsync();
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v2/checkout/orders/{orderId}/capture");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            string requestId = Guid.NewGuid().ToString();
+            request.Headers.Add("PayPal-Request-Id", requestId);
+
+            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(content);
+            string status = jsonDoc.RootElement.GetProperty("status").GetString();
+            if (status == "COMPLETED")
+            {
+                return ResponseModel.Success("PayPal order captured successfully");
+            }
+            return ResponseModel.Error("Error capturing PayPal order");
+        }
+
+        public async Task<ResponseModel> CreatePaymentAsync(PaymentDto paymentRequest, double amount)
+        {
+            try
+            {
+                var accessToken = await GenerateAccessTokenAsync();
+                double rate = await GetConversionRateVndToUsd();
+                var order = await CreatePayPalOrderAsync(paymentRequest.OrderId, accessToken, amount * rate);
+
+                return ResponseModel.Success("PayPal order created successfully", order);
+            }
+            catch (Exception ex)
+            {
+                return ResponseModel.Error($"Error creating PayPal payment: {ex.Message}");
+            }
+        }
+
+        private async Task<double> GetConversionRateVndToUsd()
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("x-rapidapi-host", "currency-converter5.p.rapidapi.com");
+                client.DefaultRequestHeaders.Add("x-rapidapi-key", _config.RapidapiKey);
+
+                var url = "https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=VND&to=USD&amount=1&language=en";
+
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                dynamic data = JsonConvert.DeserializeObject(content);
+                double rate = data.rates.USD.rate;
+
+                return rate;
+            }
+        }
+
+
+        private async Task<string> GenerateAccessTokenAsync()
+        {
+            var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_config.PayPalClientId}:{_config.PayPalSecret}"));
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v1/oauth2/token");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", auth);
+            request.Content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("grant_type", "client_credentials")
+            });
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(content);
+            string accessToken = jsonDoc.RootElement.GetProperty("access_token").GetString();
+            return accessToken;
+        }
+
+
+        private async Task<string> CreatePayPalOrderAsync(string orderId, string accessToken, double amount)
+        {
+            var orderRequest = new
+            {
+                intent = "CAPTURE",
+                purchase_units = new[]
+                {
+                    new
+                    {
+                        reference_id = Guid.NewGuid().ToString(),
+                        amount = new
+                        {
+                            currency_code = "USD",
+                            value = amount.ToString("F2"),
+                            breakdown = new
+                            {
+                                item_total = new
+                                {
+                                    currency_code = "USD",
+                                    value = amount.ToString("F2")
+                                }
+                            }
+                        }
+                    }
+                },
+                application_context = new
+                {
+                    return_url = $"{_config.BaseUrl}/payment-return?method=paypal",
+                    cancel_url = $"{_config.BaseUrl}/payment-return?method=paypal",
+                    shipping_preference = "NO_SHIPPING",
+                    user_action = "PAY_NOW",
+                    brand_name = "TicketResell"
+                }
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v2/checkout/orders");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(orderRequest), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            string paymentUrl = await GetApprovalLink(response);
+
+            return paymentUrl;
+        }
+
+        public async Task<string> GetApprovalLink(HttpResponseMessage response)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Deserialize the JSON content into a JsonDocument
+            var jsonDoc = JsonDocument.Parse(content);
+
+            // Find the link with "approve" rel
+            string? approvalLink = jsonDoc.RootElement
+                .GetProperty("links")
+                .EnumerateArray()
+                .First(link => link.GetProperty("rel").GetString() == "approve")
+                .GetProperty("href")
+                .GetString();
+
+            return approvalLink;
+        }
+    }
+
+
+}

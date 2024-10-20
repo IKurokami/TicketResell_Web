@@ -1,3 +1,5 @@
+using Repositories.Core.Dtos.OrderDetail;
+using Repositories.Core.Dtos.Payment;
 using TicketResell.Repositories.Core.Dtos.Cart;
 
 namespace TicketResell.Services.Services.Carts;
@@ -13,4 +15,6 @@ public interface ICartService
     Task<ResponseModel> GetCartTotal(string userId);
     Task<ResponseModel> CreateOrderFromSelectedItems(string userId, List<string> selectedTicketIds);
     Task<ResponseModel> Checkout(string userId);
+
+    Task<List<VirtualOrderDetailDto>> CreateVirtualCart(PaymentDto paymentDto);
 }

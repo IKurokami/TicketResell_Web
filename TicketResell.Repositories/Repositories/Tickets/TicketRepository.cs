@@ -106,6 +106,11 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         await _context.Tickets.AddAsync(ticket);
     }
 
+    public async Task<List<Ticket>> GetTicketsByIds(List<string> ticketIds)
+    {
+        return await _context.Tickets.Where(t => ticketIds.Contains(t.TicketId)).ToListAsync();
+    }
+
     public async Task UpdateTicketAsync(string id, Ticket ticket, List<string> categoryIds)
     {
         var ticketUpdate = await _context.Tickets

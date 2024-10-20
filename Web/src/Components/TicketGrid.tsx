@@ -17,14 +17,10 @@ const TicketGrid: React.FC<TicketGridProps> = ({
       currency: "VND",
     }).format(amount);
   };
-
-  const truncateText = (text: string, maxLength: number) => {
-    if (text.length > maxLength) {
-      return text.slice(0, maxLength) + "...";
-    }
-    return text;
+  const status = (date: Date) => {
+    return new Date(date) > new Date() ? "Sắp Diễn Ra" : "Đã Hết Hạn";
   };
-
+  
   const gridColumns = Math.min(maxTicketInRow, 5);
 
   return (
@@ -63,11 +59,24 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                     </div>
                   </div>
                   <div className="p-3 sm:p-4 flex-grow flex flex-col">
-                    <h3 className="text-base sm:text-lg font-semibold mb-1 text-gray-900 line-clamp-2">
-                      {truncateText(ticket.name, 20)}
+                    <h3 className="text-base sm:text-lg font-semibold mb-1 text-gray-900 line-clamp-2 truncate">
+                      {ticket.name}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                      {truncateText(ticket.location, 20)}
+                    <p
+                      className={`text-sm mb-4 p-2 rounded-full w-auto h-auto flex items-center justify-center ${
+                        status(ticket.startDate) === "Sắp Diễn Ra"
+                          ? "bg-blue-50 text-blue-500 font-bold"
+                          : status(ticket.startDate) === "Đã Hết Hạn"
+                          ? "bg-red-50 text-red-500 font-bold"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                      style={{ width: "fit-content", height: "fit-content" }} // Đảm bảo chiều rộng và chiều cao tự động theo nội dung
+                    >
+                      {status(ticket.startDate)}
+                    </p>
+
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">
+                      {ticket.location}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-600">
                       {new Date(ticket.startDate).toLocaleDateString("en-US", {
