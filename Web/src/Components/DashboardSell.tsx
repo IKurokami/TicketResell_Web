@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import TicketsPage from "./TicketSeller"; // Adjust the path based on your file structure
 import "@/Css/DashboardSeller.css";
+import TransactionTable from "./TransactionPage";
 
 const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState("Tickets");
@@ -19,12 +20,8 @@ const Dashboard = () => {
       case "Tickets":
         return <TicketsPage />; // Render the TicketsPage component
       case "Transaction":
-        return (
-          <div className="p-4">
-            <h2 className="text-2xl font-bold">Transaction Details</h2>
-            <p>This is where you can manage transactions.</p>
-          </div>
-        );
+        return <TransactionTable/>;
+        
       case "Revenue":
         return (
           <div className="p-4">
@@ -58,7 +55,7 @@ const Dashboard = () => {
         {/* Sidebar */}
         <div
           ref={sidebarRef} // Attach the ref to the sidebar div
-          className={`fixed inset-y-0 left-0 transform bg-green-50 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/5 z-10 ${
+          className={`fixed inset-y-0 left-0 transform bg-slate-100 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/5 z-10 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -66,7 +63,7 @@ const Dashboard = () => {
             {["Tickets", "Transaction", "Revenue"].map((tab) => (
               <li key={tab}>
                 <a
-                  className={`block font-semibold no-underline rounded-lg p-2 transition-all duration-300 ${
+                  className={`block font-semibold no-underline rounded-xl p-2 transition-all duration-300 ${
                     selectedTab === tab
                       ? "bg-green-600 text-white"
                       : "bg-white text-black hover:bg-green-500"

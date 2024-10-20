@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import RichTextEditor from "@/Hooks/RichTextEditor";
 import { useRouter } from "next/navigation";
 import ScrollToTopButton from "@/Hooks/useScrollTopButton";
+import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import {
   TextField,
   Button,
@@ -79,6 +80,9 @@ const AddTicketModal: React.FC = () => {
   const [selectedWard, setSelectedWard] = useState<number | null>(null);
   const [minDateTime, setMinDateTime] = useState("");
 
+
+
+  
   const fetchProvinces = async () => {
     try {
       const response = await fetch(
@@ -231,12 +235,27 @@ const AddTicketModal: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  
+    if (name === "cost") {
+      // Remove the '000' suffix before processing input
+      let baseValue = value.replace(/000$/, '');
+  
+      // Remove non-numeric characters from the base value
+      baseValue = baseValue.replace(/\D/g, '');
+  
+      // Ensure that when the user types/deletes, '000' is always appended
+      setFormData({
+        ...formData,
+        [name]: baseValue + '000',
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
-
+  
   const handleCategoriesChange = (
     event: React.SyntheticEvent<Element, Event>,
     value: Category[]
@@ -552,17 +571,17 @@ const AddTicketModal: React.FC = () => {
             required
           />
 
-          <TextField
-            className="custom-text-field"
-            fullWidth
-            label="Cost"
-            name="cost"
-            value={formData.cost}
-            onChange={handleChange}
-            margin="normal"
-            type="number"
-            required
-          />
+            <TextField
+              className="custom-text-field"
+              fullWidth
+              label="Cost"
+              name="cost"
+              value={formData.cost}
+              onChange={handleChange}
+              margin="normal"
+              type="number"
+              required
+            />
           {/* Location (Province, District, Ward) */}
 
           <div className="address-fields-container">

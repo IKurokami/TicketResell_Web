@@ -34,10 +34,10 @@ namespace Api.Controllers
         [HttpGet("buyers/{sellerId}")]
         public async Task<IActionResult> GetBuyer(string sellerId)
         {
-            if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to get buyer information."));
+            // if (!HttpContext.GetIsAuthenticated())
+            //     return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to get buyer information."));
 
-            return ResponseParser.Result(await _transactionService.GetBuyer(sellerId));
+            return ResponseParser.Result(await _transactionService.GetTicketOrderDetailsBySeller(sellerId));
         }
     }
 }

@@ -131,7 +131,7 @@ const TicketsPage = () => {
                           className="no-underline"
                         >
                           <h3 className="text-base sm:text-lg font-semibold mb-1 text-gray-900 line-clamp-2">
-                            {ticketItem.name}
+                            {truncateText(ticketItem.name,20)}
                           </h3>
                           <p className="text-xs sm:text-sm text-gray-600 mb-1">
                             {truncateText(ticketItem.location, 20)}

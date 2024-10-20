@@ -5,6 +5,7 @@ using Repositories.Core.Helper;
 using Microsoft.EntityFrameworkCore;
 using TicketResell.Repositories.Logger;
 using Microsoft.Extensions.Logging;
+using Repositories.Core.Dtos.OrderDetail;
 
 namespace Repositories.Repositories;
 
@@ -12,6 +13,7 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
 {
     public readonly TicketResellManagementContext _context;
     public readonly IAppLogger _logger;
+
     public TransactionRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
     {
         _context = context;
@@ -39,18 +41,16 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
             .SumAsync(od => od.Price * od.Quantity);
     }
 
-    public async Task<IEnumerable<User>> GetUserBuyTicket(string sellerId)
+    public async Task<List<OrderDetail>> GetTicketOrderDetailsBySeller(string sellerId)
     {
-        var result = new List<User>();
-        foreach (var orderDetail in await _context.OrderDetails
-                     .Where(od => od.Ticket != null && od.Ticket.SellerId == sellerId).ToListAsync())
-        {
-            var user = orderDetail.Order?.Buyer;
-
-            if (user != null)
-                result.Add(user);
-        }
+        var result = await _context.OrderDetails
+            .Include(od => od.Ticket)
+            .Include(od => od.Order)
+            .ThenInclude(o => o.Buyer)
+            .Where(od => od.Ticket.SellerId == sellerId && od.Order.Status==0)
+            .ToListAsync();
 
         return result;
     }
+
 }
