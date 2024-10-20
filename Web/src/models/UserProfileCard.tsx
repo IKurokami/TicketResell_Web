@@ -1,3 +1,5 @@
+import ProfileInfo from "@/Components/ProfileInfo";
+import SellProfile from "@/Components/sellprofile";
 import React, { useState, useEffect } from "react";
 import {
   FaPencilAlt,
@@ -10,34 +12,34 @@ import {
 
 export interface UserProfileCard {
   id: string;
-  username: string;
-  email: string;
-  avatar: string | null;
-  phone: string | null;
-  address: string | null;
+  username: string | undefined;
+  email: string | undefined;
+  avatar: string | undefined;
+  phone: string | undefined;
+  address: string | undefined;
   status: number;
-  fullname: string | null;
-  sex: string | null;
+  fullname: string | undefined;
+  sex: string | undefined;
   createDate: string;
-  sellConfigId: string | null;
-  bio: string | null;
-  birthday: string | null;
+  sellConfigId: string | undefined;
+  bio: string | undefined;
+  birthday: string | undefined;
   roles: string[];
 }
 
 export interface UserUpdateDto {
-  UserId: string;
-  SellConfigId: string | null;
-  Username: string;
-  Password: string | null;
-  Gmail: string;
-  Fullname: string | null;
-  Sex: string | null;
-  Phone: string | null;
-  Address: string | null;
-  Avatar: string | null;
-  Birthday: string | null;
-  Bio: string | null;
+  UserId: string | undefined;
+  SellConfigId: string | undefined;
+  Username: string | undefined;
+  Password: string | undefined;
+  Gmail: string | undefined;
+  Fullname: string | undefined;
+  Sex: string | undefined;
+  Phone: string | undefined;
+  Address: string | undefined;
+  Avatar: string | undefined;
+  Birthday: string | undefined;
+  Bio: string | undefined;
 }
 
 const convertToUserProfileCard = (
@@ -137,7 +139,7 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
       UserId: profile.id,
       SellConfigId: profile.sellConfigId,
       Username: profile.username,
-      Password: null,
+      Password: undefined,
       Gmail: profile.email,
       Fullname: profile.fullname,
       Sex: profile.sex,
@@ -256,18 +258,26 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
     setIsChangePasswordModalOpen(false);
 
   return (
-    <div className="bg-transparent min-h-96 pb-32 font-sans mt-16">
-      <div className="max-w-md mx-auto pt-16 px-4">
-        {/* Banner */}
-        <div className="h-40 -mb-5 rounded-xl shadow-lg overflow-hidden">
+    <div className="bg-transparent min-h-96 pb-32 font-sans ">
+      ""
+      <div className="bg-white">
+        <SellProfile
+          address={profile.address}
+          avatar={profile.avatar}
+          fullname={profile.fullname}
+          phoneNumber={profile.phone}
+          isAdjustVisible={true}
+        />
+        <ProfileInfo />
+        {/* <div className="h-40 -mb-5 rounded-xl shadow-lg overflow-hidden">
           <img
             src="https://picsum.photos/1000"
             alt="Banner"
             className="w-full h-full object-cover"
           />
-        </div>
+        </div> */}
         {/* Header */}
-        <div className="bg-white rounded-t-xl shadow-sm">
+        {/* <div className="bg-white rounded-t-xl shadow-sm">
           <div className="relative pt-8 pb-4 px-4 text-center">
             <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
               <div className="relative">
@@ -304,16 +314,9 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
               </button>
             )}
           </div>
-        </div>
-
+        </div> */}
         {/* User Information */}
         <div className="bg-white shadow-sm rounded-b-xl">
-          <div className="px-4 py-3 border-b border-gray-200">
-            <p className="text-sm text-gray-600 flex items-center">
-              <FaPhoneAlt className="mr-3 text-gray-400" />
-              {profile.phone ? profile.phone : "No Phone Provided"}
-            </p>
-          </div>
           <div className="px-4 py-3 border-b border-gray-200">
             <p className="text-sm text-gray-600 flex items-center">
               <FaEnvelope className="mr-3 text-gray-400" />
@@ -327,7 +330,6 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
             </p>
           </div>
         </div>
-
         {/* Profile Actions */}
         <div className="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <button
@@ -351,145 +353,145 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
             <FaChevronRight className="text-gray-400" />
           </button>
         </div>
+
+        {/* Edit Profile Modal */}
+        {isEditModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
+            <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+              <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <button
+                  onClick={handleCloseEditModal}
+                  className="text-blue-500 font-semibold"
+                >
+                  Cancel
+                </button>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Edit Profile
+                </h2>
+                <button
+                  onClick={() => handleSaveProfile()}
+                  className="text-blue-500 font-semibold"
+                >
+                  Save
+                </button>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={profile.username}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bio
+                  </label>
+                  <input
+                    type="text"
+                    name="bio"
+                    value={profile.bio ?? ""}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="text"
+                    name="email"
+                    value={profile.email}
+                    readOnly
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={profile.phone ?? ""}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Change Password Modal */}
+        {isChangePasswordModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
+            <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+              <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <button
+                  onClick={handleCloseChangePasswordModal}
+                  className="text-blue-500 font-semibold"
+                >
+                  Cancel
+                </button>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Change Password
+                </h2>
+                <button
+                  onClick={handleChangePassword}
+                  className="text-blue-500 font-semibold"
+                >
+                  Save
+                </button>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    name="confirmNewPassword"
+                    value={passwordData.confirmNewPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Edit Profile Modal */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
-          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <button
-                onClick={handleCloseEditModal}
-                className="text-blue-500 font-semibold"
-              >
-                Cancel
-              </button>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Edit Profile
-              </h2>
-              <button
-                onClick={() => handleSaveProfile()}
-                className="text-blue-500 font-semibold"
-              >
-                Save
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  value={profile.username}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bio
-                </label>
-                <input
-                  type="text"
-                  name="bio"
-                  value={profile.bio ?? ""}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="text"
-                  name="email"
-                  value={profile.email}
-                  readOnly
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={profile.phone ?? ""}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Change Password Modal */}
-      {isChangePasswordModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
-          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <button
-                onClick={handleCloseChangePasswordModal}
-                className="text-blue-500 font-semibold"
-              >
-                Cancel
-              </button>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Change Password
-              </h2>
-              <button
-                onClick={handleChangePassword}
-                className="text-blue-500 font-semibold"
-              >
-                Save
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmNewPassword"
-                  value={passwordData.confirmNewPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
