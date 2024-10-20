@@ -104,8 +104,8 @@ async function convertVNDToUSD(vndAmount: number): Promise<number> {
             }
           ],
           application_context: {
-            return_url: "http://localhost:3000",
-            cancel_url: "http://localhost:3000",
+            return_url: process.env.BASE_URL + "/payment-return?method=paypal",
+            cancel_url: process.env.BASE_URL + "/payment-return?method=paypal",
             shipping_preference: "NO_SHIPPING",
             user_action: "PAY_NOW",
             brand_name: "TicketResell",

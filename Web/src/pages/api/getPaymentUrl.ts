@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         vnp_TxnRef: vnp_TxnRef, // Unique transaction reference from the request
         vnp_OrderInfo: `Payment for order ${vnp_TxnRef}`, // Information about the order
         vnp_OrderType: ProductCode.Other, // Type of product
-        vnp_ReturnUrl: `http://localhost:${port}`, // Return URL after payment
+        vnp_ReturnUrl: `${process.env.BASE_URL}/payment-return?method=vnpay`, // Return URL after payment
       },
       {
         logger: {

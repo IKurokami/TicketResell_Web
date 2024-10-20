@@ -15,7 +15,7 @@ const PaymentStatus = ({ success }) => {
 
     // Redirect after 3 seconds
     const timeout = setTimeout(() => {
-      router.push("http://localhost:3000");
+      router.push("/");
     }, 3000);
 
     // Clean up timers on component unmount

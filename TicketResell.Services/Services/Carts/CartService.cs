@@ -1,10 +1,12 @@
 using AutoMapper;
 using Repositories.Core.Dtos.Order;
 using Repositories.Core.Dtos.OrderDetail;
+using Repositories.Core.Dtos.Payment;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
 using Repositories.Core.Validators;
 using TicketResell.Repositories.Core.Dtos.Cart;
+using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Carts;
 
@@ -15,12 +17,15 @@ namespace TicketResell.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IValidatorFactory _validatorFactory;
+        private readonly IAppLogger _logger;
 
-        public CartService(IUnitOfWork unitOfWork, IMapper mapper, IValidatorFactory validatorFactory)
+
+        public CartService(IUnitOfWork unitOfWork, IMapper mapper, IValidatorFactory validatorFactory, IAppLogger logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _validatorFactory = validatorFactory;
+            _logger = logger;
         }
 
         public async Task<ResponseModel> GetCart(string userId)
@@ -66,7 +71,7 @@ namespace TicketResell.Services.Services
             }
 
             await _unitOfWork.CartRepository.AddToCartAsync(cart, cartItem);
-            
+
             return ResponseModel.Success($"Successfully added item to cart for user: {cartItemDto.UserId}");
         }
 
@@ -205,6 +210,31 @@ namespace TicketResell.Services.Services
 
             var orderDto = _mapper.Map<OrderDto>(order);
             return ResponseModel.Success("Order created successfully", orderDto);
+        }
+
+        public async Task<List<VirtualOrderDetailDto>> CreateVirtualCart(PaymentDto paymentDto)
+        {
+            var ticketIds = paymentDto.OrderInfo.SelectedTicketIds.Select(t => t.TicketId).ToList();
+
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsByIds(ticketIds);
+
+            var result = paymentDto.OrderInfo.SelectedTicketIds
+               .Join(tickets,
+                   selected => selected.TicketId,
+                   ticket => ticket.TicketId,
+                   (selected, ticket) =>
+                   {
+                       var dto = new VirtualOrderDetailDto
+                       {
+                           OrderId = paymentDto.OrderId,
+                           TicketId = selected.TicketId,
+                           Quantity = selected.Quantity,
+                           Price = ticket.Cost
+                       };
+                       _logger.LogInformation($"Created detail - TicketId: {dto.TicketId}, Quantity: {dto.Quantity}, Price: {dto.Price}");
+                       return dto;
+                   }).ToList();
+            return result;
         }
 
         public async Task<ResponseModel> Checkout(string userId)
