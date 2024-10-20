@@ -272,8 +272,6 @@ namespace TicketResell.Repositories.Controllers
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view orders"));
             string userId = HttpContext.GetUserId();
-            if (!HttpContext.IsUserIdAuthenticated(userId))
-                return ResponseParser.Result(ResponseModel.Unauthorized("Access denied: You cannot access this"));
             var response = await _ticketService.GetTicketsByOrderIdWithStatusZeroAsync(userId, status);
             return ResponseParser.Result(response);
         }
@@ -285,7 +283,7 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketNotByCategoryIdAsync(id);
             return ResponseParser.Result(response);
         }
-        
+
         [HttpPost]
         [Route("getByListCate")]
         public async Task<IActionResult> GetTicketByListCateId([FromBody] string[] id)
