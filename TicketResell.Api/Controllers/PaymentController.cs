@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Repositories.Core.Dtos.Payment;
 using Repositories.Core.Helper;
 using System.Threading.Tasks;
+using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Payments;
 
 namespace Api.Controllers
@@ -14,6 +15,7 @@ namespace Api.Controllers
         private readonly IVnpayService _vnpayService;
         private readonly IOrderService _orderService;
         private readonly IPaypalService _paypalService;
+        private readonly ICartService _cartService;
 
         public PaymentController(IServiceProvider serviceProvider)
         {
@@ -21,11 +23,13 @@ namespace Api.Controllers
             _orderService = serviceProvider.GetRequiredService<IOrderService>();
             _vnpayService = serviceProvider.GetRequiredService<IVnpayService>();
             _paypalService = serviceProvider.GetRequiredService<IPaypalService>();
+            _cartService = serviceProvider.GetRequiredService<ICartService>();
         }
 
         [HttpPost("momo/payment")]
         public async Task<IActionResult> CreatePaymentMomo([FromBody] PaymentDto dto)
         {
+            var virtualCart = await _cartService.CreateVirtualCart(dto);
             var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
             double amount = (double)orderResponse.Data;
             var response = await _momoService.CreatePaymentAsync(dto, amount);
