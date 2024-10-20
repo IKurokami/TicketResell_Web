@@ -11,6 +11,8 @@ import {
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSearchParams } from "next/navigation";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Search: React.FC = () => {
   const searchParams = useSearchParams();
@@ -20,7 +22,16 @@ const Search: React.FC = () => {
   const [priceRange, setPriceRange] = useState(23000000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedDateFilter, setSelectedDateFilter] = useState("all");
+
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
+  const [startDate, endDate] = dateRange;
+
+  const [startTime, setStartTime] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
+
   const [tickets, setTickets] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [uniqueCities, setUniqueCities] = useState<string[]>([]);
@@ -151,9 +162,36 @@ const Search: React.FC = () => {
     selectedLocation,
     tickets,
     sortOption,
-    selectedDateFilter,
-    selectedTime, // Add this line
+    startDate,
+    endDate,
+    startTime,
+    endTime,
   ]);
+  const clearTimeFilter = () => {
+    setStartTime("");
+    setEndTime("");
+  };
+  const clearFilters = () => {
+    setSearchTerm("");
+    setPriceRange(23000000);
+    setSelectedGenres([]);
+    setSelectedLocation("");
+    clearTimeFilter();
+    setDateRange([null, null]);
+    // Reset the date picker inputs
+    const startInput = document.getElementById(
+      "datepicker-range-start"
+    ) as HTMLInputElement;
+    const endInput = document.getElementById(
+      "datepicker-range-end"
+    ) as HTMLInputElement;
+    if (startInput) startInput.value = "";
+    if (endInput) endInput.value = "";
+  };
+
+  const handleDateChange = (update: [Date | null, Date | null]) => {
+    setDateRange(update);
+  };
 
   const filterTickets = () => {
     let filtered = tickets;
@@ -181,14 +219,24 @@ const Search: React.FC = () => {
       );
     }
 
-    // Time Filter
-    if (selectedTime) {
-      const [filterHour, filterMinute] = selectedTime.split(":").map(Number);
+    // Date Range Filter
+    if (startDate && endDate) {
       filtered = filtered.filter((ticket) => {
         const ticketDate = new Date(ticket.startDate);
-        const ticketHour = ticketDate.getHours();
-        const ticketMinute = ticketDate.getMinutes();
-        return ticketHour === filterHour && ticketMinute >= filterMinute;
+        return ticketDate >= startDate && ticketDate <= endDate;
+      });
+    }
+
+    // Time Range Filter
+    if (startTime && endTime) {
+      filtered = filtered.filter((ticket) => {
+        const ticketDate = new Date(ticket.startDate);
+        const ticketTime = ticketDate.getHours() * 60 + ticketDate.getMinutes();
+        const [startHour, startMinute] = startTime.split(":").map(Number);
+        const [endHour, endMinute] = endTime.split(":").map(Number);
+        const filterStartTime = startHour * 60 + startMinute;
+        const filterEndTime = endHour * 60 + endMinute;
+        return ticketTime >= filterStartTime && ticketTime <= filterEndTime;
       });
     }
 
@@ -199,43 +247,6 @@ const Search: React.FC = () => {
           extractCity(ticket.location).toLowerCase() ===
           selectedLocation.toLowerCase()
       );
-    }
-
-    // Date Filter
-    if (selectedDateFilter !== "all") {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth(); // January is 0, December is 11
-
-      // Calculate next month and two months ahead before filtering
-      const nextMonth = (currentMonth + 1) % 12;
-      const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-
-      const twoMonthsAhead = (currentMonth + 2) % 12;
-      const twoMonthsYear =
-        currentMonth + 2 >= 12 ? currentYear + 1 : currentYear;
-
-      filtered = filtered.filter((ticket) => {
-        const ticketDate = new Date(ticket.startDate);
-        const ticketMonth = ticketDate.getMonth();
-        const ticketYear = ticketDate.getFullYear();
-
-        switch (selectedDateFilter) {
-          case "thisMonth":
-            return ticketMonth === currentMonth && ticketYear === currentYear;
-
-          case "nextMonth":
-            return ticketMonth === nextMonth && ticketYear === nextMonthYear;
-
-          case "twoMonthsAhead":
-            return (
-              ticketMonth === twoMonthsAhead && ticketYear === twoMonthsYear
-            );
-
-          default:
-            return true; // Return all if the filter doesn't match
-        }
-      });
     }
 
     setFilteredTickets(sortTickets(filtered));
@@ -399,46 +410,59 @@ const Search: React.FC = () => {
                 >
                   <option value="">All Locations</option>
                   {uniqueCities.map((city) => (
-                    <option key={city} value={city}>
-                      {truncateText(city, 30)}
+                    <option key={city} value={city} className="truncate">
+                      {city}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Date Filter */}
+              {/* Date Range Filter */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Date</h3>
-                <select
-                  value={selectedDateFilter}
-                  onChange={(e) => setSelectedDateFilter(e.target.value)}
+                <h3 className="text-lg font-semibold mb-2">Date Range</h3>
+                <DatePicker
+                  selectsRange={true}
+                  startDate={startDate as Date}
+                  endDate={endDate as Date}
+                  onChange={handleDateChange}
                   className="w-full border-gray-300 rounded-lg shadow-sm p-2"
-                >
-                  <option value="all">Show all months</option>
-                  <option value="thisMonth">
-                    This month ({getCurrentMonthName()})
-                  </option>
-                  <option value="nextMonth">
-                    Next month ({getNextMonthName()})
-                  </option>
-                  <option value="twoMonthsAhead">
-                    Next 2 months ({getTwoMonthsAheadName()})
-                  </option>
-                </select>
-              </div>
-              {/* Time Filter */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Select Time</h3>
-                <label htmlFor="time" className="sr-only">
-                  Select Time
-                </label>
-                <input
-                  id="time"
-                  type="time"
-                  value={selectedTime}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                  className="w-64 ml-4 border-gray-300 rounded-lg shadow-sm p-2 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                  placeholderText="Select date range"
                 />
+              </div>
+
+              {/* Time Range Filter */}
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-2">Time Range</h3>
+                <div className="flex flex-col space-y-2">
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full border-gray-300 rounded-lg shadow-sm p-2"
+                  />
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full border-gray-300 rounded-lg shadow-sm p-2"
+                  />
+                </div>
+                <button
+                  onClick={clearTimeFilter}
+                  className="mt-2 w-full bg-gray-200 text-gray-700 rounded-md py-1 px-2 hover:bg-gray-300 transition duration-200 text-sm"
+                >
+                  Clear Time Filter
+                </button>
+              </div>
+
+              {/* Clear Filters Button */}
+              <div className="mt-6">
+                <button
+                  onClick={clearFilters}
+                  className="w-full bg-red-500 text-white rounded-md py-2 px-4 hover:bg-red-600 transition duration-200"
+                >
+                  Clear Filters
+                </button>
               </div>
             </div>
 
