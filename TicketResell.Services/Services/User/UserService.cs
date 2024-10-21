@@ -2,6 +2,7 @@
 using FluentValidation;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Entities;
+using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
 using IValidatorFactory = Repositories.Core.Validators.IValidatorFactory;
 
@@ -10,14 +11,16 @@ namespace TicketResell.Services.Services
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAppLogger _logger;
         private IMapper _mapper;
 
         private IValidatorFactory _validatorFactory;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IValidatorFactory validatorFactory)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IValidatorFactory validatorFactory, IAppLogger logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _logger = logger;
             _validatorFactory = validatorFactory;
         }
 
@@ -44,7 +47,7 @@ namespace TicketResell.Services.Services
             var users = _mapper.Map<IEnumerable<UserReadDto>>(user);
             return ResponseModel.Success($"Successfully get all user", users);
         }
-        
+
         public async Task<ResponseModel> GetUserByIdAsync(string id)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
@@ -52,7 +55,7 @@ namespace TicketResell.Services.Services
             UserReadDto userDto = _mapper.Map<UserReadDto>(user);
             return ResponseModel.Success($"Successfully get user: {userDto.Username}", userDto);
         }
-        
+
         public async Task<ResponseModel> GetUserByEmailAsync(string email)
         {
             User? user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
@@ -67,14 +70,14 @@ namespace TicketResell.Services.Services
         public async Task<ResponseModel> UpdateUserByIdAsync(string id, UserUpdateDto dto, bool saveAll)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
-            
+
             if (string.IsNullOrEmpty(dto.Password))
             {
                 dto.Password = user.Password;
             }
-            
+
             _mapper.Map(dto, user);
-            
+
             var validator = _validatorFactory.GetValidator<User>();
 
             var validationResult = validator.Validate(user);
@@ -82,14 +85,14 @@ namespace TicketResell.Services.Services
             {
                 return ResponseModel.BadRequest("Validation error", validationResult.Errors);
             }
-            
+
             _unitOfWork.UserRepository.Update(user);
             if (saveAll)
                 await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully updated user: {user.Username}", _mapper.Map<UserReadDto>(user));
         }
 
-        public async Task<ResponseModel> RegisterSeller(string id,SellerRegisterDto dto,bool saveAll)
+        public async Task<ResponseModel> RegisterSeller(string id, SellerRegisterDto dto, bool saveAll)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
             _mapper.Map(dto, user);
@@ -102,7 +105,7 @@ namespace TicketResell.Services.Services
             await _unitOfWork.UserRepository.RegisterSeller(user);
             if (saveAll)
                 await _unitOfWork.CompleteAsync();
-            return ResponseModel.Success($"Successfully register seller");  
+            return ResponseModel.Success($"Successfully register seller");
         }
 
         public async Task<ResponseModel> CheckSeller(string id)

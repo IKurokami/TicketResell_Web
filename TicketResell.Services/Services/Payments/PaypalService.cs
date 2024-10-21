@@ -34,8 +34,8 @@ namespace TicketResell.Services.Services.Payments
                 double rate = await GetConversionRateVndToUsd();
                 payoutRequest.Amount = payoutRequest.Amount * rate * (1 / 1.05);
                 var payout = await CreatePayPalPayoutAsync(payoutRequest, accessToken);
-
-                return ResponseModel.Success("PayPal payout created successfully", payout);
+                string batchId = (string)payout.Data;
+                return ResponseModel.Success("PayPal payout created successfully", batchId);
             }
             catch (Exception ex)
             {
@@ -89,9 +89,9 @@ namespace TicketResell.Services.Services.Payments
             request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(_payoutRequest), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
             var jsonDoc = JsonDocument.Parse(content);
             string payoutBatchId = jsonDoc.RootElement.GetProperty("batch_header").GetProperty("payout_batch_id").GetString();
 

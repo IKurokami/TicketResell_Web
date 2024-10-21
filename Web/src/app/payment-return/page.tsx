@@ -7,7 +7,7 @@ const PaymentReturn = () => {
     <div className="home">
       {/* <Announce/> */}
       <Navbar page={"ticket"} />
-      <PaymentStatus success={true} />
+      <PaymentStatus />
       <Footer />
       {/*     
       <Topticket />
