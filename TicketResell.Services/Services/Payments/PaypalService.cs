@@ -9,7 +9,10 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Repositories.Config;
 using Repositories.Core.Dtos.Payment;
+using Repositories.Core.Entities;
+using TicketResell.Repositories.Core.Dtos.Payment;
 using TicketResell.Repositories.Logger;
+using TicketResell.Repositories.UnitOfWork;
 
 namespace TicketResell.Services.Services.Payments
 {
@@ -18,12 +21,124 @@ namespace TicketResell.Services.Services.Payments
         private readonly AppConfig _config;
         private readonly HttpClient _httpClient;
         private readonly IAppLogger _logger;
-        public PaypalService(IOptions<AppConfig> config, HttpClient httpClient, IAppLogger logger)
+        private readonly IUnitOfWork _unitOfWork;
+        public PaypalService(IOptions<AppConfig> config, HttpClient httpClient, IAppLogger logger, IUnitOfWork unitOfWork)
         {
             _config = config.Value;
             _httpClient = httpClient;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
+
+        public async Task<ResponseModel> CreatePayoutAsync(string orderId)
+        {
+            try
+            {
+                var accessToken = await GenerateAccessTokenAsync();
+                var payout = await CreatePayPalPayoutAsync(orderId, accessToken);
+                string batchId = (string)payout.Data;
+                return ResponseModel.Success("PayPal payout created successfully", batchId);
+            }
+            catch (Exception ex)
+            {
+                return ResponseModel.Error($"Error creating PayPal payout: {ex.Message}");
+            }
+        }
+
+        public async Task<ResponseModel> CheckPayoutStatusAsync(string payoutBatchId)
+        {
+            try
+            {
+                var accessToken = await GenerateAccessTokenAsync();
+                var status = await GetPayoutStatusAsync(payoutBatchId, accessToken);
+
+                return ResponseModel.Success($"Payout status: {status}", status);
+            }
+            catch (Exception ex)
+            {
+                return ResponseModel.Error($"Error checking payout status: {ex.Message}");
+            }
+        }
+        private async Task<ResponseModel> CreatePayPalPayoutAsync(string orderId, string accessToken)
+        {
+            try
+            {
+                double rate = await GetConversionRateVndToUsd();
+                var order = await _unitOfWork.OrderRepository.GetTicketDetailsByIdAsync(orderId);
+
+                if (order == null)
+                    return ResponseModel.Error("Order not found");
+
+                var payoutItems = new List<dynamic>();
+
+                foreach (var orderDetail in order.OrderDetails)
+                {
+                    User seller = orderDetail.Ticket.Seller;
+                    double ticketCost = orderDetail.Ticket.Cost ?? -1.0;
+                    int quantity = orderDetail.Quantity ?? -1;
+
+                    var payoutItem = new
+                    {
+                        recipient_type = "EMAIL",
+                        amount = new
+                        {
+                            value = (ticketCost * quantity * rate).ToString("F2"),
+                            currency = "USD"
+                        },
+                        note = "Thanks for your patronage!",
+                        sender_item_id = Guid.NewGuid().ToString(),
+                        receiver = seller.Gmail
+                    };
+
+                    payoutItems.Add(payoutItem);
+                }
+
+                var payoutRequest = new
+                {
+                    sender_batch_header = new
+                    {
+                        sender_batch_id = Guid.NewGuid().ToString(),
+                        email_subject = "You have a payout!",
+                        email_message = "You have received a payout! Thanks for using our service!"
+                    },
+                    items = payoutItems
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v1/payments/payouts");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(payoutRequest), Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
+
+                var jsonDoc = JsonDocument.Parse(content);
+                string payoutBatchId = jsonDoc.RootElement.GetProperty("batch_header").GetProperty("payout_batch_id").GetString();
+
+                await _unitOfWork.CompleteAsync();
+
+                return ResponseModel.Success("Success", payoutBatchId);
+            }
+            catch (Exception ex)
+            {
+                return ResponseModel.Error($"Error creating PayPal payout: {ex.Message}");
+            }
+        }
+        private async Task<ResponseModel> GetPayoutStatusAsync(string payoutBatchId, string accessToken)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_config.PayPalApiUrl}/v1/payments/payouts/{payoutBatchId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(content);
+            string status = jsonDoc.RootElement.GetProperty("batch_header").GetProperty("batch_status").GetString();
+
+            return ResponseModel.Success("Success", status);
+        }
+
 
         public async Task<ResponseModel> CheckTransactionStatus(string orderId)
         {
@@ -136,8 +251,8 @@ namespace TicketResell.Services.Services.Payments
                 },
                 application_context = new
                 {
-                    return_url = $"{_config.BaseUrl}/payment-return?method=paypal",
-                    cancel_url = $"{_config.BaseUrl}/payment-return?method=paypal",
+                    return_url = $"{_config.BaseUrl}/payment-return?method=paypal&orderId={orderId}",
+                    cancel_url = $"{_config.BaseUrl}/payment-return?method=paypal&orderId={orderId}",
                     shipping_preference = "NO_SHIPPING",
                     user_action = "PAY_NOW",
                     brand_name = "TicketResell"

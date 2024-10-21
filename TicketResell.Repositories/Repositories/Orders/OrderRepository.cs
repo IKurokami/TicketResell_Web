@@ -21,6 +21,23 @@ namespace Repositories.Repositories
             return await _context.Orders.Include(o => o.OrderDetails).ToListAsync();
         }
 
+        public async Task<Order?> GetDetailsByIdAsync(string orderId)
+        {
+            return await _context.Orders
+                                 .Include(o => o.OrderDetails)
+                                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
+        }
+
+        public async Task<Order?> GetTicketDetailsByIdAsync(string orderId)
+        {
+            return await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Ticket)
+                .ThenInclude(t => t.Seller)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+        }
+
+
         public async Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId)
         {
             return await _context.Orders
@@ -28,6 +45,8 @@ namespace Repositories.Repositories
                 .Include(o => o.OrderDetails)
                 .ToListAsync();
         }
+
+
 
         public async Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateRange dateRange)
         {

@@ -87,7 +87,7 @@ namespace TicketResell.Services.Services
 
             // Build the signature string
             string RequestId = Guid.NewGuid().ToString();
-            string signatureString = $"accessKey={_config.MomoAccessKey}&amount={amount}&extraData={ExtraData}&ipnUrl={_ipnUrl}&orderId={dto.OrderId}&orderInfo={OrderInfo}&partnerCode={_config.MomoPartnerCode}&redirectUrl={_redirectUrl}&requestId={RequestId}&requestType=captureWallet";
+            string signatureString = $"accessKey={_config.MomoAccessKey}&amount={amount}&extraData={ExtraData}&ipnUrl={_ipnUrl}&orderId={dto.OrderId}&orderId={dto.OrderId}&orderInfo={OrderInfo}&partnerCode={_config.MomoPartnerCode}&redirectUrl={_redirectUrl}&orderId={dto.OrderId}&requestId={RequestId}&requestType=captureWallet";
 
             // Create SHA256 signature
             string signature = CreateSignature(signatureString, _config.MomoSecretKey);

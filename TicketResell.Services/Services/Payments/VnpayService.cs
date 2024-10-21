@@ -78,11 +78,12 @@ namespace TicketResell.Services.Services.Payments
             var result = await response.Content.ReadAsStringAsync();
 
             var jsonDoc = JsonDocument.Parse(result);
-            string resultCode = jsonDoc.RootElement.GetProperty("vnp_ResponseCode").GetString();
+            string resultCode = jsonDoc.RootElement.GetProperty("vnp_TransactionStatus").GetString();
             string message = jsonDoc.RootElement.GetProperty("vnp_Message").GetString();
-            if (resultCode == "00")
+            if (resultCode == "01")
+            {
                 return ResponseModel.Success(message);
-
+            }
             return ResponseModel.Error(message);
         }
 

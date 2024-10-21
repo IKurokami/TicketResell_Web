@@ -23,20 +23,20 @@ namespace Repositories.Repositories
             return await _context.Orders
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Ticket).ThenInclude(t => t.Seller)
-                .FirstOrDefaultAsync(o => o.BuyerId == userId && o.Status == (int)OrderStatus.Pending);
+                .FirstOrDefaultAsync(o => o.BuyerId == userId && o.Status == (int)OrderStatus.Carting);
         }
 
         public async Task<bool> UserHasCartAsync(string userId)
         {
             return await _context.Orders
-                .AnyAsync(o => o.BuyerId == userId && o.Status == (int)OrderStatus.Pending);
+                .AnyAsync(o => o.BuyerId == userId && o.Status == (int)OrderStatus.Carting);
         }
 
         public async Task<IEnumerable<Order>> GetAllActiveCartsAsync()
         {
             return await _context.Orders
                 .Include(o => o.OrderDetails)
-                .Where(o => o.Status == (int)OrderStatus.Pending)
+                .Where(o => o.Status == (int)OrderStatus.Carting)
                 .ToListAsync();
         }
 
@@ -54,7 +54,7 @@ namespace Repositories.Repositories
                 BuyerId = userId,
                 Total = 0,
                 Date = DateTime.UtcNow,
-                Status = (int)OrderStatus.Pending
+                Status = (int)OrderStatus.Carting
             };
 
             await _context.Orders.AddAsync(newCart);
