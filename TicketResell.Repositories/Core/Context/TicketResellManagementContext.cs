@@ -32,7 +32,7 @@ public partial class TicketResellManagementContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=SQLServer");
+        => optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("SQLSERVER"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
