@@ -25,7 +25,7 @@ const UserManager: React.FC<UserManagerProps> = ({
   const [sortOption, setSortOption] = useState("Sort By");
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -247,105 +247,81 @@ const UserManager: React.FC<UserManagerProps> = ({
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 auto-rows-fr">
-        {paginatedUsers.map((user) => (
-          <div
-            key={user.userId}
-            className="relative bg-emerald-800 rounded-lg shadow-lg group overflow-hidden"
-          >
-            <svg
-              className="absolute bottom-0 left-0 mb-8 scale-100 group-hover:scale-[1.65] transition-transform"
-              viewBox="0 0 375 283"
-              fill="none"
-              style={{ opacity: 0.1 }}
-            >
-              <rect
-                x="159.52"
-                y="175"
-                width="152"
-                height="152"
-                rx="8"
-                transform="rotate(-45 159.52 175)"
-                fill="white"
-              />
-              <rect
-                y="107.48"
-                width="152"
-                height="152"
-                rx="8"
-                transform="rotate(-45 0 107.48)"
-                fill="white"
-              />
-            </svg>
-            <div className="pt-12 px-12 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <div
-                className="block absolute w-full h-56 bottom-0 left-0 -mb-24 ml-3"
-                style={{
-                  background: "radial-gradient(black, transparent 60%)",
-                  transform: "rotate3d(0, 0, 1, 20deg) scale3d(1, 0.6, 1)",
-                  opacity: 0.2,
-                }}
-              ></div>
-              <img
-                src={
-                  user.avatar ||
-                  "https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"
-                }
-                alt={user.fullname}
-                className="relative w-48 h-48 rounded-full object-cover"
-              />
-            </div>
-            <div className="relative text-white px-8 pb-16 mt-8">
-              <div className="flex justify-between items-start">
-                <div className="w-3/4">
-                  <h2
-                    className="block font-semibold text-xl mb-1 truncate"
-                    title={user.fullname || user.username}
-                  >
-                    {user.fullname || user.username}
-                  </h2>
-                  <p className="text-sm truncate" title={user.gmail}>
-                    {user.gmail}
-                  </p>
-                </div>
-                {getStatusBadge(user.status)}
-              </div>
-              <div className="flex flex-wrap py-1">
-                {getUserRoles(user)
-                  .split(",")
-                  .filter((role) => role.trim() !== "")
-                  .map((role) => (
-                    <span
-                      key={role}
-                      className="bg-blue-400 text-black rounded-full px-2 py-1 text-xs mr-1 mb-1"
+
+      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                Name
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Email
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Roles
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Status
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Joined
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedUsers.map((user) => (
+              <tr
+                key={user.userId}
+                className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
+              >
+                <th
+                  scope="row"
+                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                >
+                  {user.fullname || user.username}
+                </th>
+                <td className="px-6 py-4">{user.gmail}</td>
+                <td className="px-6 py-4">
+                  {getUserRoles(user)
+                    .split(",")
+                    .filter((role) => role.trim() !== "")
+                    .map((role, index) => (
+                      <span
+                        key={index}
+                        className="bg-blue-400 text-black rounded-full px-2 py-1 text-xs mr-1 mb-1"
+                      >
+                        {role.trim()}
+                      </span>
+                    ))}
+                </td>
+                <td className="px-6 py-4">{getStatusBadge(user.status)}</td>
+                <td className="px-6 py-4">{formatDate(user.createDate)}</td>
+                <td className="px-6 py-4">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => onEdit(user.userId)}
+                      className="text-blue-600 dark:text-blue-500 hover:underline"
+                      title="Edit"
                     >
-                      {role.trim()}
-                    </span>
-                  ))}
-              </div>
-              <p className="text-sm mt-2">{user.phone || "No phone"}</p>
-              <p className="text-sm mt-1">
-                Joined: {formatDate(user.createDate)}
-              </p>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 bg-emerald-600 py-3 px-8 flex justify-between items-center">
-              <button
-                onClick={() => onEdit(user.userId)}
-                className="text-white hover:text-blue-200 transition-colors duration-200"
-                title="Edit"
-              >
-                <FaEdit size={20} />
-              </button>
-              <button
-                onClick={() => onDelete(user.userId)}
-                className="text-white hover:text-red-200 transition-colors duration-200"
-                title="Delete"
-              >
-                <FaTrash size={20} />
-              </button>
-            </div>
-          </div>
-        ))}
+                      <FaEdit size={16} />
+                    </button>
+                    <button
+                      onClick={() => onDelete(user.userId)}
+                      className="text-red-600 dark:text-red-500 hover:underline"
+                      title="Delete"
+                    >
+                      <FaTrash size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}

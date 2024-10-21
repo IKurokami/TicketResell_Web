@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaTrash, FaEdit, FaSearch, FaPlus } from "react-icons/fa";
+import { FaTrash, FaEdit, FaSearch, FaPlus, FaSort } from "react-icons/fa";
 
 interface Category {
   categoryId: string;
@@ -22,6 +22,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
+  const [sortField, setSortField] = useState<"name" | "description">("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     const filterCategories = () => {
@@ -30,18 +32,37 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
         setFilteredCategories([]);
         return;
       }
-      console.log("category", categories);
 
-      const filtered = categories.filter(
+      let filtered = categories.filter(
         (category) =>
           category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           category.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
+
+      // Sort the filtered results
+      filtered = filtered.sort((a, b) => {
+        const aValue = a[sortField].toLowerCase();
+        const bValue = b[sortField].toLowerCase();
+        if (sortDirection === "asc") {
+          return aValue > bValue ? 1 : -1;
+        }
+        return aValue < bValue ? 1 : -1;
+      });
+
       setFilteredCategories(filtered);
     };
 
     filterCategories();
-  }, [searchTerm, categories]);
+  }, [searchTerm, categories, sortField, sortDirection]);
+
+  const handleSort = (field: "name" | "description") => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
 
   const truncateText = (text: string, maxLength: number) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -52,7 +73,6 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       {/* Header */}
       <div className="p-4">
         <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-          {/* Search Input */}
           <div className="relative flex-grow mx-2 w-full mb-4 md:mb-0">
             <input
               type="text"
@@ -63,55 +83,88 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
             />
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
-          {/* Add Category Button */}
           <button
             onClick={onAdd}
-            className="flex items-center h-12 px-6 bg-transparent-500 text-black text-nowrap shadow-sm font-semibold rounded-xl hover:bg-transparent-600 transition duration-200"
+            className="flex items-center h-12 px-6 bg-blue-500 text-white text-nowrap shadow-sm font-semibold rounded-xl hover:bg-blue-600 transition duration-200"
           >
             <FaPlus className="mr-2" /> Add Category
           </button>
         </div>
       </div>
 
-      {/* Category Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredCategories.length > 0 ? (
-          filteredCategories.map((category) => (
-            <div
-              key={category.categoryId}
-              className="relative border border-gray-200 rounded-lg shadow-md p-4"
-            >
-              {/* Category Information */}
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-bold">{category.name}</h2>
-                <div className="flex space-x-2">
-                  {/* Edit and Delete Buttons */}
-                  <button
-                    onClick={() => onEdit(category.categoryId)}
-                    className="text-blue-500 hover:text-blue-700"
-                    title="Edit Category"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => onDelete(category.categoryId)}
-                    className="text-red-500 hover:text-red-700"
-                    title="Delete Category"
-                  >
-                    <FaTrash />
-                  </button>
+      {/* Table */}
+      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table className="w-full text-sm text-left text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                <div
+                  className="flex items-center cursor-pointer"
+                  onClick={() => handleSort("name")}
+                >
+                  Name
+                  <FaSort className="w-3 h-3 ms-1.5" />
                 </div>
-              </div>
-              <p className="text-sm text-gray-600">
-                {truncateText(category.description, 100)}
-              </p>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center text-gray-500">
-            No categories found.
-          </div>
-        )}
+              </th>
+              <th scope="col" className="px-6 py-3">
+                <div
+                  className="flex items-center cursor-pointer"
+                  onClick={() => handleSort("description")}
+                >
+                  Description
+                  <FaSort className="w-3 h-3 ms-1.5" />
+                </div>
+              </th>
+              <th scope="col" className="px-6 py-3">
+                <span className="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredCategories.length > 0 ? (
+              filteredCategories.map((category) => (
+                <tr
+                  key={category.categoryId}
+                  className="bg-white border-b hover:bg-gray-50"
+                >
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                  >
+                    {category.name}
+                  </th>
+                  <td className="px-6 py-4">
+                    {truncateText(category.description, 100)}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => onEdit(category.categoryId)}
+                        className="text-blue-500 hover:text-blue-700"
+                        title="Edit Category"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => onDelete(category.categoryId)}
+                        className="text-red-500 hover:text-red-700"
+                        title="Delete Category"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                  No categories found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

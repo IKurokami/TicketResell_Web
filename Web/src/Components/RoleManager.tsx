@@ -67,45 +67,63 @@ const RoleManager: React.FC<RoleListProps> = ({
         </div>
       </div>
 
-      {/* Role Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredRoles.length > 0 ? (
-          filteredRoles.map((role) => (
-            <div
-              key={role.roleId}
-              className="relative border border-gray-200 rounded-lg shadow-md p-4"
-            >
-              {/* Role Information */}
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-bold">{role.rolename}</h2>
-                <div className="flex space-x-2">
-                  {/* Edit and Delete Buttons */}
-                  <button
-                    onClick={() => onEdit(role.roleId)}
-                    className="text-blue-500 hover:text-blue-700"
-                    title="Edit Role"
+      {/* Role Table */}
+      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                Role Name
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Description
+              </th>
+              <th scope="col" className="px-6 py-3">
+                <span className="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredRoles.length > 0 ? (
+              filteredRoles.map((role) => (
+                <tr
+                  key={role.roleId}
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                >
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                   >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => onDelete(role.roleId)}
-                    className="text-red-500 hover:text-red-700"
-                    title="Delete Role"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600">
-                {truncateText(role.description, 100)}
-              </p>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center text-gray-500">
-            No roles found.
-          </div>
-        )}
+                    {role.rolename}
+                  </th>
+                  <td className="px-6 py-4">
+                    {truncateText(role.description, 100)}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => onEdit(role.roleId)}
+                      className="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-2"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => onDelete(role.roleId)}
+                      className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                  No roles found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
