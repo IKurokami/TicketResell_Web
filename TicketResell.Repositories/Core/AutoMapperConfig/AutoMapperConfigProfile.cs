@@ -35,7 +35,7 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<Revenue, RevenueReadDto>();
             CreateMap<RevenueUpdateDto, Revenue>();
 
-            //Order
+            //SQL
             CreateMap<Order, OrderDto>();
             CreateMap<OrderDto, Order>();
             CreateMap<CartItemDto, OrderDetailDto>();
