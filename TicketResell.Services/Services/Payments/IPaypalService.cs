@@ -13,7 +13,7 @@ namespace TicketResell.Services.Services.Payments
         public Task<ResponseModel> CheckTransactionStatus(string orderId);
 
         public Task<ResponseModel> CheckPayoutStatusAsync(string payoutBatchId);
-        public Task<ResponseModel> CreatePayoutAsync(PayoutDto payoutRequest);
+        public Task<ResponseModel> CreatePayoutAsync(string orderId);
 
     }
 }

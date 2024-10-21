@@ -202,7 +202,7 @@ namespace TicketResell.Services.Services
                 Date = DateTime.UtcNow,
                 OrderDetails = orderDetails,
                 Total = orderDetails.Sum(od => od.Price * od.Quantity),
-                Status = (int)OrderStatus.Pending  // Assuming you have an OrderStatus enum
+                Status = (int)OrderStatus.Processing  // Assuming you have an OrderStatus enum
             };
 
             var validator = _validatorFactory.GetValidator<Order>();

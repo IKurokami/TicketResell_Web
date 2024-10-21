@@ -16,10 +16,8 @@ const PaymentStatus = () => {
       if (hasFetchedRef.current) return; // Prevent double fetch
       hasFetchedRef.current = true;
       const method = searchParams.get("method");
-      const orderId =
-        method === "paypal"
-          ? searchParams.get("token")
-          : searchParams.get("orderId");
+      const orderId = searchParams.get("orderId");
+      const token = method === "paypal" ? searchParams.get("token") : "default";
       console.log(method);
       console.log(orderId);
       if (!method || !orderId) {
@@ -47,7 +45,7 @@ const PaymentStatus = () => {
 
       const requestBody = {
         orderId,
-        token: orderId,
+        token,
         orderInfo: {
           userId: "user-id-here", // Replace with actual user ID if needed
           selectedTicketIds: [], // This can be left empty as per your requirements

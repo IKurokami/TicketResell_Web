@@ -6,5 +6,5 @@ public enum OrderStatus
     Carting = 1,
     Refund = 2,
     Cancel = 3,
-    Pending = -1,
+    Processing = -1,
 }
