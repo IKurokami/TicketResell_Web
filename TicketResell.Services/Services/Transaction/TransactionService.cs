@@ -28,8 +28,8 @@ public class TransactionService : ITransactionService
         {
             return ResponseModel.NotFound($"No order details found for seller {sellerId} in the specified date range.");
         }
-
-        return ResponseModel.Success($"Successfully retrieved order details for seller {sellerId} from {dateRange.StartDate} to {dateRange.EndDate}", orderDetails);
+        var orderDtos = _mapper.Map<List<OrderDetailTransactionDto>>(orderDetails);
+        return ResponseModel.Success($"Successfully retrieved order details for seller {sellerId} from {dateRange.StartDate} to {dateRange.EndDate}", orderDtos);
     }
 
     public async Task<ResponseModel> CalculatorTotal(string sellerId, DateRange dateRange)

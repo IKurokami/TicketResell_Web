@@ -4,6 +4,7 @@ import RichTextEditor from "@/Hooks/RichTextEditor";
 import { useRouter } from "next/navigation";
 import ScrollToTopButton from "@/Hooks/useScrollTopButton";
 import "bootstrap/dist/css/bootstrap.min.css";
+import uploadImageForTicket from "@/models/UpdateImage";
 import {
   TextField,
   Button,
@@ -15,13 +16,6 @@ import Cookies from "js-cookie";
 import "@/Css/AddTicketModal.css";
 import { useParams } from "next/navigation";
 import { fetchImage } from "@/models/FetchImage";
-import { updateImage } from "@/models/UpdateImage";
-import { deleteImage } from "@/models/Deleteimage";
-
-type Ticket = {
-  TicketId: string;
-  Image: string;
-};
 
 interface Province {
   Id: number;
@@ -518,44 +512,6 @@ const UpdateTicketModal: React.FC = () => {
     }
   };
 
-const updateImageForTicket = async (ticket: Ticket, selectedFile: File | null) => {
-  // Check if a file was provided
-  if (!selectedFile) {
-    console.error("No file selected for upload.");
-    return null;
-  }
-
-  const formData = new FormData();
-  formData.append("id", ticket.Image); 
-  formData.append("image", selectedFile);
-
-  try {
-    // Call the deleteImage function
-    const deleteImageResult = await deleteImage(ticket.Image);
-    console.log(deleteImageResult);
-    
-    // Check if the image deletion was successful
-    
-
-      // Proceed with image upload
-      const uploadResponse = await fetch("/api/uploadImage", {
-        method: "POST",
-        body: formData,
-      });
-
-      // Check if the upload request was successful
-      if (!uploadResponse.ok) {
-        throw new Error(`Error uploading image: ${uploadResponse.statusText}`);
-      }
-
-      // Return the result of the upload
-      const uploadResult = await uploadResponse.json();
-      return uploadResult;
-  } catch (error) {
-    console.error("Error during image update:", error);
-    return null;
-  }
-};
 
   
 
@@ -628,7 +584,7 @@ const updateImageForTicket = async (ticket: Ticket, selectedFile: File | null) =
         const firstTicket = tickets[0]; 
         console.log(firstTicket);
         
-        const imageUpdateResult = await updateImageForTicket(firstTicket, selectedFile);
+        const imageUpdateResult = await uploadImageForTicket(firstTicket, selectedFile);
         return imageUpdateResult; 
       } else {
         console.error("No file selected or no tickets available.");
