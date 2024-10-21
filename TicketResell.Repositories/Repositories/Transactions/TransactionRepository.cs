@@ -22,12 +22,14 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
 
     public async Task<IEnumerable<OrderDetail>> GetTransactionsByDateAsync(string sellerId, DateRange dateRange)
     {
-        return (await _context.OrderDetails.Where(od => od != null &&
-                                                        od.Ticket != null &&
-                                                        od.Ticket.SellerId == sellerId &&
-                                                        od.Order != null &&
-                                                        od.Order.Date >= dateRange.StartDate &&
-                                                        od.Order.Date <= dateRange.EndDate).ToListAsync())!;
+        return (await _context.OrderDetails.Include(od => od.Ticket)
+            .Include(od => od.Order)
+            .ThenInclude(o => o.Buyer).Where(od => od != null &&
+                                                   od.Ticket != null &&
+                                                   od.Ticket.SellerId == sellerId &&
+                                                   od.Order != null &&
+                                                   od.Order.Date >= dateRange.StartDate &&
+                                                   od.Order.Date <= dateRange.EndDate).ToListAsync())!;
     }
 
     public async Task<double?> CalculatorTotal(string sellerId, DateRange dateRange)
@@ -47,10 +49,9 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
             .Include(od => od.Ticket)
             .Include(od => od.Order)
             .ThenInclude(o => o.Buyer)
-            .Where(od => od.Ticket.SellerId == sellerId && od.Order.Status==0)
+            .Where(od => od.Ticket.SellerId == sellerId && od.Order.Status == 0)
             .ToListAsync();
 
         return result;
     }
-
 }

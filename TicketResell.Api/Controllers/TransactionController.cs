@@ -16,8 +16,8 @@ namespace Api.Controllers
         [HttpPost("orderdetails/{sellerId}")]
         public async Task<IActionResult> GetOrderDetailByDate(string sellerId, [FromBody] DateRange dateRange)
         {
-            if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to access order details."));
+            // if (!HttpContext.GetIsAuthenticated())
+            //     return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to access order details."));
 
             return ResponseParser.Result(await _transactionService.GetOrderDetailByDate(sellerId, dateRange));
         }
@@ -34,8 +34,8 @@ namespace Api.Controllers
         [HttpGet("buyers/{sellerId}")]
         public async Task<IActionResult> GetBuyer(string sellerId)
         {
-            // if (!HttpContext.GetIsAuthenticated())
-            //     return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to get buyer information."));
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to get buyer information."));
 
             return ResponseParser.Result(await _transactionService.GetTicketOrderDetailsBySeller(sellerId));
         }
