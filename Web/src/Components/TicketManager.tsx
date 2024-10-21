@@ -25,7 +25,7 @@ const TicketManager: React.FC<TicketListProps> = ({
   const [sortOption, setSortOption] = useState("Sort By");
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>(tickets);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // Adjust this value to change items per page
+  const itemsPerPage = 10; // Adjust this value to change items per page
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -253,85 +253,96 @@ const TicketManager: React.FC<TicketListProps> = ({
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 auto-rows-fr">
-        {paginatedTickets.map((ticket) => (
-          <div
-            key={ticket.ticketId}
-            className="relative border border-gray-200 rounded-lg shadow-md overflow-hidden flex flex-col"
-          >
-            {/* Conditionally Render Edit/Delete or Active Icon */}
-            <div className="absolute bottom-2 right-2 flex flex-col space-y-1 z-10">
-              {" "}
-              {ticket.status === 1 ? (
-                <button
-                  onClick={() => onDelete(ticket.ticketId)}
-                  className="text-red-500 hover:text-red-700"
-                  title="Delete"
-                >
-                  <FaTrash />
-                </button>
-              ) : (
-                <button
-                  onClick={() => onActive(ticket.ticketId)}
-                  className="text-green-500 hover:text-green-700"
-                  title="Edit Inactive Ticket"
-                >
-                  <FaCheck />
-                </button>
-              )}
-            </div>
 
-            {/* Ticket Image */}
-            <img
-              src={ticket.imageUrl || ticket.image}
-              alt={ticket.name}
-              className="w-full h-48 object-cover"
-            />
-
-            {/* Ticket Information */}
-            <div className="p-4 flex-grow flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h2 className="text-lg font-bold truncate mr-2 flex-grow">
-                    {ticket.name}
-                  </h2>
-                  <div className="flex-shrink-0">
-                    {getStatusBadge(ticket.status)}
+      {/* Table */}
+      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                Name
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Categories
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Location
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Price
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Date
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Status
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedTickets.map((ticket) => (
+              <tr
+                key={ticket.ticketId}
+                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+              >
+                <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                  {truncateText(ticket.name, 20)}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex flex-wrap gap-2">
+                    {getCategoryNames(ticket)
+                      .split(",")
+                      .filter((category) => category.trim() !== "")
+                      .slice(0, 3)
+                      .map((category) => (
+                        <span
+                          key={category}
+                          className="bg-emerald-400 text-white rounded-full px-2 py-1 text-xs"
+                        >
+                          {category.trim()}
+                        </span>
+                      ))}
+                    {getCategoryNames(ticket).trim() === "" && (
+                      <span className="bg-gray-200 text-gray-700 rounded-full px-2 py-1 text-xs">
+                        No categories
+                      </span>
+                    )}
                   </div>
-                </div>
-                <p className="text-xl font-bold mb-2">
-                  {formatVND(ticket.cost)}
-                </p>
-                <p className="text-sm text-gray-600 mb-1">
+                </td>
+                <td className="px-6 py-4">
                   {truncateText(ticket.location, 20)}
-                </p>
-                <p className="text-sm text-gray-600 mb-4">
-                  Date: {formatDate(ticket.startDate)}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {getCategoryNames(ticket)
-                  .split(",")
-                  .filter((category) => category.trim() !== "")
-                  .slice(0, 3)
-                  .map((category) => (
-                    <span
-                      key={category}
-                      className="bg-emerald-400 text-white rounded-full px-2 py-1 text-xs"
+                </td>
+                <td className="px-6 py-4">{formatVND(ticket.cost)}</td>
+                <td className="px-6 py-4">{formatDate(ticket.startDate)}</td>
+                <td className="px-6 py-4">{getStatusBadge(ticket.status)}</td>
+                <td className="px-6 py-4 text-right">
+                  {ticket.status === 1 ? (
+                    <button
+                      onClick={() => onDelete(ticket.ticketId)}
+                      className="text-red-500 hover:text-red-700"
+                      title="Delete"
                     >
-                      {category.trim()}
-                    </span>
-                  ))}
-                {getCategoryNames(ticket).trim() === "" && (
-                  <span className="bg-gray-200 text-gray-700 rounded-full px-2 py-1 text-xs">
-                    No categories
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+                      <FaTrash />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onActive(ticket.ticketId)}
+                      className="text-green-500 hover:text-green-700"
+                      title="Edit Inactive Ticket"
+                    >
+                      <FaCheck />
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-8">
