@@ -262,13 +262,17 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
       ""
       <div className="bg-white">
         <SellProfile
-          address={profile.address}
+          gmail={profile.email}
           avatar={profile.avatar}
           fullname={profile.fullname}
           phoneNumber={profile.phone}
           isAdjustVisible={true}
         />
-        <ProfileInfo />
+        <ProfileInfo
+          address={profile.address}
+          bio={profile.bio}
+          birthday={profile.birthday}
+        />
         {/* <div className="h-40 -mb-5 rounded-xl shadow-lg overflow-hidden">
           <img
             src="https://picsum.photos/1000"
