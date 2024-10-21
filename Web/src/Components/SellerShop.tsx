@@ -13,10 +13,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dropdown } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
 import { MdClose, MdFilterList, MdKeyboardArrowDown } from "react-icons/md";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getCategoryNames } from "@/models/TicketFetch";
-import TicketGrid from "./TicketGrid";
+import { fetchRemainingByID, getCategoryNames } from "@/models/TicketFetch";
+import TicketGrid, { TICKET_STATUS } from "./TicketGrid";
 import { fetchImage } from "@/models/FetchImage";
 import { useParams } from "next/navigation";
 import SellProfile from "./sellprofile";
@@ -56,6 +56,7 @@ const SellerShop = () => {
   const cateName = searchParams?.get("cateName") || "";
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
   const [priceRange, setPriceRange] = useState(23000000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -66,6 +67,8 @@ const SellerShop = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("Price low to high");
   const [statusOption, setStatusOption] = useState("Sắp diễn ra");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [uniqueCities, setUniqueCities] = useState<string[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [sellerResult, setSellerResult] = useState<Seller | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -76,6 +79,11 @@ const SellerShop = () => {
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
   const params = useParams<{ id: string }>();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const extractCity = (location: string): string => {
+    const parts = location.split(",");
+    return parts[parts.length - 1].trim();
+  };
+
   const convertToTickets = async (response: any[]): Promise<Ticket[]> => {
     const tickets = await Promise.all(
       response.map(async (item) => {
@@ -115,6 +123,7 @@ const SellerShop = () => {
   const statusOptions = [
     { text: "Sắp diễn ra", icon: faCheck },
     { text: "Hết hạn", icon: faClock },
+    { text: "Hết hàng", icon: faTag },
   ];
 
   const fetchTicketsBySeller = async (): Promise<Ticket[]> => {
@@ -161,8 +170,14 @@ const SellerShop = () => {
       const allCategories = fetchedTickets.flatMap((ticket) =>
         ticket.categories.map((category) => category.name)
       );
+
       const uniqueCategories = Array.from(new Set(allCategories));
       setCategories(uniqueCategories);
+      const cities = fetchedTickets.map((ticket) =>
+        extractCity(ticket.location)
+      );
+      const uniqueCitiesList = Array.from(new Set(cities));
+      setUniqueCities(uniqueCitiesList);
     };
 
     let searchData = localStorage.getItem("searchData");
@@ -293,6 +308,16 @@ const SellerShop = () => {
         (ticket) =>
           ticket.location.toLowerCase() === selectedLocation.toLowerCase()
       );
+    }
+    // Time Filter
+    if (selectedTime) {
+      const [filterHour, filterMinute] = selectedTime.split(":").map(Number);
+      filtered = filtered.filter((ticket) => {
+        const ticketDate = new Date(ticket.startDate);
+        const ticketHour = ticketDate.getHours();
+        const ticketMinute = ticketDate.getMinutes();
+        return ticketHour === filterHour && ticketMinute >= filterMinute;
+      });
     }
 
     // Date Filter
@@ -427,256 +452,270 @@ const SellerShop = () => {
     return text;
   };
   return (
-    <main className="bg-white text-black pb-[5vh]">
-      <SellProfile
-        userId={sellerResult?.userId}
-        username={sellerResult?.fullname}
-        address={sellerResult?.address}
-        avatar={sellerResult?.avatar}
-        fullname={sellerResult?.fullname}
-        phoneNumber={sellerResult?.phone}
-      />
-      <div className="flex flex-col lg:flex-row min-h-screen">
-        {/* Sidebar */}
-        {isSidebarOpen && (
-          <div
-            ref={sidebarRef}
-            className={`fixed inset-y-0 left-0 z-50 w-full sm:w-80 lg:w-96 bg-white transform ${
-              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out overflow-y-auto`}
-          >
-            <div className="h-full flex flex-col p-6">
-              {/* Sidebar Header */}
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-black">Filters</h2>
-                <button
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="lg:hidden text-gray-500 hover:text-gray-700"
-                >
-                  <MdClose size={24} />
-                </button>
-              </div>
-
-              {/* Sidebar Content */}
-              <div className="flex-grow overflow-auto">
-                {/* Genre Filter */}
-                <h3 className="font-semibold text-lg mb-2">Genres</h3>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {categories.map((genre) => (
-                    <button
-                      key={genre}
-                      onClick={() => handleGenreChange(genre)}
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        selectedGenres.includes(genre)
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                    >
-                      {genre}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Price Filter */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-2">
-                    Price Range: {priceRange.toLocaleString()} VND
-                  </h3>
-                  <input
-                    type="range"
-                    min="0"
-                    max="23000000"
-                    value={priceRange}
-                    onChange={(e) => setPriceRange(Number(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Location Filter */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-2">Location</h3>
-                  <select
-                    value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full border-gray-300 rounded-lg shadow-sm p-2"
-                  >
-                    <option value="">All Locations</option>
-                    {Array.from(
-                      new Set(tickets.map((ticket) => ticket.location))
-                    ).map((location) => (
-                      <option key={location} value={location}>
-                        {truncateText(location, 20)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Date Filter */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-2">Date</h3>
-                  <select
-                    value={selectedDateFilter}
-                    onChange={(e) => setSelectedDateFilter(e.target.value)}
-                    className="w-full border-gray-300 rounded-lg shadow-sm p-2"
-                  >
-                    <option value="all">Show all months</option>
-                    <option value="thisMonth">
-                      This month ({getCurrentMonthName()})
-                    </option>
-                    <option value="nextMonth">
-                      Next month ({getNextMonthName()})
-                    </option>
-                    <option value="twoMonthsAhead">
-                      Next 2 months ({getTwoMonthsAheadName()})
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Apply Filters Button (visible only on mobile) */}
-              <div className="mt-6 lg:hidden">
-                <button
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="w-full bg-blue-500 text-white rounded-md py-2 px-4 hover:bg-blue-600 transition duration-200"
-                >
-                  Apply Filters
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-32">
-          {/* Header */}
-          <div className="p-4">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-              {/* Left: Filter button and Live results */}
-              <div className="flex items-center space-x-4 mb-2 md:mb-0 w-full md:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className={`inline-flex items-center justify-center whitespace-nowrap transition duration-200 text-md leading-md font-semibold bg-gray-200 text-primary hover:bg-gray-100 gap-3 rounded-xl py-3 px-3 disabled:pointer-events-none disabled:opacity-40 ${
-                    isSidebarOpen ? "shadow-sm" : ""
-                  }`}
-                  aria-expanded={isSidebarOpen}
-                  aria-label="Filter"
-                >
-                  <MdFilterList
-                    className="text-black"
-                    style={{ fontSize: "24px" }}
-                  />
-                </button>
-
-                <div className="flex items-center pl-10 space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-md leading-md font-semibold">Live</span>
-                  <span className="text-md leading-md text-gray-600 text-nowrap">
-                    {filteredTickets?.length || 0} results
-                  </span>
-                </div>
-              </div>
-              {/* Center: Search input */}
-              <div className="relative flex-grow mx-2 max-w-xl md:mb-0 w-full md:w-auto">
-                <input
-                  type="text"
-                  placeholder="Search by name"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-12 w-full pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200"
-                />
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </div>
-              {/* Status dropdown
-              <div className="relative mr-3 w-full md:w-64" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="h-12 w-full pl-4 pr-10 rounded-xl border border-gray-300 bg-white hover:border-gray-400 focus:outline-none flex items-center justify-between transition duration-200"
-                >
-                  <span className="truncate">{statusOption}</span>
-                  <MdKeyboardArrowDown className="text-2xl text-gray-600" />
-                </button>
-                {isDropdownOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg">
-                    <ul className="py-1">
-                      {statusOptions.map((option) => (
-                        <li key={option.text}>
-                          <button
-                            onClick={() => handleStatusChange(option.text)} // This function will handle the change in status
-                            className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:outline-none transition duration-200 flex items-center"
-                          >
-                            {option.text}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div> */}
-              {/* Right: Sort dropdown */}
-              <div className="flex items-center space-x-4 w-full md:w-auto">
-                <div className="relative mr-3 w-full md:w-64" ref={dropdownRef}>
+    <div className="bg-transparent pb-32">
+      ""
+      <main className="bg-white text-black">
+        <SellProfile
+          address={sellerResult?.address}
+          avatar={sellerResult?.avatar}
+          fullname={sellerResult?.fullname}
+          phoneNumber={sellerResult?.phone}
+          isAdjustVisible={false}
+        />
+        <div className="flex flex-col lg:flex-row min-h-screen">
+          {/* Sidebar */}
+          {isSidebarOpen && (
+            <div
+              ref={sidebarRef}
+              className={`fixed inset-y-0 left-0 z-50 w-full sm:w-80 md:w-90 lg:w-96 bg-white transform ${
+                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+              } md:relative md:translate-x-0 transition-transform duration-300 ease-in-out overflow-y-auto`}
+            >
+              <div className="h-full flex flex-col p-6">
+                {/* Sidebar Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-black">Filters</h2>
                   <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="h-12 w-full pl-4 pr-10 rounded-xl border border-gray-300 bg-white hover:border-gray-400 focus:outline-none flex items-center justify-between transition duration-200"
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="lg:hidden text-gray-500 hover:text-gray-700"
                   >
-                    <span className="truncate">{sortOption}</span>
-                    <MdKeyboardArrowDown className="text-2xl text-gray-600" />
+                    <MdClose size={24} />
                   </button>
-                  {isDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg">
-                      <ul className="py-1">
-                        {sortOptions.map((option) => (
-                          <li key={option.text}>
-                            <button
-                              onClick={() => handleSortOptionClick(option.text)}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:outline-none transition duration-200 flex items-center"
-                            >
-                              <FontAwesomeIcon
-                                icon={option.icon}
-                                className="mr-2"
-                              />
-                              {option.text}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                </div>
+
+                {/* Sidebar Content */}
+                <div className="flex-grow overflow-auto">
+                  {/* Genre Filter */}
+                  <h3 className="font-semibold text-lg mb-2">Genres</h3>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {categories.map((genre) => (
+                      <button
+                        key={genre}
+                        onClick={() => handleGenreChange(genre)}
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          selectedGenres.includes(genre)
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      >
+                        {genre}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Price Filter */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-2">
+                      Price Range: {priceRange.toLocaleString()} VND
+                    </h3>
+                    <input
+                      type="range"
+                      min="0"
+                      max="23000000"
+                      value={priceRange}
+                      onChange={(e) => setPriceRange(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Location Filter */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-2">Location</h3>
+                    <select
+                      value={selectedLocation}
+                      onChange={(e) => setSelectedLocation(e.target.value)}
+                      className="w-full border-gray-300 rounded-lg shadow-sm p-2"
+                    >
+                      <option value="">All Locations</option>
+                      {uniqueCities.map((city) => (
+                        <option key={city} value={city}>
+                          {truncateText(city, 30)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Date Filter */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-2">Date</h3>
+                    <select
+                      value={selectedDateFilter}
+                      onChange={(e) => setSelectedDateFilter(e.target.value)}
+                      className="w-full border-gray-300 rounded-lg shadow-sm p-2"
+                    >
+                      <option value="all">Show all months</option>
+                      <option value="thisMonth">
+                        This month ({getCurrentMonthName()})
+                      </option>
+                      <option value="nextMonth">
+                        Next month ({getNextMonthName()})
+                      </option>
+                      <option value="twoMonthsAhead">
+                        Next 2 months ({getTwoMonthsAheadName()})
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* Time Filter */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-2">Select Time</h3>
+                    <label htmlFor="time" className="sr-only">
+                      Select Time
+                    </label>
+                    <input
+                      id="time"
+                      type="time"
+                      value={selectedTime}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      className="w-64 ml-4 border-gray-300 rounded-lg shadow-sm p-2 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    />
+                  </div>
+                </div>
+
+                {/* Apply Filters Button (visible only on mobile) */}
+                <div className="mt-6 lg:hidden">
+                  <button
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="w-full bg-blue-500 text-white rounded-md py-2 px-4 hover:bg-blue-600 transition duration-200"
+                  >
+                    Apply Filters
+                  </button>
                 </div>
               </div>
             </div>
-          </div>
-          {/* Ticket Grid and Pagination */}
-          <div className="flex-1 p-4">
-            <TicketGrid
-              maxTicketInRow={isSidebarOpen ? 3 : 5}
-              paginatedTickets={paginatedTickets}
-            />
+          )}
 
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-8">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="w-10 h-10 mx-1 rounded-full bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50"
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-32">
+            {/* Header */}
+            <div className="p-4">
+              <div className="flex flex-col md:flex-row items-center justify-between mb-4">
+                {/* Left: Filter button and Live results */}
+                <div className="flex items-center space-x-4 mb-2 md:mb-0 w-full md:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className={`inline-flex items-center justify-center whitespace-nowrap transition duration-200 text-md leading-md font-semibold bg-gray-200 text-primary hover:bg-gray-100 gap-3 rounded-xl py-3 px-3 disabled:pointer-events-none disabled:opacity-40 ${
+                      isSidebarOpen ? "shadow-sm" : ""
+                    }`}
+                    aria-expanded={isSidebarOpen}
+                    aria-label="Filter"
+                  >
+                    <MdFilterList
+                      className="text-black"
+                      style={{ fontSize: "24px" }}
+                    />
+                  </button>
+
+                  <div className="flex items-center pl-10 space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-md leading-md font-semibold">
+                      Live
+                    </span>
+                    <span className="text-md leading-md text-gray-600 text-nowrap">
+                      {filteredTickets?.length || 0} results
+                    </span>
+                  </div>
+                </div>
+                {/* Center: Search input */}
+                <div className="relative flex-grow mx-2 max-w-xl md:mb-0 w-full md:w-auto">
+                  <input
+                    type="text"
+                    placeholder="Search by name"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="h-12 w-full pl-10 pr-40- rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200"
+                  />
+                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                </div>
+                {/* <div className="flex items-center gap-4">
+                <select
+                  value={selectedStatus}
+                  // onValueChange={setSelectedStatus}
+                  className="w-full max-w-xs"
                 >
-                  &lt;
-                </button>
-                {renderPaginationButtons()}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="w-10 h-10 mx-1 rounded-full bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50"
-                >
-                  &gt;
-                </button>
+                  <option value="">All Statuses</option>
+                  {Object.values(TICKET_STATUS).map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="text-sm text-gray-500">
+                  {filteredTickets.length} tickets found
+                </div>
+              </div> */}
+                {/* Right: Sort dropdown */}
+                <div className="flex items-center space-x-4 w-full md:w-auto">
+                  <div
+                    className="relative mr-3 w-full md:w-64"
+                    ref={dropdownRef}
+                  >
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="h-12 w-full pl-4 pr-10 rounded-xl border border-gray-300 bg-white hover:border-gray-400 focus:outline-none flex items-center justify-between transition duration-200"
+                    >
+                      <span className="truncate">{sortOption}</span>
+                      <MdKeyboardArrowDown className="text-2xl text-gray-600" />
+                    </button>
+                    {isDropdownOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg">
+                        <ul className="py-1">
+                          {sortOptions.map((option) => (
+                            <li key={option.text}>
+                              <button
+                                onClick={() =>
+                                  handleSortOptionClick(option.text)
+                                }
+                                className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:outline-none transition duration-200 flex items-center"
+                              >
+                                <FontAwesomeIcon
+                                  icon={option.icon}
+                                  className="mr-2"
+                                />
+                                {option.text}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+            {/* Ticket Grid and Pagination */}
+            <div className="flex-1 p-4">
+              <TicketGrid
+                maxTicketInRow={isSidebarOpen ? 2 : 4}
+                paginatedTickets={paginatedTickets}
+              />
+
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-8">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="w-10 h-10 mx-1 rounded-full bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50"
+                  >
+                    &lt;
+                  </button>
+                  {renderPaginationButtons()}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="w-10 h-10 mx-1 rounded-full bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50"
+                  >
+                    &gt;
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 };
 

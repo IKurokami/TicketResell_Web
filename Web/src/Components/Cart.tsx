@@ -477,7 +477,12 @@ const MyCart: React.FC = () => {
                     {formatPriceVND(totalItemsPrice)}
                   </span>
                 </div>
-
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Thuế (5%)</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {formatPriceVND(totalItemsPrice * 0.05)}
+                  </span>
+                </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-3">
                     Phương thức thanh toán:
@@ -509,16 +514,14 @@ const MyCart: React.FC = () => {
                     ))}
                   </div>
                 </div>
-
                 <div className="flex justify-between items-center pt-6 border-t border-gray-200">
                   <span className="text-lg font-semibold text-gray-800">
-                    Tổng cộng
+                    Tổng cộng (bao gồm thuế)
                   </span>
                   <span className="text-lg font-semibold text-green-600">
-                    {formatPriceVND(totalPrice)}
+                    {formatPriceVND(totalItemsPrice * 1.05)}
                   </span>
                 </div>
-
                 <button
                   className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition duration-300 mt-4"
                   onClick={handleCheckout}
