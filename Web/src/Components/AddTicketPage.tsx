@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import Cookies from "js-cookie";
 import "@/Css/AddTicketModal.css";
+import uploadImageForTicket from "@/models/UpdateImage";
 
 interface Province {
   Id: number;
@@ -334,6 +335,8 @@ const AddTicketModal: React.FC = () => {
     });
   };
 
+
+
   const handleSave = async () => {
     const sellerId = Cookies.get("id");
     if (
@@ -395,21 +398,26 @@ const AddTicketModal: React.FC = () => {
 
       console.log(tickets);
 
-      const uploadImagePromises = tickets.map((ticket) => {
-        const formData = new FormData();
-        formData.append("id", ticket.Image);
-        formData.append("image", selectedFile as Blob);
-        return fetch("/api/uploadImage", {
-          method: "POST",
-          body: formData,
-        });
-      });
-
+       
+    const updateImages = async () => {
+      if (selectedFile && tickets.length > 0) { 
+        const firstTicket = tickets[0]; 
+        console.log(firstTicket);
+        
+        const imageUpdateResult = await uploadImageForTicket(firstTicket, selectedFile);
+        return imageUpdateResult; 
+      } else {
+        console.error("No file selected or no tickets available.");
+        return null; 
+      }
+    };
+      
       try {
-        await Promise.all(uploadImagePromises);
+        const imageUpdateSuccess = await updateImages(); 
+        console.log("Image update success:", imageUpdateSuccess);
         console.log("Images uploaded successfully (simulated).");
 
-        const createTicketPromises = tickets.map(async (ticket) => {
+        const createTicketPromises = async (ticket) => {
           await fetch("http://localhost:5296/api/Ticket/create", {
             method: "POST",
             credentials: "include",
@@ -418,9 +426,9 @@ const AddTicketModal: React.FC = () => {
             },
             body: JSON.stringify(ticket),
           });
-        });
+        };
 
-        await Promise.all(createTicketPromises);
+        await createTicketPromises(tickets);
         console.log("Tickets created successfully.");
       } catch (error) {
         console.error("Error creating tickets or uploading images:", error);
@@ -446,6 +454,8 @@ const AddTicketModal: React.FC = () => {
     setImagePreview(null);
     router.push("/sell");
   };
+
+  
 
   return (
     <div>
