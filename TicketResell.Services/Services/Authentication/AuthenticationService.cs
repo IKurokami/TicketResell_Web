@@ -35,15 +35,16 @@ public class AuthenticationService : IAuthenticationService
         if (string.IsNullOrEmpty(registerDto.OTP))
             return ResponseModel.BadRequest("Registration failed", "No OTP provided");
 
+
         var cacheOtp = await GetCachedAccessKeyAsync("email_verification", registerDto.UserId);
         if (!cacheOtp.HasValue)
             return ResponseModel.BadRequest("Registration failed", "Otp not found for user");
 
         if (cacheOtp != registerDto.OTP)
             return ResponseModel.BadRequest("Registration failed", "OTP provided is invalid");
-        
+
         var user = _mapper.Map<User>(registerDto);
-        
+        user.UserId = registerDto.Gmail;
         var validator = _validatorFactory.GetValidator<User>();
         var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid)
@@ -51,7 +52,7 @@ public class AuthenticationService : IAuthenticationService
             return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
         }
 
-        if (await _unitOfWork.UserRepository.GetUserByEmailAsync(user.Gmail ?? string.Empty) != null)
+        if (await _unitOfWork.UserRepository.GetByIdAsync(user.Gmail ?? string.Empty) != null)
         {
             return ResponseModel.BadRequest("Registration failed", "Email already exists");
         }
@@ -72,7 +73,7 @@ public class AuthenticationService : IAuthenticationService
         {
             var decryptedData = (new CryptoService()).Decrypt(data);
             var splitedData = decryptedData.Split("|");
-            if (await _unitOfWork.UserRepository.GetUserByEmailAsync(splitedData[0]) != null)
+            if (await _unitOfWork.UserRepository.GetByIdAsync(splitedData[0]) != null)
             {
                 await CacheAccessKeyAsync("email_verification", splitedData[0], splitedData[1], TimeSpan.FromMinutes(5));
                 return ResponseModel.Success("Cached", "OTP cache done");
@@ -88,7 +89,7 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<ResponseModel> LoginAsync(LoginDto loginDto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(loginDto.Gmail);
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(loginDto.Gmail);
         if (user == null)
         {
             return ResponseModel.BadRequest("Login failed", "Invalid email or password");
@@ -163,7 +164,7 @@ public class AuthenticationService : IAuthenticationService
     }
     public async Task<ResponseModel> LoginWithGoogleAsync(GoogleUserInfoDto googleUser)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(googleUser.Email);
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(googleUser.Email);
         if (user == null)
         {
             user = new User
