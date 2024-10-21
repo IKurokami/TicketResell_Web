@@ -20,12 +20,42 @@ public class OrderService : IOrderService
         _validatorFactory = validatorFactory;
     }
 
+    public async Task<ResponseModel> SetOrderStatus(string orderId, int status)
+    {
+        var order = await _unitOfWork.OrderRepository.GetDetailsByIdAsync(orderId);
+
+        if (order == null)
+        {
+            return ResponseModel.NotFound($"Order with ID {orderId} not found");
+        }
+
+        if (!Enum.IsDefined(typeof(OrderStatus), status))
+        {
+            return ResponseModel.BadRequest($"Invalid order status: {status}");
+        }
+
+        order.Status = status;
+
+        var validator = _validatorFactory.GetValidator<Order>();
+        var validationResult = await validator.ValidateAsync(order);
+        if (!validationResult.IsValid)
+        {
+            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+        }
+
+        _unitOfWork.OrderRepository.Update(order);
+        await _unitOfWork.CompleteAsync();
+        var orderDto = _mapper.Map<OrderDto>(order);
+
+        return ResponseModel.Success($"Order status updated successfully to {(OrderStatus)status}", orderDto);
+    }
+
     public async Task<ResponseModel> CreateOrder(OrderDto dto, bool saveAll = true)
     {
         var order = _mapper.Map<Order>(dto);
         order.Date = DateTime.UtcNow;
         order.Total = 0;
-        order.Status = (int)OrderStatus.Pending;
+        order.Status = (int)OrderStatus.Carting;
 
         var validator = _validatorFactory.GetValidator<Order>();
         var validationResult = await validator.ValidateAsync(order);
@@ -108,6 +138,7 @@ public class OrderService : IOrderService
         return ResponseModel.Success($"Successfully updated order: {order.OrderId}", order);
     }
 
+
     public async Task<ResponseModel> DeleteOrder(string orderId, bool saveAll = true)
     {
         Order? order = await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
@@ -116,12 +147,12 @@ public class OrderService : IOrderService
         {
             return ResponseModel.NotFound($"Order not found");
         }
-        
+
         _unitOfWork.OrderRepository.Delete(order);
 
         if (saveAll)
             await _unitOfWork.CompleteAsync();
-        
+
         return ResponseModel.Success($"Successfully deleted: {order.OrderId}");
     }
 }

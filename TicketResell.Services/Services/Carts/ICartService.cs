@@ -1,3 +1,4 @@
+using Repositories.Core.Dtos.Order;
 using Repositories.Core.Dtos.OrderDetail;
 using Repositories.Core.Dtos.Payment;
 using TicketResell.Repositories.Core.Dtos.Cart;
@@ -15,6 +16,8 @@ public interface ICartService
     Task<ResponseModel> GetCartTotal(string userId);
     Task<ResponseModel> CreateOrderFromSelectedItems(string userId, List<string> selectedTicketIds);
     Task<ResponseModel> Checkout(string userId);
-
-    Task<List<VirtualOrderDetailDto>> CreateVirtualCart(PaymentDto paymentDto);
+    Task<ResponseModel> RemoveFromCart(OrderDto order);
+    Task<double> CalculateVirtualCartTotalAsync(List<VirtualOrderDetailDto> virtualCart);
+    Task<List<VirtualOrderDetailDto>> CreateVirtualCartAsync(PaymentDto paymentDto);
+    Task<ResponseModel> CreateOrderFromVirtualDetailsDirectly(string orderId, string userId, List<VirtualOrderDetailDto> virtualOrderDetails, bool saveAll = true);
 }

@@ -44,11 +44,13 @@ namespace Repositories.Core.AutoMapperConfig
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.user, opt => opt.MapFrom(src => src.Buyer));
-            
-            
+
+
             //OrderDetail
+            CreateMap<VirtualOrderDetailDto, OrderDetail>();
             CreateMap<OrderDetailDto, OrderDetail>();
             CreateMap<OrderDetail, OrderDetailDto>();
+            CreateMap<OrderDetail, VirtualOrderDetailDto>();
             CreateMap<OrderDetail, OrderDetailTransactionDto>()
                 .ForMember(dest => dest.OrderDetailId, opt => opt.MapFrom(src => src.OrderDetailId))
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId))
@@ -57,9 +59,9 @@ namespace Repositories.Core.AutoMapperConfig
                 .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Ticket))
                 .ForMember(dest => dest.order, opt => opt.MapFrom(src => src.Order));
 
-               
-            
-            
+
+
+
             //Cart
             CreateMap<Order, CartDto>();
 

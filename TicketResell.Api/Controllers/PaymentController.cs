@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.Language;
 using Repositories.Core.Dtos.Payment;
 using Repositories.Core.Helper;
 using System.Threading.Tasks;
+using System.Xml;
+using TicketResell.Repositories.Core.Dtos.Payment;
+using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Payments;
 
@@ -17,6 +21,8 @@ namespace Api.Controllers
         private readonly IPaypalService _paypalService;
         private readonly ICartService _cartService;
 
+        private readonly double _tax = 1.05;
+
         public PaymentController(IServiceProvider serviceProvider)
         {
             _momoService = serviceProvider.GetRequiredService<IMomoService>();
@@ -29,53 +35,173 @@ namespace Api.Controllers
         [HttpPost("momo/payment")]
         public async Task<IActionResult> CreatePaymentMomo([FromBody] PaymentDto dto)
         {
-            var virtualCart = await _cartService.CreateVirtualCart(dto);
-            var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
-            double amount = (double)orderResponse.Data;
-            var response = await _momoService.CreatePaymentAsync(dto, amount);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to pay"));
+            var userId = HttpContext.GetUserId();
 
+            var orderId = "O" + Guid.NewGuid().ToString("N");
+            dto.OrderId = orderId;
+            var virtualCart = await _cartService.CreateVirtualCartAsync(dto);
+            double totalAmount = await _cartService.CalculateVirtualCartTotalAsync(virtualCart);
+            var momoResponse = await _momoService.CreatePaymentAsync(dto, totalAmount * _tax);
+
+            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { momoResponse, cartResponse }, "Success create momo payment");
             return ResponseParser.Result(response);
         }
 
         [HttpPost("momo/verify")]
         public async Task<IActionResult> CheckMomoTransaction([FromBody] PaymentDto dto)
         {
-            var response = await _momoService.CheckTransactionStatus(dto.OrderId);
+            var orderResponse1 = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
+            PayoutDto payoutDto = new PayoutDto
+            {
+                Amount = (double)orderResponse1.Data,
+                RecipientEmail = dto.Email
+            };
+
+            var momoResponse = await _momoService.CheckTransactionStatus(dto.OrderId);
+            string message = "Payment Success";
+            ResponseModel orderResponse = new ResponseModel();
+            ResponseModel paypalResponse2 = new ResponseModel();
+            ResponseModel paypalResponse3 = new ResponseModel();
+            if (momoResponse.Status == "Success")
+            {
+                orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 0);
+                if (orderResponse.Data is OrderDto order)
+                {
+                    await _cartService.RemoveFromCart(order);
+                }
+                paypalResponse2 = await _paypalService.CreatePayoutAsync(payoutDto);
+                paypalResponse3 = await _paypalService.CheckPayoutStatusAsync(dto.OrderId);
+            }
+            else
+            {
+                message = "Payment Failed";
+            }
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { momoResponse, orderResponse, paypalResponse2, paypalResponse3 }, message);
             return ResponseParser.Result(response);
         }
 
         [HttpPost("vnpay/payment")]
         public async Task<IActionResult> CreatePaymentVnpay([FromBody] PaymentDto dto)
         {
-            var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to pay"));
+            var userId = HttpContext.GetUserId();
 
-            double amount = (double)orderResponse.Data;
-            var response = await _vnpayService.CreatePaymentAsync(dto, amount);
+            var orderId = "O" + Guid.NewGuid().ToString("N");
+            dto.OrderId = orderId;
+            var virtualCart = await _cartService.CreateVirtualCartAsync(dto);
+            double totalAmount = await _cartService.CalculateVirtualCartTotalAsync(virtualCart);
+            var vnpayResponse = await _vnpayService.CreatePaymentAsync(dto, totalAmount * _tax);
 
+            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { vnpayResponse, cartResponse }, "Success create momo payment");
             return ResponseParser.Result(response);
         }
 
         [HttpPost("vnpay/verify")]
         public async Task<IActionResult> CheckVnpayTransaction([FromBody] PaymentDto dto)
         {
-            var response = await _vnpayService.CheckTransactionStatus(dto.OrderId);
+            var orderResponse1 = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
+            PayoutDto payoutDto = new PayoutDto
+            {
+                Amount = (double)orderResponse1.Data,
+                RecipientEmail = dto.Email
+            };
+
+            var vnpayResponse = await _vnpayService.CheckTransactionStatus(dto.OrderId);
+            string message = "Payment Success";
+            ResponseModel orderResponse = new ResponseModel();
+            ResponseModel paypalResponse2 = new ResponseModel();
+            ResponseModel paypalResponse3 = new ResponseModel();
+            if (vnpayResponse.Status == "Success")
+            {
+                orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 0);
+                if (orderResponse.Data is OrderDto order)
+                {
+                    await _cartService.RemoveFromCart(order);
+                }
+                paypalResponse2 = await _paypalService.CreatePayoutAsync(payoutDto);
+                paypalResponse3 = await _paypalService.CheckPayoutStatusAsync(dto.OrderId);
+            }
+            else
+            {
+                message = "Payment Failed";
+            }
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { vnpayResponse, orderResponse, paypalResponse2, paypalResponse3 }, message);
             return ResponseParser.Result(response);
         }
 
         [HttpPost("paypal/payment")]
         public async Task<IActionResult> CreatePaymentPaypal([FromBody] PaymentDto dto)
         {
-            var orderResponse = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to pay"));
+            var userId = HttpContext.GetUserId();
 
-            double amount = (double)orderResponse.Data;
-            var response = await _paypalService.CreatePaymentAsync(dto, amount);
+            var orderId = "O" + Guid.NewGuid().ToString("N");
+            dto.OrderId = orderId;
+            var virtualCart = await _cartService.CreateVirtualCartAsync(dto);
+            double totalAmount = await _cartService.CalculateVirtualCartTotalAsync(virtualCart);
+            var paypalResponse = await _paypalService.CreatePaymentAsync(dto, totalAmount * _tax);
 
+            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { paypalResponse, cartResponse }, "Success create momo payment");
             return ResponseParser.Result(response);
         }
         [HttpPost("paypal/verify")]
         public async Task<IActionResult> CheckPaypalTransaction([FromBody] PaymentDto dto)
         {
-            var response = await _paypalService.CheckTransactionStatus(dto.OrderId);
+            var orderResponse1 = await _orderService.CalculateTotalPriceForOrder(dto.OrderId);
+            PayoutDto payoutDto = new PayoutDto
+            {
+                Amount = (double)orderResponse1.Data,
+                RecipientEmail = dto.Email
+            };
+
+            var vnpayResponse = await _paypalService.CheckTransactionStatus(dto.OrderId);
+            string message = "Payment Success";
+            ResponseModel orderResponse = new ResponseModel();
+            ResponseModel paypalResponse2 = new ResponseModel();
+            ResponseModel paypalResponse3 = new ResponseModel();
+            if (vnpayResponse.Status == "Success")
+            {
+                orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 0);
+                if (orderResponse.Data is OrderDto order)
+                {
+                    await _cartService.RemoveFromCart(order);
+                }
+                paypalResponse2 = await _paypalService.CreatePayoutAsync(payoutDto);
+                paypalResponse3 = await _paypalService.CheckPayoutStatusAsync(dto.OrderId);
+            }
+            else
+            {
+                message = "Payment Failed";
+            }
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { vnpayResponse, orderResponse, paypalResponse2, paypalResponse3 }, message);
+            return ResponseParser.Result(response);
+        }
+
+
+        [HttpPost("payout")]
+        public async Task<IActionResult> CreatePayout([FromBody] PayoutDto dto)
+        {
+            // if (!HttpContext.GetIsAuthenticated())
+            //     return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to create a payout"));
+
+            var response = await _paypalService.CreatePayoutAsync(dto);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpGet("payout/{payoutBatchId}")]
+        public async Task<IActionResult> CheckPayoutStatus(string payoutBatchId)
+        {
+            // if (!HttpContext.GetIsAuthenticated())
+            //     return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to check payout status"));
+
+            var response = await _paypalService.CheckPayoutStatusAsync(payoutBatchId);
             return ResponseParser.Result(response);
         }
     }

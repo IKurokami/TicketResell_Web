@@ -7,6 +7,8 @@ public class PaymentDto
 {
     public string OrderId { get; set; } = null!;
 
+    public string Email { get; set; } = null!;
+
     public CreateVirtualOrderDto OrderInfo { get; set; } = null!;
 
 }

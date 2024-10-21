@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Repositories.Config;
 using Repositories.Core.Dtos.Payment;
+using TicketResell.Repositories.Core.Dtos.Payment;
 using TicketResell.Repositories.Logger;
 
 namespace TicketResell.Services.Services.Payments
@@ -24,6 +25,94 @@ namespace TicketResell.Services.Services.Payments
             _httpClient = httpClient;
             _logger = logger;
         }
+
+        public async Task<ResponseModel> CreatePayoutAsync(PayoutDto payoutRequest)
+        {
+            try
+            {
+                var accessToken = await GenerateAccessTokenAsync();
+                double rate = await GetConversionRateVndToUsd();
+                payoutRequest.Amount = payoutRequest.Amount * rate * (1 / 1.05);
+                var payout = await CreatePayPalPayoutAsync(payoutRequest, accessToken);
+
+                return ResponseModel.Success("PayPal payout created successfully", payout);
+            }
+            catch (Exception ex)
+            {
+                return ResponseModel.Error($"Error creating PayPal payout: {ex.Message}");
+            }
+        }
+
+        public async Task<ResponseModel> CheckPayoutStatusAsync(string payoutBatchId)
+        {
+            try
+            {
+                var accessToken = await GenerateAccessTokenAsync();
+                var status = await GetPayoutStatusAsync(payoutBatchId, accessToken);
+
+                return ResponseModel.Success($"Payout status: {status}", status);
+            }
+            catch (Exception ex)
+            {
+                return ResponseModel.Error($"Error checking payout status: {ex.Message}");
+            }
+        }
+        private async Task<ResponseModel> CreatePayPalPayoutAsync(PayoutDto payoutRequest, string accessToken)
+        {
+            var _payoutRequest = new
+            {
+                sender_batch_header = new
+                {
+                    sender_batch_id = Guid.NewGuid().ToString(),
+                    email_subject = "You have a payout!",
+                    email_message = "You have received a payout. Thanks for using our service!"
+                },
+                items = new[]
+                {
+                    new
+                    {
+                        recipient_type = "EMAIL",
+                        amount = new
+                        {
+                            value = payoutRequest.Amount.ToString("F2"),
+                            currency = "USD"
+                        },
+                        note = "Thanks for your patronage!",
+                        sender_item_id = Guid.NewGuid().ToString(),
+                        receiver = payoutRequest.RecipientEmail
+                    }
+                }
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v1/payments/payouts");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(_payoutRequest), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(content);
+            string payoutBatchId = jsonDoc.RootElement.GetProperty("batch_header").GetProperty("payout_batch_id").GetString();
+
+            return ResponseModel.Success("Success", payoutBatchId);
+        }
+
+        private async Task<ResponseModel> GetPayoutStatusAsync(string payoutBatchId, string accessToken)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_config.PayPalApiUrl}/v1/payments/payouts/{payoutBatchId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(content);
+            string status = jsonDoc.RootElement.GetProperty("batch_header").GetProperty("batch_status").GetString();
+
+            return ResponseModel.Success("Success", status);
+        }
+
 
         public async Task<ResponseModel> CheckTransactionStatus(string orderId)
         {
