@@ -238,24 +238,43 @@ const AddTicketModal: React.FC = () => {
     const { name, value } = e.target;
   
     if (name === "cost") {
-      // Remove the '000' suffix before processing input
+     
       let baseValue = value.replace(/000$/, '');
   
-      // Remove non-numeric characters from the base value
+     
       baseValue = baseValue.replace(/\D/g, '');
   
-      // Ensure that when the user types/deletes, '000' is always appended
+   
       setFormData({
         ...formData,
         [name]: baseValue + '000',
       });
+    } else if (name === "date") {
+     
+      const newDate = new Date(value);
+      const minDate = new Date(minDateTime);
+  
+     
+      if (newDate < minDate) {
+       
+        alert("Selected date is before the minimum allowed date.");
+        return; 
+      }
+  
+      
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     } else {
+      
       setFormData({
         ...formData,
         [name]: value,
       });
     }
   };
+  
   
   const handleCategoriesChange = (
     event: React.SyntheticEvent<Element, Event>,
@@ -453,6 +472,7 @@ const AddTicketModal: React.FC = () => {
     setQrFileNames([]);
     setImagePreview(null);
     router.push("/sell");
+    window.location.href = "/sell";
   };
 
   
