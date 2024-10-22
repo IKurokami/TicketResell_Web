@@ -68,6 +68,18 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
   };
 
+  const getSortIcon = (field: string) => {
+    if (sortField !== field)
+      return <FaSort className="w-3 h-3 ms-1.5 text-gray-400" />;
+    return (
+      <FaSort
+        className={`w-3 h-3 ms-1.5 ${
+          sortDirection === "asc" ? "text-blue-500" : "text-blue-700"
+        }`}
+      />
+    );
+  };
+
   return (
     <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-32">
       {/* Header */}
@@ -99,20 +111,20 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
             <tr>
               <th scope="col" className="px-6 py-3">
                 <div
-                  className="flex items-center cursor-pointer"
+                  className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("name")}
                 >
                   Name
-                  <FaSort className="w-3 h-3 ms-1.5" />
+                  {getSortIcon("name")}
                 </div>
               </th>
               <th scope="col" className="px-6 py-3">
                 <div
-                  className="flex items-center cursor-pointer"
+                  className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("description")}
                 >
                   Description
-                  <FaSort className="w-3 h-3 ms-1.5" />
+                  {getSortIcon("description")}
                 </div>
               </th>
               <th scope="col" className="px-6 py-3">
