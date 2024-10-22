@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { TicketCard, fetchTicketItems } from "@/models/TicketSellCard";
 import "@/Css/search.css";
@@ -8,7 +7,7 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link"; 
+import Link from "next/link";
 import Popup from "./PopupDelete"; // Adjust the path based on your file structure
 
 const TicketsPage = () => {
@@ -67,12 +66,12 @@ const TicketsPage = () => {
   );
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center ">
       {/* Content */}
-      <div className="w-4/5 -mx-8">
+      <div className="w-full py-10 px-16 overflow-x-auto">
         {/* Search Navigation */}
-        <div className="flex flex-col sm:flex-row justify-between items-center p-4 rounded-full  sm:space-y-0 sm:space-x-4">
-          <div className="relative flex items-center bg-white rounded-full p-1 px-3 border border-gray-300 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center p-2 pt-8 rounded-full  sm:space-y-0 sm:space-x-4">
+          <div className="relative flex items-center bg-white rounded-full p-1 h-[7vh] px-3 border border-gray-300 w-full sm:w-auto">
             <input
               type="text"
               placeholder="Search ticket"
@@ -131,10 +130,10 @@ const TicketsPage = () => {
                           className="no-underline"
                         >
                           <h3 className="text-base sm:text-lg font-semibold mb-1 text-gray-900 line-clamp-2">
-                            {truncateText(ticketItem.name,20)}
+                            {truncateText(ticketItem.name, 35)}
                           </h3>
                           <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                            {truncateText(ticketItem.location, 20)}
+                            {truncateText(ticketItem.location, 35)}
                           </p>
                           <p className="text-xs sm:text-sm text-gray-600">
                             {ticketItem.date}
@@ -174,7 +173,10 @@ const TicketsPage = () => {
                             passHref
                             className="no-underline"
                           >
-                            <FontAwesomeIcon icon={faPenToSquare} />
+                            <FontAwesomeIcon
+                              icon={faPenToSquare}
+                              className="text-gray-600 hover:text-blue-500 transition-colors duration-200 cursor-pointer active:scale-95"
+                            />
                           </Link>
                           <button
                             className="text-red-600 cursor-pointer"
@@ -183,7 +185,10 @@ const TicketsPage = () => {
                               handleDeleteTicket(ticketItem.id); // Call delete function
                             }}
                           >
-                            <FontAwesomeIcon icon={faTrash} />
+                            <FontAwesomeIcon
+                              icon={faTrash}
+                              className="hover:text-red-800 transition-colors duration-200 active:scale-95"
+                            />
                           </button>
                         </div>
                       </div>

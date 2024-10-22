@@ -34,7 +34,7 @@ const AdminPage = () => {
     { name: "Tickets", icon: <TicketsIcon /> },
     { name: "Categories", icon: <CategoriesIcon /> },
     { name: "Orders", icon: <OrdersIcon /> },
-    { name: "Transaction", icon: <ShoppingBasket /> },
+    { name: "Revenue", icon: <ShoppingBasket /> },
   ];
 
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);

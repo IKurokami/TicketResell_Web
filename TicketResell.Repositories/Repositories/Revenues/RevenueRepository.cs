@@ -15,9 +15,15 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
         _logger = logger;
     }
 
+    
+    
+    
     public async Task<List<Revenue>> GetRevenuesBySellerId_MonthAsync(string sellerId, string month)
     {
-        var revenues = await _context.Revenues.Where(r => r.SellerId == sellerId && r.Type == month).ToListAsync();
+        var revenues = await _context.Revenues
+            .Include(x=>x.Seller)
+            .Where(r => r.SellerId == sellerId && r.Type == month)
+            .ToListAsync();
         if (revenues == null)
         {
             throw new KeyNotFoundException("id is not existed");
@@ -27,7 +33,10 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
 
     public async Task<List<Revenue>> GetRevenuesBySellerIdAsync(string id)
     {
-        var revenues = await _context.Revenues.Where(x => x.SellerId == id).ToListAsync();
+        var revenues = await _context.Revenues
+            .Include(x=>x.Seller)
+            .Where(x => x.SellerId == id)
+            .ToListAsync();
         if (revenues == null)
         {
             throw new KeyNotFoundException("id is not existed");

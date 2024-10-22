@@ -76,6 +76,7 @@ const TicketDetail = () => {
   const [count, setCount] = useState(1);
   const handleClosePopup = () => {
     setShowPopup(false);
+    window.location.reload();
   };
 
   const increase = () => {
