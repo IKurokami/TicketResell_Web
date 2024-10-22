@@ -50,7 +50,7 @@ const Dropdown: React.FC<ChildComponentProps> = ({
 
       {checkDropDown ? (
         isDropdownVisible && (
-          <div className="dropdown-content max-h-60 break-word">
+          <div className="dropdown-content max-h-60 whitespace-normal break-all">
             <div
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
             />
