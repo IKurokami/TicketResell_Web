@@ -12,6 +12,7 @@ const HistoryPage = () => {
     status: number;
     seller: string | null;
   }>>([]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,19 +34,44 @@ const HistoryPage = () => {
 
         const result = await response.json();
         if (result.statusCode === 200 && Array.isArray(result.data)) {
-          const groupedOrders = result.data.map(order => ({
-            id: order.orderId,
-            date: order.orderDetails[0]?.ticket.createDate || '',
-            tickets: order.orderDetails.map(detail => ({
-              ...detail.ticket,
-              cost: detail.ticket.cost,
-              quantity: detail.quantity,
-            })),
-            price: order.orderDetails.reduce((total: number, detail: any) =>
-              total + detail.ticket.cost * detail.quantity, 0),
-            status: order.status,
-            seller: order.orderDetails[0]?.ticket.sellerId || null,
-          }));
+          const groupedOrders = result.data.map(order => {
+            const createDate = order.orderDetails[0]?.ticket.createDate; // Get the createDate
+
+            // Check if createDate is valid and format it
+            const formattedDate = createDate ? (() => {
+              const date = new Date(createDate);
+
+              // Debugging: Log the date object
+              console.log('Parsed Date:', date);
+
+              // Check if the date is valid
+              if (isNaN(date.getTime())) {
+                return 'Ngày không hợp lệ'; // Invalid date handling
+              }
+
+              const day = date.getDate().toString().padStart(2, '0'); // Day
+              const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month (0-based index)
+              const year = date.getFullYear(); // Year
+              const hours = date.getHours().toString().padStart(2, '0'); // Hours
+              const minutes = date.getMinutes().toString().padStart(2, '0'); // Minutes
+              return `ngày ${day} tháng ${month} năm ${year}, ${hours}:${minutes}`; // Formatted string
+            })() : 'Ngày không hợp lệ'; // Fallback for invalid date
+
+            return {
+              id: order.orderId,
+              date: formattedDate,
+              tickets: order.orderDetails.map(detail => ({
+                ...detail.ticket,
+                cost: detail.ticket.cost,
+                quantity: detail.quantity,
+              })),
+              price: order.orderDetails.reduce((total, detail) =>
+                total + detail.ticket.cost * detail.quantity, 0),
+              status: order.status,
+              seller: order.orderDetails[0]?.ticket.sellerId || null,
+            };
+          });
+
 
           setPurchaseHistory(groupedOrders);
         }
@@ -163,14 +189,8 @@ const HistoryPage = () => {
                       <p className="text-sm text-gray-500">Ngày mua</p>
                       <p className="font-medium">{order.date}</p>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-gray-500">Bao gồm</p>
-                      <ul className="list-disc list-inside">
-                        {order.tickets.map((ticket, idx) => (
-                          <li key={idx} className="font-medium">{ticket.name} - {ticket.quantity} vé</li>
-                        ))}
-                      </ul>
-                    </div>
+
+                    <div className="space-y-1"></div>
 
                     <div className="space-y-1 text-right">
                       <p className="text-sm text-gray-500">Tổng tiền</p>
@@ -216,83 +236,37 @@ const HistoryPage = () => {
               <div className="text-center flex-1">
                 <h3 className="text-lg font-semibold">Chi tiết đơn hàng #{selectedOrder.id}</h3>
               </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
-              >
-                <X className="w-5 h-5" />
+              <button onClick={() => setIsModalOpen(false)}>
+                <X className="w-6 h-6 text-gray-600" />
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] space-y-4">
-              {selectedOrder.tickets.map((ticket: any, index: number) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 rounded-xl p-4 border border-gray-200"
-                >
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                      <Ticket className="w-6 h-6 text-blue-600" />
+            {/* Modal Body */}
+            <div className="p-6 bg-white shadow-lg rounded-lg">
+              <div className="space-y-4">
+                <h4 className="font-semibold text-xl border-b pb-2">Thông tin vé</h4>
+                <div className="space-y-2">
+                  {selectedOrder.tickets.map((ticket, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-2 border-b last:border-none hover:bg-gray-100 transition duration-200">
+                      <span className="font-medium flex-1">{ticket.name}</span>
+                      <div className="flex flex-1 justify-center">
+                        <span className="font-medium text-center">{ticket.quantity} x {formatPrice(ticket.cost)}</span>
+                      </div>
+                      {ticket.sellerId && <span className="text-gray-500 text-sm flex-shrink-0">{ticket.sellerId}</span>}
                     </div>
-                    <div className="flex-1 space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-lg">{ticket.name}</h4>
-                        <p className="text-sm text-gray-500">
-                          Vé {index + 1} / {selectedOrder.tickets.length}
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                            <User className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Người bán</p>
-                            <p className="text-sm text-gray-500">{selectedOrder.seller}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                            <Coins className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Giá tiền</p>
-                            <p className="text-sm text-gray-500">{formatPrice(ticket.cost)}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Display the quantity of tickets here */}
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                          <span className="text-blue-600 font-semibold">SL</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Số lượng</p>
-                          <p className="text-sm text-gray-500">{ticket.quantity}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+                <div className="flex justify-between font-bold mt-4">
+                  <span>Tổng cộng:</span>
+                  <span className="text-lg text-blue-600">{formatPrice(selectedOrder.price)}</span>
+                </div>
+              </div>
             </div>
 
-
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t bg-gray-50">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors"
-              >
-                Đóng
-              </button>
-            </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
