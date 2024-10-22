@@ -10,6 +10,7 @@ import {
   TravelExplore as TicketsIcon,
   Category as CategoriesIcon,
   ShoppingCart as OrdersIcon,
+  ShoppingBasket,
 } from "@mui/icons-material";
 import UserManager from "./UserManager";
 import RoleManager from "./RoleManager";
@@ -33,7 +34,18 @@ const AdminPage = () => {
     { name: "Tickets", icon: <TicketsIcon /> },
     { name: "Categories", icon: <CategoriesIcon /> },
     { name: "Orders", icon: <OrdersIcon /> },
+    { name: "Transaction", icon: <ShoppingBasket /> },
   ];
+
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [currentRole, setCurrentRole] = useState<any>(null);
+  const [isRoleDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<any>(null);
+  const [isCategoryDeleteConfirmOpen, setIsCategoryDeleteConfirmOpen] =
+    useState(false);
+
   useEffect(() => {
     if (searchParams) {
       const page = searchParams.get("page");
@@ -207,20 +219,204 @@ const AdminPage = () => {
   const handleUserEdit = async (userId: string) => {};
   const handleUserDelete = async (userId: string) => {};
 
-  const handleRoleAdd = async () => {};
-  const handleRoleEdit = async (roleId: string) => {};
-  const handleRoleDelete = async (roleId: string) => {};
+  const handleRoleAdd = async () => {
+    setCurrentRole(null);
+    setIsRoleModalOpen(true);
+  };
 
-  const handleCategoryAdd = async () => {};
-  const handleCategoryEdit = async (categoryId: string) => {};
-  const handleCategoryDelete = async (categoryId: string) => {};
+  const handleRoleEdit = async (roleId: string) => {
+    const roleToEdit = roles.find((role) => role.roleId === roleId);
+    setCurrentRole(roleToEdit);
+    setIsRoleModalOpen(true);
+  };
 
-  const handleOrderCancel = async (orderID: string) => {};
-  const handleOrderComplete = async (orderID: string) => {};
+  const handleRoleDelete = async (roleId: string) => {
+    setCurrentRole(roles.find((role) => role.roleId === roleId));
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleRoleSubmit = async (roleData: any) => {
+    try {
+      let response;
+      if (currentRole) {
+        // Edit existing role
+        response = await fetch(
+          `http://localhost:5296/api/Role/update/${roleData.roleId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(roleData),
+            credentials: "include",
+          }
+        );
+      } else {
+        // Add new role
+        response = await fetch("http://localhost:5296/api/Role/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(roleData),
+          credentials: "include",
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to submit role");
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+
+      // Update the roles state
+      if (currentRole) {
+        setRoles(
+          roles.map((role) =>
+            role.roleId === roleData.roleId ? result.data : role
+          )
+        );
+      } else {
+        setRoles([...roles, result.data]);
+      }
+
+      setIsRoleModalOpen(false);
+    } catch (error) {
+      console.error("Error submitting role:", error);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      if (currentRole) {
+        const response = await fetch(
+          `http://localhost:5296/api/Role/delete/${currentRole.roleId}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to delete role");
+        }
+
+        const result = await response.json();
+        console.log(result.message);
+
+        // Remove the deleted role from the state
+        setRoles(roles.filter((role) => role.roleId !== currentRole.roleId));
+
+        setIsDeleteConfirmOpen(false);
+      }
+    } catch (error) {
+      console.error("Error deleting role:", error);
+    }
+  };
+
+  const handleCategoryAdd = async () => {
+    setCurrentCategory(null);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleCategoryEdit = async (categoryId: string) => {
+    const categoryToEdit = categories.find(
+      (category) => category.categoryId === categoryId
+    );
+    setCurrentCategory(categoryToEdit);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleCategoryDelete = async (categoryId: string) => {
+    setCurrentCategory(
+      categories.find((category) => category.categoryId === categoryId)
+    );
+    setIsCategoryDeleteConfirmOpen(true);
+  };
+
+  const handleCategorySubmit = async (categoryData: any) => {
+    try {
+      let response;
+      if (currentCategory) {
+        response = await fetch(
+          `http://localhost:5296/api/Category/update/${categoryData.categoryId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(categoryData),
+            credentials: "include",
+          }
+        );
+      } else {
+        // Add new category
+        response = await fetch("http://localhost:5296/api/Category/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(categoryData),
+          credentials: "include",
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to submit category");
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+
+      // Update the categories state
+      if (currentCategory) {
+        setCategories(
+          categories.map((category) =>
+            category.categoryId === categoryData.categoryId
+              ? { ...category, ...categoryData }
+              : category
+          )
+        );
+      } else {
+        setCategories([...categories, categoryData]);
+      }
+
+      setIsCategoryModalOpen(false);
+    } catch (error) {
+      console.error("Error submitting category:", error);
+    }
+  };
+
+  const handleConfirmCategoryDelete = async () => {
+    try {
+      if (currentCategory) {
+        const response = await fetch(
+          `http://localhost:5296/api/Category/delete/${currentCategory.categoryId}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to delete category");
+        }
+
+        const result = await response.json();
+        console.log(result.message);
+
+        // Remove the deleted category from the state
+        setCategories(
+          categories.filter(
+            (category) => category.categoryId !== currentCategory.categoryId
+          )
+        );
+
+        setIsCategoryDeleteConfirmOpen(false);
+      }
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    }
+  };
+
+  const handleOrderRefresh = async (orderID: string) => {};
 
   const handleNavigation = (tabName: string) => {
     console.log("Navigate to:", tabName);
-    router.push(`/admin?page=${tabName}`, undefined, { shallow: true });
+    router.push(`/admin?page=${tabName}`, undefined);
     setActiveTab(tabName);
   };
 
@@ -261,13 +457,7 @@ const AdminPage = () => {
           />
         );
       case "Orders":
-        return (
-          <OrderManager
-            orders={orders}
-            onCancel={handleOrderCancel}
-            onComplete={handleOrderComplete}
-          />
-        );
+        return <OrderManager orders={orders} onRefresh={handleOrderRefresh} />;
       default:
         return <div>{activeTab} content goes here</div>;
     }
@@ -305,8 +495,12 @@ const AdminPage = () => {
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-xl font-semibold text-border">
-              <span className="text-emerald-500 text-2xl">Ticket </span>
-              <span className="resell text-black text-2xl">Resell </span>
+              <span className="text-emerald-500 text-2xl font-bold">
+                Ticket{" "}
+              </span>
+              <span className="resell text-black text-2xl font-bold">
+                Resell{" "}
+              </span>
               Admin
             </h2>
             <button
@@ -353,6 +547,184 @@ const AdminPage = () => {
         <h2 className="text-2xl font-bold mb-4">{activeTab}</h2>
         {renderContent()}
       </div>
+
+      {isRoleModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">
+          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+              <button
+                onClick={() => setIsRoleModalOpen(false)}
+                className="text-blue-500 font-semibold"
+              >
+                Cancel
+              </button>
+              <h3 className="text-lg font-medium text-gray-900">
+                {currentRole ? "Edit Role" : "Add New Role"}
+              </h3>
+              <button
+                type="submit"
+                form="roleForm" // Link the button with the form submission
+                className="text-blue-500 font-semibold"
+              >
+                {currentRole ? "Update" : "Add"}
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <form
+                id="roleForm" // Add an ID to associate the submit button
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target);
+                  const roleData = {
+                    roleId: formData.get("roleId"),
+                    rolename: formData.get("rolename"),
+                    description: formData.get("description"),
+                  };
+                  handleRoleSubmit(roleData);
+                }}
+              >
+                <input
+                  type="text"
+                  name="roleId"
+                  placeholder="Role ID"
+                  defaultValue={currentRole?.roleId || ""}
+                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                />
+                <input
+                  type="text"
+                  name="rolename"
+                  placeholder="Role Name"
+                  defaultValue={currentRole?.rolename || ""}
+                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                />
+                <input
+                  type="text"
+                  name="description"
+                  placeholder="Description"
+                  defaultValue={currentRole?.description || ""}
+                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                />
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isRoleDeleteConfirmOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">
+          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+              <button
+                onClick={() => setIsDeleteConfirmOpen(false)}
+                className="text-blue-500 font-semibold"
+              >
+                Cancel
+              </button>
+              <h3 className="text-lg font-medium text-gray-900">
+                Confirm Deletion
+              </h3>
+              <button
+                onClick={handleConfirmDelete}
+                className="text-red-500 font-semibold"
+              >
+                Delete
+              </button>
+            </div>
+            <div className="p-4">
+              <p>Are you sure you want to delete this role?</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCategoryModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">
+          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+              <button
+                onClick={() => setIsCategoryModalOpen(false)}
+                className="text-blue-500 font-semibold"
+              >
+                Cancel
+              </button>
+              <h3 className="text-lg font-medium text-gray-900">
+                {currentCategory ? "Edit Category" : "Add New Category"}
+              </h3>
+              <button
+                type="submit"
+                form="categoryForm"
+                className="text-blue-500 font-semibold"
+              >
+                {currentCategory ? "Update" : "Add"}
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <form
+                id="categoryForm"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target);
+                  const categoryData = {
+                    categoryId: formData.get("categoryId"),
+                    name: formData.get("name"),
+                    description: formData.get("description"),
+                  };
+                  handleCategorySubmit(categoryData);
+                }}
+              >
+                <input
+                  type="text"
+                  name="categoryId"
+                  placeholder="Category ID"
+                  defaultValue={currentCategory?.categoryId || ""}
+                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                />
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Category Name"
+                  defaultValue={currentCategory?.name || ""}
+                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                />
+                <input
+                  type="text"
+                  name="description"
+                  placeholder="Description"
+                  defaultValue={currentCategory?.description || ""}
+                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                />
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCategoryDeleteConfirmOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">
+          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+              <button
+                onClick={() => setIsCategoryDeleteConfirmOpen(false)}
+                className="text-blue-500 font-semibold"
+              >
+                Cancel
+              </button>
+              <h3 className="text-lg font-medium text-gray-900">
+                Confirm Deletion
+              </h3>
+              <button
+                onClick={handleConfirmCategoryDelete}
+                className="text-red-500 font-semibold"
+              >
+                Delete
+              </button>
+            </div>
+            <div className="p-4">
+              <p>Are you sure you want to delete this category?</p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
