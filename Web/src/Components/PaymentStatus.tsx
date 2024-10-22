@@ -1,29 +1,103 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
-const PaymentStatus = ({ success }) => {
-  const [countdown, setCountdown] = useState(3); // Countdown starting from 3 seconds
+const PaymentStatus = () => {
+  const [countdown, setCountdown] = useState(3);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const hasFetchedRef = useRef(false);
 
-  // Handle countdown and redirect
   useEffect(() => {
+    const verifyPayment = async () => {
+      if (hasFetchedRef.current) return; // Prevent double fetch
+      hasFetchedRef.current = true;
+      const method = searchParams.get("method");
+      const orderId = searchParams.get("orderId");
+      const token = method === "paypal" ? searchParams.get("token") : "default";
+      console.log(method);
+      console.log(orderId);
+      if (!method || !orderId) {
+        setSuccess(false);
+        setLoading(false);
+        return;
+      }
+
+      let apiEndpoint;
+      switch (method) {
+        case "momo":
+          apiEndpoint = "http://localhost:5296/api/Payment/momo/verify";
+          break;
+        case "vnpay":
+          apiEndpoint = "http://localhost:5296/api/Payment/vnpay/verify";
+          break;
+        case "paypal":
+          apiEndpoint = "http://localhost:5296/api/Payment/paypal/verify";
+          break;
+        default:
+          setSuccess(false);
+          setLoading(false);
+          return;
+      }
+
+      const requestBody = {
+        orderId,
+        token,
+        orderInfo: {
+          userId: "user-id-here", // Replace with actual user ID if needed
+          selectedTicketIds: [], // This can be left empty as per your requirements
+        },
+      };
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+          credentials: "include",
+        });
+
+        const result = await response.json();
+        setSuccess(result.statusCode === 200);
+        setLoading(false);
+      } catch (error) {
+        console.error("Payment verification failed:", error);
+        setSuccess(false);
+        setLoading(false);
+      }
+    };
+
+    verifyPayment();
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (loading) return;
+
     const timer = setInterval(() => {
       setCountdown((prev) => prev - 1);
     }, 1000);
 
-    // Redirect after 3 seconds
     const timeout = setTimeout(() => {
       router.push("/");
     }, 3000);
 
-    // Clean up timers on component unmount
     return () => {
       clearInterval(timer);
       clearTimeout(timeout);
     };
-  }, [router]);
+  }, [loading, router]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Verifying payment...
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center p-6 mt-[40vh] mb-[50vh]">
@@ -41,7 +115,6 @@ const PaymentStatus = ({ success }) => {
         </div>
       )}
 
-      {/* Display the countdown */}
       <p className="mt-4 text-gray-500">
         Redirecting in {countdown} second{countdown !== 1 ? "s" : ""}...
       </p>

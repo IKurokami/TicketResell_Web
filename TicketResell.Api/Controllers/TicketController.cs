@@ -1,3 +1,4 @@
+using Repositories.Constants;
 using Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Tickets;
@@ -18,18 +19,40 @@ namespace TicketResell.Repositories.Controllers
 
         [HttpPost]
         [Route("create")]
-        public async Task<IActionResult> CreateTicket([FromBody] TicketCreateDto dto)
+        public async Task<IActionResult> CreateTicket([FromBody] TicketCreateDto[] dto)
         {
             if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to create a ticket"));
-
-            var response = await _ticketService.CreateTicketAsync(dto);
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to create a ticket"));
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Seller))
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You are not seller"));
+            ResponseModel response = new ResponseModel();
+            for (int i = 0; i < dto.Length; i++)
+            {
+                if (i == dto.Length - 1)
+                {
+                    response = await _ticketService.CreateTicketAsync(dto[i]);
+                    if (response.StatusCode != 200)
+                    {
+                        return ResponseParser.Result(response);
+                    }
+                }
+                else
+                {
+                    response = await _ticketService.CreateTicketAsync(dto[i], false);
+                    if (response.StatusCode != 200)
+                    {
+                        return ResponseParser.Result(response);
+                    }
+                }
+            }
+            
             return ResponseParser.Result(response);
         }
 
         [HttpGet]
         [Route("checkexist/{id}")]
-
         public async Task<IActionResult> CheckExistTicket(string id)
         {
             var response = await _ticketService.CheckExistId(id);
@@ -44,7 +67,6 @@ namespace TicketResell.Repositories.Controllers
             var response = await _ticketService.GetTicketsAsync();
             return ResponseParser.Result(response);
         }
-
 
 
         [HttpGet]
@@ -84,7 +106,8 @@ namespace TicketResell.Repositories.Controllers
                 return ResponseParser.Result(ResponseModel.BadRequest("Time range must be greater than 0"));
             }
 
-            var response = await _ticketService.GetTicketsStartingWithinTimeRangeAsync(request.TicketAmount, request.TimeRange);
+            var response =
+                await _ticketService.GetTicketsStartingWithinTimeRangeAsync(request.TicketAmount, request.TimeRange);
             return ResponseParser.Result(response);
         }
 
@@ -107,7 +130,8 @@ namespace TicketResell.Repositories.Controllers
 
             if (range.From > range.To)
             {
-                return ResponseParser.Result(ResponseModel.BadRequest("Range from cannot be greater than the range to"));
+                return ResponseParser.Result(
+                    ResponseModel.BadRequest("Range from cannot be greater than the range to"));
             }
 
             var response = await _ticketService.GetTicketRangeAsync(range.From, range.To - range.From + 1);
@@ -159,14 +183,16 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> UpdateTicket(string id, [FromBody] TicketUpdateDto dto)
         {
             if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
 
             var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
             if (ticket != null)
             {
                 if (ticket.SellerId == HttpContext.GetUserId())
                 {
-                    return ResponseParser.Result(await _ticketService.UpdateTicketsByBaseIdAsync(id, dto, dto.CategoriesId, true));
+                    return ResponseParser.Result(
+                        await _ticketService.UpdateTicketsByBaseIdAsync(id, dto, dto.CategoriesId, true));
                 }
             }
 
@@ -174,15 +200,13 @@ namespace TicketResell.Repositories.Controllers
         }
 
 
-
-
-
         [HttpPut]
         [Route("update/qr/{id}")]
         public async Task<IActionResult> UpdateQrTicket(string id, [FromBody] TicketQrDto dto)
         {
             if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
 
             var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
             if (ticket != null)
@@ -202,7 +226,8 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> DeleteManyTicket(string id, [FromBody] List<string> ticketIds)
         {
             if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
 
             var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
             if (ticket != null)
@@ -222,7 +247,8 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> DeleteTicketByBaseId(string id)
         {
             if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
 
             var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
             if (ticket != null)
@@ -243,7 +269,8 @@ namespace TicketResell.Repositories.Controllers
         public async Task<IActionResult> DeleteTicket(string id)
         {
             if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to delete a ticket"));
 
             var response = await _ticketService.DeleteTicketAsync(id);
             return ResponseParser.Result(response);

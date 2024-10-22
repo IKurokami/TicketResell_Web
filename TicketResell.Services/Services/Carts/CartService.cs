@@ -135,6 +135,19 @@ namespace TicketResell.Services.Services
             }
         }
 
+        public async Task<ResponseModel> RemoveFromCart(OrderDto order)
+        {
+            string userId = order.BuyerId;
+            List<string> ticketIds = order.OrderDetails.Select(od => od.TicketId).ToList();
+            List<ResponseModel> responses = new List<ResponseModel>();
+            foreach (var ticketId in ticketIds)
+            {
+                var response = await RemoveFromCart(userId, ticketId);
+                responses.Add(response);
+            }
+            return ResponseList.AggregateResponses(responses, "success");
+        }
+
         public async Task<ResponseModel> ClearCart(string userId)
         {
             try
@@ -171,6 +184,41 @@ namespace TicketResell.Services.Services
 
             var cartItems = _mapper.Map<IEnumerable<OrderDetailDto>>(cart.OrderDetails);
             return ResponseModel.Success($"Successfully retrieved cart items for user: {userId}", cartItems);
+        }
+
+        public async Task<ResponseModel> CreateOrderFromVirtualDetailsDirectly(string orderId, string userId, List<VirtualOrderDetailDto> virtualOrderDetails, bool saveAll = true)
+        {
+            if (virtualOrderDetails == null || !virtualOrderDetails.Any())
+            {
+                return ResponseModel.BadRequest("No order details provided");
+            }
+
+            var orderDetails = _mapper.Map<List<OrderDetail>>(virtualOrderDetails);
+
+            var order = new Order
+            {
+                OrderId = orderId,
+                BuyerId = userId,
+                Date = DateTime.UtcNow,
+                OrderDetails = orderDetails,
+                Total = orderDetails.Sum(od => od.Price * od.Quantity),
+                Status = (int)OrderStatus.Processing  // Assuming you have an OrderStatus enum
+            };
+
+            var validator = _validatorFactory.GetValidator<Order>();
+            var validationResult = await validator.ValidateAsync(order);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            }
+
+            await _unitOfWork.OrderRepository.CreateAsync(order);
+
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
+
+            var orderDto = _mapper.Map<OrderDto>(order);
+            return ResponseModel.Success("Order created successfully", orderDto);
         }
 
         public async Task<ResponseModel> CreateOrderFromSelectedItems(string userId, List<string> selectedTicketIds)
@@ -212,7 +260,12 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success("Order created successfully", orderDto);
         }
 
-        public async Task<List<VirtualOrderDetailDto>> CreateVirtualCart(PaymentDto paymentDto)
+        public async Task<double> CalculateVirtualCartTotalAsync(List<VirtualOrderDetailDto> virtualCart)
+        {
+            return await Task.FromResult(virtualCart.Sum(item => item.Price * item.Quantity));
+        }
+
+        public async Task<List<VirtualOrderDetailDto>> CreateVirtualCartAsync(PaymentDto paymentDto)
         {
             var ticketIds = paymentDto.OrderInfo.SelectedTicketIds.Select(t => t.TicketId).ToList();
 
@@ -224,12 +277,14 @@ namespace TicketResell.Services.Services
                    ticket => ticket.TicketId,
                    (selected, ticket) =>
                    {
+
                        var dto = new VirtualOrderDetailDto
                        {
+                           OrderDetailId = "OD" + Guid.NewGuid(),
                            OrderId = paymentDto.OrderId,
                            TicketId = selected.TicketId,
                            Quantity = selected.Quantity,
-                           Price = ticket.Cost
+                           Price = ticket.Cost ?? -1
                        };
                        _logger.LogInformation($"Created detail - TicketId: {dto.TicketId}, Quantity: {dto.Quantity}, Price: {dto.Price}");
                        return dto;

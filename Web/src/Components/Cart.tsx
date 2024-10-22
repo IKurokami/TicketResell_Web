@@ -173,73 +173,6 @@ const MyCart: React.FC = () => {
     }
   };
 
-  const fetchPaypalOrder = async (vndAmount) => {
-    try {
-      const response = await fetch("/api/getPaypalOrder", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ vndAmount }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create PayPal order");
-      }
-
-      const data = await response.json();
-      return data.paymentUrl; // Return the order data
-    } catch (error) {
-      console.error("Error fetching order:", error);
-      throw error; // Re-throw the error for handling elsewhere if needed
-    }
-  };
-
-  const fetchVnPay = async (amount, vnp_TxnRef) => {
-    try {
-      const response = await fetch("/api/getPaymentUrl", {
-        method: "POST", // Specify the method as POST
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ amount, vnp_TxnRef }), // Include amount and vnp_TxnRef in the request body
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch payment URL");
-      }
-
-      const data = await response.json();
-      return data.paymentUrl; // Return the payment URL
-    } catch (error) {
-      console.error("Error fetching payment URL:", error);
-      throw error; // Re-throw the error for handling elsewhere
-    }
-  };
-
-  const fetchMoMoPayment = async (amount, requestId, orderId) => {
-    try {
-      const response = await fetch("/api/createMoMoPayment", {
-        // Adjust the API endpoint as necessary
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ amount, requestId, orderId }), // Send the amount, requestId, and orderId
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch MoMo payment URL");
-      }
-
-      const data = await response.json();
-      return data.payUrl; // Return the payment URL from MoMo's response
-    } catch (error) {
-      console.error("Error fetching MoMo payment URL:", error);
-      throw error; // Re-throw the error for handling elsewhere
-    }
-  };
-
   // Proceed to checkout
   const handleCheckout = async () => {
     const productsForCheckout = items.filter((item) => item.isSelected);
@@ -260,46 +193,62 @@ const MyCart: React.FC = () => {
       JSON.stringify(productsForCheckout)
     );
     localStorage.setItem("paymentMethod", selectedPayment);
-    const requestId = `requestId_${Date.now()}`; // Generate a unique request ID
-    const orderId = `orderId_${Date.now()}`;
-    if (selectedPayment === "Paypal") {
-      try {
-        const paymentUrl = await fetchPaypalOrder(totalItemsPrice);
-        router.push(paymentUrl);
-      } catch (error) {
-        console.error("Error fetching PayPal order:", error);
-        alert(
-          "There was an error processing your PayPal order. Please try again."
-        );
-      }
-    } else if (selectedPayment === "VNpay") {
-      try {
-        const paymentUrl = await fetchVnPay(totalItemsPrice, orderId); // Fetch the VNPay payment URL
-        console.log("VNPay Payment URL:", paymentUrl);
-        router.push(paymentUrl); // Redirect to VNPay URL
-      } catch (error) {
-        console.error("Error fetching VNPay order:", error);
-        alert(
-          "There was an error processing your VNPay order. Please try again."
-        );
-      }
-    } else if (selectedPayment === "momo") {
-      // Generate a unique order ID
 
-      try {
-        const paymentUrl = await fetchMoMoPayment(
-          totalItemsPrice,
-          requestId,
-          orderId
-        ); // Fetch the MoMo payment URL
-        console.log("MoMo Payment URL:", paymentUrl);
-        router.push(paymentUrl); // Redirect to MoMo URL
-      } catch (error) {
-        console.error("Error fetching MoMo payment URL:", error);
-        alert(
-          "There was an error processing your MoMo order. Please try again."
-        );
+    const orderId = `default`;
+    const token = "default";
+
+    const orderInfo = {
+      userId: "default",
+      selectedTicketIds: productsForCheckout.map((product) => ({
+        ticketId: product.ticketId,
+        quantity: product.quantity,
+      })),
+    };
+
+    const requestBody = {
+      orderId,
+      token,
+      orderInfo,
+    };
+
+    let apiEndpoint;
+    switch (selectedPayment) {
+      case "momo":
+        apiEndpoint = "http://localhost:5296/api/Payment/momo/payment";
+        break;
+      case "VNpay":
+        apiEndpoint = "http://localhost:5296/api/Payment/vnpay/payment";
+        break;
+      case "Paypal":
+        apiEndpoint = "http://localhost:5296/api/Payment/paypal/payment";
+        break;
+      default:
+        alert("Invalid payment method selected.");
+        return;
+    }
+
+    try {
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+
+      if (result.statusCode === 200 && result.data) {
+        router.push(result.data[0].data); // Redirect to the payment URL
+      } else {
+        throw new Error(result.message || "Failed to process payment");
       }
+    } catch (error) {
+      console.error(`Error processing ${selectedPayment} payment:`, error);
+      alert(
+        `There was an error processing your ${selectedPayment} order. Please try again.`
+      );
     }
   };
 
@@ -477,7 +426,12 @@ const MyCart: React.FC = () => {
                     {formatPriceVND(totalItemsPrice)}
                   </span>
                 </div>
-
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Thuế (5%)</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {formatPriceVND(totalItemsPrice * 0.05)}
+                  </span>
+                </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-3">
                     Phương thức thanh toán:
@@ -509,16 +463,14 @@ const MyCart: React.FC = () => {
                     ))}
                   </div>
                 </div>
-
                 <div className="flex justify-between items-center pt-6 border-t border-gray-200">
                   <span className="text-lg font-semibold text-gray-800">
-                    Tổng cộng
+                    Tổng cộng (bao gồm thuế)
                   </span>
                   <span className="text-lg font-semibold text-green-600">
-                    {formatPriceVND(totalPrice)}
+                    {formatPriceVND(totalItemsPrice * 1.05)}
                   </span>
                 </div>
-
                 <button
                   className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition duration-300 mt-4"
                   onClick={handleCheckout}
