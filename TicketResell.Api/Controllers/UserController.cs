@@ -84,8 +84,8 @@ namespace Repositories.Controllers
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDto dto)
         {
-            if (!HttpContext.GetIsAuthenticated())
-                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a user."));
+            //if (!HttpContext.GetIsAuthenticated())
+            //    return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a user."));
 
             var response = await _userService.UpdateUserByIdAsync(id, dto);
             return ResponseParser.Result(response);
