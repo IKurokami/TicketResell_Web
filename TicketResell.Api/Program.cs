@@ -15,6 +15,7 @@ using TicketResell.Services.Services.Tickets;
 using TicketResell.Repositories.Logger;
 using TicketResell.Services.Services.Payments;
 using Repositories.Config;
+using TicketResell.Services.Services.History;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -69,6 +70,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ISellConfigService, SellConfigService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddHttpClient<IMomoService, MomoService>();
 builder.Services.AddHttpClient<IVnpayService, VnpayService>();
 builder.Services.AddHttpClient<IPaypalService, PaypalService>();

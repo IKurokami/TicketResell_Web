@@ -43,11 +43,10 @@ namespace Repositories.Repositories
             return await _context.Orders
                 .Where(o => o != null && o.BuyerId == buyerId)
                 .Include(o => o.OrderDetails)
+                .ThenInclude(i => i.Ticket)
                 .ToListAsync();
         }
-
-
-
+        
         public async Task<IEnumerable<Order?>> GetOrdersByDateRangeAsync(DateRange dateRange)
         {
             return await _context.Orders

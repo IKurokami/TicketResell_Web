@@ -1,101 +1,119 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
-import TicketsPage from "./TicketSeller"; // Adjust the path based on your file structure
-import "@/Css/DashboardSeller.css";
+import { LayoutDashboard, Settings } from "lucide-react";
+import { GrTransaction } from "react-icons/gr";
+import { IoTicketOutline } from "react-icons/io5";
+import { MdAttachMoney } from "react-icons/md";
+import TicketsPage from "./TicketSeller";
 import TransactionTable from "./TransactionPage";
 
 const Dashboard = () => {
-  const [selectedTab, setSelectedTab] = useState("Tickets");
-  const [isSidebarOpen, setSidebarOpen] = useState(false); // Sidebar starts closed
-  const sidebarRef = useRef<HTMLDivElement | null>(null); // Create a ref for the sidebar
+  const [selectedTab, setSelectedTab] = useState("Ticket"); // Set default to "Ticket"
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarRef = useRef(null);
+
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, disable: true },
+    { id: "ticket", label: "Ticket", icon: IoTicketOutline },
+    { id: "transactions", label: "Transactions", icon: GrTransaction },
+    { id: "revenue", label: "Revenue", icon: MdAttachMoney },
+    { id: "setting", label: "Setting", icon: Settings },
+  ];
 
   const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen); // Toggle the sidebar visibility
+    setSidebarOpen(!isSidebarOpen);
   };
 
-  const renderContent = () => {
-    switch (selectedTab) {
-      case "Tickets":
-        return <TicketsPage />; // Render the TicketsPage component
-      case "Transaction":
-        return <TransactionTable/>;
-        
-      case "Revenue":
-        return (
-          <div className="p-4">
-            <h2 className="text-2xl font-bold">Revenue Report</h2>
-            <p>This is where you can view revenue details.</p>
-          </div>
-        );
-      default:
-        return null;
+  const handleClickOutside = (event) => {
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setSidebarOpen(false);
     }
   };
 
-  const handleClickOutside = (event: MouseEvent) => {
-    // Check if the click is outside the sidebar
-    if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-      setSidebarOpen(false); // Close the sidebar if clicked outside
-    }
-  };
-
-  // Use effect to handle clicks outside the sidebar
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside); // Clean up event listener
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
+  const renderContent = () => {
+    switch (selectedTab) {
+      case "Ticket":
+        return <TicketsPage />;
+      case "Transactions":
+        return <TransactionTable />;
+      default:
+        return <TicketsPage />; // Default to TicketsPage
+    }
+  };
+
   return (
-    <div className="relative py-14 bg-white">
-      <div className="flex flex-col md:flex-row">
-        {/* Sidebar */}
-        <div
-          ref={sidebarRef} // Attach the ref to the sidebar div
-          className={`fixed inset-y-0 left-0 transform bg-slate-100 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/5 z-10 ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <ul className="flex flex-col slidebar-seller p-6 space-y-5 mt-7">
-            {["Tickets", "Transaction", "Revenue"].map((tab) => (
-              <li key={tab}>
-                <a
-                  className={`block font-semibold no-underline rounded-xl p-2 transition-all duration-300 ${
-                    selectedTab === tab
-                      ? "bg-green-600 text-white"
-                      : "bg-white text-black hover:bg-green-500"
+    <div className="flex bg-white pt-10">
+      {/* Sidebar */}
+      <div
+        ref={sidebarRef}
+        className={`fixed min-h-[140vh] inset-y-0 left-0 transform bg-white  transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 w-64 z-10 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        <div className="flex flex-col h-full lg:p-4 md:mt-12">
+          <div className="space-y-4">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+
+              if (item.disable) {
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-center w-full px-4 py-3 text-lg font-bold text-gray-400"
+                  >
+                    <Icon className="w-5 h-5 mr-3 text-gray-400" />
+                    {item.label}
+                  </div>
+                );
+              }
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setSelectedTab(item.label)}
+                  className={`flex items-center w-full px-4 py-3 text-sm rounded-lg transition-colors ${
+                    selectedTab === item.label
+                      ? "bg-gray-100 text-gray-900 font-medium"
+                      : "text-gray-500 hover:bg-gray-50"
                   }`}
-                  onClick={() => {
-                    setSelectedTab(tab);
-                    toggleSidebar(); // Optionally close the sidebar when a tab is clicked
-                  }}
-                  href="#"
                 >
-                  {tab}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Content area */}
-        <div
-          className={`flex-grow pt-11 px-4 md:px-0 ${
-            isSidebarOpen ? "ml-0" : "ml-0"
-          }`} // Maintain space for the sidebar when it's open
-        >
-          <div className="flex items-center justify-between">
-            <FontAwesomeIcon
-              icon={faBars}
-              className="text-lg cursor-pointer sm:hidden" // Show icon only on small screens
-              onClick={toggleSidebar} // Toggle sidebar on click
-            />
+                  <Icon className="w-5 h-5 mr-3" />
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
+        </div>
+      </div>
 
-          {/* Always render content regardless of the sidebar state */}
+      {/* Main Content */}
+      <div className="flex-1 pt-16   ">
+        <div className="max-[1024px]:p-1">
+          <button
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+            onClick={toggleSidebar}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
           {renderContent()}
         </div>
       </div>

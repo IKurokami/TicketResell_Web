@@ -134,26 +134,26 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     };
     const id = Cookies.get("id");
 
-    const fetchCart = async () => {
-      const response = await fetch(
-        `http://localhost:5296/api/cart/items/${id}`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const result = await response.json();
-      if (result.data == null) {
-        setCountCartItems(0);
-      } else {
-        setCountCartItems(result.data.length);
-      }
-    };
+    // const fetchCart = async () => {
+    //   const response = await fetch(
+    //     `http://localhost:5296/api/cart/items/${id}`,
+    //     {
+    //       method: "GET",
+    //       credentials: "include",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     }
+    //   );
+    //   const result = await response.json();
+    //   if (result.data == null) {
+    //     setCountCartItems(0);
+    //   } else {
+    //     setCountCartItems(result.data.length);
+    //   }
+    // };
 
-    fetchCart(); // Fetch cart items when the component mounts
+    // fetchCart(); // Fetch cart items when the component mounts
 
     // Set up a function to listen for changes in the cookies or storage
     const handleCookieChange = () => {
