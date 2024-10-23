@@ -2,6 +2,8 @@ import { fetchImage } from "@/models/FetchImage";
 import React, { useEffect, useState } from "react";
 import { FaEnvelope, FaPencilAlt, FaPhoneAlt } from "react-icons/fa";
 import EditProfilePopup from "./EditProfilePopUp";
+import uploadImageForTicket from "@/models/UpdateImage";
+import { Image } from "lucide-react";
 
 const DEFAULT_IMAGE = "https://images7.alphacoders.com/129/1297416.png";
 
@@ -39,19 +41,22 @@ const SellProfile: React.FC<props> = ({
   userId, // Pass userId to EditProfilePopup
 }) => {
   const [avatarUrl, setAvatarUrl] = useState<string>(DEFAULT_IMAGE);
+  const [coverImageUrl, setCoverImageUrl] = useState<string>(DEFAULT_IMAGE);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State to control EditProfilePopup visibility
-  const [imageFileSelected, setImageFile] = useState<File | null>(null);
-  const [showSaveButton, setShowSaveButton] = useState(false);
+  const coverId = `${userId}_cover`;
 
-  const fetchImageAvatar = async (avatar: string) => {
-    const { imageUrl: fetchedImageUrl, error } = await fetchImage(avatar);
+  const fetchImageAvatar = async (imageId: string) => {
+    const { imageUrl: fetchedImageUrl, error } = await fetchImage(imageId);
     if (fetchedImageUrl && !error) {
       setAvatarUrl(fetchedImageUrl); // Set the fetched image URL if available
-    } else {
-      setAvatarUrl(DEFAULT_IMAGE); // Fallback to default image if there's an error
     }
   };
-
+  const fetchImageCoverAvatar = async (imageId: string) => {
+    const { imageUrl: fetchedImageUrl, error } = await fetchImage(imageId);
+    if (fetchedImageUrl && !error) {
+      setCoverImageUrl(fetchedImageUrl); // Set the fetched image URL if available
+    }
+  };
   const handleOpenEditModal = () => setIsEditModalOpen(true); // Open the popup
   const handleCloseEditModal = () => setIsEditModalOpen(false); // Close the popup
   const formData: FormData = {
@@ -65,31 +70,60 @@ const SellProfile: React.FC<props> = ({
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
-
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarUrl(reader.result as string);
-        setShowSaveButton(true);
       };
+      uploadImageForTicket(userId, file);
+      reader.readAsDataURL(file);
+    }
+  };
+  const handleCoverAvatarChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverImageUrl(reader.result as string);
+      };
+      uploadImageForTicket(coverId, file);
       reader.readAsDataURL(file);
     }
   };
 
   // Fetch the avatar when the component mounts or the avatar prop changes
   useEffect(() => {
-    if (avatar) {
-      fetchImageAvatar(avatar);
-    }
+    fetchImageAvatar(userId);
+    fetchImageCoverAvatar(coverId);
   }, [avatar]); // Dependency array includes avatar
 
+  useEffect(() => {});
   return (
     <div className="relative profile">
       <img
         className="w-full object-cover mt-[10vh] max-w-full h-[30vh] bg-gray-100"
-        src={DEFAULT_IMAGE}
+        src={coverImageUrl}
         alt=""
       />
+      {isAdjustVisible && (
+        <>
+          <label
+            htmlFor="avatar"
+            className="flex items-center absolute top-[20vh] left-[87vw] px-4 py-2 bg-gray-500 rounded text-gray-600 p-1.5 cursor-pointer"
+          >
+            <FaPencilAlt className="mr-2 text-white" size={12} />
+            <span className="text-white">Thêm ảnh bìa</span>
+          </label>
+          <input
+            id="avatar"
+            type="file"
+            className="hidden"
+            onChange={handleCoverAvatarChange}
+            accept="image/*"
+          />
+        </>
+      )}
       <div className="absolute w-[20vh] h-[20vh] rounded-full left-[3vw] top-[15vh] border-4 border-white bg-gray-100">
         <img
           src={avatarUrl} // Use the fetched avatarUrl or fallback to default

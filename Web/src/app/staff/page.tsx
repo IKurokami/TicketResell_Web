@@ -1,11 +1,11 @@
 import React from "react";
 import Background from "@/Components/Background";
-import StaffDetail from "@/Components/StaffDetail";
+import StaffDashboard from "@/Components/staff/StaffDashboard";
 
 const staff = () => {
   return (
     <div>
-      {/* <Background test={<StaffDetail />} /> */}
+      <Background test={<StaffDashboard />} />
     </div>
   );
 };
