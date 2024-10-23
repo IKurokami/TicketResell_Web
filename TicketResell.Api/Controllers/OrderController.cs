@@ -53,7 +53,7 @@ namespace Api.Controllers
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view orders"));
 
             var order = await _orderService.GetOrderById(orderId);
-
+            
             if (order.Data is not Order orderDto)
                 return ResponseParser.Result(ResponseModel.Forbidden("Access denied: You cannot access this order"));
 

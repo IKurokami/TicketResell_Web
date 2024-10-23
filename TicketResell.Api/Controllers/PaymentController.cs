@@ -1,11 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Razor.Language;
 using Repositories.Core.Dtos.Payment;
-using Repositories.Core.Dtos.User;
-using Repositories.Core.Helper;
-using System.Threading.Tasks;
-using System.Xml;
-using TicketResell.Repositories.Core.Dtos.Payment;
 using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Payments;

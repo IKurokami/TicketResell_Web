@@ -1,6 +1,5 @@
 using Repositories.Constants;
 using Repositories.Core.Dtos.OrderDetail;
-using Repositories.Core.Dtos.User;
 using TicketResell.Repositories.Helper;
 
 namespace Api.Controllers
@@ -21,25 +20,11 @@ namespace Api.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateOrderDetail([FromBody] OrderDetailDto dto)
         {
-            var userId = HttpContext.GetUserId();
-            if (HttpContext.IsUserIdAuthenticated(userId))
+            if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(
-                    ResponseModel.Unauthorized("Cannot create order detail with unknown user"));
-
-            var userService = _serviceProvider.GetRequiredService<IUserService>();
-            var user = await userService.GetUserByIdAsync(userId);
-
-            if (user.Data is UserReadDto userReadDto)
-            {
-                if (userReadDto.Roles.Any(x => RoleHelper.HasEnoughRoleLevel(x.RoleId, UserRole.Buyer)))
-                {
-                    return ResponseParser.Result(await _orderDetailService.CreateOrderDetail(dto));
-                }
-
-                return ResponseParser.Result(ResponseModel.Forbidden("You don't have permission to delete the order"));
-            }
-
-            return ResponseParser.Result(ResponseModel.NotFound("User not found in server"));
+                    ResponseModel.Unauthorized("You need to be authenticated to create order details"));
+            
+            return ResponseParser.Result(await _orderDetailService.CreateOrderDetail(dto));
         }
 
         [HttpGet("{id}")]
@@ -49,9 +34,12 @@ namespace Api.Controllers
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("You need to be authenticated to view order details"));
 
-            //TODO: check for order buyerId is authenticated UserId
+            var orderDetail = await _orderDetailService.GetOrderDetail(id);
             
-            return ResponseParser.Result(await _orderDetailService.GetOrderDetail(id));
+            if (orderDetail.Data is not OrderDetailDto detailDto)
+                return ResponseParser.Result(ResponseModel.NotFound("Order detail not found"));
+            
+            return ResponseParser.Result(orderDetail);
         }
 
         [HttpGet]
@@ -61,8 +49,10 @@ namespace Api.Controllers
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("You need to be authenticated to view order details"));
 
-            //TODO: Check for authenticated UserId is a Staff or Admin
-            
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
+                return ResponseParser.Result(
+                    ResponseModel.Forbidden("Access denied: You don't have permission to view all order details"));
+
             return ResponseParser.Result(await _orderDetailService.GetAllOrderDetails());
         }
 
@@ -73,11 +63,11 @@ namespace Api.Controllers
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("You need to be authenticated to view order details"));
 
-            var userId = HttpContext.GetUserId();
-            if (userId != buyerId)
+            if (!HttpContext.IsUserIdAuthenticated(buyerId) && 
+                !HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
                 return ResponseParser.Result(
                     ResponseModel.Forbidden("Access denied: You cannot access order details for this buyer"));
-            
+
             return ResponseParser.Result(await _orderDetailService.GetOrderDetailsByBuyerId(buyerId));
         }
 
@@ -88,8 +78,8 @@ namespace Api.Controllers
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("You need to be authenticated to view order details"));
 
-            var userId = HttpContext.GetUserId();
-            if (userId != sellerId)
+            if (!HttpContext.IsUserIdAuthenticated(sellerId) && 
+                !HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
                 return ResponseParser.Result(
                     ResponseModel.Forbidden("Access denied: You cannot access order details for this seller"));
 
@@ -102,12 +92,11 @@ namespace Api.Controllers
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("You need to be authenticated to update order details"));
-
-            var userId = HttpContext.GetUserId();
-            if (string.IsNullOrEmpty(userId))
-                return ResponseParser.Result(
-                    ResponseModel.Unauthorized("Cannot update order detail with unknown user"));
             
+            var orderDetail = await _orderDetailService.GetOrderDetail(dto.OrderDetailId);
+            if (orderDetail.Data is not OrderDetailDto detailDto)
+                return ResponseParser.Result(ResponseModel.NotFound("Order detail not found"));
+
             return ResponseParser.Result(await _orderDetailService.UpdateOrderDetail(dto));
         }
 
@@ -118,11 +107,10 @@ namespace Api.Controllers
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("You need to be authenticated to delete order details"));
 
-            var userId = HttpContext.GetUserId();
-            if (string.IsNullOrEmpty(userId))
-                return ResponseParser.Result(
-                    ResponseModel.Unauthorized("Cannot delete order detail with unknown user"));
-            
+            var orderDetail = await _orderDetailService.GetOrderDetail(id);
+            if (orderDetail.Data is not OrderDetailDto detailDto)
+                return ResponseParser.Result(ResponseModel.NotFound("Order detail not found"));
+
             return ResponseParser.Result(await _orderDetailService.DeleteOrderDetail(id));
         }
     }
