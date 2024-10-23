@@ -76,8 +76,8 @@ const TransactionTable: React.FC = () => {
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const fetchTransactions = async () => {
@@ -121,7 +121,13 @@ const TransactionTable: React.FC = () => {
   }
 
   if (error) {
-    return <div className="p-4 text-center text-red-600">Error: {error}</div>;
+    return (
+      <tr>
+        <td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-gray-500">
+          No transactions available.
+        </td>
+      </tr>
+    );
   }
 
   const startDate = dateRange.start ? toISODate(dateRange.start) : null;
@@ -151,7 +157,9 @@ const TransactionTable: React.FC = () => {
   const MobileCard = ({ transaction }) => (
     <div className="bg-white p-4 rounded-lg shadow mb-4 border border-gray-200">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm text-gray-600">{formatDate(transaction.order.date)}</span>
+        <span className="text-sm text-gray-600">
+          {formatDate(transaction.order.date)}
+        </span>
         <span className="text-sm font-medium text-green-700">
           {formatVND(transaction.price * transaction.quantity)}
         </span>
@@ -189,7 +197,7 @@ const TransactionTable: React.FC = () => {
           />
         </div>
 
-        <div className="w-full lg:w-auto">
+        <div className="">
           <DateRange onDateChange={handleDateChange} />
         </div>
       </div>
@@ -212,20 +220,25 @@ const TransactionTable: React.FC = () => {
             <table className="w-full divide-y divide-gray-200">
               <thead>
                 <tr className="bg-gray-100">
-                  {['DATE', 'TICKET', 'PRICE', 'QUANTITY', 'TOTAL', 'FROM'].map((header) => (
-                    <th
-                      key={header}
-                      className="px-4 lg:px-6 py-3 lg:py-4 text-black text-sm font-semibold tracking-wider text-center"
-                    >
-                      {header}
-                    </th>
-                  ))}
+                  {["DATE", "TICKET", "PRICE", "QUANTITY", "TOTAL", "FROM"].map(
+                    (header) => (
+                      <th
+                        key={header}
+                        className="px-4 lg:px-6 py-3 lg:py-4 text-black text-sm font-semibold tracking-wider text-center"
+                      >
+                        {header}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {filteredTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-gray-500">
+                    <td
+                      colSpan={6}
+                      className="px-4 lg:px-6 py-4 text-center text-gray-500"
+                    >
                       No transactions available.
                     </td>
                   </tr>

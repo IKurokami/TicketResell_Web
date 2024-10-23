@@ -16,6 +16,7 @@ using TicketResell.Repositories.Logger;
 using TicketResell.Services.Services.Payments;
 using Repositories.Config;
 using TicketResell.Services.Services.History;
+using TicketResell.Services.Services.Revenues;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -57,7 +58,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 // Automapper configuration
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 builder.Services.AddSingleton<IAppLogger, AppLogger>();
-
+builder.Services.AddScoped<IRevenueService, RevenueService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

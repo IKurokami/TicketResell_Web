@@ -6,6 +6,7 @@ import { IoTicketOutline } from "react-icons/io5";
 import { MdAttachMoney } from "react-icons/md";
 import TicketsPage from "./TicketSeller";
 import TransactionTable from "./TransactionPage";
+import RevenueCard from "./Revenue";
 
 const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState("Ticket"); // Set default to "Ticket"
@@ -13,7 +14,12 @@ const Dashboard = () => {
   const sidebarRef = useRef(null);
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, disable: true },
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      disable: true,
+    },
     { id: "ticket", label: "Ticket", icon: IoTicketOutline },
     { id: "transactions", label: "Transactions", icon: GrTransaction },
     { id: "revenue", label: "Revenue", icon: MdAttachMoney },
@@ -43,6 +49,8 @@ const Dashboard = () => {
         return <TicketsPage />;
       case "Transactions":
         return <TransactionTable />;
+      case "Revenue":
+        return <RevenueCard />;
       default:
         return <TicketsPage />; // Default to TicketsPage
     }
@@ -53,7 +61,7 @@ const Dashboard = () => {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed min-h-[140vh] inset-y-0 left-0 transform bg-white  transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 w-64 z-10 ${
+        className={`fixed inset-y-0 left-0 transform bg-white  transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 w-64 z-10 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
