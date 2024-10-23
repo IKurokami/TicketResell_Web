@@ -43,7 +43,6 @@ const SellProfile: React.FC<props> = ({
   const [avatarUrl, setAvatarUrl] = useState<string>(DEFAULT_IMAGE);
   const [coverImageUrl, setCoverImageUrl] = useState<string>(DEFAULT_IMAGE);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State to control EditProfilePopup visibility
-  const [showSaveButton, setShowSaveButton] = useState(false);
   const coverId = `${userId}_cover`;
 
   const fetchImageAvatar = async (imageId: string) => {
@@ -73,7 +72,7 @@ const SellProfile: React.FC<props> = ({
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setShowSaveButton(true);
+        setAvatarUrl(reader.result as string);
       };
       uploadImageForTicket(userId, file);
       reader.readAsDataURL(file);
@@ -87,7 +86,6 @@ const SellProfile: React.FC<props> = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         setCoverImageUrl(reader.result as string);
-        setShowSaveButton(true);
       };
       uploadImageForTicket(coverId, file);
       reader.readAsDataURL(file);
@@ -96,12 +94,11 @@ const SellProfile: React.FC<props> = ({
 
   // Fetch the avatar when the component mounts or the avatar prop changes
   useEffect(() => {
-    if (avatar) {
-      fetchImageAvatar(userId);
-      fetchImageCoverAvatar(coverId);
-    }
+    fetchImageAvatar(userId);
+    fetchImageCoverAvatar(coverId);
   }, [avatar]); // Dependency array includes avatar
 
+  useEffect(() => {});
   return (
     <div className="relative profile">
       <img

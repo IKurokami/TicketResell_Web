@@ -221,8 +221,7 @@ namespace TicketResell.Repositories.Controllers
         }
 
 
-        [HttpDelete]
-        [Route("deletemany/{id}")]
+        [HttpPost("deletemany/{id}")]
         public async Task<IActionResult> DeleteManyTicket(string id, [FromBody] List<string> ticketIds)
         {
             if (!HttpContext.GetIsAuthenticated())

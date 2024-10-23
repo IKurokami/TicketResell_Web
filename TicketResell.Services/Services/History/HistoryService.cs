@@ -33,6 +33,6 @@ public class HistoryService : IHistoryService
             return ResponseModel.NotFound($"Not found any history for user {userID}.");
         }
         
-        return ResponseModel.Success("Get history successful" , _mapper.Map<IEnumerable<OrderDto>>(response.Where(i => i.Status == (int)OrderStatus.Completed)));
+        return ResponseModel.Success("Get history successful" , _mapper.Map<IEnumerable<OrderDto>>(response));
     }
 }

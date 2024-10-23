@@ -22,6 +22,7 @@ export interface Ticket {
   image: string;
   categories: Category[];
   imageUrl?: string;
+  description: string;
 }
 
 const DEFAULT_IMAGE =
