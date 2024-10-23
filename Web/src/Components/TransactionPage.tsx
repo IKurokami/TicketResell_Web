@@ -99,6 +99,8 @@ const TransactionTable: React.FC = () => {
         throw new Error("Failed to fetch transactions");
       }
       const result = await response.json();
+      console.log(result.data);
+      
       setTransactions(result.data);
     } catch (error: any) {
       setError(error.message);

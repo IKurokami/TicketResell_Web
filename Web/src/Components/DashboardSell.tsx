@@ -6,7 +6,7 @@ import { IoTicketOutline } from "react-icons/io5";
 import { MdAttachMoney } from "react-icons/md";
 import TicketsPage from "./TicketSeller";
 import TransactionTable from "./TransactionPage";
-import RevenueCard from "./Revenue";
+import RevenueCard from "./RevenuePage";
 
 const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState("Ticket"); // Set default to "Ticket"
