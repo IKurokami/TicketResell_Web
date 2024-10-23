@@ -6,6 +6,7 @@ import {
   ChevronDown, MapPin, Share2, Download, Tag, Info, Clock,
   ArrowUpDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
 import Cookies from 'js-cookie';
@@ -753,20 +754,23 @@ const MyTicketPage = () => {
                     </div>
                     <div>
                       <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
-                        <Tag className="w-5 h-5 text-blue-500" />
-                        <span>Danh mục</span>
+                        <span>Bản đồ</span>
                       </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedTicket.categories?.map((category, index) => (
-                          <span
-                            key={index}
-                            className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm"
+                      <div className="w-full h-64">
+                        {/* Nhúng Google Map ở đây */}
+                        <LoadScript googleMapsApiKey="AIzaSyDFmwUleiGh4WLHqClLPPu8OgQTuUIzfQY">
+
+                          <GoogleMap
+                            mapContainerStyle={{ width: "300px", height: "250px" }}
+                            center={{ lat: 10.762622, lng: 106.660172 }} // Tọa độ trung tâm (có thể thay đổi theo vị trí thực tế)
+                            zoom={15}
                           >
-                            {category}
-                          </span>
-                        ))}
+                            <Marker position={{ lat: 10.762622, lng: 106.660172 }} />
+                          </GoogleMap>
+                        </LoadScript>
                       </div>
                     </div>
+
                   </div>
 
                   <div className="space-y-4">
