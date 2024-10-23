@@ -26,4 +26,21 @@ public class CategoryRepository : GenericRepository<Category>, ICategoryReposito
             .Where(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
+    public async Task DeleteCategoryAsync(string id)
+    {
+        var category = await _context.Categories
+            .Include(t => t.Tickets)
+            .FirstOrDefaultAsync(t => t.CategoryId == id);
+
+        if (category == null)
+        {
+            throw new KeyNotFoundException("Ticket not found");
+        }
+
+        category.Tickets.Clear();
+
+        _context.Categories.Remove(category);
+
+        await _context.SaveChangesAsync();
+    }
 }

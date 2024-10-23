@@ -112,8 +112,8 @@ namespace TicketResell.Repositories.Controllers
         }
 
 
-        [HttpGet("getbycategory")]
-        public async Task<IActionResult> GetTicketsByCategoryAndDate(TicketCategoryRequestDto dto)
+        [HttpPost("getbycategory")]
+        public async Task<IActionResult> GetTicketsByCategoryAndDate([FromBody]TicketCategoryRequestDto dto)
         {
             var response = await _ticketService.GetTicketsByCategoryAndDateAsync(dto.CategoryName, dto.Amount);
 
