@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/Components/ui/card";
 import {
   LineChart,
   Line,
