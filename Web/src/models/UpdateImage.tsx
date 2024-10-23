@@ -11,6 +11,7 @@ const uploadImageForTicket = async (id: string, selectedFile: File | null) => {
   formData.append("image", selectedFile);
 
   try {
+
     const deleteImageResult = await deleteImage(id);
     console.log("Kết quả xóa hình ảnh:", deleteImageResult);
 
@@ -19,6 +20,9 @@ const uploadImageForTicket = async (id: string, selectedFile: File | null) => {
       body: formData,
     });
 
+    if (!uploadResponse.ok) {
+      throw new Error(`Lỗi khi tải lên hình ảnh: ${uploadResponse.statusText}`);
+    }
     if (!uploadResponse.ok) {
       throw new Error(`Lỗi khi tải lên hình ảnh: ${uploadResponse.statusText}`);
     }

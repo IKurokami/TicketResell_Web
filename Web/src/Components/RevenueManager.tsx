@@ -28,6 +28,11 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
   const [timeframe, setTimeframe] = useState("month");
   const today = new Date();
 
+  // Sort revenue data by startDate
+  const sortedRevenueData = [...revenueData].sort(
+    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+  );
+
   const calculatePercentageChangeTodayYesterday = (
     revenueData: RevenueItem[]
   ): string => {
@@ -169,7 +174,9 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
 
   // Generate Y-axis ticks
   const getYAxisTicks = () => {
-    const maxRevenue = Math.max(...revenueData.map((item) => item.revenue1));
+    const maxRevenue = Math.max(
+      ...sortedRevenueData.map((item) => item.revenue1)
+    );
     const step = Math.ceil(maxRevenue / 4 / 100) * 100;
     return [0, step, step * 2, step * 3, step * 4];
   };
@@ -206,11 +213,11 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
             <div className="flex items-center gap-3">
               <h2 className="text-4xl font-bold text-slate-900">
                 {formatCurrency(
-                  revenueData.length ? revenueData[0].revenue1 : 0
+                  sortedRevenueData.length ? sortedRevenueData[0].revenue1 : 0
                 )}
               </h2>
               <span className="px-2 py-1 text-sm font-medium text-green-500 bg-green-50 rounded-full">
-                {calculatePercentageChangeTodayYesterday(revenueData)}%
+                +{calculatePercentageChangeTodayYesterday(sortedRevenueData)}%
               </span>
             </div>
             <p className="text-sm text-slate-500">Total Revenue</p>
@@ -249,7 +256,7 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={revenueData.map((item) => ({
+              data={sortedRevenueData.map((item) => ({
                 name: item.startDate,
                 value1: item.revenue1,
               }))}
@@ -294,8 +301,8 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
           title="Daily Revenue"
-          value={formatCurrency(calculateDayRevenue(today, revenueData))}
-          change={calculatePercentageChangeTodayYesterday(revenueData)}
+          value={formatCurrency(calculateDayRevenue(today, sortedRevenueData))}
+          change={calculatePercentageChangeTodayYesterday(sortedRevenueData)}
           subtitle={`${today.getDate()}/${today.getMonth() + 1}`}
         />
         <StatCard
@@ -304,18 +311,18 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
             calculateMonthRevenue(
               today.getMonth(),
               today.getFullYear(),
-              revenueData
+              sortedRevenueData
             )
           )}
-          change={calculatePercentageChangeTodayYesterday(revenueData)}
+          change={calculatePercentageChangeTodayYesterday(sortedRevenueData)}
           subtitle={`From ${today.getMonth() + 1}`}
         />
         <StatCard
           title="Yearly Revenue"
           value={formatCurrency(
-            calculateYearRevenue(today.getFullYear(), revenueData)
+            calculateYearRevenue(today.getFullYear(), sortedRevenueData)
           )}
-          change={calculatePercentageChangeTodayYesterday(revenueData)}
+          change={calculatePercentageChangeTodayYesterday(sortedRevenueData)}
           subtitle={`From ${today.getFullYear()}`}
         />
       </div>

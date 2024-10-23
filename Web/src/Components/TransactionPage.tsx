@@ -78,6 +78,7 @@ const TransactionTable: React.FC = () => {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+
   }, []);
 
   const fetchTransactions = async () => {
@@ -159,6 +160,9 @@ const TransactionTable: React.FC = () => {
   const MobileCard = ({ transaction }) => (
     <div className="bg-white p-4 rounded-lg shadow mb-4 border border-gray-200">
       <div className="flex justify-between items-center mb-2">
+        <span className="text-sm text-gray-600">
+          {formatDate(transaction.order.date)}
+        </span>
         <span className="text-sm text-gray-600">
           {formatDate(transaction.order.date)}
         </span>
@@ -285,3 +289,4 @@ const TransactionTable: React.FC = () => {
 };
 
 export default TransactionTable;
+

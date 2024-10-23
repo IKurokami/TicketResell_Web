@@ -52,15 +52,15 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address }) => {
       <div className="w-full h-fit md:w-2/4 p-4 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <nav className="flex space-x-4">
-            <a href="#" className="text-gray-500 hover:text-green-500">
+            <a href="#" className="no-underline	text-gray-500 hover:text-green-500">
               Followers
             </a>
-            <a href="#" className="text-gray-500 hover:text-green-500">
+            <a href="#" className="no-underline	text-gray-500 hover:text-green-500">
               Following
             </a>
             <a
               href="#"
-              className="text-green-500 font-bold border-b-2 border-green-500"
+              className="no-underline	text-green-500 font-bold border-b-2 border-green-500"
             >
               Posts
             </a>

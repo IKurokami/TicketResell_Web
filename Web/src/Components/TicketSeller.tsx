@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TicketCard, fetchTicketItems } from "@/models/TicketSellCard";
-import "@/Css/search.css";
+
 import {
   faMagnifyingGlass,
   faPenToSquare,
