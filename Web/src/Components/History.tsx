@@ -60,12 +60,12 @@ const HistoryPage = () => {
             return {
               id: order.orderId,
               date: formattedDate,
-              tickets: order.orderDetails.map(detail  => ({
+              tickets: order.orderDetails.map(detail => ({
                 ...detail.ticket,
                 cost: detail.ticket.cost,
                 quantity: detail.quantity,
               })),
-              price: order.orderDetails.reduce((total:any, detail:any) =>
+              price: order.orderDetails.reduce((total: any, detail: any) =>
                 total + detail.ticket.cost * detail.quantity, 0),
               status: order.status,
               seller: order.orderDetails[0]?.ticket.sellerId || null,
@@ -229,7 +229,7 @@ const HistoryPage = () => {
         <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
 
-          <div className="relative bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          <div className="relative bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden mt-16"> {/* Add mt-16 for margin-top */}
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
               <div className="flex items-center gap-3">
@@ -241,16 +241,55 @@ const HistoryPage = () => {
                   <p className="text-sm text-gray-500">Được đặt vào {selectedOrder.date}</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-2 hover:bg-gray-200 rounded-full transition-colors"
               >
                 <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
+            <div className="bg-white rounded-xl border">
+              <div className="p-4 border-b bg-gray-50">
+                <h4 className="font-semibold text-gray-900">Chi tiết vé</h4>
+              </div>
 
+              <div className="divide-y overflow-y-auto max-h-[30vh]"> {/* Thêm overflow-y-auto ở đây */}
+                {selectedOrder.tickets.map((ticket: any, idx: any) => (
+                  <div key={idx} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                      <div className="flex-1">
+                        <h5 className="font-medium text-gray-900">{ticket.name}</h5>
+                        {ticket.sellerId && (
+                          <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                            <User className="w-4 h-4" />
+                            Người bán: {ticket.sellerId}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-6">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Đơn giá</p>
+                          <p className="font-medium text-gray-900">{formatPrice(ticket.cost)}</p>
+                        </div>
+                        <div className="h-8 w-px bg-gray-200"></div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Số lượng</p>
+                          <p className="font-medium text-gray-900">{ticket.quantity}</p>
+                        </div>
+                        <div className="h-8 w-px bg-gray-200"></div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Thành tiền</p>
+                          <p className="font-medium text-blue-600">{formatPrice(ticket.cost * ticket.quantity)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+            <div className="p-3 max-h-[calc(70vh-60px)]">
               {/* Order Summary */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 {/* Total Amount Card */}
@@ -288,7 +327,7 @@ const HistoryPage = () => {
                     <div>
                       <p className="text-sm text-gray-500">Số lượng vé</p>
                       <p className="text-lg font-bold text-gray-900">
-                        {selectedOrder.tickets.reduce((sum:any, ticket:any) => sum + ticket.quantity, 0)} vé
+                        {selectedOrder.tickets.reduce((sum: any, ticket: any) => sum + ticket.quantity, 0)} vé
                       </p>
                     </div>
                   </div>
@@ -296,52 +335,13 @@ const HistoryPage = () => {
               </div>
 
               {/* Ticket Details */}
-              <div className="bg-white rounded-xl border">
-                <div className="p-4 border-b bg-gray-50">
-                  <h4 className="font-semibold text-gray-900">Chi tiết vé</h4>
-                </div>
-                
-                <div className="divide-y">
-                  {selectedOrder.tickets.map((ticket:any, idx:any) => (
-                    <div key={idx} className="p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                        <div className="flex-1">
-                          <h5 className="font-medium text-gray-900">{ticket.name}</h5>
-                          {ticket.sellerId && (
-                            <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
-                              <User className="w-4 h-4" />
-                              Người bán: {ticket.sellerId}
-                            </p>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-6">
-                          <div className="text-center">
-                            <p className="text-sm text-gray-500">Đơn giá</p>
-                            <p className="font-medium text-gray-900">{formatPrice(ticket.cost)}</p>
-                          </div>
-                          <div className="h-8 w-px bg-gray-200"></div>
-                          <div className="text-center">
-                            <p className="text-sm text-gray-500">Số lượng</p>
-                            <p className="font-medium text-gray-900">{ticket.quantity}</p>
-                          </div>
-                          <div className="h-8 w-px bg-gray-200"></div>
-                          <div className="text-center">
-                            <p className="text-sm text-gray-500">Thành tiền</p>
-                            <p className="font-medium text-blue-600">{formatPrice(ticket.cost * ticket.quantity)}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
-           
-              </div>
             </div>
           </div>
         </div>
       )}
+
+
     </div>
   );
 };
