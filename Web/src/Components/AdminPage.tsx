@@ -17,6 +17,7 @@ import RoleManager from "./RoleManager";
 import TicketManager from "./TicketManager";
 import CategoryManager from "./CategoryManager";
 import OrderManager from "./OrderManager";
+import RevenueManager from "./RevenueManager";
 
 const AdminPage = () => {
   const [tickets, setTickets] = useState<any[]>([]);
@@ -24,6 +25,7 @@ const AdminPage = () => {
   const [roles, setRoles] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [revenues, setRevenues] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Tickets");
   const router = useRouter();
@@ -34,7 +36,7 @@ const AdminPage = () => {
     { name: "Tickets", icon: <TicketsIcon /> },
     { name: "Categories", icon: <CategoriesIcon /> },
     { name: "Orders", icon: <OrdersIcon /> },
-    { name: "Revenue", icon: <ShoppingBasket /> },
+    { name: "Revenues", icon: <ShoppingBasket /> },
   ];
 
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
@@ -121,11 +123,29 @@ const AdminPage = () => {
       }
     };
 
+    const getRevenues = async () => {
+      try {
+        const response = await fetch("http://localhost:5296/api/Revenue/read", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        console.log("revenueData", data);
+        if (!response.ok) {
+          throw new Error("Failed to fetch Revenues");
+        }
+        setRevenues(data.data);
+      } catch (error) {
+        console.error("Error fetching Revenues:", error);
+      }
+    };
+
     getUsers();
     getTickets();
     getRoles();
     getCategories();
     getOrders();
+    getRevenues();
   }, []);
 
   const toggleSidebar = () => {
@@ -458,6 +478,8 @@ const AdminPage = () => {
         );
       case "Orders":
         return <OrderManager orders={orders} onRefresh={handleOrderRefresh} />;
+      case "Revenues":
+        return <RevenueManager revenueData={revenues} />;
       default:
         return <div>{activeTab} content goes here</div>;
     }
