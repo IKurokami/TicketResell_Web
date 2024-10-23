@@ -104,13 +104,12 @@ namespace Api.Controllers
         {
             return ResponseParser.Result(ResponseModel.Success(HttpContext.GetIsAuthenticated().ToString()));
         }
+        
 
         [HttpPost("logout/{userId}")]
         public async Task<IActionResult> Logout(string userId)
         {
-            var authenData = HttpContext.GetAuthenData();
-
-            if (!authenData.IsAuthenticated || authenData.UserId != userId)
+            if (!HttpContext.IsUserIdAuthenticated(userId))
             {
                 return ResponseParser.Result(ResponseModel.Unauthorized("You are not logged in"));
             }
@@ -119,6 +118,8 @@ namespace Api.Controllers
             HttpContext.SetIsAuthenticated(false);
             HttpContext.SetAccessKey("");
             HttpContext.SetUserId("");
+            HttpContext.SetRole("Buyer");
+            
             return ResponseParser.Result(result);
         }
 

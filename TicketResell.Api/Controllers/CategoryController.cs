@@ -48,100 +48,42 @@ public class CategoryController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> CreateCategory([FromBody] CategoryCreateDto dto)
     {
-        var response = ResponseModel.Unauthorized("Cannot create category with unknown user");
-        var userId = HttpContext.GetUserId();
-        if (!string.IsNullOrEmpty(userId))
-        {
-            if (HttpContext.GetIsAuthenticated())
-            {
-                var userService = _serviceProvider.GetRequiredService<IUserService>();
-                var user = await userService.GetUserByIdAsync(userId);
+        if (!HttpContext.GetIsAuthenticated())
+            return ResponseParser.Result(
+                ResponseModel.Unauthorized("You need to be authenticated to create category"));
+        
+        if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            return ResponseParser.Result(
+                ResponseModel.Forbidden("You don't have permission to create categories"));
 
-                if (user.Data is UserReadDto userReadDto)
-                {
-                    if (userReadDto.Roles.Any(x => RoleHelper.HasEnoughRoleLevel(x.RoleId, UserRole.Staff)))
-                    {
-                        return ResponseParser.Result(await _categoryService.CreateCategoryAsync(dto));
-                    }
-                }
-                else
-                {
-                    response = ResponseModel.NotFound("User not found in server");
-                }
-            }
-            else
-            {
-                response = ResponseModel.Unauthorized("You are not authorized to create a category");
-            }
-        }
-
-        return ResponseParser.Result(response);
+        return ResponseParser.Result(await _categoryService.CreateCategoryAsync(dto));
     }
 
     [HttpPut("update/{id}")]
     public async Task<IActionResult> UpdateCategory(string id, [FromBody] CategoryUpdateDto dto)
     {
-        var response = ResponseModel.Unauthorized("Cannot update category with unknown user");
-        var userId = HttpContext.GetUserId();
-        if (!string.IsNullOrEmpty(userId))
-        {
-            if (HttpContext.GetIsAuthenticated())
-            {
-                var userService = _serviceProvider.GetRequiredService<IUserService>();
-                var user = await userService.GetUserByIdAsync(userId);
+        if (!HttpContext.GetIsAuthenticated())
+            return ResponseParser.Result(
+                ResponseModel.Unauthorized("You need to be authenticated to update category"));
+        
+        if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            return ResponseParser.Result(
+                ResponseModel.Forbidden("You don't have permission to update categories"));
 
-                if (user.Data is UserReadDto userReadDto)
-                {
-                    if (userReadDto.Roles.Any(x => RoleHelper.HasEnoughRoleLevel(x.RoleId, UserRole.Staff)))
-                    {
-                        return ResponseParser.Result(await _categoryService.UpdateCategoryAsync(id, dto));
-                    }
-                }
-                else
-                {
-                    response = ResponseModel.NotFound("User not found in server");
-                }
-            }
-            else
-            {
-                response = ResponseModel.Unauthorized("You are not authorized to update a category");
-            }
-        }
-
-        return ResponseParser.Result(response);
+        return ResponseParser.Result(await _categoryService.UpdateCategoryAsync(id, dto));
     }
 
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> DeleteCategory(string id)
     {
-        var response = ResponseModel.Unauthorized("Cannot delete category with unknown user");
-        var userId = HttpContext.GetUserId();
-        if (!string.IsNullOrEmpty(userId))
-        {
-            if (HttpContext.GetIsAuthenticated())
-            {
-                var userService = _serviceProvider.GetRequiredService<IUserService>();
-                var user = await userService.GetUserByIdAsync(userId);
+        if (!HttpContext.GetIsAuthenticated())
+            return ResponseParser.Result(
+                ResponseModel.Unauthorized("You need to be authenticated to delete category"));
+        
+        if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            return ResponseParser.Result(
+                ResponseModel.Forbidden("You don't have permission to delete categories"));
 
-                if (user.Data is UserReadDto userReadDto)
-                {
-                    if (userReadDto.Roles.Any(x => RoleHelper.HasEnoughRoleLevel(x.RoleId, UserRole.Staff)))
-                    {
-                        return ResponseParser.Result(await _categoryService.DeleteCategoryAsync(id));
-                    }
-                }
-                else
-                {
-                    response = ResponseModel.NotFound("User not found in server");
-                }
-            }
-            else
-            {
-                response = ResponseModel.Unauthorized("You are not authorized to delete a category");
-            }
-        }
-
-        return ResponseParser.Result(response);
+        return ResponseParser.Result(await _categoryService.DeleteCategoryAsync(id));
     }
-
 }
