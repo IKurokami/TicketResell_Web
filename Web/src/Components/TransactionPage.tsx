@@ -78,6 +78,7 @@ const TransactionTable: React.FC = () => {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+
   }, []);
 
   const fetchTransactions = async () => {
@@ -99,6 +100,8 @@ const TransactionTable: React.FC = () => {
         throw new Error("Failed to fetch transactions");
       }
       const result = await response.json();
+      console.log(result.data);
+      
       setTransactions(result.data);
     } catch (error: any) {
       setError(error.message);
@@ -122,11 +125,11 @@ const TransactionTable: React.FC = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center px-4 lg:px-6 py-4 text-center text-gray-500">
-        <tr>
-          <td colSpan={6}>No transactions available.</td>
-        </tr>
-      </div>
+      <tr>
+        <td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-gray-500">
+          No transactions available.
+        </td>
+      </tr>
     );
   }
 
@@ -157,6 +160,9 @@ const TransactionTable: React.FC = () => {
   const MobileCard = ({ transaction }) => (
     <div className="bg-white p-4 rounded-lg shadow mb-4 border border-gray-200">
       <div className="flex justify-between items-center mb-2">
+        <span className="text-sm text-gray-600">
+          {formatDate(transaction.order.date)}
+        </span>
         <span className="text-sm text-gray-600">
           {formatDate(transaction.order.date)}
         </span>
@@ -197,7 +203,7 @@ const TransactionTable: React.FC = () => {
           />
         </div>
 
-        <div className="w-full lg:w-auto">
+        <div className="">
           <DateRange onDateChange={handleDateChange} />
         </div>
       </div>
@@ -283,3 +289,4 @@ const TransactionTable: React.FC = () => {
 };
 
 export default TransactionTable;
+

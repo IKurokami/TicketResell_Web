@@ -58,7 +58,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 // Automapper configuration
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 builder.Services.AddSingleton<IAppLogger, AppLogger>();
-
+builder.Services.AddScoped<IRevenueService, RevenueService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

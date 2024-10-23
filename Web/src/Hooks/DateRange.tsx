@@ -39,6 +39,7 @@ export default function DateRange({ onDateChange }: DateRangeProps) {
       <DateRangePicker
         calendarProps={{
           classNames: {
+            separator: "-mx-2",
             base: "bg-background bg-white border border-gray-500 max-w-full",
             headerWrapper: "pt-4 bg-background",
             prevButton: "border-1 border-default-200 rounded-small",
@@ -79,10 +80,14 @@ export default function DateRange({ onDateChange }: DateRangeProps) {
         popoverProps={{
           // Make the popover responsive
           classNames: {
+          
             base: "max-w-full sm:max-w-[calc(100vw-2rem)] md:max-w-lg",
             content: "max-h-[80vh] overflow-auto"
           },
           placement: isMobile ? "bottom" : "bottom-start"
+        }}
+        classNames={{
+          separator: "mx-1", // Customize the separator class here
         }}
       />
       <button
