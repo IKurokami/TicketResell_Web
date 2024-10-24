@@ -11,7 +11,7 @@ public interface ICartService
     Task<ResponseModel> GetCartItems(string userId);
     Task<ResponseModel> AddToCart(CartItemDto cartItem);
     Task<ResponseModel> UpdateCartItem(CartItemDto cartItem);
-    Task<ResponseModel> RemoveFromCart(string userId, string ticketId);
+    Task<ResponseModel> RemoveFromCart(string userId, string ticketId, bool saveAll = true);
     Task<ResponseModel> ClearCart(string userId);
     Task<ResponseModel> GetCartTotal(string userId);
     Task<ResponseModel> CreateOrderFromSelectedItems(string userId, List<string> selectedTicketIds);

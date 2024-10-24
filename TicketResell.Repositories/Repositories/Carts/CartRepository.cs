@@ -119,7 +119,6 @@ namespace Repositories.Repositories
             }
 
             cart.OrderDetails.Remove(itemToRemove);
-            await _context.SaveChangesAsync();
         }
 
         public async Task ClearCartAsync(string userId)
