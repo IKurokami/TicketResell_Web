@@ -2,6 +2,7 @@ namespace Repositories.Core.Entities;
 
 public class Chat
 {
+    public string ChatId { get; set; } = null!;
     public string SenderId { get; set; } = null!;
 
     public string ReceiverId { get; set; } = null!;
