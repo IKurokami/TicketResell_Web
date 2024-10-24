@@ -29,6 +29,15 @@ namespace Repositories.Config
         //Rapidapi
         public string RapidapiKey { get; set; } = null!;
 
+
+        //Email
+        public string SmtpHost { get; set; } = null!;
+        public string SmtpPort { get; set; } = null!;
+        public string Username { get; set; } = null!;
+        public string Password { get; set; } = null!;
+        public string FromEmail { get; set; } = null!;
+        public string FromDisplayName { get; set; } = null!;
+
     }
 
 }
