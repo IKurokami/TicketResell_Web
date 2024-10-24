@@ -31,8 +31,8 @@ const HistoryPage = () => {
         });
 
         if (!response.ok) throw new Error('Network response was not ok');
-
         const result = await response.json();
+        console.log(result.data)
         if (result.statusCode === 200 && Array.isArray(result.data)) {
           const groupedOrders = result.data.map(order => {
             const createDate = order.orderDetails[0]?.ticket.createDate; // Get the createDate
@@ -67,7 +67,7 @@ const HistoryPage = () => {
               })),
               price: order.orderDetails.reduce((total: any, detail: any) =>
                 total + detail.ticket.cost * detail.quantity, 0),
-              status: order.status,
+              status: order.status ===-1 ? 1 : order.status,
               seller: order.orderDetails[0]?.ticket.sellerId || null,
             };
           });
@@ -101,7 +101,7 @@ const HistoryPage = () => {
         icon: '×',
       },
     };
-
+  
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig[0];
     return (
       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${config.className}`}>
