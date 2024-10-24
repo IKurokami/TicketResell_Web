@@ -17,9 +17,9 @@ namespace Api.Controllers
         [HttpGet("get/{userId}")]
         public async Task<IActionResult> GetHistoryByUserId(string userId)
         {
-            if (!HttpContext.IsUserIdAuthenticated(userId))
-                return ResponseParser.Result(
-                    ResponseModel.Unauthorized("You are not authorized to access this history"));
+            // if (!HttpContext.IsUserIdAuthenticated(userId))
+            //     return ResponseParser.Result(
+            //         ResponseModel.Unauthorized("You are not authorized to access this history"));
 
             return ResponseParser.Result(await _historyRepository.GetHistoryByUserId(userId));
         }
