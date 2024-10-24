@@ -170,6 +170,7 @@ public class AuthenticationService : IAuthenticationService
             {
                 UserId = googleUser.Email,
                 Username = googleUser.Given_Name,
+                Fullname = googleUser.Name,
                 Password = BCrypt.Net.BCrypt.HashPassword(GenerateAccessKey()),
                 Gmail = googleUser.Email,
                 CreateDate = DateTime.UtcNow,
