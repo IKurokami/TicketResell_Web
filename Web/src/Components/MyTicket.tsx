@@ -758,7 +758,7 @@ const MyTicketPage = () => {
                       </h4>
                       <div className="w-full h-64">
                         {/* Nhúng Google Map ở đây */}
-                        <LoadScript googleMapsApiKey="AIzaSyDFmwUleiGh4WLHqClLPPu8OgQTuUIzfQY">
+                        <LoadScript googleMapsApiKey="AlzaSyNa20bToeNXLJ6qTZR19bANY6nwn9ZaGjo">
 
                           <GoogleMap
                             mapContainerStyle={{ width: "300px", height: "250px" }}
