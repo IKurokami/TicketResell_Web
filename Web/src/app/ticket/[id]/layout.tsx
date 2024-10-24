@@ -1,5 +1,6 @@
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
+import { NumberProvider } from "@/Components/NumberContext";
 
 export const metadata = {
   title: "Ticket Resell - Buy & Sell Event Tickets Legitimately",
@@ -13,11 +14,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <Navbar page={"ticket"} />
-        {children}
-        <Footer />
-      </body>
+      <NumberProvider>
+        <body>
+          <Navbar page={"ticket"} />
+          {children}
+          <Footer />
+        </body>
+      </NumberProvider>
     </html>
   );
 }
