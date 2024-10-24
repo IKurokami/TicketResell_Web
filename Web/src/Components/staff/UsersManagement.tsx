@@ -1,17 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { PlusCircle, Pencil, Trash2, Search } from "lucide-react";
+import { PlusCircle, Search, Send } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/Components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 
-// Define the User interface
 interface User {
   userId: string;
   username: string;
@@ -25,21 +19,29 @@ interface User {
   bio: string;
 }
 
-// UserManagement component
-const UserManagement = () => {
-  const [users, setUsers] = useState<User[]>([]); // Manage users state
-  const [isOpen, setIsOpen] = useState(false); // Modal state
-  const [searchTerm, setSearchTerm] = useState(""); // Search state
-  const [currentUser, setCurrentUser] = useState<User | null>(null); // Current user for edit
-  const [formData, setFormData] = useState<Partial<User>>({}); // Form data state
+interface Message {
+  id: string;
+  senderId: string;
+  content: string;
+  timestamp: Date;
+}
 
-  // Fetch user data from the API when the component mounts
+const UserManagement = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [formData, setFormData] = useState<Partial<User>>({});
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+
   useEffect(() => {
     fetch("http://localhost:5296/api/User/read")
       .then((response) => response.json())
       .then((data) => {
         if (data.statusCode === 200) {
-          setUsers(data.data); // Set users from the API response
+          setUsers(data.data);
         } else {
           console.error("Failed to fetch users:", data.message);
         }
@@ -49,49 +51,59 @@ const UserManagement = () => {
       });
   }, []);
 
-  // Handle form submit for both adding and editing users
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentUser) {
-      // Update existing user
-      setUsers(
-        users.map((user) =>
-          user.userId === currentUser.userId ? { ...user, ...formData } : user
-        )
-      );
-    } else {
-      // Create new user
-      const newUser = {
-        ...formData,
-        userId: `USER${(users.length + 1).toString().padStart(3, "0")}`,
-        status: 1,
-      } as User;
-      setUsers([...users, newUser]);
-    }
+    const newUser = {
+      ...formData,
+      userId: `USER${(users.length + 1).toString().padStart(3, "0")}`,
+      status: 1,
+    } as User;
+    setUsers([...users, newUser]);
     setIsOpen(false);
-    setCurrentUser(null);
     setFormData({});
   };
 
-  // Handle user deletion
-  const handleDelete = (userId: string) => {
-    setUsers(users.filter((user) => user.userId !== userId));
+  const handleChat = (user: User) => {
+    setSelectedUser(user);
+    setIsChatOpen(true);
+    // In a real application, you would fetch chat history here
+    setMessages([
+      // Simulated messages for demonstration
+      {
+        id: "1",
+        senderId: "admin",
+        content: "Hello! How can I help you today?",
+        timestamp: new Date(),
+      },
+      {
+        id: "2",
+        senderId: user.userId,
+        content: "Hi! I have a question about my account.",
+        timestamp: new Date(),
+      },
+    ]);
   };
 
-  // Handle editing a user
-  const handleEdit = (user: User) => {
-    setCurrentUser(user);
-    setFormData(user);
-    setIsOpen(true);
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    const message: Message = {
+      id: Date.now().toString(),
+      senderId: "admin",
+      content: newMessage,
+      timestamp: new Date(),
+    };
+
+    setMessages([...messages, message]);
+    setNewMessage("");
   };
 
-  // Filter users based on search term
   const filteredUsers = users.filter(
     (user) =>
       (user.fullname &&
-        user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) || // Check if fullname exists
-      (user.gmail &&
-        user.gmail.toLowerCase().includes(searchTerm.toLowerCase())) // Check if gmail exists
+        user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.gmail && user.gmail.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -108,13 +120,7 @@ const UserManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button
-            onClick={() => {
-              setCurrentUser(null);
-              setFormData({});
-              setIsOpen(true);
-            }}
-          >
+          <Button onClick={() => { setFormData({}); setIsOpen(true); }}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add User
           </Button>
@@ -140,24 +146,26 @@ const UserManagement = () => {
                   <td className="py-3 px-4">{user.phone}</td>
                   <td className="py-3 px-4">{user.address}</td>
                   <td className="py-3 px-4">
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(user)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(user.userId)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleChat(user)}
+                      className="relative flex items-center justify-center w-10 h-10 rounded-full 
+    bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+    border-none text-white shadow-md
+    hover:shadow-lg hover:scale-105
+    transition-all duration-200 ease-in-out"
+                    >
+                      <span className="text-xl transition-transform duration-200 group-hover:scale-110 drop-shadow-md">
+                        💬
+                      </span>
+
+                      {/* Hiệu ứng ripple khi hover */}
+                      <span className="absolute inset-0 rounded-full bg-white opacity-0 
+    hover:opacity-20 transition-opacity duration-200"></span>
+                    </Button>
                   </td>
+
                 </tr>
               ))}
             </tbody>
@@ -165,12 +173,11 @@ const UserManagement = () => {
         </div>
       </CardContent>
 
+      {/* Add User Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="bg-white">
           <DialogHeader>
-            <DialogTitle>
-              {currentUser ? "Edit User" : "Add New User"}
-            </DialogTitle>
+            <DialogTitle>Add New User</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -178,9 +185,7 @@ const UserManagement = () => {
                 <label className="text-sm font-medium">Full Name</label>
                 <Input
                   value={formData.fullname || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullname: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
                   required
                 />
               </div>
@@ -189,9 +194,7 @@ const UserManagement = () => {
                 <Input
                   type="email"
                   value={formData.gmail || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, gmail: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, gmail: e.target.value })}
                   required
                 />
               </div>
@@ -199,9 +202,7 @@ const UserManagement = () => {
                 <label className="text-sm font-medium">Phone</label>
                 <Input
                   value={formData.phone || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
                 />
               </div>
@@ -210,9 +211,7 @@ const UserManagement = () => {
                 <select
                   className="w-full rounded-md border border-gray-300 p-2"
                   value={formData.sex || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, sex: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
                   required
                 >
                   <option value="">Select gender</option>
@@ -224,9 +223,7 @@ const UserManagement = () => {
                 <label className="text-sm font-medium">Address</label>
                 <Input
                   value={formData.address || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   required
                 />
               </div>
@@ -235,17 +232,58 @@ const UserManagement = () => {
                 <textarea
                   className="w-full rounded-md border border-gray-300 p-2"
                   value={formData.bio || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   rows={3}
                 />
               </div>
             </div>
             <Button type="submit" className="w-full">
-              {currentUser ? "Save Changes" : "Add User"}
+              Add User
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Dialog */}
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="bg-white max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chat with {selectedUser?.fullname}</DialogTitle>
+          </DialogHeader>
+          <div className="h-96 flex flex-col">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.senderId === "admin" ? "justify-end" : "justify-start"
+                    }`}
+                >
+                  <div
+                    className={`max-w-[70%] rounded-lg p-3 ${message.senderId === "admin"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100"
+                      }`}
+                  >
+                    <p>{message.content}</p>
+                    <span className="text-xs opacity-70">
+                      {message.timestamp.toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <form onSubmit={handleSendMessage} className="p-4 border-t flex gap-2">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type your message..."
+                className="flex-1"
+              />
+              <Button type="submit">
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
     </Card>
