@@ -11,7 +11,7 @@ import { removeAllCookies } from "./Cookie";
 import { useRouter } from "next/navigation";
 import SellPopup from "./PopUp";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { LogIn } from 'lucide-react';
+import { LogIn } from "lucide-react";
 
 import { CheckSeller } from "./CheckSeller";
 interface NavbarProps {
@@ -134,26 +134,26 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     };
     const id = Cookies.get("id");
 
-    // const fetchCart = async () => {
-    //   const response = await fetch(
-    //     `http://localhost:5296/api/cart/items/${id}`,
-    //     {
-    //       method: "GET",
-    //       credentials: "include",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     }
-    //   );
-    //   const result = await response.json();
-    //   if (result.data == null) {
-    //     setCountCartItems(0);
-    //   } else {
-    //     setCountCartItems(result.data.length);
-    //   }
-    // };
+    const fetchCart = async () => {
+      const response = await fetch(
+        `http://localhost:5296/api/cart/items/${id}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const result = await response.json();
+      if (result.data == null) {
+        setCountCartItems(0);
+      } else {
+        setCountCartItems(result.data.length);
+      }
+    };
 
-    // fetchCart(); // Fetch cart items when the component mounts
+    fetchCart(); // Fetch cart items when the component mounts
 
     // Set up a function to listen for changes in the cookies or storage
     const handleCookieChange = () => {
@@ -277,8 +277,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
       <div className="user-section">
         {!isLoggedIn && (
           <button onClick={handleSignInClick} className="sign-in-btn">
-      <LogIn size={24} />
-      
+            <LogIn size={24} />
           </button>
         )}
 
@@ -322,7 +321,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                     Hồ sơ
                   </div>
                 </a>
-             
+
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/history")}
@@ -369,7 +368,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                     Vé của bạn
                   </div>
                 </a>
-             
+
                 <Link
                   href="/login"
                   onClick={() => {

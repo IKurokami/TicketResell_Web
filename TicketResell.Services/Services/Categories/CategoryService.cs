@@ -78,7 +78,7 @@ public class CategoryService : ICategoryService
 
     public async Task<ResponseModel> DeleteCategoryAsync(string id, bool saveAll)
     {
-        await _unitOfWork.CategoryRepository.DeleteByIdAsync(id);
+        await _unitOfWork.CategoryRepository.DeleteCategoryAsync(id);
         if (saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully deleted Category with id: {id}");
     }

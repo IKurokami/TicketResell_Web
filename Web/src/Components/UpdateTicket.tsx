@@ -596,7 +596,7 @@ const UpdateTicketModal: React.FC = () => {
         console.log(firstTicket);
 
         const imageUpdateResult = await uploadImageForTicket(
-          firstTicket,
+          firstTicket.Image,
           selectedFile
         );
         return imageUpdateResult;

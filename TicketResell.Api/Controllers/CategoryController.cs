@@ -51,7 +51,7 @@ public class CategoryController : ControllerBase
         if (!HttpContext.GetIsAuthenticated())
             return ResponseParser.Result(
                 ResponseModel.Unauthorized("You need to be authenticated to create category"));
-        
+
         if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
             return ResponseParser.Result(
                 ResponseModel.Forbidden("You don't have permission to create categories"));
@@ -65,7 +65,7 @@ public class CategoryController : ControllerBase
         if (!HttpContext.GetIsAuthenticated())
             return ResponseParser.Result(
                 ResponseModel.Unauthorized("You need to be authenticated to update category"));
-        
+
         if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
             return ResponseParser.Result(
                 ResponseModel.Forbidden("You don't have permission to update categories"));
@@ -79,7 +79,7 @@ public class CategoryController : ControllerBase
         if (!HttpContext.GetIsAuthenticated())
             return ResponseParser.Result(
                 ResponseModel.Unauthorized("You need to be authenticated to delete category"));
-        
+
         if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
             return ResponseParser.Result(
                 ResponseModel.Forbidden("You don't have permission to delete categories"));
