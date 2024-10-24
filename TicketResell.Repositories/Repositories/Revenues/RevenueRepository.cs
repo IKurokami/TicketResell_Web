@@ -35,4 +35,36 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
 
         return revenues;
     }
+
+    public async Task AddRevenueByDateAsync(DateTime date, double amount)
+    {
+        // Normalize the input date to the start of the day (12 AM) and end of the day (11:59 PM)
+        DateTime startDate = date.Date; // 12 AM of the input date
+        DateTime endDate = startDate.AddDays(1).AddTicks(-1); // 11:59 PM of the same day
+
+        // Find existing revenue item within the date range
+        var existingRevenue = await _context.Revenues
+            .FirstOrDefaultAsync(r => r.StartDate <= startDate && r.EndDate >= endDate);
+
+        if (existingRevenue != null)
+        {
+            // If an existing revenue item is found, update the Revenue1 value
+            existingRevenue.Revenue1 = (existingRevenue.Revenue1 ?? 0) + amount;
+            _context.Revenues.Update(existingRevenue); // Mark the entity as modified
+        }
+        else
+        {
+            var newRevenue = new Revenue
+            {
+                RevenueId = "RE"+ Guid.NewGuid().ToString(), 
+                SellerId = null,
+                StartDate = startDate,
+                EndDate = endDate,
+                Revenue1 = amount,
+                Type = startDate.ToString("MMMM") 
+            };
+
+            await _context.Revenues.AddAsync(newRevenue);
+        }
+    }
 }

@@ -90,5 +90,17 @@ public class RevenueService : IRevenueService
         return ResponseModel.Success($"Successfully deleted Revenue(s) with SellerID: {id}");
     }
 
+    public async Task<ResponseModel> AddRevenueByDateAsync(DateTime date, double amount, bool saveAll)
+    {
+        // Using the updated repository method to add revenue by date
+        await _unitOfWork.RevenueRepository.AddRevenueByDateAsync(date, amount);
+
+        if (saveAll)
+        {
+            await _unitOfWork.CompleteAsync();
+        }
+
+        return ResponseModel.Success("Successfully added revenue for the specified date");
+    }
 
 }
