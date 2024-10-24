@@ -8,8 +8,6 @@ namespace Repositories.Core.Dtos.User
     public class UserUpdateDto
     {
 
-        public string? Password { get; set; } = null;
-
         public string? Fullname { get; set; }
 
         public string? Sex { get; set; }
