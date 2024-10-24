@@ -271,7 +271,7 @@ public partial class TicketResellManagementContext : DbContext
 
         modelBuilder.Entity<Chat>(entity =>
         {
-            entity.HasKey(e => new { e.SenderId, e.ReceiverId });
+            entity.HasKey(e => e.ChatId);
 
             entity.ToTable("Chat");
 
