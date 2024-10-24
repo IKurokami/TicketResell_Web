@@ -17,6 +17,7 @@ using TicketResell.Services.Services.Payments;
 using Repositories.Config;
 using TicketResell.Services.Services.History;
 using TicketResell.Services.Services.Revenues;
+using TicketResell.Services.Services.Mail;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,12 @@ builder.Services.Configure<AppConfig>(config =>
     config.PayPalSecret = Environment.GetEnvironmentVariable("PAYPAL_SECRET") ?? "default";
     config.PayPalApiUrl = Environment.GetEnvironmentVariable("PAYPAL_API_URL") ?? "https://api-m.sandbox.paypal.com";
     config.RapidapiKey = Environment.GetEnvironmentVariable("RAPIDAPI_KEY") ?? "default";
+    config.SmtpHost = Environment.GetEnvironmentVariable("SMTP_HOST") ?? "default";
+    config.SmtpPort = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "default";
+    config.Username = Environment.GetEnvironmentVariable("SMTP_USERNAME") ?? "default";
+    config.Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? "default";
+    config.FromEmail= Environment.GetEnvironmentVariable("FROM_EMAIL") ?? "default";
+    config.FromDisplayName = Environment.GetEnvironmentVariable("FROM_DISPLAY_NAME") ?? "default";
 });
 builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
 
@@ -58,7 +65,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 // Automapper configuration
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 builder.Services.AddSingleton<IAppLogger, AppLogger>();
-
+builder.Services.AddScoped<IRevenueService, RevenueService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -73,6 +80,8 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IRevenueService, RevenueService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
+builder.Services.AddScoped<IMailService, MailService>();
+
 builder.Services.AddHttpClient<IMomoService, MomoService>();
 builder.Services.AddHttpClient<IVnpayService, VnpayService>();
 builder.Services.AddHttpClient<IPaypalService, PaypalService>();
@@ -125,5 +134,7 @@ app.UseSwaggerUI(options =>
     options.DocumentTitle = "Swagger";
 });
 app.Run();
+
+
 
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", "default");

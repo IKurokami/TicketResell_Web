@@ -6,6 +6,7 @@ import {
   ChevronDown, MapPin, Share2, Download, Tag, Info, Clock,
   ArrowUpDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
 import Cookies from 'js-cookie';
@@ -753,20 +754,23 @@ const MyTicketPage = () => {
                     </div>
                     <div>
                       <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
-                        <Tag className="w-5 h-5 text-blue-500" />
-                        <span>Danh mục</span>
+                        <span>Bản đồ</span>
                       </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedTicket.categories?.map((category, index) => (
-                          <span
-                            key={index}
-                            className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm"
+                      <div className="w-full h-64">
+                        {/* Nhúng Google Map ở đây */}
+                        <LoadScript googleMapsApiKey="AlzaSyNa20bToeNXLJ6qTZR19bANY6nwn9ZaGjo">
+
+                          <GoogleMap
+                            mapContainerStyle={{ width: "300px", height: "250px" }}
+                            center={{ lat: 10.762622, lng: 106.660172 }} // Tọa độ trung tâm (có thể thay đổi theo vị trí thực tế)
+                            zoom={15}
                           >
-                            {category}
-                          </span>
-                        ))}
+                            <Marker position={{ lat: 10.762622, lng: 106.660172 }} />
+                          </GoogleMap>
+                        </LoadScript>
                       </div>
                     </div>
+
                   </div>
 
                   <div className="space-y-4">
@@ -826,25 +830,7 @@ const MyTicketPage = () => {
 
                 <div className="border-t border-gray-200 pt-6">
                   <div className="flex items-center justify-end space-x-4">
-                    <button
-                      onClick={() => {
-                        console.log("Share button clicked", selectedTicket); // Debugging line
-                        if (navigator.share) {
-                          navigator.share({
-                            title: selectedTicket.name,
-                            text: `Check out this event: ${selectedTicket.name}`,
-                            url: window.location.href,
-                          }).catch(console.error);
-                        } else {
-                          console.warn("Share API not supported.");
-                        }
-                      }}
-
-                      className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-                    >
-                      <Share2 className="w-5 h-5" />
-                      <span>Chia sẻ</span>
-                    </button>
+               
                     <button
                       onClick={() => downloadQRCodes(selectedTicket)}
                       className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"

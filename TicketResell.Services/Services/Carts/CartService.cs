@@ -116,7 +116,7 @@ namespace TicketResell.Services.Services
             }
         }
 
-        public async Task<ResponseModel> RemoveFromCart(string userId, string ticketId)
+        public async Task<ResponseModel> RemoveFromCart(string userId, string ticketId, bool saveAll = true)
         {
             var cart = await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId);
             if (cart == null)
@@ -127,6 +127,8 @@ namespace TicketResell.Services.Services
             try
             {
                 await _unitOfWork.CartRepository.RemoveFromCartAsync(cart, ticketId);
+                if (saveAll)
+                    _unitOfWork.CompleteAsync();
                 return ResponseModel.Success($"Successfully removed item from cart: {ticketId}");
             }
             catch (Exception ex)
@@ -142,7 +144,7 @@ namespace TicketResell.Services.Services
             List<ResponseModel> responses = new List<ResponseModel>();
             foreach (var ticketId in ticketIds)
             {
-                var response = await RemoveFromCart(userId, ticketId);
+                var response = await RemoveFromCart(userId, ticketId, false);
                 responses.Add(response);
             }
             return ResponseList.AggregateResponses(responses, "success");

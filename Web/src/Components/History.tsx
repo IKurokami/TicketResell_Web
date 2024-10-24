@@ -35,27 +35,25 @@ const HistoryPage = () => {
         const result = await response.json();
         if (result.statusCode === 200 && Array.isArray(result.data)) {
           const groupedOrders = result.data.map(order => {
-            const createDate = order.orderDetails[0]?.ticket.createDate; // Get the createDate
-
-            // Check if createDate is valid and format it
-            const formattedDate = createDate ? (() => {
-              const date = new Date(createDate);
-
+            const date = order.date;
+            const formattedDate = date ? (() => {
+              const parsedDate = new Date(date);
+            
               // Debugging: Log the date object
-              console.log('Parsed Date:', date);
-
-              // Check if the date is valid
-              if (isNaN(date.getTime())) {
-                return 'Ngày không hợp lệ'; // Invalid date handling
+              console.log('Parsed Date:', parsedDate);
+            
+              // Kiểm tra nếu date hợp lệ
+              if (isNaN(parsedDate.getTime())) {
+                return 'Ngày không hợp lệ'; // Xử lý ngày không hợp lệ
               }
-
-              const day = date.getDate().toString().padStart(2, '0'); // Day
-              const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month (0-based index)
-              const year = date.getFullYear(); // Year
-              const hours = date.getHours().toString().padStart(2, '0'); // Hours
-              const minutes = date.getMinutes().toString().padStart(2, '0'); // Minutes
-              return `ngày ${day} tháng ${month} năm ${year}, ${hours}:${minutes}`; // Formatted string
-            })() : 'Ngày không hợp lệ'; // Fallback for invalid date
+            
+              const day = parsedDate.getDate().toString().padStart(2, '0'); // Ngày
+              const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0'); // Tháng (chỉ số bắt đầu từ 0)
+              const year = parsedDate.getFullYear(); // Năm
+              const hours = parsedDate.getHours().toString().padStart(2, '0'); // Giờ
+              const minutes = parsedDate.getMinutes().toString().padStart(2, '0'); // Phút
+              return `ngày ${day} tháng ${month} năm ${year}, ${hours}:${minutes}`; // Chuỗi đã định dạng
+            })() : 'Ngày không hợp lệ';
 
             return {
               id: order.orderId,
@@ -64,12 +62,13 @@ const HistoryPage = () => {
                 ...detail.ticket,
                 cost: detail.ticket.cost,
                 quantity: detail.quantity,
+                seller: detail.ticket.seller?.fullname || null, // Add fullname here
               })),
               price: order.orderDetails.reduce((total: any, detail: any) =>
                 total + detail.ticket.cost * detail.quantity, 0),
               status: order.status,
-              seller: order.orderDetails[0]?.ticket.sellerId || null,
             };
+            
           });
 
 
@@ -259,12 +258,14 @@ const HistoryPage = () => {
                     <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                       <div className="flex-1">
                         <h5 className="font-medium text-gray-900">{ticket.name}</h5>
-                        {ticket.sellerId && (
+                        {ticket.seller && (
                           <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
                             <User className="w-4 h-4" />
-                            Người bán: {ticket.sellerId}
+                            Người bán: {ticket.seller} {/* This now shows fullname */}
                           </p>
                         )}
+
+
                       </div>
 
                       <div className="flex items-center gap-6">

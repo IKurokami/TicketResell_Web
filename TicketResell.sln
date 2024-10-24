@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicketResell.Repositories",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicketResell.Services", "TicketResell.Services\TicketResell.Services.csproj", "{82D35758-23B1-4DC5-930C-A89D6A5A400C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{EB9773CF-9123-41F5-A032-BFA77F36D12F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{82D35758-23B1-4DC5-930C-A89D6A5A400C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82D35758-23B1-4DC5-930C-A89D6A5A400C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82D35758-23B1-4DC5-930C-A89D6A5A400C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB9773CF-9123-41F5-A032-BFA77F36D12F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB9773CF-9123-41F5-A032-BFA77F36D12F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB9773CF-9123-41F5-A032-BFA77F36D12F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB9773CF-9123-41F5-A032-BFA77F36D12F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
