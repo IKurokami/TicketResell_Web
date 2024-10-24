@@ -7,15 +7,8 @@ namespace Repositories.Core.Dtos.User
 {
     public class UserUpdateDto
     {
-        public string UserId { get; set; } = null!;
 
-        public string? SellConfigId { get; set; }
-
-        public string? Username { get; set; }
-
-        public string? Password { get; set; }
-        
-        public string? Gmail { get; set; }
+        public string? Password { get; set; } = null;
 
         public string? Fullname { get; set; }
 

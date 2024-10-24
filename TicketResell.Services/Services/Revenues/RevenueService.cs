@@ -28,6 +28,15 @@ public class RevenueService : IRevenueService
         return ResponseModel.Success("Successfully created Revenue");
     }
 
+    // public async Task<ResponseModel> GetRevenueFromOrder(string orderId, bool saveAll = true)
+    // {
+    //     var order = _unitOfWork.OrderRepository.GetByIdAsync(orderId);
+    //     if (order.Status == 0)
+    //     {
+    //         
+    //     }
+    // }
+
     public async Task<ResponseModel> GetRevenuesAsync()
     {
         var revenues = await _unitOfWork.RevenueRepository.GetAllAsync();

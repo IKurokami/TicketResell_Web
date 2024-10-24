@@ -27,6 +27,7 @@ const Notification_Popup: React.FC<SuccessPopupProps> = ({
 
       <div className="relative z-50 bg-white p-4 rounded shadow-lg text-center ">
         <p>{message}</p>
+
         <button
           className="bg-green-500 text-white px-4 py-2 mt-2 rounded"
           onClick={onClose}

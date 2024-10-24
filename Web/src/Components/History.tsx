@@ -1,141 +1,349 @@
 import React, { useState, useEffect } from 'react';
-import { Receipt, Calendar } from 'lucide-react';
-import { Ticket } from '@/models/TicketFetch';
+import { Ticket, User, Coins, Search, ArrowUpDown, X, Calendar, CreditCard, Package2 } from 'lucide-react';
+import { Ticket as TicketModel } from '@/models/TicketFetch';
+import Cookies from 'js-cookie';
 
+const HistoryPage = () => {
+  const [purchaseHistory, setPurchaseHistory] = useState<Array<{
+    id: string;
+    date: string;
+    tickets: TicketModel[];
+    price: number;
+    status: number;
+    seller: string | null;
+  }>>([]);
 
-
-
-interface Purchase {
-  id: string; // Corresponds to OrderId in your Dto
-  date: string; // The date of the order
-  totalAmount: number; // Total amount (you can calculate this)
-  orderDetails: OrderDetail[]; // Details of tickets in the order
-}
-
-interface OrderDetail {
-  orderDetailId: string; // Corresponds to OrderDetailId
-  ticketId: string; // TicketId
-  price: number; // Price of the ticket
-  quantity: number; // Quantity purchased
-  ticket: Ticket; // Associated ticket information
-}
-
-const TAX_RATE = 0.05; // 5% tax rate
-
-const PurchaseHistory: React.FC = () => {
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const buyerId = 'USER001'; // Replace with the actual buyer ID.
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
     const fetchPurchaseHistory = async () => {
       try {
-        setIsLoading(true);
+        const userId = Cookies.get('id');
+        const response = await fetch(`http://localhost:5296/api/History/get/${userId}`, {
+          credentials: 'include',
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-        // Replace the URL with your actual API endpoint.
-        const response = await fetch(`http://localhost:5296/api/Order/buyer/${buyerId}`);
-        const data = await response.json();
-        console.log("Order History", data);
+        if (!response.ok) throw new Error('Network response was not ok');
 
-        // Assuming the API response directly matches the Purchase model
-        setPurchases(data.data);
-      } catch (err) {
-        setError('Failed to fetch purchase history. Please try again later.');
-      } finally {
-        setIsLoading(false);
+        const result = await response.json();
+        if (result.statusCode === 200 && Array.isArray(result.data)) {
+          const groupedOrders = result.data.map(order => {
+            const createDate = order.orderDetails[0]?.ticket.createDate; // Get the createDate
+
+            // Check if createDate is valid and format it
+            const formattedDate = createDate ? (() => {
+              const date = new Date(createDate);
+
+              // Debugging: Log the date object
+              console.log('Parsed Date:', date);
+
+              // Check if the date is valid
+              if (isNaN(date.getTime())) {
+                return 'Ngày không hợp lệ'; // Invalid date handling
+              }
+
+              const day = date.getDate().toString().padStart(2, '0'); // Day
+              const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month (0-based index)
+              const year = date.getFullYear(); // Year
+              const hours = date.getHours().toString().padStart(2, '0'); // Hours
+              const minutes = date.getMinutes().toString().padStart(2, '0'); // Minutes
+              return `ngày ${day} tháng ${month} năm ${year}, ${hours}:${minutes}`; // Formatted string
+            })() : 'Ngày không hợp lệ'; // Fallback for invalid date
+
+            return {
+              id: order.orderId,
+              date: formattedDate,
+              tickets: order.orderDetails.map(detail => ({
+                ...detail.ticket,
+                cost: detail.ticket.cost,
+                quantity: detail.quantity,
+              })),
+              price: order.orderDetails.reduce((total: any, detail: any) =>
+                total + detail.ticket.cost * detail.quantity, 0),
+              status: order.status,
+              seller: order.orderDetails[0]?.ticket.sellerId || null,
+            };
+          });
+
+
+          setPurchaseHistory(groupedOrders);
+        }
+      } catch (error) {
+        console.error('Error fetching purchase history:', error);
       }
     };
 
     fetchPurchaseHistory();
-  }, [buyerId]);
+  }, []);
 
-  if (isLoading) {
+  const getStatusBadge = (status: number) => {
+    const statusConfig = {
+      0: {
+        label: 'Đã Thanh Toán',
+        className: 'bg-green-100 text-green-800 ring-green-600/20',
+        icon: '✓',
+      },
+      1: {
+        label: 'Đang xử lý',
+        className: 'bg-yellow-100 text-yellow-800 ring-yellow-600/20',
+        icon: '⧖',
+      },
+      2: {
+        label: 'Đã hủy',
+        className: 'bg-red-100 text-red-800 ring-red-600/20',
+        icon: '×',
+      },
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig[0];
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500"></div>
-      </div>
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${config.className}`}>
+        {config.icon} {config.label}
+      </span>
     );
-  }
+  };
 
-  if (error) {
-    return <div className="text-center py-12 text-red-600">{error}</div>;
-  }
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(price);
+  };
+
+  const filteredOrders = purchaseHistory
+    .filter(order => filterStatus === 'all' || order.status === Number(filterStatus))
+    .filter(order =>
+      order.id.includes(searchTerm) ||
+      order.tickets.some(ticket => ticket.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (order.seller && order.seller.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8 my-20">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-5xl font-extrabold text-gray-900 mb-12 text-center">Transaction History</h1>
-        {purchases.length === 0 ? (
-          <div className="bg-white shadow rounded-lg p-6">
-            <p className="text-gray-600 text-center">No purchase history available.</p>
+    <div className="min-h-screen bg-gray-50 mt-20">
+      <div className="max-w mx-auto px-4 py-8">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight">Lịch sử đơn hàng</h1>
+              <p className="text-gray-500">Quản lý và theo dõi các đơn hàng của bạn</p>
+            </div>
+            <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm">
+              {purchaseHistory.length} đơn hàng
+            </span>
           </div>
-        ) : (
-          <div className="space-y-12">
-            {purchases.map((purchase) => {
-              const subtotal = purchase.orderDetails.reduce(
-                (acc, detail) => acc + detail.price * detail.quantity,
-                0
-              );
-              const tax = subtotal * TAX_RATE;
-              const totalWithTax = subtotal + tax;
 
-              return (
-                <div key={purchase.id} className="bg-white shadow-lg rounded-lg overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-2xl font-semibold flex items-center space-x-2 text-gray-800">
-                        <Receipt className="h-6 w-6 text-blue-500" />
-                        <span>Order #{purchase.id}</span>
-                      </h2>
-                      <div className="flex items-center text-gray-500 whitespace-nowrap">
-                        <Calendar className="h-5 w-5 mr-2" />
-                        <span>
-                          {new Date(purchase.date).toLocaleString('en-US', {
-                            dateStyle: 'medium',
-                            timeStyle: 'short',
-                          })}
-                        </span>
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
+              <input
+                type="text"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                placeholder="Tìm kiếm theo mã đơn, tên vé hoặc người bán..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <select
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="0">Đã thanh toán</option>
+              <option value="1">Đang xử lý</option>
+              <option value="2">Đã hủy</option>
+            </select>
+          </div>
+
+          {/* Orders List */}
+          <div className="grid gap-4">
+            {filteredOrders.map(order => (
+              <div
+                key={order.id}
+                className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setIsModalOpen(true);
+                }}
+              >
+                <div className="p-6 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="w-4 h-4 text-gray-400" />
+                      <h3 className="font-semibold">#{order.id}</h3>
+                    </div>
+                    {getStatusBadge(order.status)}
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-gray-500">Ngày mua</p>
+                      <p className="font-medium">{order.date}</p>
+                    </div>
+
+                    <div className="space-y-1"></div>
+
+                    <div className="space-y-1 text-right">
+                      <p className="text-sm text-gray-500">Tổng tiền</p>
+                      <p className="text-lg font-bold text-blue-600">
+                        {formatPrice(order.price)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-4 border-t">
+                    {order.tickets.map((ticket, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                      >
+                        {ticket.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {filteredOrders.length === 0 && (
+              <div className="text-center py-12">
+                <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium">Không tìm thấy đơn hàng</h3>
+                <p className="text-gray-500 mt-2">Thử tìm kiếm với từ khóa khác</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {isModalOpen && selectedOrder && (
+        <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+
+          <div className="relative bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden mt-16"> {/* Add mt-16 for margin-top */}
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Package2 className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Chi tiết đơn hàng #{selectedOrder.id}</h3>
+                  <p className="text-sm text-gray-500">Được đặt vào {selectedOrder.date}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            <div className="bg-white rounded-xl border">
+              <div className="p-4 border-b bg-gray-50">
+                <h4 className="font-semibold text-gray-900">Chi tiết vé</h4>
+              </div>
+
+              <div className="divide-y overflow-y-auto max-h-[30vh]"> {/* Thêm overflow-y-auto ở đây */}
+                {selectedOrder.tickets.map((ticket: any, idx: any) => (
+                  <div key={idx} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                      <div className="flex-1">
+                        <h5 className="font-medium text-gray-900">{ticket.name}</h5>
+                        {ticket.sellerId && (
+                          <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                            <User className="w-4 h-4" />
+                            Người bán: {ticket.sellerId}
+                          </p>
+                        )}
                       </div>
 
-
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {purchase.orderDetails.map((detail, index) => (
-                        <div key={index} className="bg-gray-50 rounded-lg p-4 flex flex-col items-center shadow hover:shadow-lg transition-shadow">
-                          <img
-                            src={detail.ticket.imageUrl || detail.ticket.image}
-                            alt={detail.ticket.name}
-                            className="w-full h-64 object-cover rounded-md mb-4"
-                          />
-                          <h3 className="text-lg font-semibold text-gray-800 mb-2">{detail.ticket.name}</h3>
-                          <div className="flex justify-between w-full text-gray-600">
-                            <span>Quantity: {detail.quantity}</span>
-                            <span>€ {(detail.price * detail.quantity).toFixed(2)}</span>
-                          </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Đơn giá</p>
+                          <p className="font-medium text-gray-900">{formatPrice(ticket.cost)}</p>
                         </div>
-                      ))}
-                    </div>
-                    <div className="mt-6">
-                      <div className="flex flex-col items-end">
-                        <div className="bg-yellow-100 text-yellow-800 px-6 py-2 rounded-md shadow-md mb-2">
-                          <span className="text-lg font-medium">Tax ( 5% ): € {tax.toFixed(2)}</span>
+                        <div className="h-8 w-px bg-gray-200"></div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Số lượng</p>
+                          <p className="font-medium text-gray-900">{ticket.quantity}</p>
                         </div>
-                        <div className="bg-green-100 text-green-800 px-6 py-3 rounded-md shadow-md">
-                          <span className="text-xl font-bold">Total with Tax: € {totalWithTax.toFixed(2)}</span>
+                        <div className="h-8 w-px bg-gray-200"></div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Thành tiền</p>
+                          <p className="font-medium text-blue-600">{formatPrice(ticket.cost * ticket.quantity)}</p>
                         </div>
                       </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
+            {/* Modal Body */}
+            <div className="p-3 max-h-[calc(70vh-60px)]">
+              {/* Order Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {/* Total Amount Card */}
+                <div className="bg-white p-4 rounded-xl border shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <CreditCard className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Tổng tiền</p>
+                      <p className="text-lg font-bold text-green-600">{formatPrice(selectedOrder.price)}</p>
+                    </div>
+                  </div>
                 </div>
-              );
-            })}
+
+                {/* Status Card */}
+                <div className="bg-white p-4 rounded-xl border shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Calendar className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Trạng thái</p>
+                      <div className="mt-1">{getStatusBadge(selectedOrder.status)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ticket Count Card */}
+                <div className="bg-white p-4 rounded-xl border shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                      <Ticket className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Số lượng vé</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {selectedOrder.tickets.reduce((sum: any, ticket: any) => sum + ticket.quantity, 0)} vé
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ticket Details */}
+
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+
     </div>
   );
 };
 
-export default PurchaseHistory;
+export default HistoryPage;

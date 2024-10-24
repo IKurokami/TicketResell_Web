@@ -34,8 +34,7 @@ public class AuthenticationService : IAuthenticationService
     {
         if (string.IsNullOrEmpty(registerDto.OTP))
             return ResponseModel.BadRequest("Registration failed", "No OTP provided");
-
-
+        
         var cacheOtp = await GetCachedAccessKeyAsync("email_verification", registerDto.UserId);
         if (!cacheOtp.HasValue)
             return ResponseModel.BadRequest("Registration failed", "Otp not found for user");
