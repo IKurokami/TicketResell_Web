@@ -1,4 +1,5 @@
 using Repositories.Core.Dtos.Revenue;
+using TicketResell.Repositories.Core.Dtos.Revenue;
 using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Revenues;
 
@@ -59,7 +60,7 @@ namespace TicketResell.Repositories.Controllers
         {
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view revenues by seller ID"));
-
+            
             var userId = HttpContext.GetUserId();
             //TODO: Check for authenticated UserId is a Seller
 
@@ -112,5 +113,6 @@ namespace TicketResell.Repositories.Controllers
             var response = await _revenueService.DeleteRevenuesBySellerIdAsync(id);
             return ResponseParser.Result(response);
         }
+
     }
 }

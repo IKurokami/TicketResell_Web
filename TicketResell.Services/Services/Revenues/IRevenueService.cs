@@ -19,4 +19,5 @@ public interface IRevenueService
     public Task<ResponseModel> DeleteRevenuesAsync(string id,bool saveAll=true);
 
     public Task<ResponseModel> DeleteRevenuesBySellerIdAsync(string id,bool saveAll=true);
+    public Task<ResponseModel> AddRevenueByDateAsync(DateTime date, double amount, bool saveAll);
 }

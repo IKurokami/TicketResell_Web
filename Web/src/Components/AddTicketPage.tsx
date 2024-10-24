@@ -423,7 +423,7 @@ const AddTicketModal: React.FC = () => {
         const firstTicket = tickets[0]; 
         console.log(firstTicket);
         
-        const imageUpdateResult = await uploadImageForTicket(firstTicket, selectedFile);
+        const imageUpdateResult = await uploadImageForTicket(firstTicket.Image, selectedFile);
         return imageUpdateResult; 
       } else {
         console.error("No file selected or no tickets available.");

@@ -44,7 +44,6 @@ public class OrderService : IOrderService
         }
 
         _unitOfWork.OrderRepository.Update(order);
-        await _unitOfWork.CompleteAsync();
         var orderDto = _mapper.Map<OrderDto>(order);
 
         return ResponseModel.Success($"Order status updated successfully to {(OrderStatus)status}", orderDto);
