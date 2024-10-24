@@ -1,17 +1,80 @@
-import React, { useState, useEffect } from "react";
-import { FaSearch, FaTrash, FaEdit, FaSort } from "react-icons/fa";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  FaSearch,
+  FaTrash,
+  FaEdit,
+  FaSort,
+  FaUserCog,
+  FaUserSlash,
+  FaKey,
+} from "react-icons/fa";
 import { User } from "@/models/UserManagement";
+
+interface ContextMenuProps {
+  x: number;
+  y: number;
+  onClose: () => void;
+  options: {
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+    className?: string;
+  }[];
+}
+
+const ContextMenu: React.FC<ContextMenuProps> = ({
+  x,
+  y,
+  onClose,
+  options,
+}) => {
+  useEffect(() => {
+    const handleClick = () => onClose();
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed bg-white shadow-lg rounded-lg py-2 z-50 min-w-[200px] border border-gray-200"
+      style={{ top: y, left: x }}
+    >
+      {options.map((option, index) => (
+        <button
+          key={index}
+          onClick={(e) => {
+            e.stopPropagation();
+            option.onClick();
+            onClose();
+          }}
+          className={`w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 ${
+            option.className || "text-gray-700"
+          }`}
+        >
+          {option.icon}
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 interface UserManagerProps {
   users: User[];
-  onDelete: (userId: string) => void;
-  onEdit: (userId: string) => void;
+  onEdit?: (userId: string) => void;
+  onDisableAccount?: (userId: string) => void;
+  onEnableAccount?: (userId: string) => void;
+  onEditRoles?: (userId: string) => void;
+  onResetPassword?: (userId: string) => void;
 }
 
 const UserManager: React.FC<UserManagerProps> = ({
   users,
-  onDelete,
   onEdit,
+  onDisableAccount,
+  onEnableAccount,
+  onEditRoles,
+  onResetPassword,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
@@ -88,75 +151,72 @@ const UserManager: React.FC<UserManagerProps> = ({
     }
   };
 
-    const renderPaginationButtons = () => {
-      const maxVisiblePages = 5;
-      const pageButtons = [];
-      let startPage = Math.max(
-        1,
-        currentPage - Math.floor(maxVisiblePages / 2)
+  const renderPaginationButtons = () => {
+    const maxVisiblePages = 5;
+    const pageButtons = [];
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    if (startPage > 1) {
+      pageButtons.push(
+        <button
+          key="first"
+          onClick={() => handlePageChange(1)}
+          className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+        >
+          1
+        </button>
       );
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-      if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1);
-      }
-
-      if (startPage > 1) {
+      if (startPage > 2) {
         pageButtons.push(
-          <button
-            key="first"
-            onClick={() => handlePageChange(1)}
-            className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
-          >
-            1
-          </button>
-        );
-        if (startPage > 2) {
-          pageButtons.push(
-            <span key="ellipsis1" className="mx-1">
-              ...
-            </span>
-          );
-        }
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pageButtons.push(
-          <button
-            key={i}
-            onClick={() => handlePageChange(i)}
-            className={`w-10 h-10 mx-1 rounded-full transition-colors duration-200 ${
-              currentPage === i
-                ? "bg-blue-500 text-white"
-                : "bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
-            }`}
-          >
-            {i}
-          </button>
+          <span key="ellipsis1" className="mx-1">
+            ...
+          </span>
         );
       }
+    }
 
-      if (endPage < totalPages) {
-        if (endPage < totalPages - 1) {
-          pageButtons.push(
-            <span key="ellipsis2" className="mx-1">
-              ...
-            </span>
-          );
-        }
+    for (let i = startPage; i <= endPage; i++) {
+      pageButtons.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`w-10 h-10 mx-1 rounded-full transition-colors duration-200 ${
+            currentPage === i
+              ? "bg-blue-500 text-white"
+              : "bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
         pageButtons.push(
-          <button
-            key="last"
-            onClick={() => handlePageChange(totalPages)}
-            className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
-          >
-            {totalPages}
-          </button>
+          <span key="ellipsis2" className="mx-1">
+            ...
+          </span>
         );
       }
+      pageButtons.push(
+        <button
+          key="last"
+          onClick={() => handlePageChange(totalPages)}
+          className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+        >
+          {totalPages}
+        </button>
+      );
+    }
 
-      return pageButtons;
-    };
+    return pageButtons;
+  };
 
   const getSortIcon = (field: string) => {
     if (sortField !== field)
@@ -169,6 +229,22 @@ const UserManager: React.FC<UserManagerProps> = ({
       />
     );
   };
+
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    userId: string;
+    isActive: boolean;
+  } | null>(null);
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent, userId: string, isActive: boolean) => {
+      e.preventDefault();
+      const { pageX, pageY } = e;
+      setContextMenu({ x: pageX, y: pageY, userId, isActive });
+    },
+    []
+  );
 
   return (
     <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-32">
@@ -233,18 +309,18 @@ const UserManager: React.FC<UserManagerProps> = ({
                   {getSortIcon("createDate")}
                 </div>
               </th>
-              <th scope="col" className="px-6 py-3">
-                Action
-              </th>
             </tr>
-          </thead>
+          </thead>{" "}
           <tbody>
             {paginatedUsers.map((user) => (
               <tr
                 key={user.userId}
-                className="border-b hover:bg-gray-50 transition-colors duration-150"
+                onContextMenu={(e) =>
+                  handleContextMenu(e, user.userId, user.status === 1)
+                }
+                className="border-b hover:bg-gray-50 transition-colors duration-150 cursor-context-menu"
               >
-                <td className="px-6 py-4 font-medium text-gray-900">
+                <td className="px-6 py-4 font-medium text-gray-900 truncate text-nowrap">
                   {user.fullname || user.username}
                 </td>
                 <td className="px-6 py-4 text-blue-600">{user.userId}</td>
@@ -275,29 +351,50 @@ const UserManager: React.FC<UserManagerProps> = ({
                 <td className="px-6 py-4">
                   {new Date(user.createDate).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => onEdit(user.userId)}
-                      className="text-blue-600 hover:text-blue-800 transition-colors duration-150"
-                      title="Edit"
-                    >
-                      <FaEdit size={16} />
-                    </button>
-                    <button
-                      onClick={() => onDelete(user.userId)}
-                      className="text-red-600 hover:text-red-800 transition-colors duration-150"
-                      title="Delete"
-                    >
-                      <FaTrash size={16} />
-                    </button>
-                  </div>
-                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          options={[
+            {
+              label: "Edit User",
+              icon: <FaEdit className="w-4 h-4" />,
+              onClick: () => onEdit?.(contextMenu.userId),
+            },
+            {
+              label: "Edit Roles",
+              icon: <FaUserCog className="w-4 h-4" />,
+              onClick: () => onEditRoles?.(contextMenu.userId),
+            },
+            {
+              label: contextMenu.isActive
+                ? "Disable Account"
+                : "Enable Account",
+              icon: <FaUserSlash className="w-4 h-4" />,
+              onClick: () =>
+                contextMenu.isActive
+                  ? onDisableAccount?.(contextMenu.userId)
+                  : onEnableAccount?.(contextMenu.userId),
+              className: contextMenu.isActive
+                ? "text-orange-600"
+                : "text-green-600",
+            },
+            {
+              label: "Reset Password",
+              icon: <FaKey className="w-4 h-4" />,
+              onClick: () => onResetPassword?.(contextMenu.userId),
+            },
+          ]}
+        />
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

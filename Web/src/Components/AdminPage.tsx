@@ -236,8 +236,11 @@ const AdminPage = () => {
     }
   };
 
-  const handleUserEdit = async (userId: string) => {};
-  const handleUserDelete = async (userId: string) => {};
+  const handleUserOnEdit = async (userId: string) => {};
+  const handleUserOnDisableAccount = async (userId: string) => {};
+  const handleUserOnEnableAccount = async (userId: string) => {};
+  const handleUserOnEditRoles = async (userId: string) => {};
+  const handleUserOnResetPassword = async (userId: string) => {};
 
   const handleRoleAdd = async () => {
     setCurrentRole(null);
@@ -454,8 +457,11 @@ const AdminPage = () => {
         return (
           <UserManager
             users={users}
-            onEdit={handleUserEdit}
-            onDelete={handleUserDelete}
+            onEdit={handleUserOnEdit}
+            onDisableAccount={handleUserOnDisableAccount}
+            onEnableAccount={handleUserOnEnableAccount}
+            onEditRoles={handleUserOnEditRoles}
+            onResetPassword={handleUserOnResetPassword}
           />
         );
       case "Roles":
