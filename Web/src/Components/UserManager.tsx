@@ -63,8 +63,8 @@ interface UserManagerProps {
   users: User[];
   onEdit?: (userId: string) => void;
   onDisableAccount?: (userId: string) => void;
+  onDisableSeller?: (userId: string) => void;
   onEnableAccount?: (userId: string) => void;
-  onEditRoles?: (userId: string) => void;
   onResetPassword?: (userId: string) => void;
 }
 
@@ -73,7 +73,7 @@ const UserManager: React.FC<UserManagerProps> = ({
   onEdit,
   onDisableAccount,
   onEnableAccount,
-  onEditRoles,
+  onDisableSeller,
   onResetPassword,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -235,13 +235,19 @@ const UserManager: React.FC<UserManagerProps> = ({
     y: number;
     userId: string;
     isActive: boolean;
+    isSeller: boolean;
   } | null>(null);
 
   const handleContextMenu = useCallback(
-    (e: React.MouseEvent, userId: string, isActive: boolean) => {
+    (
+      e: React.MouseEvent,
+      userId: string,
+      isActive: boolean,
+      isSeller: boolean
+    ) => {
       e.preventDefault();
       const { pageX, pageY } = e;
-      setContextMenu({ x: pageX, y: pageY, userId, isActive });
+      setContextMenu({ x: pageX, y: pageY, userId, isActive, isSeller });
     },
     []
   );
@@ -316,7 +322,12 @@ const UserManager: React.FC<UserManagerProps> = ({
               <tr
                 key={user.userId}
                 onContextMenu={(e) =>
-                  handleContextMenu(e, user.userId, user.status === 1)
+                  handleContextMenu(
+                    e,
+                    user.userId,
+                    user.status === 1,
+                    user.roles.some((role) => role.roleId === "RO2")
+                  )
                 }
                 className="border-b hover:bg-gray-50 transition-colors duration-150 cursor-context-menu"
               >
@@ -370,9 +381,14 @@ const UserManager: React.FC<UserManagerProps> = ({
               onClick: () => onEdit?.(contextMenu.userId),
             },
             {
-              label: "Edit Roles",
-              icon: <FaUserCog className="w-4 h-4" />,
-              onClick: () => onEditRoles?.(contextMenu.userId),
+              label: contextMenu.isSeller ? "Disable Seller" : "",
+              icon: <FaUserSlash className="w-4 h-4" />,
+              onClick: () => {
+                if (contextMenu.isSeller) {
+                  onDisableSeller?.(contextMenu.userId); // Only disable if isSeller is true
+                }
+              },
+              className: contextMenu.isSeller ? "text-orange-600" : "hidden",
             },
             {
               label: contextMenu.isActive

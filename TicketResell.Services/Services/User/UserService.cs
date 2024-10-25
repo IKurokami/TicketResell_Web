@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Entities;
 using TicketResell.Repositories.Logger;
@@ -91,6 +92,25 @@ namespace TicketResell.Services.Services
                 await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully updated user: {user.Username}", _mapper.Map<UserReadDto>(user));
         }
+        public async Task<ResponseModel> UpdateUserAdminByIdAsync(string id, UserUpdateByAdminDto dto, bool saveAll)
+        {
+            User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+
+            _mapper.Map(dto, user);
+
+            var validator = _validatorFactory.GetValidator<User>();
+
+            var validationResult = validator.Validate(user);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation error", validationResult.Errors);
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully updated user: {user.Username}", _mapper.Map<UserUpdateByAdminDto>(user));
+        }
 
         public async Task<ResponseModel> RegisterSeller(string id, SellerRegisterDto dto, bool saveAll)
         {
@@ -126,6 +146,68 @@ namespace TicketResell.Services.Services
             if (saveAll)
                 await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully deleted user: {user.Username}");
+        }
+
+        public async Task<ResponseModel> UpdateRoleAsync(string id, List<Role> roles)
+        {
+            User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
+
+
+            _unitOfWork.UserRepository.UpdateRole(user, roles);
+            await _unitOfWork.CompleteAsync(); // Save changes to the database
+
+            return ResponseModel.Success($"Successfully update role");
+
+        }
+
+        public async Task<ResponseModel> RemoveSeller(string id, bool saveAll = true)
+        {
+            User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+            var validator = _validatorFactory.GetValidator<User>();
+            var validationResult = validator.Validate(user);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            }
+            await _unitOfWork.UserRepository.RemoveSeller(user);
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully remove seller");
+        }
+
+        public async Task<ResponseModel> AddSeller(string id, bool saveAll = true)
+        {
+            User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+            var validator = _validatorFactory.GetValidator<User>();
+            var validationResult = validator.Validate(user);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            }
+            await _unitOfWork.UserRepository.RegisterSeller(user);
+            if (saveAll)
+                await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success($"Successfully register seller");
+        }
+
+        public async Task<ResponseModel> ChangeUserStatusAsync(string id, bool saveAll = true)
+        {
+
+            User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+            var validator = _validatorFactory.GetValidator<User>();
+            var validationResult = validator.Validate(user);
+            if (!validationResult.IsValid)
+            {
+                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+            }
+            await _unitOfWork.UserRepository.ChangeStatus(user);
+            await _unitOfWork.CompleteAsync(); // Assuming you have a SaveChanges method to save changes to the database
+            return ResponseModel.Success($"Successfully change status");
         }
     }
 }

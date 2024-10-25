@@ -76,5 +76,53 @@ namespace Repositories.Repositories
             if (user != null)
                 _context.Users.Update(user);
         }
+
+        public async Task RemoveSeller (User? user)
+        {
+            var roleId = RoleConstant.roleSeller;
+            var role = await _context.Roles.FindAsync (roleId);
+            if (role != null) 
+            {
+                user?.Roles.Remove(role);
+            }
+            if (user != null)
+                {
+                    _context.Users.Update(user);
+                }
+        }
+
+        public async Task UpdateRole(User user, List<Role> roles)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user), "User cannot be null.");
+            }
+
+            if (roles != null)
+            {
+                user.Roles = roles; // Assuming Roles is a List<Role>
+            }
+
+            _context.Users.Update(user); // Mark the user entity as modified
+
+            // Save changes to the database
+        }
+
+        public async Task ChangeStatus(User user)
+        {
+            if (user != null)
+            {
+                if (user.Status == 1)
+                {
+                    user.Status = 0;
+                }
+                else
+                {
+                    user.Status = 1;
+                }
+                _context.Users.Update(user);
+
+            }
+        }
     }
 }

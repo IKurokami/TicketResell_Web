@@ -1,4 +1,5 @@
 using Repositories.Core.Dtos.User;
+using Repositories.Core.Entities;
 
 namespace TicketResell.Services.Services
 {
@@ -12,11 +13,20 @@ namespace TicketResell.Services.Services
         public Task<ResponseModel> GetUserByEmailAsync(string email);
 
         public Task<ResponseModel> UpdateUserByIdAsync(string id, UserUpdateDto dto, bool saveAll = true);
+        public Task<ResponseModel> UpdateUserAdminByIdAsync(string id, UserUpdateByAdminDto dto, bool saveAll = true);
+        public Task<ResponseModel> UpdateRoleAsync(string id, List<Role> roles);
 
         public Task<ResponseModel> RegisterSeller(string id,SellerRegisterDto dto,bool saveAll=true);
         
         public Task<ResponseModel> CheckSeller(string id);
         
         public Task<ResponseModel> DeleteUserByIdAsync(string id, bool saveAll = true);
+
+        public Task<ResponseModel> RemoveSeller(string id, bool saveAll = true);
+        public Task<ResponseModel> AddSeller(string id, bool saveAll = true);
+        public Task<ResponseModel> ChangeUserStatusAsync(string id, bool saveAll = true);
+
+
+
     }
 }
