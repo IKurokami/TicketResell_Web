@@ -43,7 +43,15 @@ public partial class User
 
     public string? Cccd { get; set; }
 
+    public virtual ICollection<Chat> ChatReceivers { get; set; } = new List<Chat>();
+
+    public virtual ICollection<Chat> ChatSenders { get; set; } = new List<Chat>();
+
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    public virtual ICollection<Rating> RatingSellers { get; set; } = new List<Rating>();
+
+    public virtual ICollection<Rating> RatingUsers { get; set; } = new List<Rating>();
 
     public virtual ICollection<Revenue> Revenues { get; set; } = new List<Revenue>();
 
