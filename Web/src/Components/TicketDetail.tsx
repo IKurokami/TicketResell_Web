@@ -13,7 +13,7 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { checkLogin } from "./checkLogin";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "next/navigation";
 import Dropdown from "./Dropdown";
 import Link from "next/link";
@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import RelatedTicket from "./RelatedTicket";
 import Notification_Popup from "./Notification_PopUp";
 import { fetchRemainingByID } from "@/models/TicketFetch";
+import { NumberContext } from "./NumberContext";
 
 interface TicketDetail {
   id: string;
@@ -72,11 +73,11 @@ const TicketDetail = () => {
     }
   };
   const baseId = splitId();
+  const context = useContext(NumberContext);
 
   const [count, setCount] = useState(1);
   const handleClosePopup = () => {
     setShowPopup(false);
-    window.location.reload();
   };
 
   const increase = () => {
@@ -124,6 +125,18 @@ const TicketDetail = () => {
       });
       if (result) {
         setShowPopup(true);
+
+        const increaseNumber = () => {
+          if (context) {
+            const { number, setNumber } = context;
+
+            let num = Number(number) || 0;
+            num += 1;
+            setNumber(num);
+            console.log("change cart count to ", num);
+          }
+        };
+        increaseNumber();
         console.log("Item added to cart successfully:", result);
       } else {
         console.error("Failed to add item to cart");

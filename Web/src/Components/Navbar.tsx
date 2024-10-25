@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "@/Css/Navbar.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useScroll } from "@/Hooks/useScroll";
@@ -14,12 +14,44 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { LogIn } from "lucide-react";
 
 import { CheckSeller } from "./CheckSeller";
+import { NumberContext } from "./NumberContext";
 import { checkLogin } from "./checkLogin";
 interface NavbarProps {
   page: string;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
+  const context = useContext(NumberContext);
+  if (context) {
+    const { number, setNumber } = context;
+    useEffect(() => {
+      console.log("number change");
+      const id = Cookies.get("id");
+
+      const fetchCart = async () => {
+        const response = await fetch(
+          `http://localhost:5296/api/cart/items/${id}`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const result = await response.json();
+        if (result.data == null) {
+          setCountCartItems(0);
+        } else {
+          setCountCartItems(result.data.length);
+          setNumber(result.data.length);
+        }
+      };
+
+      fetchCart();
+    }, [number]);
+  }
+
   const [menuActive, setMenuActive] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");

@@ -122,6 +122,11 @@ public static class RequestHelper
         return RoleHelper.HasEnoughRoleLevel(RoleHelper.ConvertToRole(context.GetRole()), roleNeed);
     }
 
+    public static bool HasEqualRoleLevel(this HttpContext? context, UserRole roleNeed = UserRole.Buyer)
+    {
+        return RoleHelper.ConvertToRole(context.GetRole()) == roleNeed;
+    }
+
     #endregion
 
     #region SetData

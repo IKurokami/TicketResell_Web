@@ -30,7 +30,9 @@ public partial class TicketResellManagementContext : DbContext
     public virtual DbSet<Ticket> Tickets { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
+    
+    public virtual DbSet<Chat> Chats { get; set; }
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("SQLSERVER"));
 
@@ -267,6 +269,37 @@ public partial class TicketResellManagementContext : DbContext
                     });
         });
 
+        modelBuilder.Entity<Chat>(entity =>
+        {
+            entity.HasKey(e => e.ChatId);
+
+            entity.ToTable("Chat");
+
+            entity.Property(e => e.SenderId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.Property(e => e.ReceiverId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.Property(e => e.Message)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            entity.HasOne(d => d.Sender)
+                .WithMany()
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Chat_Sender");
+
+            entity.HasOne(d => d.Receiver)
+                .WithMany()
+                .HasForeignKey(d => d.ReceiverId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Chat_Receiver");
+        });
+        
         OnModelCreatingPartial(modelBuilder);
     }
 

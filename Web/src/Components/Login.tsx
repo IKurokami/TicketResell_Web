@@ -190,19 +190,15 @@ const Login: React.FC = () => {
   };
 
   const handleSignUp = async () => {
-    if (!validateEmail(email)) {
-      notifyError("Định dạng email không hợp lệ.");
-      return;
-    }
 
-    if (!username || !name || !email || !password) {
+    if (!username || !name || !password) {
       notifyError("Vui lòng điền đầy đủ thông tin.");
       return;
     }
 
     try {
-      const response = await getOTP(name, email, username);
-      if (response.success) {
+      const response = await getOTP(username);
+      if (response.status == 'Success') {
         setOtpSent(true);
         setTimer(300);
         notifySuccess(
@@ -224,6 +220,7 @@ const Login: React.FC = () => {
     }
 
     try {
+      console.log("TESTTTT")
       const response = await fetch("/api/getOTP", {
         method: "POST",
         headers: {
@@ -232,14 +229,16 @@ const Login: React.FC = () => {
         body: JSON.stringify({
           username: username,
           password: password,
-          email: email,
+          email: "default@gmail.com",
           otp: enteredOtp,
         }),
       });
-
+      
+      console.log("TESTTTT2")
       const data = await response.json();
-
-      if (response.ok && data.success) {
+      console.log("TESTTTT3")
+      console.log(data)
+      if (response.ok) {
         notifySuccess("Xác minh OTP thành công! Đăng ký hoàn tất.");
         setActiveTab("login"); // Chuyển sang tab đăng nhập
         setOtpSent(false); // Đặt lại trạng thái OTP
@@ -359,7 +358,7 @@ const Login: React.FC = () => {
                 <InputField
                   icon={<FaUser />}
                   type="text"
-                  placeholder="Tên người dùng"
+                  placeholder="Địa chỉ email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -369,13 +368,6 @@ const Login: React.FC = () => {
                   placeholder="Tên"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                />
-                <InputField
-                  icon={<FaEnvelope />}
-                  type="email"
-                  placeholder="Địa chỉ email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <InputField
                   icon={<FaLock />}

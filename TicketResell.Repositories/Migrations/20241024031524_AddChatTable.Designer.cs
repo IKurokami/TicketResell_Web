@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repositories.Core.Context;
 
 #nullable disable
 
-namespace Repositories.Migrations
+namespace TicketResell.Repositories.Migrations
 {
     [DbContext(typeof(TicketResellManagementContext))]
-    partial class TicketResellManagementContextModelSnapshot : ModelSnapshot
+    [Migration("20241024031524_AddChatTable")]
+    partial class AddChatTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,31 +47,24 @@ namespace Repositories.Migrations
 
             modelBuilder.Entity("Repositories.Core.Entities.Chat", b =>
                 {
-                    b.Property<string>("ChatId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<string>("SenderId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ReceiverId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<string>("ReceiverId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.HasKey("ChatId");
+                    b.HasKey("SenderId", "ReceiverId");
 
                     b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId");
 
                     b.ToTable("Chat", (string)null);
                 });

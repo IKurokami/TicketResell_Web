@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using AutoMapper;
 using Newtonsoft.Json;
 using Repositories.Core.Dtos.User;
@@ -6,6 +7,7 @@ using Repositories.Core.Entities;
 using Repositories.Core.Validators;
 using StackExchange.Redis;
 using TicketResell.Repositories.Core.Dtos.Authentication;
+using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Crypto;
 
@@ -18,32 +20,45 @@ public class AuthenticationService : IAuthenticationService
     private readonly IValidatorFactory _validatorFactory;
     private readonly IConnectionMultiplexer _redis;
 
+    private readonly IAppLogger _logger;
+    
     public AuthenticationService(
         IUnitOfWork unitOfWork,
         IMapper mapper,
         IValidatorFactory validatorFactory,
-        IConnectionMultiplexer redis)
+        IConnectionMultiplexer redis,
+        IServiceProvider serviceProvider, IAppLogger logger)
     {
+        _logger = logger;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _validatorFactory = validatorFactory;
         _redis = redis;
     }
 
+    
+    
     public async Task<ResponseModel> RegisterAsync(RegisterDto registerDto)
     {
+
         if (string.IsNullOrEmpty(registerDto.OTP))
             return ResponseModel.BadRequest("Registration failed", "No OTP provided");
-        
-        var cacheOtp = await GetCachedAccessKeyAsync("email_verification", registerDto.UserId);
-        if (!cacheOtp.HasValue)
-            return ResponseModel.BadRequest("Registration failed", "Otp not found for user");
 
-        if (cacheOtp != registerDto.OTP)
+        _logger.LogError(registerDto.OTP);
+        _logger.LogError(registerDto.UserId);
+        var cacheOtp = await GetCachedAccessKeyAsync("email_verification", registerDto.UserId);
+        _logger.LogError(cacheOtp);
+        if (!cacheOtp.HasValue){
+            _logger.LogError("test");
+            return ResponseModel.BadRequest("Registration failed", "Otp not found for user");
+        }
+        if (cacheOtp != registerDto.OTP){
+            _logger.LogError("test2");
             return ResponseModel.BadRequest("Registration failed", "OTP provided is invalid");
+        }
 
         var user = _mapper.Map<User>(registerDto);
-        user.UserId = registerDto.Gmail;
+        user.UserId = registerDto.UserId;
         var validator = _validatorFactory.GetValidator<User>();
         var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid)
@@ -51,8 +66,9 @@ public class AuthenticationService : IAuthenticationService
             return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
         }
 
-        if (await _unitOfWork.UserRepository.GetByIdAsync(user.Gmail ?? string.Empty) != null)
+        if (await _unitOfWork.UserRepository.GetByIdAsync(user.UserId ?? string.Empty) != null)
         {
+            _logger.LogError("Email exist");
             return ResponseModel.BadRequest("Registration failed", "Email already exists");
         }
         
@@ -66,10 +82,11 @@ public class AuthenticationService : IAuthenticationService
         return ResponseModel.Success("User registered successfully", registerDto);
     }
 
+
     public async Task<ResponseModel> PutOtpAsync(string data)
     {
         try
-        {
+        {   
             var decryptedData = (new CryptoService()).Decrypt(data);
             var splitedData = decryptedData.Split("|");
             if (await _unitOfWork.UserRepository.GetByIdAsync(splitedData[0]) != null)
@@ -170,6 +187,7 @@ public class AuthenticationService : IAuthenticationService
             {
                 UserId = googleUser.Email,
                 Username = googleUser.Given_Name,
+                Fullname = googleUser.Name,
                 Password = BCrypt.Net.BCrypt.HashPassword(GenerateAccessKey()),
                 Gmail = googleUser.Email,
                 CreateDate = DateTime.UtcNow,

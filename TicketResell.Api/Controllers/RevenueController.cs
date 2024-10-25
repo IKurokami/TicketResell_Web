@@ -1,4 +1,5 @@
 using Repositories.Core.Dtos.Revenue;
+using TicketResell.Repositories.Core.Dtos.Revenue;
 using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Revenues;
 
@@ -112,5 +113,6 @@ namespace TicketResell.Repositories.Controllers
             var response = await _revenueService.DeleteRevenuesBySellerIdAsync(id);
             return ResponseParser.Result(response);
         }
+
     }
 }

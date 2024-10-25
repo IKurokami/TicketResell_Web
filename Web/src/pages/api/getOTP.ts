@@ -15,39 +15,27 @@ const encryptData = (data: string): string => {
 };
 
 // Function to generate OTP and send via EmailJS
-export const getOTP = async (name: string, email: string, userID: string) => {
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const templateParams = {
-        to_name: name,
-        to_email: email,
-        otp: generatedOtp,
-    };
-
+export const getOTP = async (email: string) => {
     try {
-        // Send OTP via email
-        await emailjs.send(
-            'service_d76v3rv',
-            'template_juvp2i4',
-            templateParams,
-            'RNLODJWvSPCIi0CTv'
-        );
-
-        // Encrypt user email and OTP
-        const dataToEncrypt = `${email}|${generatedOtp}`;
-        const encryptedData = encryptData(dataToEncrypt);
-
-        // Send encrypted data to the backend API
-        const response = await axios.post('http://localhost:5296/api/Authentication/putOTP', { encryptedData }, {
+        const response = await fetch('http://localhost:5296/api/Mail/sendopt', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+                to: email
+            })
         });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to send OTP');
+        }
 
-        return { success: true, message: 'OTP sent and encrypted successfully!' };
+        const data = await response.json();
+        return data;
     } catch (error) {
-        console.error('Error in sending OTP or encrypting data:', error);
-        return { success: false, message: 'Failed to send OTP or encrypt data.' };
+        console.error('Error sending OTP:', error);
+        throw error;
     }
 };
 
@@ -56,6 +44,7 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
+    console.log("Something")
     if (req.method === 'POST') {
         const { email, otp, username, password } = req.body;
         console.log('Received data:', { email, otp, username, password });
@@ -67,7 +56,7 @@ export default async function handler(
         }
 
         // Encrypt data
-        const dataToEncrypt = `${email}|${otp}`;
+        const dataToEncrypt = `${username}|${otp}`;
         const encryptedData = encryptData(dataToEncrypt);
         console.log('Encrypted data:', encryptedData);
 
@@ -81,7 +70,7 @@ export default async function handler(
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    UserId: email,
+                    UserId: username,
                     Username: username,
                     Password: password,
                     Gmail: email,
