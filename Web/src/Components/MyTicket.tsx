@@ -38,6 +38,9 @@ interface TicketData {
   cost: number;
   quantity: number;
   sellerId: string;
+  seller:string;
+  fullname:string;
+
   description: string;
   categories?: string[];
   image: string;
@@ -51,6 +54,8 @@ interface OrderDetail {
     startDate: string;
     cost: number;
     sellerId: string;
+    seller:string;
+    fullname:string;
     description?: string;
     categories?: string[];
     image: string;
@@ -113,12 +118,14 @@ const MyTicketPage = () => {
                 date: formattedDate,
                 cost: detail.ticket.cost,
                 quantity: detail.quantity,
-                sellerId: detail.ticket.sellerId,
+                sellerId: detail.ticket.seller.fullname, // Use seller's fullname
+               
                 description: detail.ticket.description || 'Không có mô tả',
                 categories: detail.ticket.categories || ['Chung'],
                 image: imageUrl || detail.ticket.image,
                 location: detail.ticket.location
               };
+              
             })
           )
         );
@@ -830,7 +837,7 @@ const MyTicketPage = () => {
 
                 <div className="border-t border-gray-200 pt-6">
                   <div className="flex items-center justify-end space-x-4">
-               
+
                     <button
                       onClick={() => downloadQRCodes(selectedTicket)}
                       className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
