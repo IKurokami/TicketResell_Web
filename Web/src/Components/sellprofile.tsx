@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import { FaEnvelope, FaPencilAlt, FaPhoneAlt } from "react-icons/fa";
 import EditProfilePopup from "./EditProfilePopUp";
 import uploadImageForTicket from "@/models/UpdateImage";
-import { Image } from "lucide-react";
 
 const DEFAULT_IMAGE = "https://images7.alphacoders.com/129/1297416.png";
 
 interface FormData {
+  userid: string;
   fullName: string | undefined;
   sex: string | undefined;
   phone: string | undefined;
@@ -26,6 +26,7 @@ interface props {
   avatar: string | undefined;
   isAdjustVisible: boolean;
   userId: string; // Add userId prop to pass to EditProfilePopup
+  onSave: (data: FormData) => void;
 }
 
 const SellProfile: React.FC<props> = ({
@@ -39,6 +40,7 @@ const SellProfile: React.FC<props> = ({
   phoneNumber,
   isAdjustVisible,
   userId, // Pass userId to EditProfilePopup
+  onSave,
 }) => {
   const [avatarUrl, setAvatarUrl] = useState<string>(DEFAULT_IMAGE);
   const [coverImageUrl, setCoverImageUrl] = useState<string>(DEFAULT_IMAGE);
@@ -59,7 +61,8 @@ const SellProfile: React.FC<props> = ({
   };
   const handleOpenEditModal = () => setIsEditModalOpen(true); // Open the popup
   const handleCloseEditModal = () => setIsEditModalOpen(false); // Close the popup
-  const formData: FormData = {
+  const formData: any = {
+    userid: userId,
     fullName: fullname,
     sex: sex,
     phone: phoneNumber,
@@ -196,6 +199,7 @@ const SellProfile: React.FC<props> = ({
           onClose={handleCloseEditModal} // Close the popup
           userId={userId} // Pass the userId as required
           initialData={formData}
+          onSave={onSave}
         />
       )}
     </div>

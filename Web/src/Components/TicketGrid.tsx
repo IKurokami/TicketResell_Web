@@ -138,7 +138,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                       <h3 className="text-base sm:text-lg font-semibold mb-1 text-gray-900 line-clamp-2">
                         {truncateText(ticket.name, 20)}
                       </h3>
-                      <p
+                      {/* <p
                         className={`text-sm mb-4 p-2 rounded-full w-auto h-auto flex items-center justify-center ${
                           status === TICKET_STATUS.UPCOMING
                             ? "bg-blue-50 text-blue-500 font-bold"
@@ -150,7 +150,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                         }`}
                       >
                         {status}
-                      </p>
+                      </p> */}
                       <p className="text-xs sm:text-sm text-gray-600 mb-1">
                         {truncateText(ticket.location, 20)}
                       </p>
