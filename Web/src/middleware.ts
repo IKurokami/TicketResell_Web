@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
   const accessKey = request.cookies.get('.AspNetCore.Session')?.value;
 
   // Define the paths that require authentication 
-  const protectedRoutes = ['/profile', '/favorites', '/history', '/myticket', '/settings', '/admin'];
+  const protectedRoutes = ['/profile', '/favorites', '/history', '/myticket', '/settings', '/admin','/sell'];
   
   const validate = await fetch('http://localhost:5296/api/Authentication/islogged', {
     method: 'POST',
@@ -35,5 +35,5 @@ export async function middleware(request: NextRequest) {
 
 // Specify which routes should trigger this middleware
 export const config = {
-  matcher: ['/profile/:path*', '/favorites/:path*', '/history/:path*', '/myticket/:path*', '/settings/:path*'],
+  matcher: ['/profile/:path*', '/favorites/:path*', '/history/:path*', '/myticket/:path*', '/settings/:path*','/sell/:path*'],
 };

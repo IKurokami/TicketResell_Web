@@ -213,10 +213,8 @@ namespace TicketResell.Services.Services
         public async Task<ResponseModel> UpdateTicketsByBaseIdAsync(string ticketId, TicketUpdateDto? dto,
             List<string> categoryIds, bool saveAll)
         {
-            var baseId = ticketId.Split('_')[0];
-
-
-            var tickets = await _unitOfWork.TicketRepository.GetTicketsByBaseIdAsync(baseId);
+            
+            var tickets = await _unitOfWork.TicketRepository.GetTicketsByBaseIdAsync(ticketId);
 
             if (tickets == null || !tickets.Any())
             {
@@ -243,7 +241,7 @@ namespace TicketResell.Services.Services
 
             if (saveAll) await _unitOfWork.CompleteAsync();
 
-            return ResponseModel.Success($"Successfully updated all tickets with base ID: {baseId}");
+            return ResponseModel.Success($"Successfully updated all tickets with base ID: {ticketId}");
         }
 
         public async Task<ResponseModel> DeleteManyTicketAsync(string ticketId, List<string> ticketIds, bool saveAll)

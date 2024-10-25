@@ -53,4 +53,7 @@ public class TransactionService : ITransactionService
         var orderDtos = _mapper.Map<List<OrderDetailTransactionDto>>(buyers);
         return ResponseModel.Success($"Successfully retrieved buyers for seller {sellerId}", orderDtos );
     }
+    
+    
+
 }

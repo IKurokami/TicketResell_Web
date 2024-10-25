@@ -186,13 +186,13 @@ namespace TicketResell.Repositories.Controllers
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
 
-            var ticket = (await _ticketService.GetTicketByIdAsync(id)).Data as TicketReadDto;
+            var ticket = (await _ticketService.GetTicketByBaseIdAsync(id)).Data as List<TicketReadDto>;
             if (ticket != null)
             {
-                if (ticket.SellerId == HttpContext.GetUserId())
+                if (ticket[0].SellerId == HttpContext.GetUserId())
                 {
                     return ResponseParser.Result(
-                        await _ticketService.UpdateTicketsByBaseIdAsync(id, dto, dto.CategoriesId, true));
+                        await _ticketService.UpdateTicketsByBaseIdAsync(id, dto, dto.CategoriesId,true));
                 }
             }
 

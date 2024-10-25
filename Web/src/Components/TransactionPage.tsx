@@ -104,8 +104,8 @@ const TransactionTable: React.FC = () => {
       
       setTransactions(result.data);
     } catch (error: any) {
-      setError(error.message);
-      console.error("Error fetching transactions:", error);
+      setError("Transaction is available");
+      console.error("Transaction is available:", error);
     } finally {
       setLoading(false);
     }
@@ -123,15 +123,6 @@ const TransactionTable: React.FC = () => {
     return <div className="p-4 text-center">Loading transactions...</div>;
   }
 
-  if (error) {
-    return (
-      <tr>
-        <td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-gray-500">
-          No transactions available.
-        </td>
-      </tr>
-    );
-  }
 
   const startDate = dateRange.start ? toISODate(dateRange.start) : null;
   const endDate = dateRange.end ? toISODate(dateRange.end) : null;
@@ -188,7 +179,7 @@ const TransactionTable: React.FC = () => {
 
   return (
     <div className="container mx-auto px-10 py-10 max-w-screen-xl">
-      <div className="flex flex-col  lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div className="relative flex items-center bg-white rounded-full h-12 p-1 px-3 border border-gray-300 w-3/5 lg:w-64">
           <input
             type="text"
@@ -239,21 +230,15 @@ const TransactionTable: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {filteredTransactions.length === 0 ? (
+                {error || filteredTransactions.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 lg:px-6 py-4 text-center text-gray-500"
-                    >
-                      No transactions available.
+                    <td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-gray-500">
+                      {error ? "No transactions available." : "No transactions available."}
                     </td>
                   </tr>
                 ) : (
                   filteredTransactions.map((transaction, index) => (
-                    <tr
-                      key={index}
-                      className="hover:bg-gray-50 transition-colors duration-150"
-                    >
+                    <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
                       <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm text-center text-gray-600">
                         {formatDate(transaction.order.date)}
                       </td>
