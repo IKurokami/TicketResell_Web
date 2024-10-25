@@ -237,8 +237,12 @@ const AdminPage = () => {
   };
 
   const handleUserOnEdit = async (userId: string) => {};
-  const handleUserOnDisableAccount = async (userId: string) => {};
-  const handleUserOnEnableAccount = async (userId: string) => {};
+  const handleUserOnDisableAccount = async (userId: string) => {
+    console.log("user disable", userId);
+  };
+  const handleUserOnEnableAccount = async (userId: string) => {
+    
+  };
   const handleUserOnEditRoles = async (userId: string) => {};
   const handleUserOnResetPassword = async (userId: string) => {};
 
