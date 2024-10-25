@@ -264,6 +264,7 @@ const TicketDetail = () => {
               <ul className="flex flex-wrap gap-2 tag--list">
                 {ticketresult.categories.slice(0, 5).map((category) => (
                   <Link
+                  key={category.categoryId}
                     className="no-underline "
                     href={{
                       pathname: `/search`,
@@ -273,7 +274,7 @@ const TicketDetail = () => {
                     }}
                   >
                     <li
-                      key={category.categoryId}
+                      
                       className="bg-green-500 hover:bg-green-400 text-white px-3 py-1 rounded-full text-sm font-semibold  {"
                     >
                       {category.name}

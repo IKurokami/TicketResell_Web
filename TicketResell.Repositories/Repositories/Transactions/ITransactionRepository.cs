@@ -11,4 +11,6 @@ public interface ITransactionRepository : IRepository<Transaction>
     Task<double?> CalculatorTotal(string sellerId, DateRange dateRange);
 
     Task<List<OrderDetail>> GetTicketOrderDetailsBySeller(string sellerId);
+    
+    
 }

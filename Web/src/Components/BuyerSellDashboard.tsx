@@ -1,45 +1,54 @@
 import React from "react";
 import { Card } from "@/Components/ui/card";
-import { Check } from "lucide-react";
+import {
+  CalendarDays,
+  Package,
+  DollarSign,
+  Users,
+  TrendingUp,
+  ShoppingBag,
+} from "lucide-react";
 
-const ProductSalesDashboard = () => {
-  const productData = [
-    {
-      id: 1,
-      name: "iPhone 14 Pro Max 512GB",
-      variant: "Gold",
-      price: 1399,
-      soldCount: 1243,
-      status: "In Stock",
-      image: "/api/placeholder/40/40",
-    },
-    {
-      id: 2,
-      name: "iPhone 13 512GB",
-      variant: "Purple",
-      price: 1099,
-      soldCount: 433,
-      status: "In Stock",
-      image: "/api/placeholder/40/40",
-    },
-    {
-      id: 3,
-      name: "Google Pixel 7 pro 128GB",
-      variant: "Black",
-      price: 899,
-      soldCount: 2343,
-      status: "In Stock",
-      image: "/api/placeholder/40/40",
-    },
-  ];
+interface Order {
+  orderId: string;
+  date: string;
+  user: User;
+}
 
-  const topCountries = [
-    { name: "India", percentage: 16, flag: "🇮🇳" },
-    { name: "USA", percentage: 15, flag: "🇺🇸" },
-    { name: "UK", percentage: 15, flag: "🇬🇧" },
-    { name: "Australia", percentage: 14, flag: "🇦🇺" },
-    { name: "Germany", percentage: 13, flag: "🇩🇪" },
-  ];
+interface User {
+  userId: string;
+  username: string;
+}
+
+interface Ticket {
+  ticketId: string;
+  name: string;
+}
+
+interface Transaction {
+  date: string;
+  quantity: number;
+  price: number;
+  order: Order;
+  ticket: Ticket;
+}
+
+interface TopBuyer {
+  buyerId: string;
+  username: string;
+  total: number;
+}
+
+interface OrderDetailsDashboardProps {
+  transactions: Transaction[];
+  topBuyers: TopBuyer[];
+}
+
+const OrderDetailsDashboard = ({
+  transactions,
+  topBuyers,
+}: OrderDetailsDashboardProps) => {
+
 
   const formatCurrency = (amount: number) => {
     return `${new Intl.NumberFormat("en-US", {
@@ -48,77 +57,199 @@ const ProductSalesDashboard = () => {
     }).format(amount)} đ`;
   };
 
+  const formatDate = (dateString:string) => {
+    const date = new Date(dateString);
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns month index (0-11)
+    const day = String(date.getDate()).padStart(2, '0'); // getDate() returns the day (1-31)
+    const year = date.getFullYear(); // getFullYear() returns the full year
+  
+    return `${day}/${month}/${year}`; // Format as mm/dd/yyyy
+  };
+  
+  const recentTransactions = transactions
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3);
+    console.log("Recent Transactions:", recentTransactions);
+  // Calculate total revenue
+  const totalRevenue = transactions.reduce(
+    (sum, transaction) => sum + transaction.price * transaction.quantity,
+    0
+  );
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold">Recent Transaction</h2>
-          {/* <div className="flex items-center space-x-2">
-            <select className="bg-slate-50 text-sm rounded-lg px-4 py-2 text-slate-600 focus:outline-none focus:ring-2">
-              <option>8 Jan - 2 Feb</option>
-            </select>
-          </div> */}
-        </div>
-
-        <div className="space-y-4">
-          {productData.map((product) => (
-           <div
-           key={product.id}
-           className="flex justify-between items-center gap-10 py-3 border-b last:border-0"
-         >
-           {/* Image and product details */}
-           <div className="flex items-center space-x-4">
-             <img
-               src={product.image}
-               alt={product.name}
-               className="w-10 h-10 rounded-lg object-cover"
-             />
-             <div>
-               <h3 className="font-medium text-sm">{product.name}</h3>
-               <p className="text-sm text-slate-500">({product.variant})</p>
-             </div>
-           </div>
-         
-           {/* Price and sold count */}
-           <div className="text-right">
-             <p className="font-medium">{formatCurrency(product.price)}</p>
-             <p className="text-sm text-slate-500">{product.soldCount} pcs</p>
-           </div>
-         
-           {/* Status */}
-           <div className="flex items-center space-x-1 text-green-500">
-             <Check size={16} />
-             <span className="text-sm">{product.status}</span>
-           </div>
-         </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold">Top Buyer</h2>
-          <p>Cost</p>
-        </div>
-
-        <div className="space-y-4">
-          {topCountries.map((country, index) => (
-            <div
-              key={country.name}
-              className="flex items-center justify-between"
-            >
-              <div className="flex items-center space-x-4">
-                <span className="text-lg">{index + 1}</span>
-                <span className="text-xl">{country.flag}</span>
-                <span className="font-medium">{country.name}</span>
-              </div>
-              <span className="font-medium">{country.percentage}%</span>
+    <div className="p-2 sm:p-4 md:p-6 bg-slate-50 ">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6">
+        {/* Total Revenue Card */}
+        <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="bg-blue-100 p-2 md:p-3 rounded-full">
+              <DollarSign className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
             </div>
-          ))}
-        </div>
-      </Card>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-slate-600 truncate">
+                Total Revenue
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
+                {formatCurrency(totalRevenue)}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Total Orders Card */}
+        <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="bg-green-100 p-2 md:p-3 rounded-full">
+              <ShoppingBag className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-slate-600 truncate">
+                Total Orders
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900">
+                {transactions.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Total Buyers Card */}
+        <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="bg-purple-100 p-2 md:p-3 rounded-full">
+              <Users className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-slate-600 truncate">
+                Total Buyers
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900">
+                {topBuyers.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Average Order Value Card */}
+        <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="bg-orange-100 p-2 md:p-3 rounded-full">
+              <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-slate-600 truncate">
+                Avg. Order Value
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
+                {formatCurrency(totalRevenue / transactions.length)}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+        {/* Recent Transactions */}
+        <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow overflow-hidden">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-lg md:text-xl font-semibold text-slate-900">
+              Recent Transactions
+            </h2>
+            <span className="text-xs md:text-sm text-slate-500">
+              {transactions.length} orders
+            </span>
+          </div>
+
+          <div className="space-y-3 md:space-y-4 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            {recentTransactions.map((transaction) => (
+              <div
+                key={transaction.order.orderId}
+                className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 hover:bg-slate-50 rounded-lg transition-colors gap-3 sm:gap-4"
+              >
+                <div className="flex items-center space-x-3 md:space-x-4 w-full sm:w-auto">
+                  <div className="bg-slate-100 p-2 md:p-3 rounded-full shrink-0">
+                    <Package className="w-4 h-4 md:w-5 md:h-5 text-slate-600" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-medium text-sm md:text-base text-slate-900 truncate">
+                      {transaction.order.user?.username || "User"}
+                    </h3>
+                    <div className="flex items-center text-xs md:text-sm text-slate-500 mt-1">
+                      <CalendarDays className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                      <span className="truncate">
+                        {formatDate(transaction.order.date)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-right w-full sm:w-auto">
+                  <p className="font-semibold text-sm md:text-base text-slate-900">
+                    {formatCurrency(transaction.price * transaction.quantity)}
+                  </p>
+                  <p className="text-xs md:text-sm text-slate-500">
+                    {transaction.quantity}{" "}
+                    {transaction.quantity > 1 ? "items" : "item"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Top Buyers */}
+        <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow overflow-hidden">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-lg md:text-xl font-semibold text-slate-900">
+              Top Buyers
+            </h2>
+            <span className="text-xs md:text-sm text-slate-500">
+              Total Spent
+            </span>
+          </div>
+
+          <div className="space-y-3 md:space-y-4 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            {topBuyers.map((buyer, index) => (
+              <div
+                key={buyer.buyerId}
+                className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 hover:bg-slate-50 rounded-lg transition-colors gap-3 sm:gap-4"
+              >
+                <div className="flex items-center space-x-3 md:space-x-4 w-full sm:w-auto">
+                  <div
+                    className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-white font-semibold shrink-0
+                  ${
+                    index === 0
+                      ? "bg-yellow-500"
+                      : index === 1
+                      ? "bg-slate-400"
+                      : index === 2
+                      ? "bg-amber-600"
+                      : "bg-slate-300"
+                  }`}
+                  >
+                    {index + 1}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm md:text-base text-slate-900 truncate">
+                      {buyer.username}
+                    </p>
+                    <p className="text-xs md:text-sm text-slate-500 truncate">
+                      Customer ID: {buyer.buyerId.slice(0, 8)}
+                    </p>
+                  </div>
+                </div>
+                <span className="font-semibold text-sm md:text-base text-slate-900 w-full sm:w-auto text-left sm:text-right">
+                  {formatCurrency(buyer.total)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };
 
-export default ProductSalesDashboard;
+export default OrderDetailsDashboard;
