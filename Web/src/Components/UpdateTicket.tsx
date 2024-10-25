@@ -97,6 +97,16 @@ const UpdateTicketModal: React.FC = () => {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
+  const splitId = () => {
+    if (id) {
+      return id.split("_")[0];
+    } else {
+      console.error("id.fullTicketId is undefined or null");
+      return null;
+    }
+  };
+  const baseId = splitId();
+
   const fetchProvinces = async () => {
     try {
       const response = await fetch(
@@ -503,7 +513,7 @@ const UpdateTicketModal: React.FC = () => {
   const deleteManyTickets = async (ticketIds: string[]) => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Ticket/deletemany/${id}`,
+        `http://localhost:5296/api/Ticket/deletemany/${baseId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -543,7 +553,7 @@ const UpdateTicketModal: React.FC = () => {
 
     // Prepare tickets
     const tickets = Array.from({ length: quantity }).map((_, index) => ({
-      TicketId: `${id}_${index + 1}`,
+      TicketId: quantity === 1 ? baseId : `${baseId}_${index + 1}`, 
       SellerId: sellerId,
       Name: formData.name,
       Cost: parseFloat(formData.cost),
@@ -555,11 +565,12 @@ const UpdateTicketModal: React.FC = () => {
       CategoriesId: formData.categories.map((category) => category.categoryId),
       Description: formData.description,
     }));
+    
 
     console.log("Tickets to update:", tickets);
 
     // Function to update QR codes
-    const updateQrCodes = async (tickets) => {
+    const updateQrCodes = async (tickets:any) => {
       const qrCodePromises = tickets.map(async (ticket) => {
         if (ticket.Qrcode) {
           const response = await fetch(

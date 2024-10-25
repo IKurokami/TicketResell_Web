@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import RichTextEditor from "@/Hooks/RichTextEditor";
 import { useRouter } from "next/navigation";
 import ScrollToTopButton from "@/Hooks/useScrollTopButton";
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+import "bootstrap/dist/css/bootstrap.min.css"; 
 import {
   TextField,
   Button,
@@ -14,25 +14,8 @@ import {
 import Cookies from "js-cookie";
 import "@/Css/AddTicketModal.css";
 import uploadImageForTicket from "@/models/UpdateImage";
+import AddressFields from "@/Hooks/location";
 
-interface Province {
-  Id: number;
-  Code: string;
-  Name: string;
-}
-
-interface District {
-  Id: number;
-  Code: string;
-  Name: string;
-  ProvinceId: number;
-}
-interface Ward {
-  Id: number;
-  Code: string;
-  Name: string;
-  DistrictId: number;
-}
 
 interface FormDataType {
   name: string;
@@ -71,132 +54,10 @@ const AddTicketModal: React.FC = () => {
   const [qrFileNames, setQrFileNames] = useState(Array(quantity).fill(""));
   const [qrFiles, setQrFiles] = useState(Array(quantity).fill(null));
   const router = useRouter();
-
-  const [houseNumber, setHouseNumber] = useState<string>("");
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [wards, setWards] = useState<Ward[]>([]);
-  const [selectedProvince, setSelectedProvince] = useState<number | null>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<number | null>(null);
-  const [selectedWard, setSelectedWard] = useState<number | null>(null);
   const [minDateTime, setMinDateTime] = useState("");
 
-
-
-  
-  const fetchProvinces = async () => {
-    try {
-      const response = await fetch(
-        "https://api.npoint.io/ac646cb54b295b9555be"
-      );
-      const data = await response.json();
-
-      setProvinces(data);
-    } catch (error) {
-      console.error("Error fetching provinces:", error);
-    }
-  };
-
-  const fetchDistricts = async (provinceId: number) => {
-    try {
-      const response = await fetch(
-        "https://api.npoint.io/34608ea16bebc5cffd42"
-      );
-      const data: District[] = await response.json();
-      console.log(data);
-
-      // Filter districts by ProvinceId
-      const filteredDistricts = data.filter(
-        (district) => district.ProvinceId === provinceId
-      );
-      setDistricts(filteredDistricts);
-    } catch (error) {
-      console.error("Error fetching districts:", error);
-    }
-  };
-
-  const fetchWards = async (districtId: number) => {
-    try {
-      const response = await fetch(
-        "https://api.npoint.io/dd278dc276e65c68cdf5"
-      );
-      const data: Ward[] = await response.json();
-      console.log(data);
-
-      // Filter wards by DistrictId
-      const filteredWards = data.filter(
-        (ward) => ward.DistrictId === districtId
-      );
-      setWards(filteredWards);
-    } catch (error) {
-      console.error("Error fetching wards:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchProvinces();
-  }, []);
-
-  useEffect(() => {
-    console.log("Updated provinces:", provinces);
-  }, [provinces]);
-
-  useEffect(() => {
-    if (selectedProvince) {
-      fetchDistricts(selectedProvince);
-    }
-  }, [selectedProvince]);
-
-  useEffect(() => {
-    if (selectedDistrict) {
-      fetchWards(selectedDistrict);
-    }
-  }, [selectedDistrict]);
-
-  const handleProvinceChange = (selectedProvinceId: number | null) => {
-    setSelectedProvince(selectedProvinceId);
-    setSelectedDistrict(null); // Clear district and ward when province changes
-    setSelectedWard(null);
-  };
-
-  const handleDistrictChange = (selectedDistrictId: number | null) => {
-    setSelectedDistrict(selectedDistrictId);
-    setSelectedWard(null); // Clear ward when district changes
-  };
-
-  const handleWardChange = (selectedWardId: number | null) => {
-    setSelectedWard(selectedWardId);
-  };
-
-  const getProvinceName = (provinceId: number | null) => {
-    const province = provinces.find((prov) => prov.Id === provinceId);
-    return province ? province.Name : "";
-  };
-
-  const getDistrictName = (districtId: number | null) => {
-    const district = districts.find((dist) => dist.Id === districtId);
-    return district ? district.Name : "";
-  };
-
-  const getWardName = (wardId: number | null) => {
-    const ward = wards.find((wrd) => wrd.Id === wardId);
-    return ward ? ward.Name : "";
-  };
-
-  // Generate full location string when province, district, and ward are selected
-  useEffect(() => {
-    if (selectedProvince && selectedDistrict && selectedWard) {
-      const provinceName = getProvinceName(selectedProvince);
-      const districtName = getDistrictName(selectedDistrict);
-      const wardName = getWardName(selectedWard);
-
-      setFormData((prevData) => ({
-        ...prevData,
-        location: `${houseNumber}, ${wardName}, ${districtName}, ${provinceName}`,
-      }));
-    }
-  }, [houseNumber, selectedProvince, selectedDistrict, selectedWard]);
-
+  const [houseNumber, setHouseNumber] = useState<string>("");
+ 
   useEffect(() => {
     // Function to format the current date and time to the 'datetime-local' format
     const getCurrentDateTime = () => {
@@ -614,84 +475,7 @@ const AddTicketModal: React.FC = () => {
             />
           {/* Location (Province, District, Ward) */}
 
-          <div className="address-fields-container">
-            <TextField
-              className="address-field"
-              label="House Number/Street"
-              value={houseNumber}
-              onChange={(e) => setHouseNumber(e.target.value)}
-              margin="normal"
-              fullWidth
-              required
-            />
-
-            <Autocomplete
-              options={provinces}
-              getOptionLabel={(option: Province) => option.Name}
-              value={
-                provinces.find(
-                  (province) => province.Id === selectedProvince
-                ) || null
-              }
-              onChange={(event, newValue: Province | null) => {
-                handleProvinceChange(newValue ? newValue.Id : null); // Pass Id, not Name
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  className="address-field"
-                  label="Province"
-                  margin="normal"
-                  fullWidth
-                  required
-                />
-              )}
-            />
-
-            <Autocomplete
-              options={districts}
-              getOptionLabel={(option: District) => option.Name}
-              value={
-                districts.find(
-                  (district) => district.Id === selectedDistrict
-                ) || null
-              }
-              onChange={(event, newValue: District | null) => {
-                handleDistrictChange(newValue ? newValue.Id : null); // Pass Id, not Name
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  className="address-field"
-                  label="District"
-                  margin="normal"
-                  fullWidth
-                  required
-                  disabled={!selectedProvince}
-                />
-              )}
-            />
-
-            <Autocomplete
-              options={wards}
-              getOptionLabel={(option: Ward) => option.Name}
-              value={wards.find((ward) => ward.Id === selectedWard) || null}
-              onChange={(event, newValue: Ward | null) => {
-                handleWardChange(newValue ? newValue.Id : null); // Pass Id, not Name
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  className="address-field"
-                  label="Ward"
-                  margin="normal"
-                  fullWidth
-                  required
-                  disabled={!selectedDistrict}
-                />
-              )}
-            />
-          </div>
+          <AddressFields  houseNumber={houseNumber} setHouseNumber={setHouseNumber} setFormData={setFormData} />
           <TextField
             className="custom-text-field"
             label="Please select address "

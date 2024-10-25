@@ -1,16 +1,29 @@
 "use client";
 import React, { useState } from "react";
-import "@/Css/SignupSell.css";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import TextField from "@mui/material/TextField";
+import AddressFields from "@/Hooks/location";
+import TermsModal from "./TermModal";
 
 interface ProfileData {
   gmail: string | null;
   fullname: string | null;
   sex: "male" | "female" | "other" | null;
   phone: string | null;
-  address: string | null;
+  location: string | null;
   birthday: string | null;
+}
+
+interface Errors {
+  birthday?: string;
 }
 
 const ProfileForm: React.FC = () => {
@@ -19,132 +32,293 @@ const ProfileForm: React.FC = () => {
     fullname: null,
     sex: null,
     phone: null,
-    address: null,
+    location: null,
     birthday: null,
   });
-  const route = useRouter();
+  const [notification, setNotification] = useState<string | null>(null);
+  const [isChecked, setIsChecked] = useState(false);
+  const router = useRouter();
+  const [houseNumber, setHouseNumber] = useState<string>("");
+  const [errors, setErrors] = useState<Errors>({});
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpen(false);
+  };
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | { name: string; value: string }
   ) => {
-    const { name, value } = e.target;
+    const name = "target" in e ? e.target.name : e.name;
+    const value = "target" in e ? e.target.value : e.value;
+
+    // Update profileData state
     setProfileData((prev) => ({
       ...prev,
       [name]: value || null,
     }));
+
+    // Validate birthday if the birthday field is changed
+    if (name === "birthday") {
+      validateBirthday(value);
+    }
+  };
+
+  const validateBirthday = (birthday: string) => {
+    const selectedDate = new Date(birthday);
+    const today = new Date();
+
+    // Calculate age by subtracting birth year from current year
+    const age = today.getFullYear() - selectedDate.getFullYear();
+
+    // Adjust age if the birthday hasn't occurred yet this year
+    const hasHadBirthdayThisYear =
+      today.getMonth() > selectedDate.getMonth() ||
+      (today.getMonth() === selectedDate.getMonth() &&
+        today.getDate() >= selectedDate.getDate());
+
+    const finalAge = hasHadBirthdayThisYear ? age : age - 1;
+
+    if (finalAge < 18) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        birthday: "You must be at least 18 years old.",
+      }));
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        birthday: "",
+      }));
+    }
+  };
+
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    const id = Cookies.get("id");
     e.preventDefault();
+
+    // Check if there are any validation errors before submitting
+    if (errors.birthday) {
+      console.error("Form submission prevented due to validation errors");
+      return;
+    }
+
+    console.log("Profile data before submission:", profileData);
+
+    const id = Cookies.get("id");
+    if (
+      !profileData.fullname ||
+      !profileData.gmail ||
+      !profileData.birthday ||
+      !profileData.location||
+      !isChecked
+    ) {
+      setNotification("Please fill in all required fields.");
+      return; // Prevent form submission
+    }
+
+    const profile = {
+      gmail: profileData.gmail,
+      fullname: profileData.fullname,
+      sex: profileData.sex,
+      phone: profileData.phone,
+      address: profileData.location,
+      birthday: profileData.birthday,
+    };
+
     try {
       const response = await fetch(
         `http://localhost:5296/api/user/updateseller/${id}`,
         {
           method: "PUT",
-          credentials: "include", 
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(profileData),
+          body: JSON.stringify(profile),
         }
       );
 
       if (response.ok) {
         const data = await response.json();
         console.log("Profile updated successfully:", data);
-        route.push("/sell");
+        router.push("/sell");
       } else {
         console.error("Error updating profile:", response.status);
       }
     } catch (error) {
       console.error("Network error:", error);
-      // Handle network errors
     }
   };
 
+  const textFieldStyle = {
+    "& .MuiOutlinedInput-root": {
+      "&:hover fieldset": {
+        borderColor: "#22C55E",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#22C55E",
+      },
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#22C55E",
+    },
+  };
+
   return (
-    <div className="body">
-      <div className="profile-container">
-        <div className="profile-header">
-          <h1>
-            Ticket<span className="resell-sign-up">Resell</span>
-          </h1>
+    <div className="min-h-screen py-32 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="space-y-1 pb-8">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold">
+                <span className="text-green-600">Ticket</span>
+                <span className="bg-gradient-to-r text-black bg-clip-text ">
+                  Resell
+                </span>
+              </h1>
+              <p className="text-sm text-gray-500 mt-2">
+                Complete your seller profile
+              </p>
+            </div>
+          </CardHeader>
+
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-6">
+              <TextField
+                fullWidth
+                label="Full Name"
+                name="fullname"
+                variant="outlined"
+                placeholder="Enter your full name"
+                onChange={handleChange}
+                sx={textFieldStyle}
+              />
+
+              <TextField
+                fullWidth
+                label="Email"
+                name="gmail"
+                type="email"
+                variant="outlined"
+                placeholder="Enter your email address"
+                onChange={handleChange}
+                sx={textFieldStyle}
+              />
+              <p className="text-red-600 text-sm ">* Email is account PayPal</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TextField
+                  fullWidth
+                  label="Birthday"
+                  name="birthday"
+                  type="date"
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                  error={!!errors.birthday}
+                  helperText={errors.birthday}
+                  onChange={handleChange}
+                  sx={textFieldStyle}
+                />
+
+                <TextField
+                  fullWidth
+                  select
+                  name="sex"
+                  value={profileData.sex || ""}
+                  onChange={handleChange}
+                  variant="outlined"
+                  sx={textFieldStyle}
+                  SelectProps={{
+                    native: true,
+                  }}
+                >
+                  <option value="" disabled>
+                    Select gender
+                  </option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </TextField>
+              </div>
+
+              <TextField
+                fullWidth
+                label="Phone Number"
+                name="phone"
+                type="tel"
+                variant="outlined"
+                placeholder="Enter your phone number"
+                onChange={handleChange}
+                sx={textFieldStyle}
+              />
+
+              <div className="space-y-2">
+                <AddressFields
+                  houseNumber={houseNumber}
+                  setHouseNumber={setHouseNumber}
+                  setFormData={setProfileData}
+                />
+              </div>
+
+              <TextField
+                label="Please select address "
+                value={profileData.location || ""}
+                margin="normal"
+                fullWidth
+                required
+                disabled={true}
+              />
+              <div className="flex justify-between">
+                <div className="flex items-center justify-start">
+                  <input
+                    type="checkbox"
+                    id="myCheckbox"
+                    checked={isChecked}
+                    onChange={handleCheckboxChange}
+                    className="form-checkbox h-5 w-5 items-center text-green-600 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="myCheckbox"
+                    className="ml-2 items-center  text-gray-700"
+                  >
+                    Đồng ý với điều khoản
+                  </label>
+                </div>
+                <Button onClick={handleOpenModal} className="bg-gray-200 shadow-none ">
+                  Xem điều khoản
+                </Button>
+              </div>
+
+           
+              {notification && (
+                <div className="text-red-600 text-sm mb-2">{notification}</div>
+              )}
+            </CardContent>
+
+            <CardFooter className="pt-6">
+              <Button
+                type="submit"
+                className="w-full h-12 bg-green-800 text-white hover:bg-green-500 font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
+              >
+                Complete Profile
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+        <div className="pt-20">
+        <TermsModal isOpen={isOpen} onClose={handleCloseModal} />
         </div>
 
-        <form onSubmit={handleSubmit} className="profile-form">
-          <div className="form-group">
-            <label htmlFor="fullname">Full Name</label>
-            <input
-              type="text"
-              id="fullname"
-              name="fullname"
-              onChange={handleChange}
-              placeholder="Enter your full name"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="gmail">Gmail</label>
-            <input
-              type="gmail"
-              id="gmail"
-              name="gmail"
-              onChange={handleChange}
-              placeholder="Enter your gmail"
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="birthday">Birthday</label>
-              <input
-                type="date"
-                id="birthday"
-                name="birthday"
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="sex">Sex</label>
-              <select id="sex" name="sex" onChange={handleChange}>
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="phone">Phone Number</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              onChange={handleChange}
-              placeholder="Enter your phone number"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="address">Address</label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              onChange={handleChange}
-              placeholder="Enter your address"
-            />
-          </div>
-
-          <button type="submit" className="submit-button">
-            Sign up
-          </button>
-        </form>
       </div>
     </div>
   );
