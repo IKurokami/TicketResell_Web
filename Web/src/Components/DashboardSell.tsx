@@ -22,8 +22,7 @@ const Dashboard = () => {
     },
     { id: "ticket", label: "Ticket", icon: IoTicketOutline },
     { id: "transactions", label: "Transactions", icon: GrTransaction },
-    { id: "revenue", label: "Revenue", icon: MdAttachMoney },
-    { id: "setting", label: "Setting", icon: Settings },
+    { id: "revenue", label: "Revenue", icon: MdAttachMoney }
   ];
 
   const toggleSidebar = () => {

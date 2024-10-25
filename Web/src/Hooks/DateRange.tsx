@@ -39,7 +39,6 @@ export default function DateRange({ onDateChange }: DateRangeProps) {
       <DateRangePicker
         calendarProps={{
           classNames: {
-            separator: "-mx-2",
             base: "bg-background bg-white border border-gray-500 max-w-full",
             headerWrapper: "pt-4 bg-background",
             prevButton: "border-1 border-default-200 rounded-small",
@@ -66,16 +65,12 @@ export default function DateRange({ onDateChange }: DateRangeProps) {
           min-w-[17rem] 
           max-w-full 
           sm:max-w-md 
-          border 
-          border-gray-500 
-          rounded-2xl 
+          border-gray-500  
           py-1 
-          shadow-md
           ${isMobile ? 'text-sm' : 'text-base'}
         `}
-        label="Choose date:"
         variant="bordered"
-        value={dateRange}
+        value={dateRange  }
         onChange={handleDateChange}
         popoverProps={{
           // Make the popover responsive
@@ -86,10 +81,17 @@ export default function DateRange({ onDateChange }: DateRangeProps) {
           },
           placement: isMobile ? "bottom" : "bottom-start"
         }}
+     
         classNames={{
-          separator: "mx-1", // Customize the separator class here
+
+          separator: "mx-1", // Customize separator styles here
+          selectorButton: "your-custom-selector-button-class", // Customize input buttons for both start and end
+          calendar: "your-custom-calendar-class", // Customize the calendar
+          popoverContent: "your-custom-popover-class", // Customize the popover (dropdown) content
         }}
       />
+      
+      
       <button
         onClick={resetDateRange}
         className={`
