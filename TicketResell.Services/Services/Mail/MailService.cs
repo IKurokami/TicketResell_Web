@@ -29,7 +29,7 @@ namespace TicketResell.Services.Services.Mail
             _config = config.Value;
             _logger = logger;
             _redis = redis;
-            
+
             // Load email configuration from appsettings.json
             _smtpHost = _config.SmtpHost;
             _smtpPort = int.Parse(_config.SmtpPort);
@@ -39,7 +39,8 @@ namespace TicketResell.Services.Services.Mail
             _fromDisplayName = _config.FromDisplayName;
         }
 
-        public async Task<ResponseModel> SendOtpAsync(string to){
+        public async Task<ResponseModel> SendOtpAsync(string to)
+        {
             string otp = GenerateNumericOTP(5);
             string body = $@"
     <!DOCTYPE html>
@@ -170,12 +171,14 @@ namespace TicketResell.Services.Services.Mail
     </body>
     </html>";
             var response = await SendEmailAsync(to, "TicketResell: Here is your OTP code", body);
-            if (response.StatusCode == 200){
+            if (response.StatusCode == 200)
+            {
                 await CacheAccessKeyAsync("email_verification", to, otp, TimeSpan.FromMinutes(5));
                 return ResponseModel.Success("Sucess");
             }
-            else{
-                return ResponseModel.Error(response.Message?? "Error");
+            else
+            {
+                return ResponseModel.Error(response.Message ?? "Error");
             }
         }
 
@@ -184,6 +187,7 @@ namespace TicketResell.Services.Services.Mail
             var db = _redis.GetDatabase();
             await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
         }
+
         public static string GenerateNumericOTP(int length)
         {
             var random = new Random();
@@ -229,7 +233,8 @@ namespace TicketResell.Services.Services.Mail
             }
         }
 
-        public async Task<ResponseModel> SendEmailWithAttachmentAsync(string to, string subject, string body, string attachmentPath)
+        public async Task<ResponseModel> SendEmailWithAttachmentAsync(string to, string subject, string body,
+            string attachmentPath)
         {
             try
             {

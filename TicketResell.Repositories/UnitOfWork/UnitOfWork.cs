@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Repositories;
 using Repositories.Repositories.Carts;
+using Repositories.Repositories.Chats;
 using TicketResell.Repositories.Logger;
 
 namespace TicketResell.Repositories.UnitOfWork
@@ -26,6 +27,7 @@ namespace TicketResell.Repositories.UnitOfWork
             OrderRepository = new OrderRepository(_logger, _context);
             CategoryRepository = new CategoryRepository(_logger, _context);
             CartRepository = new CartRepository(_logger, _context);
+            ChatRepository = new ChatRepository(_logger, _context);
         }
 
         public IUserRepository UserRepository { get; }
@@ -38,16 +40,15 @@ namespace TicketResell.Repositories.UnitOfWork
         public IOrderRepository OrderRepository { get; }
         public ICategoryRepository CategoryRepository { get; }
         public ICartRepository CartRepository { get; }
-
+        public IChatRepository ChatRepository { get; }
+        
         public async Task<int> CompleteAsync()
         {
-            // Save changes to the database
             return await _context.SaveChangesAsync();
         }
 
         public void Dispose()
         {
-            // Dispose of the context to free resources
             _context.Dispose();
         }
     }

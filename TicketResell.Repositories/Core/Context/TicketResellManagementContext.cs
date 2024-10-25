@@ -278,7 +278,7 @@ public partial class TicketResellManagementContext : DbContext
             entity.Property(e => e.SenderId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-
+            
             entity.Property(e => e.ReceiverId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
