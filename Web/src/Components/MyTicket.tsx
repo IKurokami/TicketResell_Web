@@ -1,22 +1,31 @@
-"use client"
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+"use client";
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Ticket, User, Search, Calendar, CreditCard, X, Filter,
-  ChevronDown, MapPin, Share2, Download, Tag, Info, Clock,
-  ArrowUpDown, ChevronLeft, ChevronRight
-} from 'lucide-react';
+  Ticket,
+  User,
+  Search,
+  Calendar,
+  CreditCard,
+  X,
+  Filter,
+  ChevronDown,
+  MapPin,
+  Share2,
+  Download,
+  Tag,
+  Info,
+  Clock,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
-import QRCode from 'qrcode';
-import JSZip from 'jszip';
-import Cookies from 'js-cookie';
-import { fetchImage } from '@/models/FetchImage';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/Components/ui/card";
+import QRCode from "qrcode";
+import JSZip from "jszip";
+import Cookies from "js-cookie";
+import { fetchImage } from "@/models/FetchImage";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import {
   Select,
   SelectContent,
@@ -68,14 +77,14 @@ const MyTicketPage = () => {
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [sortBy, setSortBy] = useState<'date' | 'price' | 'name'>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [sortBy, setSortBy] = useState<"date" | "price" | "name">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const ITEMS_PER_PAGE = 6;
 
@@ -86,47 +95,51 @@ const MyTicketPage = () => {
   const fetchTickets = async () => {
     setIsLoading(true);
     try {
-      const userId = Cookies.get('id');
-      const response = await fetch(`http://localhost:5296/api/History/get/${userId}`, {
-        credentials: 'include',
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const userId = Cookies.get("id");
+      const response = await fetch(
+        `http://localhost:5296/api/History/get/${userId}`,
+        {
+          credentials: "include",
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.ok) throw new Error("Network response was not ok");
 
       const result = await response.json();
       if (result.statusCode === 200 && Array.isArray(result.data)) {
-        const completedTickets = await Promise.all(result.data
-          .filter((order: Order) => order.status === 0)
-          .flatMap((order: Order) =>
-            order.orderDetails.map(async (detail: OrderDetail) => {
-              const startDate = detail.ticket.startDate;
-              const formattedDate = formatDate(startDate);
-              const { imageUrl } = await fetchImage(detail.ticket.image);
+        const completedTickets = await Promise.all(
+          result.data
+            .filter((order: Order) => order.status === 0)
+            .flatMap((order: Order) =>
+              order.orderDetails.map(async (detail: OrderDetail) => {
+                const startDate = detail.ticket.startDate;
+                const formattedDate = formatDate(startDate);
+                const { imageUrl } = await fetchImage(detail.ticket.image);
 
-              return {
-                id: detail.ticket.id,
-                name: detail.ticket.name,
-                date: formattedDate,
-                cost: detail.ticket.cost,
-                quantity: detail.quantity,
-                sellerId: detail.ticket.sellerId,
-                description: detail.ticket.description || 'Không có mô tả',
-                categories: detail.ticket.categories || ['Chung'],
-                image: imageUrl || detail.ticket.image,
-                location: detail.ticket.location
-              };
-            })
-          )
+                return {
+                  id: detail.ticket.id,
+                  name: detail.ticket.name,
+                  date: formattedDate,
+                  cost: detail.ticket.cost,
+                  quantity: detail.quantity,
+                  sellerId: detail.ticket.sellerId,
+                  description: detail.ticket.description || "Không có mô tả",
+                  categories: detail.ticket.categories || ["Chung"],
+                  image: imageUrl || detail.ticket.image,
+                  location: detail.ticket.location,
+                };
+              })
+            )
         );
 
         setTickets(completedTickets);
       }
     } catch (error) {
-      console.error('Error fetching tickets:', error);
+      console.error("Error fetching tickets:", error);
     } finally {
       setIsLoading(false);
     }
@@ -134,22 +147,25 @@ const MyTicketPage = () => {
   const downloadQRCodes = async (ticket: any) => {
     try {
       // Create an array of promises for generating QR codes
-      const qrPromises = Array.from({ length: ticket.quantity }, async (_, index) => {
-        // Create unique data for each ticket
-        const ticketData = {
-          id: ticket.id,
-          name: ticket.name,
-          date: ticket.date,
-          ticketNumber: `${index + 1}/${ticket.quantity}`
-        };
+      const qrPromises = Array.from(
+        { length: ticket.quantity },
+        async (_, index) => {
+          // Create unique data for each ticket
+          const ticketData = {
+            id: ticket.id,
+            name: ticket.name,
+            date: ticket.date,
+            ticketNumber: `${index + 1}/${ticket.quantity}`,
+          };
 
-        // Generate QR code as data URL
-        return await QRCode.toDataURL(JSON.stringify(ticketData), {
-          errorCorrectionLevel: 'H',
-          margin: 1,
-          width: 300
-        });
-      });
+          // Generate QR code as data URL
+          return await QRCode.toDataURL(JSON.stringify(ticketData), {
+            errorCorrectionLevel: "H",
+            margin: 1,
+            width: 300,
+          });
+        }
+      );
 
       // Generate all QR codes
       const qrDataUrls = await Promise.all(qrPromises);
@@ -160,14 +176,14 @@ const MyTicketPage = () => {
 
         // Add each QR code to the zip
         qrDataUrls.forEach((dataUrl: any, index: any) => {
-          const data = dataUrl.split(',')[1];
+          const data = dataUrl.split(",")[1];
           zip.file(`ticket-${index + 1}.png`, data, { base64: true });
         });
 
         // Generate and download zip
-        const content = await zip.generateAsync({ type: 'blob' });
+        const content = await zip.generateAsync({ type: "blob" });
         const zipUrl = URL.createObjectURL(content);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = zipUrl;
         link.download = `tickets-${ticket.id}.zip`;
         document.body.appendChild(link);
@@ -176,7 +192,7 @@ const MyTicketPage = () => {
         URL.revokeObjectURL(zipUrl);
       } else {
         // Download single QR code directly
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = qrDataUrls[0];
         link.download = `ticket-${ticket.id}.png`;
         document.body.appendChild(link);
@@ -184,15 +200,15 @@ const MyTicketPage = () => {
         document.body.removeChild(link);
       }
     } catch (error) {
-      console.error('Error generating QR codes:', error);
+      console.error("Error generating QR codes:", error);
       // You might want to add proper error handling here
     }
   };
   const calculateDaysFromNow = (startDate: string) => {
     // Parse ngày từ format "DD/MM/YYYY, HH:mm"
-    const [datePart, timePart] = startDate.split(', ');
-    const [day, month, year] = datePart.split('/');
-    const [hours, minutes] = timePart.split(':');
+    const [datePart, timePart] = startDate.split(", ");
+    const [day, month, year] = datePart.split("/");
+    const [hours, minutes] = timePart.split(":");
 
     // Tạo date object với các thành phần đã parse
     // Note: month trong JS bắt đầu từ 0 nên phải trừ 1
@@ -206,7 +222,7 @@ const MyTicketPage = () => {
 
     // Kiểm tra tính hợp lệ của ngày
     if (isNaN(eventDate.getTime())) {
-      return 'Ngày sự kiện không hợp lệ';
+      return "Ngày sự kiện không hợp lệ";
     }
 
     // Lấy thời gian hiện tại và reset về đầu ngày theo giờ địa phương
@@ -215,7 +231,9 @@ const MyTicketPage = () => {
       now.getFullYear(),
       now.getMonth(),
       now.getDate(),
-      0, 0, 0
+      0,
+      0,
+      0
     );
 
     // Reset eventDate về đầu ngày theo giờ địa phương
@@ -223,7 +241,9 @@ const MyTicketPage = () => {
       eventDate.getFullYear(),
       eventDate.getMonth(),
       eventDate.getDate(),
-      0, 0, 0
+      0,
+      0,
+      0
     );
 
     // Tính số milliseconds giữa hai ngày
@@ -241,80 +261,82 @@ const MyTicketPage = () => {
     // });
 
     if (diffDays < 0) {
-      return 'Đã diễn ra';
+      return "Đã diễn ra";
     } else if (diffDays === 0) {
-      return 'Diễn ra hôm nay';
+      return "Diễn ra hôm nay";
     } else {
-      return 'Sắp diễn ra';
+      return "Sắp diễn ra";
     }
   };
 
   // Ví dụ sử dụng:
 
-
-
-
   const formatDate = (startDate: string) => {
-    if (!startDate) return 'Ngày không hợp lệ';
+    if (!startDate) return "Ngày không hợp lệ";
     const date = new Date(startDate);
-    if (isNaN(date.getTime())) return 'Ngày không hợp lệ';
+    if (isNaN(date.getTime())) return "Ngày không hợp lệ";
 
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
 
     return `${day}/${month}/${year}, ${hours}:${minutes}`;
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(price);
   };
 
   const sortedAndFilteredTickets = useMemo(() => {
-    let filtered = tickets.filter(ticket => {
+    let filtered = tickets.filter((ticket) => {
       const matchesSearch =
         ticket.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (ticket.sellerId && ticket.sellerId.toLowerCase().includes(searchTerm.toLowerCase()));
+        (ticket.sellerId &&
+          ticket.sellerId.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      const matchesStatus = filterStatus === 'all' ||
+      const matchesStatus =
+        filterStatus === "all" ||
         calculateDaysFromNow(ticket.date).includes(filterStatus);
 
-      const matchesCategory = selectedCategory === 'all' ||
+      const matchesCategory =
+        selectedCategory === "all" ||
         ticket.categories?.includes(selectedCategory);
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
 
     return filtered.sort((a, b) => {
-      if (sortBy === 'date') {
-        return sortOrder === 'asc'
+      if (sortBy === "date") {
+        return sortOrder === "asc"
           ? new Date(a.date).getTime() - new Date(b.date).getTime()
           : new Date(b.date).getTime() - new Date(a.date).getTime();
       }
-      if (sortBy === 'price') {
-        return sortOrder === 'asc' ? a.cost - b.cost : b.cost - a.cost;
+      if (sortBy === "price") {
+        return sortOrder === "asc" ? a.cost - b.cost : b.cost - a.cost;
       }
-      return sortOrder === 'asc'
+      return sortOrder === "asc"
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name);
     });
   }, [tickets, searchTerm, filterStatus, selectedCategory, sortBy, sortOrder]);
 
-  const totalPages = Math.ceil(sortedAndFilteredTickets.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(
+    sortedAndFilteredTickets.length / ITEMS_PER_PAGE
+  );
   const currentTickets = sortedAndFilteredTickets.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
   const getStatusColor = (status: string) => {
-    if (status.includes('Đã diễn ra')) return 'bg-gray-100 text-gray-600';
-    if (status.includes('hôm nay')) return 'bg-green-100 text-green-600';
-    return 'bg-blue-100 text-blue-600';
+    if (status.includes("Đã diễn ra")) return "bg-gray-100 text-gray-600";
+    if (status.includes("hôm nay")) return "bg-green-100 text-green-600";
+    return "bg-blue-100 text-blue-600";
   };
 
   const renderTicketCard = (ticket: TicketData) => (
@@ -341,13 +363,20 @@ const MyTicketPage = () => {
               className="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className={`absolute left-4 top-4 ${getStatusColor(calculateDaysFromNow(ticket.date))} px-4 py-1.5 rounded-full text-sm font-medium shadow-sm`}>
+            <div
+              className={`absolute left-4 top-4 ${getStatusColor(
+                calculateDaysFromNow(ticket.date)
+              )} px-4 py-1.5 rounded-full text-sm font-medium shadow-sm`}
+            >
               {calculateDaysFromNow(ticket.date)}
             </div>
             {ticket.categories && (
               <div className="absolute right-4 top-4 flex gap-2">
                 {ticket.categories.map((category, index) => (
-                  <span key={index} className="bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1 rounded-full text-xs font-medium">
+                  <span
+                    key={index}
+                    className="bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1 rounded-full text-xs font-medium"
+                  >
                     {category}
                   </span>
                 ))}
@@ -442,14 +471,19 @@ const MyTicketPage = () => {
           </div>
           <div className="mt-2 flex items-center gap-2">
             {ticket.categories?.map((category, index) => (
-              <span key={index} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
+              <span
+                key={index}
+                className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs"
+              >
                 {category}
               </span>
             ))}
           </div>
         </div>
         <div className="text-right">
-          <p className="text-lg font-bold text-green-600">{formatPrice(ticket.cost)}</p>
+          <p className="text-lg font-bold text-green-600">
+            {formatPrice(ticket.cost)}
+          </p>
           <p className="text-sm text-gray-500">x{ticket.quantity}</p>
         </div>
       </div>
@@ -467,7 +501,8 @@ const MyTicketPage = () => {
                 Quản lý vé của bạn
               </h1>
               <p className="text-gray-500">
-                Theo dõi và quản lý tất cả các vé đã mua của bạn một cách dễ dàng
+                Theo dõi và quản lý tất cả các vé đã mua của bạn một cách dễ
+                dàng
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -481,22 +516,36 @@ const MyTicketPage = () => {
               </motion.div>
               <div className="flex items-center gap-2">
                 <button
-                  className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}
-                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === "grid"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                  onClick={() => setViewMode("grid")}
                 >
                   <div className="grid grid-cols-2 gap-1">
                     {[...Array(4)].map((_, i) => (
-                      <div key={`small-circle-${i}`} className="w-1.5 h-1.5 rounded-sm bg-current" />
+                      <div
+                        key={`small-circle-${i}`}
+                        className="w-1.5 h-1.5 rounded-sm bg-current"
+                      />
                     ))}
                   </div>
                 </button>
                 <button
-                  className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}
-                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === "list"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                  onClick={() => setViewMode("list")}
                 >
                   <div className="flex flex-col gap-1">
                     {[...Array(3)].map((_, i) => (
-                      <div key={`rect-${i}`} className="w-6 h-1 rounded-sm bg-current" />
+                      <div
+                        key={`rect-${i}`}
+                        className="w-6 h-1 rounded-sm bg-current"
+                      />
                     ))}
                   </div>
                 </button>
@@ -523,22 +572,46 @@ const MyTicketPage = () => {
                   <div className="flex items-center space-x-3 pl-4">
                     <Filter className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-700">
-                      {filterStatus === 'all' ? 'Tất cả trạng thái' : filterStatus}
+                      {filterStatus === "all"
+                        ? "Tất cả trạng thái"
+                        : filterStatus}
                     </span>
                   </div>
                 </SelectTrigger>
                 <SelectContent className="rounded-lg shadow-lg border border-gray-200 bg-white">
-                  <SelectItem value="all" className="px-4 py-2 hover:bg-gray-100">Tất cả trạng thái</SelectItem>
-                  <SelectItem value="Sắp diễn ra" className="px-4 py-2 hover:bg-gray-100">Sắp diễn ra</SelectItem>
-                  <SelectItem value="Diễn ra hôm nay" className="px-4 py-2 hover:bg-gray-100">Diễn ra hôm nay</SelectItem>
-                  <SelectItem value="Đã diễn ra" className="px-4 py-2 hover:bg-gray-100">Đã diễn ra</SelectItem>
+                  <SelectItem
+                    value="all"
+                    className="px-4 py-2 hover:bg-gray-100"
+                  >
+                    Tất cả trạng thái
+                  </SelectItem>
+                  <SelectItem
+                    value="Sắp diễn ra"
+                    className="px-4 py-2 hover:bg-gray-100"
+                  >
+                    Sắp diễn ra
+                  </SelectItem>
+                  <SelectItem
+                    value="Diễn ra hôm nay"
+                    className="px-4 py-2 hover:bg-gray-100"
+                  >
+                    Diễn ra hôm nay
+                  </SelectItem>
+                  <SelectItem
+                    value="Đã diễn ra"
+                    className="px-4 py-2 hover:bg-gray-100"
+                  >
+                    Đã diễn ra
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-
             <div className="sm:col-span-2">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger className="w-full h-12 border border-gray-200 rounded-xl bg-white hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out">
                   <div className="flex items-center space-x-3">
                     <Tag className="w-4 h-4 text-gray-500" />
@@ -561,37 +634,59 @@ const MyTicketPage = () => {
               </Select>
             </div>
 
-
             <div className="sm:col-span-2">
               <Select
                 value={sortBy}
-                onValueChange={(value: 'date' | 'price' | 'name') => setSortBy(value)}
+                onValueChange={(value: "date" | "price" | "name") =>
+                  setSortBy(value)
+                }
               >
                 <SelectTrigger className="w-full h-12 border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
                   <div className="flex items-center space-x-3 pl-4">
                     <ArrowUpDown className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-700">
-                      {sortBy === 'date' ? 'Ngày' : sortBy === 'price' ? 'Giá' : sortBy === 'name' ? 'Sắp xếp theo' : 'Sắp xếp theo'}
+                      {sortBy === "date"
+                        ? "Ngày"
+                        : sortBy === "price"
+                        ? "Giá"
+                        : sortBy === "name"
+                        ? "Sắp xếp theo"
+                        : "Sắp xếp theo"}
                     </span>
                   </div>
                 </SelectTrigger>
                 <SelectContent className="rounded-lg shadow-lg border border-gray-200 bg-white">
-                  <SelectItem value="name" className="px-4 py-2 hover:bg-gray-100">Sắp xếp theo</SelectItem>
-                  <SelectItem value="date" className="px-4 py-2 hover:bg-gray-100">Ngày</SelectItem>
-                  <SelectItem value="price" className="px-4 py-2 hover:bg-gray-100">Giá</SelectItem>
-
+                  <SelectItem
+                    value="name"
+                    className="px-4 py-2 hover:bg-gray-100"
+                  >
+                    Sắp xếp theo
+                  </SelectItem>
+                  <SelectItem
+                    value="date"
+                    className="px-4 py-2 hover:bg-gray-100"
+                  >
+                    Ngày
+                  </SelectItem>
+                  <SelectItem
+                    value="price"
+                    className="px-4 py-2 hover:bg-gray-100"
+                  >
+                    Giá
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
-
           </div>
 
           {/* Loading State */}
           {isLoading && (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, index) => (
-                <div key={`loading-placeholder-${index}`} className="animate-pulse">
+                <div
+                  key={`loading-placeholder-${index}`}
+                  className="animate-pulse"
+                >
                   <div className="bg-gray-200 h-48 rounded-t-lg" />
                   <div className="p-6 space-y-4 bg-white rounded-b-lg">
                     <div className="h-6 bg-gray-200 rounded w-3/4" />
@@ -616,20 +711,21 @@ const MyTicketPage = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <div className={viewMode === 'grid'
-                      ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-                      : "space-y-4"
-                    }>
-                      {currentTickets.map((ticket) => (
-                        viewMode === 'grid'
-                          ? renderTicketCard(ticket) // Không cần thêm key ở đây vì đã có trong renderTicketCard
-                          : renderListItem(ticket) // Không cần thêm key ở đây vì đã có trong renderListItem
-                      ))}
-
-
+                    <div
+                      className={
+                        viewMode === "grid"
+                          ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                          : "space-y-4"
+                      }
+                    >
+                      {currentTickets.map(
+                        (ticket) =>
+                          viewMode === "grid"
+                            ? renderTicketCard(ticket) // Không cần thêm key ở đây vì đã có trong renderTicketCard
+                            : renderListItem(ticket) // Không cần thêm key ở đây vì đã có trong renderListItem
+                      )}
                     </div>
                   </motion.div>
-
                 ) : (
                   <motion.div
                     key="empty"
@@ -645,7 +741,8 @@ const MyTicketPage = () => {
                       Không tìm thấy vé nào
                     </h3>
                     <p className="text-gray-500 mt-2 text-center max-w-md">
-                      Thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc của bạn
+                      Thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc của
+                      bạn
                     </p>
                   </motion.div>
                 )}
@@ -655,26 +752,33 @@ const MyTicketPage = () => {
               {totalPages > 1 && (
                 <div className="flex justify-center items-center space-x-2 mt-8">
                   <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
                     disabled={currentPage === 1}
                     className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-4 py-2 rounded-lg ${currentPage === page
-                        ? 'bg-blue-600 text-white'
-                        : 'border border-gray-200 hover:bg-gray-50'
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-4 py-2 rounded-lg ${
+                          currentPage === page
+                            ? "bg-blue-600 text-white"
+                            : "border border-gray-200 hover:bg-gray-50"
                         }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
                   <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
                     disabled={currentPage === totalPages}
                     className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                   >
@@ -688,8 +792,8 @@ const MyTicketPage = () => {
       </div>
 
       {/* Enhanced Modal */}
-      <AnimatePresence>
-        {isModalOpen && selectedTicket && (
+      {isModalOpen && selectedTicket && (
+        <AnimatePresence>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -724,7 +828,9 @@ const MyTicketPage = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                 <div className="absolute bottom-0 p-6 text-white">
-                  <h3 className="text-2xl font-bold mb-2">{selectedTicket.name}</h3>
+                  <h3 className="text-2xl font-bold mb-2">
+                    {selectedTicket.name}
+                  </h3>
                   <div className="flex items-center space-x-4">
                     <span className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4" />
@@ -759,18 +865,21 @@ const MyTicketPage = () => {
                       <div className="w-full h-64">
                         {/* Nhúng Google Map ở đây */}
                         <LoadScript googleMapsApiKey="AlzaSyNa20bToeNXLJ6qTZR19bANY6nwn9ZaGjo">
-
                           <GoogleMap
-                            mapContainerStyle={{ width: "300px", height: "250px" }}
+                            mapContainerStyle={{
+                              width: "300px",
+                              height: "250px",
+                            }}
                             center={{ lat: 10.762622, lng: 106.660172 }} // Tọa độ trung tâm (có thể thay đổi theo vị trí thực tế)
                             zoom={15}
                           >
-                            <Marker position={{ lat: 10.762622, lng: 106.660172 }} />
+                            <Marker
+                              position={{ lat: 10.762622, lng: 106.660172 }}
+                            />
                           </GoogleMap>
                         </LoadScript>
                       </div>
                     </div>
-
                   </div>
 
                   <div className="space-y-4">
@@ -785,7 +894,9 @@ const MyTicketPage = () => {
                             <User className="w-6 h-6 text-gray-500" />
                           </div>
                           <div>
-                            <p className="font-medium">{selectedTicket.sellerId}</p>
+                            <p className="font-medium">
+                              {selectedTicket.sellerId}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -799,17 +910,23 @@ const MyTicketPage = () => {
                       <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600">Giá mỗi vé</span>
-                          <span className="font-semibold">{formatPrice(selectedTicket.cost)}</span>
+                          <span className="font-semibold">
+                            {formatPrice(selectedTicket.cost)}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600">Số lượng</span>
-                          <span className="font-semibold">{selectedTicket.quantity}</span>
+                          <span className="font-semibold">
+                            {selectedTicket.quantity}
+                          </span>
                         </div>
                         <div className="border-t border-gray-200 pt-2 mt-2">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">Tổng tiền</span>
                             <span className="text-lg font-bold text-green-600">
-                              {formatPrice(selectedTicket.cost * selectedTicket.quantity)}
+                              {formatPrice(
+                                selectedTicket.cost * selectedTicket.quantity
+                              )}
                             </span>
                           </div>
                         </div>
@@ -821,7 +938,11 @@ const MyTicketPage = () => {
                         <Clock className="w-5 h-5 text-blue-500" />
                         <span>Trạng thái</span>
                       </h4>
-                      <div className={`inline-flex items-center px-4 py-2 rounded-full ${getStatusColor(calculateDaysFromNow(selectedTicket.date))}`}>
+                      <div
+                        className={`inline-flex items-center px-4 py-2 rounded-full ${getStatusColor(
+                          calculateDaysFromNow(selectedTicket.date)
+                        )}`}
+                      >
                         {calculateDaysFromNow(selectedTicket.date)}
                       </div>
                     </div>
@@ -830,7 +951,6 @@ const MyTicketPage = () => {
 
                 <div className="border-t border-gray-200 pt-6">
                   <div className="flex items-center justify-end space-x-4">
-               
                     <button
                       onClick={() => downloadQRCodes(selectedTicket)}
                       className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
@@ -843,9 +963,8 @@ const MyTicketPage = () => {
               </div>
             </motion.div>
           </motion.div>
-        )}
-      </AnimatePresence>
-
+        </AnimatePresence>
+      )}
     </div>
   );
 };
