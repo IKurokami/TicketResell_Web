@@ -1,14 +1,6 @@
 import ProfileInfo from "@/Components/ProfileInfo";
 import SellProfile from "@/Components/sellprofile";
 import React, { useState, useEffect } from "react";
-import {
-  FaPencilAlt,
-  FaPhoneAlt,
-  FaEnvelope,
-  FaUser,
-  FaChevronRight,
-  FaSave,
-} from "react-icons/fa";
 
 export interface UserProfileCard {
   id: string;
@@ -29,17 +21,35 @@ export interface UserProfileCard {
 
 export interface UserUpdateDto {
   UserId: string | undefined;
-  SellConfigId: string | undefined;
-  Username: string | undefined;
   Password: string | undefined;
-  Gmail: string | undefined;
   Fullname: string | undefined;
   Sex: string | undefined;
   Phone: string | undefined;
   Address: string | undefined;
-  Avatar: string | undefined;
   Birthday: string | undefined;
   Bio: string | undefined;
+}
+
+function convertFormDataToUserProfileCard(
+  formData: any,
+  profile: UserProfileCard
+): UserProfileCard {
+  return {
+    id: profile.id, // Preserve existing ID
+    username: profile.username, // Preserve username
+    email: profile.email, // Preserve email
+    avatar: profile.avatar, // Preserve avatar
+    phone: formData.phone, // Map from FormData
+    address: formData.address, // Map from FormData
+    status: profile.status, // Preserve status
+    fullname: formData.fullName, // Map from FormData
+    sex: formData.sex, // Map from FormData
+    createDate: profile.createDate, // Preserve create date
+    sellConfigId: profile.sellConfigId, // Preserve sell config ID
+    bio: formData.bio, // Map from FormData
+    birthday: formData.birthday, // Map from FormData
+    roles: profile.roles, // Preserve roles
+  };
 }
 
 const convertToUserProfileCard = (
@@ -93,6 +103,13 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
     newPassword: "",
     confirmNewPassword: "",
   });
+
+  const handleSave = (updatedData:any) => {
+    // Update the profile with the transformed data
+    setProfile((currentProfile) =>
+      convertFormDataToUserProfileCard(updatedData, currentProfile)
+    );
+  };
 
   useEffect(() => {
     loadUserImage();
@@ -272,6 +289,12 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
           fullname={profile.fullname}
           phoneNumber={profile.phone}
           isAdjustVisible={true}
+          onSave={(updatedData) => {
+            // Update profile if IDs match, transforming FormData to UserProfileCard
+            setProfile((currentProfile) =>
+              convertFormDataToUserProfileCard(updatedData, currentProfile)
+            );
+          }}
         />
         <ProfileInfo
           address={profile.address}

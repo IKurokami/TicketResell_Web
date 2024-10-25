@@ -21,6 +21,7 @@ namespace Repositories.Core.AutoMapperConfig
         {
             CreateMap<UserCreateDto, User>();
             CreateMap<UserUpdateDto, User>();
+            CreateMap<UserUpdateByAdminDto, User>().ReverseMap();
             CreateMap<User, UserReadDto>();
             CreateMap<User, SellerTicketReadDto>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))

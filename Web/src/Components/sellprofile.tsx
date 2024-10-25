@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import { FaEnvelope, FaPencilAlt, FaPhoneAlt } from "react-icons/fa";
 import EditProfilePopup from "./EditProfilePopUp";
 import uploadImageForTicket from "@/models/UpdateImage";
-import { Image } from "lucide-react";
 
 const DEFAULT_IMAGE = "https://images7.alphacoders.com/129/1297416.png";
 
 interface FormData {
+  userid: string;
   fullName: string | undefined;
   sex: string | undefined;
   phone: string | undefined;
@@ -26,6 +26,7 @@ interface props {
   avatar: string | undefined;
   isAdjustVisible: boolean;
   userId: string; // Add userId prop to pass to EditProfilePopup
+  onSave: (data: FormData) => void;
 }
 
 const SellProfile: React.FC<props> = ({
@@ -39,6 +40,7 @@ const SellProfile: React.FC<props> = ({
   phoneNumber,
   isAdjustVisible,
   userId, // Pass userId to EditProfilePopup
+  onSave,
 }) => {
   const [avatarUrl, setAvatarUrl] = useState<string>(DEFAULT_IMAGE);
   const [coverImageUrl, setCoverImageUrl] = useState<string>(DEFAULT_IMAGE);
@@ -59,7 +61,8 @@ const SellProfile: React.FC<props> = ({
   };
   const handleOpenEditModal = () => setIsEditModalOpen(true); // Open the popup
   const handleCloseEditModal = () => setIsEditModalOpen(false); // Close the popup
-  const formData: FormData = {
+  const formData: any = {
+    userid: userId,
     fullName: fullname,
     sex: sex,
     phone: phoneNumber,
@@ -98,25 +101,24 @@ const SellProfile: React.FC<props> = ({
     fetchImageCoverAvatar(coverId);
   }, [avatar]); // Dependency array includes avatar
 
-  useEffect(() => {});
   return (
     <div className="relative profile">
       <img
-        className="w-full object-cover mt-[10vh] max-w-full h-[30vh] bg-gray-100"
+        className="w-full object-cover mt-[10vh] max-w-full h-[50vh] bg-gray-100"
         src={coverImageUrl}
         alt=""
       />
       {isAdjustVisible && (
         <>
           <label
-            htmlFor="avatar"
-            className="flex items-center absolute top-[20vh] left-[87vw] px-4 py-2 bg-gray-500 rounded text-gray-600 p-1.5 cursor-pointer"
+            htmlFor="coveravatar"
+            className="flex items-center absolute top-[40vh] left-[87vw] px-4 py-2 bg-gray-500 rounded text-gray-600 p-1.5 cursor-pointer"
           >
             <FaPencilAlt className="mr-2 text-white" size={12} />
             <span className="text-white">Thêm ảnh bìa</span>
           </label>
           <input
-            id="avatar"
+            id="coveravatar"
             type="file"
             className="hidden"
             onChange={handleCoverAvatarChange}
@@ -124,7 +126,7 @@ const SellProfile: React.FC<props> = ({
           />
         </>
       )}
-      <div className="absolute w-[20vh] h-[20vh] rounded-full left-[3vw] top-[15vh] border-4 border-white bg-gray-100">
+      <div className="absolute w-[20vh] h-[20vh] rounded-full left-[3vw] top-[35vh] border-4 border-white bg-gray-100">
         <img
           src={avatarUrl} // Use the fetched avatarUrl or fallback to default
           alt="Avatar"
@@ -197,6 +199,7 @@ const SellProfile: React.FC<props> = ({
           onClose={handleCloseEditModal} // Close the popup
           userId={userId} // Pass the userId as required
           initialData={formData}
+          onSave={onSave}
         />
       )}
     </div>

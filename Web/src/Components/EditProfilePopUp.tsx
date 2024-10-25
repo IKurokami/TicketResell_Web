@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/Components/ui/dialog";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import {
   Select,
@@ -22,7 +22,9 @@ import {
   SelectValue,
 } from "@/Components/ui/select";
 import { useToast } from "@/Hooks/use-toast";
+import AddressFields from "./LocationInput";
 interface FormData {
+  userid: string;
   fullName: string | undefined;
   sex: string | undefined;
   phone: string | undefined;
@@ -36,6 +38,7 @@ interface EditProfilePopupProps {
   onClose: () => void;
   initialData?: FormData; // Chỉ định initialData là tùy chọn
   userId: string;
+  onSave: (data: FormData) => void;
 }
 
 interface PasswordChangeProps {
@@ -333,16 +336,20 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
   onClose,
   initialData,
   userId,
+  onSave,
 }) => {
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+  const [houseNumber, setHouseNumber] = useState<string>(" ");
+  const [location, setLocation] = useState<string>("");
   const { toast } = useToast();
   const HandleSubmitClick = () => {
-    window.location.reload();
+    onSave(formData);
   };
   const [formData, setFormData] = useState<FormData>(
     initialData || {
+      userid: userId,
       fullName: "",
       sex: "",
       phone: "",
@@ -509,7 +516,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  placeholder="+1 234 567 8900"
+                  placeholder="+84 123 456 789"
                   className={errors.phone ? "border-red-500" : ""}
                   disabled={isLoading}
                 />
@@ -555,6 +562,30 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                 />
                 {errors.address && (
                   <p className="text-sm text-red-500">{errors.address}</p>
+                )}
+              </div>
+              {/* <div className="space-y-2 md:col-span-2">
+                <AddressFields
+                  houseNumber={houseNumber}
+                  setHouseNumber={setHouseNumber}
+                  setFormData={setLocation}
+                />
+              </div> */}
+              <div className="space-y-2 md:col-span-2">
+                <label htmlFor="bio" className="text-sm font-medium">
+                  Bio
+                </label>
+                <Input
+                  id="bio"
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  placeholder="Something about your self"
+                  className={errors.bio ? "border-red-500" : ""}
+                  disabled={isLoading}
+                />
+                {errors.bio && (
+                  <p className="text-sm text-red-500">{errors.bio}</p>
                 )}
               </div>
             </div>

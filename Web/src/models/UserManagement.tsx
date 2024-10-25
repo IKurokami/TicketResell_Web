@@ -20,6 +20,8 @@ export interface User {
   avatar: string;
   birthday: string;
   bio: string;
+  bank?: string;
+  bankType?: string;
   roles: Role[];
 }
 
@@ -51,6 +53,8 @@ const convertToUser = async (data: any): Promise<User> => {
         rolename: role?.rolename ?? "",
         description: role?.description ?? "",
       })) ?? [],
+    bank: data?.bank ?? "",
+    bankType: data?.bankType?? "",
   };
 };
 
