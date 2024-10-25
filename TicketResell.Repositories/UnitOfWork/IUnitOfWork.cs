@@ -1,6 +1,7 @@
 
 using Repositories.Repositories;
 using Repositories.Repositories.Carts;
+using Repositories.Repositories.Chats;
 
 namespace TicketResell.Repositories.UnitOfWork
 {
@@ -17,6 +18,9 @@ namespace TicketResell.Repositories.UnitOfWork
         ICategoryRepository CategoryRepository { get; }
         
         ICartRepository CartRepository { get; }
+        
+        IChatRepository ChatRepository { get; }
+        
         Task<int> CompleteAsync();
     }
 }

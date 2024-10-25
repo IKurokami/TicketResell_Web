@@ -15,6 +15,7 @@ using TicketResell.Services.Services.Tickets;
 using TicketResell.Repositories.Logger;
 using TicketResell.Services.Services.Payments;
 using Repositories.Config;
+using TicketResell.Api.Hubs;
 using TicketResell.Services.Services.History;
 using TicketResell.Services.Services.Revenues;
 using TicketResell.Services.Services.Mail;
@@ -81,6 +82,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IRevenueService, RevenueService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddHttpClient<IMomoService, MomoService>();
 builder.Services.AddHttpClient<IVnpayService, VnpayService>();
@@ -118,6 +120,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 app.UseCors("AllowSpecificOrigin");
 app.UseSession();
@@ -133,8 +137,9 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
     options.DocumentTitle = "Swagger";
 });
+
+app.MapHub<ChatHub>("chat-hub");
+
 app.Run();
-
-
 
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", "default");

@@ -1,4 +1,5 @@
 using Repositories.Constants;
+using TicketResell.Repositories.Core.Dtos.Authentication;
 
 namespace TicketResell.Repositories.Helper;
 
@@ -11,6 +12,48 @@ public static class RequestHelper
 
     #region AuthenTicated
 
+    public static async Task<RequestAuthenData> CheckAuthenTicatedDataAsync(this HttpContext? context, IServiceProvider serviceProvider)
+    {        
+        var result = new RequestAuthenData();
+
+        if(context == null)
+            return result;
+        
+        UserRole highestRole = UserRole.Buyer;
+
+        result.UserId = context.Session.GetString("userId") ?? string.Empty;
+        result.AccessKey = context.Session.GetString("accessKey") ?? string.Empty;
+
+        if (!string.IsNullOrEmpty(result.UserId) && !string.IsNullOrEmpty(result.AccessKey))
+        {
+            var authenticationService = serviceProvider.GetRequiredService<IAuthenticationService>();
+            var tryLogin = await authenticationService.LoginWithAccessKeyAsync(result.UserId, result.AccessKey);
+            if (tryLogin.StatusCode == 200)
+            {
+                if (tryLogin.Data != null && tryLogin.Data is LoginInfoDto { User: not null } loginInfo)
+                {
+                    foreach (var role in loginInfo.User.Roles)
+                    {
+                        var userRole = RoleHelper.GetUserRole(role.RoleId);
+                        if (userRole > highestRole)
+                        {
+                            highestRole = userRole;
+                        }
+                    }
+                }
+                
+                result.IsAuthenticated = true;
+            }
+        }
+
+        result.Role = highestRole.ToString();
+        
+        context.SetIsAuthenticated(result.IsAuthenticated);
+        context.SetRole(result.Role);
+        
+        return result;
+    }
+    
     public static RequestAuthenData GetAuthenData(this HttpContext? context)
     {
         var result = new RequestAuthenData();
