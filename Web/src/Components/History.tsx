@@ -2,6 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Ticket, User, Coins, Search, ArrowUpDown, X, Calendar, CreditCard, Package2 } from 'lucide-react';
 import { Ticket as TicketModel } from '@/models/TicketFetch';
 import Cookies from 'js-cookie';
+interface OrderDetail {
+  ticket: {
+    cost: number;
+    seller?: {
+      fullname: string;
+    };
+  };
+  quantity: number;
+}
+
+interface Order {
+  orderId: string;
+  orderDetails: OrderDetail[];
+  status: string;
+  date: string;
+}
 
 const HistoryPage = () => {
   const [purchaseHistory, setPurchaseHistory] = useState<Array<{
@@ -34,42 +50,38 @@ const HistoryPage = () => {
 
         const result = await response.json();
         if (result.statusCode === 200 && Array.isArray(result.data)) {
-          const groupedOrders = result.data.map(order => {
+          const groupedOrders = result.data.map((order: Order) => {
             const date = order.date;
             const formattedDate = date ? (() => {
               const parsedDate = new Date(date);
-            
-              // Debugging: Log the date object
-              console.log('Parsed Date:', parsedDate);
-            
-              // Kiểm tra nếu date hợp lệ
               if (isNaN(parsedDate.getTime())) {
-                return 'Ngày không hợp lệ'; // Xử lý ngày không hợp lệ
+                return 'Ngày không hợp lệ';
               }
-            
-              const day = parsedDate.getDate().toString().padStart(2, '0'); // Ngày
-              const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0'); // Tháng (chỉ số bắt đầu từ 0)
-              const year = parsedDate.getFullYear(); // Năm
-              const hours = parsedDate.getHours().toString().padStart(2, '0'); // Giờ
-              const minutes = parsedDate.getMinutes().toString().padStart(2, '0'); // Phút
-              return `ngày ${day} tháng ${month} năm ${year}, ${hours}:${minutes}`; // Chuỗi đã định dạng
+              const day = parsedDate.getDate().toString().padStart(2, '0');
+              const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0');
+              const year = parsedDate.getFullYear();
+              const hours = parsedDate.getHours().toString().padStart(2, '0');
+              const minutes = parsedDate.getMinutes().toString().padStart(2, '0');
+              return `ngày ${day} tháng ${month} năm ${year}, ${hours}:${minutes}`;
             })() : 'Ngày không hợp lệ';
 
             return {
               id: order.orderId,
               date: formattedDate,
-              tickets: order.orderDetails.map(detail => ({
+              tickets: order.orderDetails.map((detail: OrderDetail) => ({
                 ...detail.ticket,
                 cost: detail.ticket.cost,
                 quantity: detail.quantity,
-                seller: detail.ticket.seller?.fullname || null, // Add fullname here
+                seller: detail.ticket.seller?.fullname || null,
               })),
-              price: order.orderDetails.reduce((total: any, detail: any) =>
+              price: order.orderDetails.reduce((total: number, detail: OrderDetail) =>
                 total + detail.ticket.cost * detail.quantity, 0),
               status: order.status,
             };
-            
           });
+
+          // Sort by date descending by default
+          groupedOrders.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 
           setPurchaseHistory(groupedOrders);
