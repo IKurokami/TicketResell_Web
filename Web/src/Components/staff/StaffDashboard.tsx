@@ -1,13 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import { Users, FolderTree } from "lucide-react";
 import UserManagement from "@/Components/staff/UsersManagement";
 import CategoryManagement from "@/Components/staff/CategoriesManagement";
-import { logoutUser } from "@/Components/Logout"; // Điều chỉnh đường dẫn nhập khẩu nếu cần
-import { removeAllCookies } from "@/Components/Cookie"; // Điều chỉnh đường dẫn nhập khẩu nếu cần
+import { logoutUser } from "@/Components/Logout";
+import { removeAllCookies } from "@/Components/Cookie";
 import Cookies from 'js-cookie';
 import "@/Css/Staff.css";
-import { Button } from "@/Components/ui/button";
+import {
+  Person as UsersIcon,
+  Category as CategoriesIcon,
+} from "@mui/icons-material";
+import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 const StaffDashboard = () => {
@@ -15,8 +18,8 @@ const StaffDashboard = () => {
   const [activeTab, setActiveTab] = useState("Người dùng");
 
   const sidebarTabs = [
-    { name: "Người dùng", icon: <Users className="w-6 h-6" /> },
-    { name: "Danh mục", icon: <FolderTree className="w-6 h-6" /> },
+    { name: "Người dùng", icon: <UsersIcon className="w-6 h-6" /> },
+    { name: "Danh mục", icon: <CategoriesIcon className="w-6 h-6" /> },
   ];
 
   const toggleSidebar = () => {
@@ -27,19 +30,18 @@ const StaffDashboard = () => {
     setSidebarOpen(false);
   };
 
-  const handleNavigation = (tabName: any) => {
+  const handleNavigation = (tabName) => {
     setActiveTab(tabName);
     closeSidebar();
   };
 
   const handleLogout = async () => {
-    const userId = Cookies.get('id'); // Lấy ID người dùng từ cookies
+    const userId = Cookies.get('id');
     const isLoggedOut = await logoutUser(userId);
 
     if (isLoggedOut) {
-      removeAllCookies(); // Xóa tất cả cookies khi đăng xuất thành công
-      // Chuyển hướng đến trang đăng nhập
-      window.location.href = "/login"; // Điều chỉnh đường dẫn nếu cần
+      removeAllCookies();
+      window.location.href = "/login";
     } else {
       console.error("Đăng xuất không thành công.");
     }
@@ -90,25 +92,26 @@ const StaffDashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed sm:relative inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed sm:relative inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } sm:translate-x-0`}
       >
-        <div className="h-full px-6 py-8 overflow-y-auto bg-white border-r border-gray-200">
+        <div className="h-full px-6 py-8 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           {/* Tiêu đề Sidebar */}
-          <div className="flex justify-between items-center mb-10">
-            <h2 className="text-xl font-semibold">
-              <span className="text-emerald-500 text-3xl font-bold">Ticket{" "}</span>
-              <span className="text-black text-3xl font-bold">Resell{" "}</span>
-              <span className="text-gray-600 text-2xl inline mt-1">Staff</span>
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-xl font-semibold text-border">
+              <span className="text-emerald-500 text-2xl font-bold">
+                Ticket{" "}
+              </span>
+              <span className="text-black text-2xl font-bold">Resell </span>
+              Staff
             </h2>
-
             <button
               onClick={closeSidebar}
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-2 inline-flex items-center sm:hidden"
+              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex items-center sm:hidden"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -119,22 +122,22 @@ const StaffDashboard = () => {
                   clipRule="evenodd"
                 ></path>
               </svg>
+              <span className="sr-only">Close sidebar</span>
             </button>
           </div>
 
           {/* Điều hướng Sidebar */}
-          <nav className="space-y-2">
+          <nav className="space-y-2 font-medium">
             {sidebarTabs.map((tab, index) => (
               <button
                 key={index}
                 onClick={() => handleNavigation(tab.name)}
-                className={`w-full flex items-center px-5 py-4 text-base font-medium rounded-xl transition-colors duration-150 ease-in-out ${activeTab === tab.name ? "bg-emerald-50 text-emerald-600" : "text-gray-700 hover:bg-gray-50"}`}
+                className={`w-full flex items-center px-5 py-3 rounded-lg transition-colors duration-150 ease-in-out ${activeTab === tab.name ? "bg-gray-100 text-emerald-600" : "text-gray-700 hover:bg-gray-50"}`}
               >
                 <span className={`mr-4 ${activeTab === tab.name ? "text-emerald-600" : "text-gray-500"}`}>
                   {tab.icon}
                 </span>
                 <span className="flex-1">{tab.name}</span>
-                {activeTab === tab.name && <span className="w-1.5 h-10 bg-emerald-500 rounded-full ml-4"></span>}
               </button>
             ))}
 
@@ -152,7 +155,8 @@ const StaffDashboard = () => {
       </aside>
 
       {/* Nội dung chính */}
-      <main className="flex-1 p-10 overflow-auto">
+      <main className="flex-1 p-6 bg-white">
+        <h2 className="text-2xl font-bold mb-4">{activeTab}</h2>
         {renderContent()}
       </main>
     </div>

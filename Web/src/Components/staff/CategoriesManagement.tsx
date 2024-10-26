@@ -180,10 +180,10 @@ const CategoryManagement = () => {
         <CardTitle>Quản lý danh mục</CardTitle>
         <div className="flex space-x-4">
           <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" /> {/* Increased icon size */}
             <Input
               placeholder="Tìm kiếm danh mục..."
-              className="px-8 rounded-xl "
+              className="px-10 py-4 rounded-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-80" // Increased padding and width, and changed to rounded-full
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -194,17 +194,19 @@ const CategoryManagement = () => {
               setFormData({});
               setIsOpen(true);
             }}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full py-3 px-6 shadow-md" // Changed to rounded-full and increased padding
           >
-            <PlusCircle className="mr-2 h-4 w-4" />
+            <PlusCircle className="mr-2 h-6 w-6" /> {/* Increased icon size */}
             Thêm danh mục
           </Button>
         </div>
+
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b">
+              <tr className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
                 <th className="py-3 px-4 text-left">ID</th>
                 <th className="py-3 px-4 text-left">Tên</th>
                 <th className="py-3 px-4 text-left">Mô tả</th>
@@ -222,22 +224,42 @@ const CategoryManagement = () => {
                   <td className="py-3 px-4">{category.description}</td>
                   <td className="py-3 px-4">
                     <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
+                      <button
+                        className="text-blue-500 hover:text-blue-700"
+                        title="Edit Category"
                         onClick={() => handleEdit(category)}
                       >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
+                        <svg
+                          stroke="currentColor"
+                          fill="currentColor"
+                          strokeWidth="0"
+                          viewBox="0 0 576 512"
+                          height="1em"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"></path>
+                        </svg>
+                      </button>
+                      <button
+                        className="text-red-500 hover:text-red-700"
+                        title="Delete Category"
                         onClick={() => handleDelete(category.categoryId)}
-                        className="text-red-600 hover:text-red-700"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        <svg
+                          stroke="currentColor"
+                          fill="currentColor"
+                          strokeWidth="0"
+                          viewBox="0 0 448 512"
+                          height="1em"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"></path>
+                        </svg>
+                      </button>
                     </div>
+
                   </td>
                 </tr>
               ))}

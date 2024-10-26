@@ -133,7 +133,8 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
   return (
     <div className="ticket--related">
-      <h2 className="text-2xl font-bold text-center">Related Tickets</h2>
+      <h3 className="text-2xl font-bold text-center">Có thể bạn sẽ thích
+      </h3>
       <div className=" mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw] ">
         {tickets.map((ticket) => (
           <Link className="no-underline" href={`/ticket/${ticket.ticketId}`}>
