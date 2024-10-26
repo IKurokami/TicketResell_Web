@@ -18,6 +18,12 @@ import TicketManager from "./TicketManager";
 import CategoryManager from "./CategoryManager";
 import OrderManager from "./OrderManager";
 import RevenueManager from "./RevenueManager";
+import {
+  AccountStatusDialog,
+  EditRolesDialog,
+  EditUserDialog,
+  RoleStatusDialog,
+} from "./EditUserPage";
 
 const AdminPage = () => {
   const [tickets, setTickets] = useState<any[]>([]);
@@ -235,15 +241,128 @@ const AdminPage = () => {
       console.error("Error updating ticket status:", error);
     }
   };
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
+  const [isEditRoleOpen, setEditRoleOpen] = useState(false);
+  const [isEditStatusOpen, setEditStatusOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null); // To store the selected user details
+  const [isActive, setActive] = useState<boolean>(false);
 
-  const handleUserOnEdit = async (userId: string) => {};
+  const handleUserOnEdit = async (userId: string) => {
+    const userToEdit = users.find((user) => user.userId === userId); // Find the user by ID (assuming 'users' is an array of user objects)
+    console.log(userToEdit);
+    if (userToEdit) {
+      setSelectedUser(userToEdit); // Set the selected user
+      setEditDialogOpen(true); // Open the edit dialog
+    }
+  };
+  const handleCloseDialog = () => {
+    setEditDialogOpen(false);
+    setSelectedUser(null);
+  };
   const handleUserOnDisableAccount = async (userId: string) => {
-    console.log("user disable", userId);
+    const userToEdit = users.find((user) => user.userId === userId); // Find the user by ID (assuming 'users' is an array of user objects)
+    console.log(userToEdit);
+    if (userToEdit) {
+      setActive(true);
+      setSelectedUser(userToEdit); // Set the selected user
+      setEditStatusOpen(true); // Open the edit dialog
+    }
   };
   const handleUserOnEnableAccount = async (userId: string) => {
-    
+    const userToEdit = users.find((user) => user.userId === userId); // Find the user by ID (assuming 'users' is an array of user objects)
+    console.log(userToEdit);
+    if (userToEdit) {
+      setActive(false);
+      setSelectedUser(userToEdit); // Set the selected user
+      setEditStatusOpen(true); // Open the edit dialog
+    }
   };
-  const handleUserOnEditRoles = async (userId: string) => {};
+  const handleConfirmStatus = async () => {
+    try {
+      // Make the API call here
+      const response = await fetch(
+        `http://localhost:5296/api/User/updatestatus/${selectedUser?.userId}`,
+        {
+          method: "PUT", // Use DELETE method
+          headers: {
+            "Content-Type": "application/json",
+            // Include any other headers your API requires
+          },
+        }
+      );
+      // Optionally: refresh user data or update local state
+      console.log(`User ${selectedUser?.userId} status updated successfully.`);
+      setUsers((users) =>
+        users.map((user) =>
+          user.userId === selectedUser.userId
+            ? {
+                ...user,
+                status: user.status === 0 ? 1 : 0, // Toggle status
+              }
+            : user
+        )
+      );
+    } catch (error) {
+      console.error("Error updating user status:", error);
+    } finally {
+      setEditStatusOpen(false); // Close the dialog after confirming
+    }
+  };
+  const handleCloseStatusDialog = () => {
+    setEditStatusOpen(false);
+    setSelectedUser(null);
+  };
+  const handleUserOnEditRoles = async (userId: string) => {
+    const userToEdit = users.find((user) => user.userId === userId); // Find the user by ID (assuming 'users' is an array of user objects)
+    console.log(userToEdit);
+    if (userToEdit) {
+      setSelectedUser(userToEdit); // Set the selected user
+      setEditRoleOpen(true); // Open the edit dialog
+    }
+  };
+  const handleCloseRoleDialog = () => {
+    setEditRoleOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleConfirmDisableRole = async () => {
+    if (selectedUser?.userId) {
+      try {
+        const response = await fetch(
+          `http://localhost:5296/api/User/deleteseller/${selectedUser?.userId}`,
+          {
+            method: "DELETE", // Use DELETE method
+            headers: {
+              "Content-Type": "application/json",
+              // Include any other headers your API requires
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log(`Disabled seller with ID: ${selectedUser.userId}`, result);
+        setUsers((users) =>
+          users.map((user) =>
+            user.userId === selectedUser.userId
+              ? {
+                  ...user,
+                  roles: user.roles.filter((role) => role.roleId !== "RO2"),
+                }
+              : user
+          )
+        );
+        // Additional logic after a successful API call...
+      } catch (error) {
+        console.error("Failed to disable seller:", error);
+      }
+    }
+    setEditRoleOpen(false); // Close the dialog after the operation
+    setSelectedUser(null); // Clear the selected user ID
+  };
   const handleUserOnResetPassword = async (userId: string) => {};
 
   const handleRoleAdd = async () => {
@@ -337,6 +456,25 @@ const AdminPage = () => {
       console.error("Error deleting role:", error);
     }
   };
+  function convertFormDataToUser(formData: any): User {
+    return {
+      userId: formData.userId,
+      username: formData.username || "", // Provide default value if undefined
+      status: formData.status,
+      createDate: formData.createDate,
+      gmail: formData.gmail || "", // Mapping 'email' in FormData to 'gmail' in User
+      fullname: formData.fullname || "",
+      sex: formData.sex || "",
+      phone: formData.phone || "",
+      address: formData.address || "",
+      avatar: formData.avatar || "", // Handling undefined with default empty string
+      birthday: formData.birthday || "",
+      bio: formData.bio || "",
+      bank: formData.bank || "", // Optional fields in User
+      bankType: formData.bankType || "",
+      roles: [], // Assuming roles need to be fetched or added separately
+    };
+  }
 
   const handleCategoryAdd = async () => {
     setCurrentCategory(null);
@@ -464,7 +602,7 @@ const AdminPage = () => {
             onEdit={handleUserOnEdit}
             onDisableAccount={handleUserOnDisableAccount}
             onEnableAccount={handleUserOnEnableAccount}
-            onEditRoles={handleUserOnEditRoles}
+            onDisableSeller={handleUserOnEditRoles}
             onResetPassword={handleUserOnResetPassword}
           />
         );
@@ -579,6 +717,43 @@ const AdminPage = () => {
         <h2 className="text-2xl font-bold mb-4">{activeTab}</h2>
         {renderContent()}
       </div>
+      {isEditDialogOpen && selectedUser && (
+        <EditUserDialog
+          roles={selectedUser.roles}
+          isOpen={isEditDialogOpen}
+          onClose={handleCloseDialog}
+          user={selectedUser}
+          onSave={(updatedData) => {
+            // Handle save logic here (e.g., update user data)
+            setUsers((users) =>
+              users.map((user) =>
+                user.userId === updatedData.userId
+                  ? convertFormDataToUser(updatedData)
+                  : user
+              )
+            );
+            console.log("Updated User Data:", updatedData);
+            handleCloseDialog(); // Close the dialog after saving
+          }}
+        />
+      )}
+
+      {isEditRoleOpen && selectedUser && (
+        <RoleStatusDialog
+          isOpen={isEditRoleOpen}
+          onClose={handleCloseRoleDialog}
+          onConfirm={handleConfirmDisableRole}
+        />
+      )}
+
+      {isEditStatusOpen && selectedUser && (
+        <AccountStatusDialog
+          isOpen={isEditStatusOpen}
+          onClose={handleCloseStatusDialog}
+          isActive={isActive}
+          onConfirm={handleConfirmStatus}
+        />
+      )}
 
       {isRoleModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">

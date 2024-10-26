@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Entities;
+
 namespace Repositories.Core.Context;
 
 public partial class TicketResellManagementContext : DbContext
@@ -17,9 +18,13 @@ public partial class TicketResellManagementContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<Chat> Chats { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+
+    public virtual DbSet<Rating> Ratings { get; set; }
 
     public virtual DbSet<Revenue> Revenues { get; set; }
 
@@ -30,11 +35,9 @@ public partial class TicketResellManagementContext : DbContext
     public virtual DbSet<Ticket> Tickets { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-    
-    public virtual DbSet<Chat> Chats { get; set; }
-    
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("SQLSERVER"));
+        => optionsBuilder.UseSqlServer("Name=SQLServer");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +51,34 @@ public partial class TicketResellManagementContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Name).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<Chat>(entity =>
+        {
+            entity.ToTable("Chat");
+
+            entity.HasIndex(e => e.ReceiverId, "IX_Chat_ReceiverId");
+
+            entity.HasIndex(e => e.SenderId, "IX_Chat_SenderId");
+
+            entity.Property(e => e.ChatId).HasDefaultValue("");
+            entity.Property(e => e.Message).HasMaxLength(1000);
+            entity.Property(e => e.ReceiverId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.SenderId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Receiver).WithMany(p => p.ChatReceivers)
+                .HasForeignKey(d => d.ReceiverId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Chat_Receiver");
+
+            entity.HasOne(d => d.Sender).WithMany(p => p.ChatSenders)
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Chat_Sender");
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -64,6 +95,7 @@ public partial class TicketResellManagementContext : DbContext
             entity.Property(e => e.BuyerId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.PaymentMethod).HasMaxLength(50);
 
             entity.HasOne(d => d.Buyer).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.BuyerId)
@@ -97,6 +129,36 @@ public partial class TicketResellManagementContext : DbContext
             entity.HasOne(d => d.Ticket).WithMany(p => p.OrderDetails)
                 .HasForeignKey(d => d.TicketId)
                 .HasConstraintName("FK__OrderDeta__Ticke__4BAC3F29");
+        });
+
+        modelBuilder.Entity<Rating>(entity =>
+        {
+            entity.HasKey(e => e.RatingId).HasName("PK__Rating__FCCDF87C6FC41DB2");
+
+            entity.ToTable("Rating");
+
+            entity.Property(e => e.RatingId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.CreateDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.SellerId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.UserId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Seller).WithMany(p => p.RatingSellers)
+                .HasForeignKey(d => d.SellerId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Rating_Seller");
+
+            entity.HasOne(d => d.User).WithMany(p => p.RatingUsers)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Rating_User");
         });
 
         modelBuilder.Entity<Revenue>(entity =>
@@ -236,9 +298,7 @@ public partial class TicketResellManagementContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Sex).HasMaxLength(10);
-            entity.Property(e => e.Username)
-                .HasMaxLength(100)
-                .IsUnicode(false);
+            entity.Property(e => e.Username).HasMaxLength(100);
 
             entity.HasOne(d => d.SellConfig).WithMany(p => p.Users)
                 .HasForeignKey(d => d.SellConfigId)
@@ -269,37 +329,6 @@ public partial class TicketResellManagementContext : DbContext
                     });
         });
 
-        modelBuilder.Entity<Chat>(entity =>
-        {
-            entity.HasKey(e => e.ChatId);
-
-            entity.ToTable("Chat");
-
-            entity.Property(e => e.SenderId)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-
-            entity.Property(e => e.ReceiverId)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-
-            entity.Property(e => e.Message)
-                .IsRequired()
-                .HasMaxLength(1000);
-
-            entity.HasOne(d => d.Sender)
-                .WithMany()
-                .HasForeignKey(d => d.SenderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Chat_Sender");
-
-            entity.HasOne(d => d.Receiver)
-                .WithMany()
-                .HasForeignKey(d => d.ReceiverId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Chat_Receiver");
-        });
-        
         OnModelCreatingPartial(modelBuilder);
     }
 

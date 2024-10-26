@@ -45,7 +45,12 @@ namespace Repositories.Migrations
             modelBuilder.Entity("Repositories.Core.Entities.Chat", b =>
                 {
                     b.Property<string>("ChatId")
-                        .HasColumnType("nvarchar(450)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)")
+                        .HasDefaultValue("");
+
+                    b.Property<DateTime?>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -66,9 +71,9 @@ namespace Repositories.Migrations
 
                     b.HasKey("ChatId");
 
-                    b.HasIndex("ReceiverId");
+                    b.HasIndex(new[] { "ReceiverId" }, "IX_Chat_ReceiverId");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex(new[] { "SenderId" }, "IX_Chat_SenderId");
 
                     b.ToTable("Chat", (string)null);
                 });
@@ -87,6 +92,10 @@ namespace Repositories.Migrations
 
                     b.Property<DateTime?>("Date")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("Status")
                         .HasColumnType("int");
@@ -133,6 +142,45 @@ namespace Repositories.Migrations
                     b.HasIndex(new[] { "TicketId" }, "IX_OrderDetail_TicketId");
 
                     b.ToTable("OrderDetail", (string)null);
+                });
+
+            modelBuilder.Entity("Repositories.Core.Entities.Rating", b =>
+                {
+                    b.Property<string>("RatingId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("SellerId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int?>("Stars")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("RatingId")
+                        .HasName("PK__Rating__FCCDF87C6FC41DB2");
+
+                    b.HasIndex("SellerId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Rating", (string)null);
                 });
 
             modelBuilder.Entity("Repositories.Core.Entities.Revenue", b =>
@@ -338,8 +386,7 @@ namespace Repositories.Migrations
 
                     b.Property<string>("Username")
                         .HasMaxLength(100)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int?>("Verify")
                         .HasColumnType("int");
@@ -395,13 +442,13 @@ namespace Repositories.Migrations
             modelBuilder.Entity("Repositories.Core.Entities.Chat", b =>
                 {
                     b.HasOne("Repositories.Core.Entities.User", "Receiver")
-                        .WithMany()
+                        .WithMany("ChatReceivers")
                         .HasForeignKey("ReceiverId")
                         .IsRequired()
                         .HasConstraintName("FK_Chat_Receiver");
 
                     b.HasOne("Repositories.Core.Entities.User", "Sender")
-                        .WithMany()
+                        .WithMany("ChatSenders")
                         .HasForeignKey("SenderId")
                         .IsRequired()
                         .HasConstraintName("FK_Chat_Sender");
@@ -436,6 +483,25 @@ namespace Repositories.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Ticket");
+                });
+
+            modelBuilder.Entity("Repositories.Core.Entities.Rating", b =>
+                {
+                    b.HasOne("Repositories.Core.Entities.User", "Seller")
+                        .WithMany("RatingSellers")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Rating_Seller");
+
+                    b.HasOne("Repositories.Core.Entities.User", "User")
+                        .WithMany("RatingUsers")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Rating_User");
+
+                    b.Navigation("Seller");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Repositories.Core.Entities.Revenue", b =>
@@ -515,7 +581,15 @@ namespace Repositories.Migrations
 
             modelBuilder.Entity("Repositories.Core.Entities.User", b =>
                 {
+                    b.Navigation("ChatReceivers");
+
+                    b.Navigation("ChatSenders");
+
                     b.Navigation("Orders");
+
+                    b.Navigation("RatingSellers");
+
+                    b.Navigation("RatingUsers");
 
                     b.Navigation("Revenues");
 

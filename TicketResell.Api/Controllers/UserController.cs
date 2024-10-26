@@ -36,6 +36,30 @@ namespace Repositories.Controllers
             return ResponseParser.Result(response);
         }
 
+        [HttpDelete]
+        [Route("deleteseller/{id}")]
+        public async Task<IActionResult> DeleteSell(string id)
+        {
+            //if (!HttpContext.GetIsAuthenticated())
+            //    return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to remove a seller."));
+
+            var response = await _userService.RemoveSeller(id);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPut]
+        [Route("addseller/{id}")]
+        public async Task<IActionResult> AddSeller(string id)
+        {
+            //if (!HttpContext.GetIsAuthenticated())
+            //    return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to remove a seller."));
+
+            var response = await _userService.AddSeller(id);
+            return ResponseParser.Result(response);
+        }
+
+
+
         [HttpPost]
         [Route("createtwo")]
         public async Task<IActionResult> CreateTwoUser([FromBody] UserCreateDto dto)
@@ -79,7 +103,16 @@ namespace Repositories.Controllers
             var response = await _userService.GetAllUser();
             return ResponseParser.Result(response);
         }
+        [HttpPut]
+        [Route("updateadmin/{id}")]
+        public async Task<IActionResult> UpdateUserByAdmin(string id, [FromBody]  UserUpdateByAdminDto dto)
+        {
+            //if (!HttpContext.GetIsAuthenticated())
+            //    return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a user."));
 
+            var response = await _userService.UpdateUserAdminByIdAsync(id, dto);
+            return ResponseParser.Result(response);
+        }
         [HttpPut]
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDto dto)
@@ -90,6 +123,18 @@ namespace Repositories.Controllers
             var response = await _userService.UpdateUserByIdAsync(id, dto);
             return ResponseParser.Result(response);
         }
+
+        [HttpPut]
+        [Route("updaterole/{id}")]
+        public async Task<IActionResult> UpdateRole(string id, [FromBody] List<Role> roles)
+        {
+            //if (!HttpContext.GetIsAuthenticated())
+            //    return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a user."));
+
+            var response = await _userService.UpdateRoleAsync(id, roles);
+            return ResponseParser.Result(response);
+        }
+
 
         [HttpGet]
         [Route("check/{id}")]
@@ -110,6 +155,14 @@ namespace Repositories.Controllers
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to delete a user."));
 
             var response = await _userService.DeleteUserByIdAsync(id);
+            return ResponseParser.Result(response);
+        }
+
+        [HttpPut]
+        [Route("updatestatus/{id}")]
+        public async Task<IActionResult> UpdateStatus(string id)
+        {
+            var response = await _userService.ChangeUserStatusAsync(id);
             return ResponseParser.Result(response);
         }
     }

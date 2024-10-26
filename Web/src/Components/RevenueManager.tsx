@@ -9,7 +9,13 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { Calendar, BarChart3, Check, LockIcon, TrendingUp } from "lucide-react";
+import {
+  Calendar,
+  Check,
+  LockIcon,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 
 interface RevenueItem {
   revenueId: string;
@@ -33,9 +39,30 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
     (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
   );
 
+  const calculateAverageDailyRateForToday = (
+    revenueData: RevenueItem[]
+  ): number => {
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date();
+    const todayString = today.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+
+    // Filter revenues that match today's date and sum their revenue1 values
+    const totalRevenueToday = revenueData
+      .filter((item) => item.startDate === todayString) // Assuming startDate indicates when the revenue is considered for today
+      .reduce((total, item) => total + item.revenue1, 0);
+
+    // Count the number of revenue entries for today
+    const numberOfEntries = revenueData.filter(
+      (item) => item.startDate === todayString
+    ).length;
+
+    // Calculate and return the Average Daily Rate (ADR)
+    return numberOfEntries > 0 ? totalRevenueToday / numberOfEntries : 0;
+  };
+
   const calculatePercentageChangeTodayYesterday = (
     revenueData: RevenueItem[]
-  ): string => {
+  ): number => {
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
@@ -63,12 +90,78 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
       .reduce((total, item) => total + item.revenue1, 0);
 
     if (yesterdayRevenue === 0) {
-      return todayRevenue > 0 ? "100.00" : "0.00";
+      return todayRevenue > 0 ? 100 : 0;
     }
 
     const percentageChange =
       ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100;
-    return percentageChange.toFixed(2);
+    return percentageChange;
+  };
+
+  const calculatePercentageChangeMonth = (
+    month: number,
+    year: number,
+    revenueData: RevenueItem[]
+  ): number => {
+    const lastMonth = new Date(year, month - 1);
+    const currentMonth = new Date(year, month);
+
+    const currentMonthRevenue = revenueData
+      .filter((item) => {
+        const itemDate = new Date(item.startDate);
+        return (
+          itemDate.getFullYear() === currentMonth.getFullYear() &&
+          itemDate.getMonth() === currentMonth.getMonth()
+        );
+      })
+      .reduce((total, item) => total + item.revenue1, 0);
+
+    const lastMonthRevenue = revenueData
+      .filter((item) => {
+        const itemDate = new Date(item.startDate);
+        return (
+          itemDate.getFullYear() === lastMonth.getFullYear() &&
+          itemDate.getMonth() === lastMonth.getMonth()
+        );
+      })
+      .reduce((total, item) => total + item.revenue1, 0);
+
+    if (lastMonthRevenue === 0) {
+      return currentMonthRevenue > 0 ? 100 : 0;
+    }
+
+    const percentageChange =
+      ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+    return percentageChange;
+  };
+
+  const calculatePercentageChangeYear = (
+    year: number,
+    revenueData: RevenueItem[]
+  ): number => {
+    const lastYear = year - 1;
+
+    const currentYearRevenue = revenueData
+      .filter((item) => {
+        const itemDate = new Date(item.startDate);
+        return itemDate.getFullYear() === year;
+      })
+      .reduce((total, item) => total + item.revenue1, 0);
+
+    const lastYearRevenue = revenueData
+      .filter((item) => {
+        const itemDate = new Date(item.startDate);
+        return itemDate.getFullYear() === lastYear;
+      })
+      .reduce((total, item) => total + item.revenue1, 0);
+
+    if (lastYearRevenue === 0) {
+      return currentYearRevenue > 0 ? 100 : 0;
+    }
+
+    const percentageChange =
+      ((currentYearRevenue - lastYearRevenue) / lastYearRevenue) * 100;
+    return percentageChange;
   };
 
   const calculateDayRevenue = (
@@ -147,18 +240,27 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
     value: string;
     change: string;
     subtitle: string;
+    changeClass: string;
   }) => (
-    <Card className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div className="space-y-1">
+    <Card className="p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="space-y-2">
         <div className="text-sm text-slate-500 flex items-center gap-2">
           {title}
           <LockIcon className="w-4 h-4 text-slate-400" />
         </div>
-        <div className="text-3xl font-bold text-slate-900 truncate">
+        <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 truncate">
           {value}
         </div>
-        <div className="flex items-center gap-1 text-emerald-500 text-sm font-medium">
-          <TrendingUp className="w-4 h-4" />
+        <div
+          className={`flex items-center gap-1 text-sm font-medium ${
+            parseFloat(change) >= 0 ? "text-green-500" : "text-red-500"
+          }`}
+        >
+          {parseFloat(change) >= 0 ? (
+            <TrendingUp className="w-4 h-4" />
+          ) : (
+            <TrendingDown className="w-4 h-4 text-red-500" />
+          )}
           <span>{change}%</span>
           <span className="text-slate-500 font-normal">{subtitle}</span>
         </div>
@@ -172,15 +274,6 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
     return `${date.getDate()}/${date.getMonth() + 1}`;
   };
 
-  // Generate Y-axis ticks
-  const getYAxisTicks = () => {
-    const maxRevenue = Math.max(
-      ...sortedRevenueData.map((item) => item.revenue1)
-    );
-    const step = Math.ceil(maxRevenue / 4 / 100) * 100;
-    return [0, step, step * 2, step * 3, step * 4];
-  };
-
   // Format Y-axis values
   const formatYAxis = (value: number) => {
     if (value >= 1000) {
@@ -192,9 +285,17 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
   // Custom tooltip
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+      // Adjust label formatting based on the selected timeframe (e.g., day, month, year)
+      const formattedLabel =
+        timeframe === "day"
+          ? formatDate(label)
+          : timeframe === "month"
+          ? `${label}`
+          : `${label}`; // For year
+
       return (
         <div className="bg-white p-3 shadow-lg rounded-lg border border-slate-100">
-          <p className="text-sm text-slate-600">{formatDate(label)}</p>
+          <p className="text-sm text-slate-600">{formattedLabel}</p>
           <p className="text-sm font-bold text-slate-900">
             {formatCurrency(payload[0].value)}
           </p>
@@ -203,64 +304,168 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
     }
     return null;
   };
+  const percentageChange =
+    calculatePercentageChangeTodayYesterday(sortedRevenueData);
+
+  const monthlyPercentageChange = calculatePercentageChangeMonth(
+    today.getMonth(),
+    today.getFullYear(),
+    sortedRevenueData
+  );
+  const yearlyPercentageChange = calculatePercentageChangeYear(
+    today.getFullYear(),
+    sortedRevenueData
+  );
+
+  const dailyChangeFormatted =
+    (percentageChange >= 0 ? "+" : "") +
+    percentageChange.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  const monthlyChangeFormatted =
+    (monthlyPercentageChange >= 0 ? "+" : "") +
+    monthlyPercentageChange.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  const yearlyChangeFormatted =
+    (yearlyPercentageChange >= 0 ? "+" : "") +
+    yearlyPercentageChange.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+  // Determine classes based on percentage changes
+  const dailyChangeClass =
+    percentageChange >= 0 ? "text-green-500 " : "text-red-500 ";
+  const monthlyChangeClass =
+    monthlyPercentageChange >= 0 ? "text-green-500" : "text-red-500 ";
+  const yearlyChangeClass =
+    yearlyPercentageChange >= 0 ? "text-green-500 " : "text-red-500 ";
+
+  const getMaxRevenue = () => {
+    const data = getFilteredRevenueData(); // Get filtered data based on the timeframe
+
+    // Ensure 'data' is defined and not empty, otherwise return 0 as default
+    if (!data || data.length === 0) {
+      return 0;
+    }
+
+    return Math.max(...data.map((item) => item.value)); // Get the maximum revenue
+  };
+
+  const getFilteredRevenueData = () => {
+    if (timeframe === "day") {
+      return sortedRevenueData.map((item) => ({
+        name: item.startDate,
+        value: item.revenue1,
+      }));
+    } else if (timeframe === "month") {
+      // Group by month
+      const groupedByMonth = sortedRevenueData.reduce(
+        (acc: Record<number, { name: string; value: number }>, item) => {
+          const month = new Date(item.startDate).getMonth() + 1;
+          const year = new Date(item.startDate).getFullYear();
+          if (!acc[month]) {
+            acc[month] = { name: `${month}/${year}`, value: 0 };
+          }
+          acc[month].value += item.revenue1;
+          return acc;
+        },
+        {} as Record<number, { name: string; value: number }>
+      );
+
+      return Object.values(groupedByMonth);
+    } else if (timeframe === "year") {
+      // Group by year
+      const groupedByYear = sortedRevenueData.reduce(
+        (acc: Record<number, { name: string; value: number }>, item) => {
+          const year = new Date(item.startDate).getFullYear();
+          if (!acc[year]) {
+            acc[year] = { name: `${year}`, value: 0 };
+          }
+          acc[year].value += item.revenue1;
+          return acc;
+        },
+        {} as Record<number, { name: string; value: number }>
+      );
+
+      return Object.values(groupedByYear);
+    }
+  };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
       {/* Main Revenue Chart Card */}
-      <Card className="w-full p-8 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <Card className="w-full p-4 sm:p-6 lg:p-8 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200">
+        <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-8">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <h2 className="text-4xl font-bold text-slate-900">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
                 {formatCurrency(
                   sortedRevenueData.length ? sortedRevenueData[0].revenue1 : 0
                 )}
               </h2>
-              <span className="px-2 py-1 text-sm font-medium text-green-500 bg-green-50 rounded-full">
-                +{calculatePercentageChangeTodayYesterday(sortedRevenueData)}%
+              <span
+                className={`inline-flex px-2 py-1 text-sm font-medium ${
+                  percentageChange >= 0
+                    ? "text-green-500 bg-green-50"
+                    : "text-red-500 bg-red-50"
+                } rounded-full`}
+              >
+                {percentageChange >= 0 ? "+" : ""}
+                {percentageChange.toFixed(2)}%
               </span>
             </div>
             <p className="text-sm text-slate-500">Total Revenue</p>
-            <div className="flex items-center gap-2 text-sm text-green-500">
-              <Check size={16} className="text-green-500" />
-              <span>On track</span>
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <div className="flex items-center gap-1">
+                <Check size={16} className="text-green-500" />
+                <span className="text-green-500">On track</span>
+              </div>
+              <span className="px-2 py-1 text-sm font-medium text-blue-500 bg-blue-50 rounded-lg whitespace-nowrap">
+                ADR:{" "}
+                {calculateAverageDailyRateForToday(
+                  sortedRevenueData
+                ).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <select
-                value={timeframe}
-                onChange={(e) => setTimeframe(e.target.value)}
-                className="appearance-none bg-slate-50 text-sm rounded-lg px-4 py-2 pr-8 text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-slate-100 transition-colors duration-200"
-              >
-                {[
-                  { label: "This day", value: "day" },
-                  { label: "This month", value: "month" },
-                  { label: "This year", value: "year" },
-                ].map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-            </div>
-
-            <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all duration-200">
-              <BarChart3 className="w-4 h-4" />
-            </button>
+          <div className="relative w-full sm:w-auto">
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value)}
+              className="w-full sm:w-auto appearance-none bg-slate-50 text-sm rounded-xl px-4 py-2 pr-8 text-slate-600 focus:outline-none duration-200"
+            >
+              {[
+                { label: "This day", value: "day" },
+                { label: "This month", value: "month" },
+                { label: "This year", value: "year" },
+              ].map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
         </div>
 
-        <div className="h-[300px] w-full">
+        <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={sortedRevenueData.map((item) => ({
-                name: item.startDate,
-                value1: item.revenue1,
-              }))}
-              margin={{ top: 20, right: 30, left: 60, bottom: 20 }}
+              data={getFilteredRevenueData()}
+              margin={{
+                top: 20,
+                right: 10,
+                left: 10,
+                bottom: 20,
+              }}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -272,21 +477,27 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "#94a3b8", fontSize: 12 }}
-                tickFormatter={formatDate}
+                tickFormatter={
+                  timeframe === "day" ? formatDate : (name) => name
+                }
                 dy={10}
+                interval="preserveStartEnd"
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "#94a3b8", fontSize: 12 }}
-                ticks={getYAxisTicks()}
+                ticks={Array.from(
+                  { length: 5 },
+                  (_, i) => (i * getMaxRevenue()) / 4
+                )}
                 tickFormatter={formatYAxis}
                 dx={-10}
               />
               <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
-                dataKey="value1"
+                dataKey="value"
                 stroke="#7c3aed"
                 strokeWidth={2.5}
                 dot={false}
@@ -298,12 +509,13 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <StatCard
           title="Daily Revenue"
           value={formatCurrency(calculateDayRevenue(today, sortedRevenueData))}
-          change={calculatePercentageChangeTodayYesterday(sortedRevenueData)}
+          change={dailyChangeFormatted}
           subtitle={`${today.getDate()}/${today.getMonth() + 1}`}
+          changeClass={dailyChangeClass}
         />
         <StatCard
           title="Monthly Revenue"
@@ -314,16 +526,18 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
               sortedRevenueData
             )
           )}
-          change={calculatePercentageChangeTodayYesterday(sortedRevenueData)}
+          change={monthlyChangeFormatted}
           subtitle={`From ${today.getMonth() + 1}`}
+          changeClass={monthlyChangeClass}
         />
         <StatCard
           title="Yearly Revenue"
           value={formatCurrency(
             calculateYearRevenue(today.getFullYear(), sortedRevenueData)
           )}
-          change={calculatePercentageChangeTodayYesterday(sortedRevenueData)}
+          change={yearlyChangeFormatted}
           subtitle={`From ${today.getFullYear()}`}
+          changeClass={yearlyChangeClass}
         />
       </div>
     </div>

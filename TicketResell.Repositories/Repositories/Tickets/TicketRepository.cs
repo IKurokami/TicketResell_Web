@@ -332,11 +332,13 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<List<Ticket>> GetTicketsByBaseIdAsync(string baseId)
     {
-        return await _context.Tickets
+        var newbaseId = baseId.Split('_')[0];
+        var tickets = await _context.Tickets
             .Include(x => x.Seller)
             .Include(x => x.Categories)
-            .Where(t => t.TicketId.StartsWith(baseId) && t.Status==1)
+            .Where(t => t.TicketId.StartsWith(newbaseId) && t.Status==1)
             .ToListAsync();
+        return tickets;
     }
 
     public async Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId)

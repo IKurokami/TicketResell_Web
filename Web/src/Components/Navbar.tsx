@@ -15,6 +15,7 @@ import { LogIn } from "lucide-react";
 
 import { CheckSeller } from "./CheckSeller";
 import { NumberContext } from "./NumberContext";
+import { checkLogin } from "./checkLogin";
 interface NavbarProps {
   page: string;
 }
@@ -138,14 +139,19 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const handleSellClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     // Fetch seller status
-    const status = await CheckSeller();
-    console.log("Seller Status: ", status); // Log the status
-    // Routing or popup logic
-    if (status) {
-      router.push("/sell");
+    const check = await checkLogin();
+    if (check == "False") {
+      router.push("/login");
     } else {
-      console.log("User is not a seller, showing popup");
-      setIsPopupVisible(true);
+      const status = await CheckSeller();
+      console.log("Seller Status: ", status); // Log the status
+      // Routing or popup logic
+      if (status) {
+        router.push("/sell");
+      } else {
+        console.log("User is not a seller, showing popup");
+        setIsPopupVisible(true);
+      }
     }
   };
   const closeDropdown = () => {
@@ -218,8 +224,8 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     } else {
       console.log("Failed to log out. Please try again.");
     }
-
     removeAllCookies();
+
   };
 
   return (
