@@ -1,10 +1,16 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { PlusCircle, Search, Send } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { PlusCircle, Search, Send, Menu } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
-import { Button } from "@/Components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/Components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
+import Cookies from "js-cookie";
+import * as signalR from "@microsoft/signalr";
 
 interface User {
   userId: string;
@@ -19,11 +25,12 @@ interface User {
   bio: string;
 }
 
-interface Message {
-  id: string;
+interface ChatMessage {
   senderId: string;
-  content: string;
-  timestamp: Date;
+  receiverId: string;
+  message: string;
+  chatId: string;
+  date: string | null;
 }
 
 const UserManagement = () => {
@@ -33,10 +40,15 @@ const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Partial<User>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState("Disconnected");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Fetch users
     fetch("http://localhost:5296/api/User/read")
       .then((response) => response.json())
       .then((data) => {
@@ -49,7 +61,94 @@ const UserManagement = () => {
       .catch((error) => {
         console.error("Error fetching users:", error);
       });
+
+    // Initialize SignalR connection
+    setupSignalRConnection();
+
+    return () => {
+      if (hubConnectionRef.current) {
+        hubConnectionRef.current.stop();
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  const setupSignalRConnection = async () => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5296/chat-hub", {
+        withCredentials: true,
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    hubConnectionRef.current = connection;
+
+    connection.on("Welcome", (message: any) => {
+      console.log(message);
+      setConnectionStatus("Connected");
+    });
+
+    connection.on("Logged", (message: any) => {
+      console.log(message);
+      setConnectionStatus("Authenticated");
+    });
+
+    connection.on("LoginFail", (message: any) => {
+      console.error(message);
+      setConnectionStatus("Authentication Failed");
+    });
+
+    connection.on("ReceiveMessage", (senderId: string, message: string) => {
+      const newMessage: ChatMessage = {
+        senderId,
+        receiverId: Cookies.get("id") || "",
+        message,
+        chatId: Date.now().toString(),
+        date: new Date().toISOString(),
+      };
+      setChatMessages((prev) => [...prev, newMessage]);
+    });
+
+    try {
+      await connection.start();
+      const userId = Cookies.get("id");
+      const accessKey = Cookies.get("accessKey");
+
+      if (userId && accessKey) {
+        await connection.invoke("LoginAsync", userId, accessKey);
+      }
+    } catch (err) {
+      console.error("Error establishing connection:", err);
+      setConnectionStatus("Connection Failed");
+    }
+  };
+
+  const fetchChatMessages = async (receiverId: string) => {
+    try {
+      const senderID = Cookies.get("id");
+      const response = await fetch(
+        `http://localhost:5296/api/Chat/get/${senderID}/${receiverId}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (data.statusCode === 200 && data.data) {
+        setChatMessages(data.data);
+      } else {
+        console.error("Failed to fetch chat messages:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,50 +165,69 @@ const UserManagement = () => {
   const handleChat = (user: User) => {
     setSelectedUser(user);
     setIsChatOpen(true);
-    // In a real application, you would fetch chat history here
-    setMessages([
-      // Simulated messages for demonstration
-      {
-        id: "1",
-        senderId: "admin",
-        content: "Hello! How can I help you today?",
-        timestamp: new Date(),
-      },
-      {
-        id: "2",
-        senderId: user.userId,
-        content: "Hi! I have a question about my account.",
-        timestamp: new Date(),
-      },
-    ]);
+    fetchChatMessages(user.userId);
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !selectedUser || !hubConnectionRef.current)
+      return;
 
-    const message: Message = {
-      id: Date.now().toString(),
-      senderId: "admin",
-      content: newMessage,
-      timestamp: new Date(),
-    };
+    try {
+      await hubConnectionRef.current.invoke(
+        "SendMessageAsync",
+        selectedUser.userId,
+        newMessage
+      );
 
-    setMessages([...messages, message]);
-    setNewMessage("");
+      // Add message to local state immediately for UI feedback
+      const newChatMessage: ChatMessage = {
+        senderId: Cookies.get("id") || "",
+        receiverId: selectedUser.userId,
+        message: newMessage,
+        chatId: Date.now().toString(),
+        date: new Date().toISOString(),
+      };
+      setChatMessages((prev) => [...prev, newChatMessage]);
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   const filteredUsers = users.filter(
     (user) =>
       (user.fullname &&
         user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.gmail && user.gmail.toLowerCase().includes(searchTerm.toLowerCase()))
+      (user.userId &&
+        user.userId.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const formatMessageDate = (date: string | null) => {
+    if (!date) return "";
+    return new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>User Management</CardTitle>
+        <div className="flex items-center space-x-4">
+          <CardTitle>User Management</CardTitle>
+          <span
+            className={`text-sm ${
+              connectionStatus === "Authenticated"
+                ? "text-green-500"
+                : connectionStatus === "Connected"
+                ? "text-yellow-500"
+                : "text-red-500"
+            }`}
+          >
+            {connectionStatus}
+          </span>
+        </div>
         <div className="flex space-x-4">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
@@ -120,7 +238,12 @@ const UserManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button onClick={() => { setFormData({}); setIsOpen(true); }}>
+          <Button
+            onClick={() => {
+              setFormData({});
+              setIsOpen(true);
+            }}
+          >
             <PlusCircle className="mr-2 h-4 w-4" />
             Add User
           </Button>
@@ -142,7 +265,7 @@ const UserManagement = () => {
               {filteredUsers.map((user) => (
                 <tr key={user.userId} className="border-b hover:bg-gray-50">
                   <td className="py-3 px-4">{user.fullname}</td>
-                  <td className="py-3 px-4">{user.gmail}</td>
+                  <td className="py-3 px-4">{user.userId}</td>
                   <td className="py-3 px-4">{user.phone}</td>
                   <td className="py-3 px-4">{user.address}</td>
                   <td className="py-3 px-4">
@@ -151,21 +274,20 @@ const UserManagement = () => {
                       size="sm"
                       onClick={() => handleChat(user)}
                       className="relative flex items-center justify-center w-10 h-10 rounded-full 
-    bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
-    border-none text-white shadow-md
-    hover:shadow-lg hover:scale-105
-    transition-all duration-200 ease-in-out"
+                        bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+                        border-none text-white shadow-md
+                        hover:shadow-lg hover:scale-105
+                        transition-all duration-200 ease-in-out"
                     >
                       <span className="text-xl transition-transform duration-200 group-hover:scale-110 drop-shadow-md">
                         💬
                       </span>
-
-                      {/* Hiệu ứng ripple khi hover */}
-                      <span className="absolute inset-0 rounded-full bg-white opacity-0 
-    hover:opacity-20 transition-opacity duration-200"></span>
+                      <span
+                        className="absolute inset-0 rounded-full bg-white opacity-0 
+                        hover:opacity-20 transition-opacity duration-200"
+                      ></span>
                     </Button>
                   </td>
-
                 </tr>
               ))}
             </tbody>
@@ -185,7 +307,9 @@ const UserManagement = () => {
                 <label className="text-sm font-medium">Full Name</label>
                 <Input
                   value={formData.fullname || ""}
-                  onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, fullname: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -193,8 +317,10 @@ const UserManagement = () => {
                 <label className="text-sm font-medium">Email</label>
                 <Input
                   type="email"
-                  value={formData.gmail || ""}
-                  onChange={(e) => setFormData({ ...formData, gmail: e.target.value })}
+                  value={formData.userId || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, gmail: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -202,7 +328,9 @@ const UserManagement = () => {
                 <label className="text-sm font-medium">Phone</label>
                 <Input
                   value={formData.phone || ""}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -211,7 +339,9 @@ const UserManagement = () => {
                 <select
                   className="w-full rounded-md border border-gray-300 p-2"
                   value={formData.sex || ""}
-                  onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, sex: e.target.value })
+                  }
                   required
                 >
                   <option value="">Select gender</option>
@@ -223,7 +353,9 @@ const UserManagement = () => {
                 <label className="text-sm font-medium">Address</label>
                 <Input
                   value={formData.address || ""}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -232,7 +364,9 @@ const UserManagement = () => {
                 <textarea
                   className="w-full rounded-md border border-gray-300 p-2"
                   value={formData.bio || ""}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bio: e.target.value })
+                  }
                   rows={3}
                 />
               </div>
@@ -251,28 +385,38 @@ const UserManagement = () => {
             <DialogTitle>Chat with {selectedUser?.fullname}</DialogTitle>
           </DialogHeader>
           <div className="h-96 flex flex-col">
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
+            <div
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto p-4 space-y-4"
+            >
+              {chatMessages.map((message) => (
                 <div
-                  key={message.id}
-                  className={`flex ${message.senderId === "admin" ? "justify-end" : "justify-start"
-                    }`}
+                  key={message.chatId}
+                  className={`flex ${
+                    message.senderId === Cookies.get("id")
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
                 >
                   <div
-                    className={`max-w-[70%] rounded-lg p-3 ${message.senderId === "admin"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100"
-                      }`}
+                    className={`max-w-[70%] rounded-lg p-3 ${
+                      message.senderId === Cookies.get("id")
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100"
+                    }`}
                   >
-                    <p>{message.content}</p>
+                    <p className="break-all">{message.message}</p>
                     <span className="text-xs opacity-70">
-                      {message.timestamp.toLocaleTimeString()}
+                      {formatMessageDate(message.date)}
                     </span>
                   </div>
                 </div>
               ))}
             </div>
-            <form onSubmit={handleSendMessage} className="p-4 border-t flex gap-2">
+            <form
+              onSubmit={handleSendMessage}
+              className="p-4 border-t flex gap-2"
+            >
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}

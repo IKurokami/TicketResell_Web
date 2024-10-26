@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Core.Entities;
 using TicketResell.Repositories.Logger;
@@ -17,9 +18,18 @@ public class ChatRepository : GenericRepository<Chat>, IChatRepository
 
     public async Task<Chat> CreateChatAsync(Chat chat)
     {
-        chat.ChatId = Guid.NewGuid().ToString();
         await _context.Chats.AddAsync(chat);
-        
         return chat;
+    }
+
+    public async Task<IEnumerable<Chat>> GetChatsBySenderIdToReceiverIdAsync(string senderId, string receiverId)
+    {
+        if (string.IsNullOrWhiteSpace(senderId) || string.IsNullOrWhiteSpace(receiverId))
+            return [];
+
+        var chats = await _context.Chats.Where(c => (c.SenderId == senderId && c.ReceiverId == receiverId) || (c.ReceiverId ==
+            senderId && c.SenderId == receiverId)).Include(c => c.Receiver).OrderBy(c => c.Date).ToListAsync();
+        
+        return chats;
     }
 }

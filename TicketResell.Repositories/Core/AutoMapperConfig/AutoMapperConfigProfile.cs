@@ -10,6 +10,7 @@ using Repositories.Core.Dtos.Role;
 using Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Core.Dtos.Cart;
+using TicketResell.Repositories.Core.Dtos.Chat;
 using Category = Repositories.Core.Entities.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 
@@ -61,8 +62,9 @@ namespace Repositories.Core.AutoMapperConfig
                 .ForMember(dest => dest.order, opt => opt.MapFrom(src => src.Order));
 
 
-
-
+            //Chat
+            CreateMap<Chat, ChatReadDto>();
+            
             //Cart
             CreateMap<Order, CartDto>();
 
