@@ -1,7 +1,6 @@
 import useShowItem from "@/Hooks/useShowItem";
-import { promises } from "dns";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { fetchImage } from "./FetchImage";
 import Image from "next/image";
 
@@ -13,10 +12,28 @@ export interface BannerItemCard {
   description: string;
   price: string;
   id: string;
+  categories: string;
 }
 
 const DEFAULT_IMAGE =
   "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
+
+// Hàm định dạng giá
+const formatPrice = (price: string): string => {
+  const priceNumber = parseFloat(price); // Chuyển đổi chuỗi thành số
+  return priceNumber.toLocaleString('vi-VN'); // Định dạng theo kiểu Việt Nam
+};
 
 const convertToBannerItemCards = async (
   response: any[]
@@ -42,11 +59,12 @@ const convertToBannerItemCards = async (
       return {
         imageUrl,
         name: item.name,
-        date: item.createDate,
+        date: formatDate(item.createDate), // Format the date here
         author: item.seller.fullname,
         description: item.description,
-        price: item.cost.toString(),
+        price: formatPrice(item.cost.toString()), // Định dạng giá ở đây
         id: item.ticketId,
+        categories: item.categories
       };
     })
   );
@@ -76,18 +94,36 @@ const BannerItemCard = ({ itemCart }: { itemCart: BannerItemCard }) => {
       <Image
         src={itemCart.imageUrl}
         alt={itemCart.name}
-        width={50}
-        height={50}
+        width={90}
+        height={90}
       />
       <div className="overlay">
         <div className="description">
-          <div>
-            <h4>{itemCart.name}</h4>
-            <p>{itemCart.date}</p>
-            <p>By {itemCart.author}</p>
-            <p dangerouslySetInnerHTML={{ __html: itemCart.description }} />
+          <div className="mt-5">
+            <h4
+              style={{
+                whiteSpace: 'nowrap',  // Prevent line break
+                overflow: 'hidden',     // Hide overflow content
+                textOverflow: 'ellipsis', // Add ... for truncated text
+                width: '300px'          // Fixed width
+              }}
+            >
+              {itemCart.name}
+            </h4>
+            <p
+              style={{
+                whiteSpace: 'nowrap',  // Prevent line break
+                overflow: 'hidden',     // Hide overflow content
+                textOverflow: 'ellipsis', // Add ... for truncated text
+                width: '650px'          // Fixed width
+              }}
+            >
+              Người bán: {itemCart.author}
+            </p>
+
+            <p>Giá: {itemCart.price} VND</p>
+            <p className="text-sm">Ngày diễn ra: {itemCart.date}</p>
           </div>
-          <p>{itemCart.price}</p>
         </div>
       </div>
     </div>

@@ -230,10 +230,10 @@ const TicketDetail = () => {
   }
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {/* Hero Section with Animated Gradient */}
-      <div className="relative h-64 bg-gradient-to-r from-green-600 via-green-500 to-green-400 overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-40"></div>
-        <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-20"></div>
+      {/* Hero Section with Solid White Background */}
+      <div className="relative h-64 bg-white overflow-hidden">
+        <div className="absolute inset-0 bg-black opacity-40"></div> {/* Lớp phủ đen */}
+        <div className="absolute inset-0 bg-white opacity-109"></div> {/* Họa tiết nền */}
         <div className="container mx-auto px-4 h-full flex items-end pb-16">
           <nav className="text-white/90 text-sm">
             <ol className="flex items-center space-x-2">
@@ -247,6 +247,7 @@ const TicketDetail = () => {
         </div>
       </div>
 
+
       <main className="container mx-auto px-4 -mt-32 pb-16 relative z-10">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column */}
@@ -255,7 +256,7 @@ const TicketDetail = () => {
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden group">
               <div className="relative">
                 <img
-                  className="w-full h-[400px] object-cover transform transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-[500px] object-cover transform transition-transform duration-500 group-hover:scale-105"
                   src={ticketresult?.imageUrl}
                   alt={ticketresult?.name}
                 />
