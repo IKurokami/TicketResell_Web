@@ -156,6 +156,7 @@ const MyCart: React.FC = () => {
 
   // Remove item from cart
   const handleRemoveItem = async (ticketId: string) => {
+    console.log("Try remove", ticketId);
     const userId = Cookies.get("id");
     try {
       await fetch(

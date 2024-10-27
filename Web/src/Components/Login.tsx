@@ -76,9 +76,7 @@ const Login: React.FC = () => {
               },
             }
           );
-
           const result = await response.json();
-
           if (!response.ok) {
             console.error("Lỗi đăng nhập:", result);
             setError(result.message || "Lỗi đăng nhập.");
@@ -86,11 +84,25 @@ const Login: React.FC = () => {
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);
             setLoginSuccessMessage("Đăng nhập thành công!");
+
+            // Determine navigation path based on user roles
+            let navigationPath = "/";
+            const userRoles = result.data.user.roles.map(
+              (role) => role.rolename
+            );
+
+            if (userRoles.includes("Admin")) {
+              navigationPath = "/admin";
+            } else if (userRoles.includes("Staff")) {
+              navigationPath = "/staff";
+            }
+
             setTimeout(() => {
               setLoginSuccessMessage(null);
             }, 3000);
+
             setTimeout(() => {
-              router.push("/");
+              router.push(navigationPath);
             }, 500);
           }
         } catch (error) {
@@ -99,7 +111,6 @@ const Login: React.FC = () => {
         }
       }
     };
-
     handleLogin();
   }, [session]);
 
@@ -179,8 +190,25 @@ const Login: React.FC = () => {
           Cookies.set("accessKey", result.data.accessKey);
         }
         notifySuccess("Đăng nhập thành công!");
+
+        // Determine navigation path based on user roles
+        let navigationPath = "/";
+        const userRoles = result.data.user.roles.map(
+          (role: any) => role.rolename
+        );
+
+        if (userRoles.includes("Admin")) {
+          navigationPath = "/admin";
+        } else if (userRoles.includes("Staff")) {
+          navigationPath = "/staff";
+        }
+
         setTimeout(() => {
-          router.push("/");
+          setLoginSuccessMessage(null);
+        }, 3000);
+
+        setTimeout(() => {
+          router.push(navigationPath);
         }, 500);
       }
     } catch (error) {
@@ -190,7 +218,6 @@ const Login: React.FC = () => {
   };
 
   const handleSignUp = async () => {
-
     if (!username || !name || !password) {
       notifyError("Vui lòng điền đầy đủ thông tin.");
       return;
@@ -198,7 +225,7 @@ const Login: React.FC = () => {
 
     try {
       const response = await getOTP(username);
-      if (response.status == 'Success') {
+      if (response.status == "Success") {
         setOtpSent(true);
         setTimer(300);
         notifySuccess(
@@ -220,7 +247,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      console.log("TESTTTT")
+      console.log("TESTTTT");
       const response = await fetch("/api/getOTP", {
         method: "POST",
         headers: {
@@ -233,11 +260,11 @@ const Login: React.FC = () => {
           otp: enteredOtp,
         }),
       });
-      
-      console.log("TESTTTT2")
+
+      console.log("TESTTTT2");
       const data = await response.json();
-      console.log("TESTTTT3")
-      console.log(data)
+      console.log("TESTTTT3");
+      console.log(data);
       if (response.ok) {
         notifySuccess("Xác minh OTP thành công! Đăng ký hoàn tất.");
         setActiveTab("login"); // Chuyển sang tab đăng nhập

@@ -172,6 +172,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
   };
 
   const renderActionButtons = (order: Order) => {
+    console.log("order ", order.status);
     switch (order.status) {
       case -1:
         return (
@@ -269,7 +270,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 w-16">
-                <span className="sr-only">Actions</span>
+                <span>Actions</span>
               </th>
             </tr>
           </thead>
@@ -306,7 +307,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
                     {order.orderDetails.length}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex justify-end space-x-2">
+                    <div className="flex justify-end">
                       {renderActionButtons(order)}
                     </div>
                   </td>

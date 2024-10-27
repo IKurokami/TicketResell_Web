@@ -86,7 +86,6 @@ public class ChatHub : Hub
 
         var sentChat = await chatService.CreateChatAsync(new Chat()
         {
-            ChatId = Guid.NewGuid().ToString(),
             SenderId = senderID,
             ReceiverId = receiverID,
             Message = sanitizedMessage,

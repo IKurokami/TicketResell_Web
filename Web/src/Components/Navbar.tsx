@@ -5,12 +5,12 @@ import "@/Css/Navbar.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useScroll } from "@/Hooks/useScroll";
 import { checkAccessKey } from "./Cookie";
-import { logoutUser } from "./Logout";
 import Cookies from "js-cookie";
-import { removeAllCookies } from "./Cookie";
 import { useRouter } from "next/navigation";
 import SellPopup from "./PopUp";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { removeAllCookies } from "./Cookie";
+import { logoutUser } from "./Logout";
 import { LogIn } from "lucide-react";
 
 import { CheckSeller } from "./CheckSeller";
