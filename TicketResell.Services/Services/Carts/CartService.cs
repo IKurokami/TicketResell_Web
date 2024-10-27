@@ -129,8 +129,9 @@ namespace TicketResell.Services.Services
             try
             {
                 await _unitOfWork.CartRepository.RemoveFromCartAsync(cart, ticketId);
+                
                 if (saveAll)
-                    _unitOfWork.CompleteAsync();
+                    await _unitOfWork.CompleteAsync();
                 return ResponseModel.Success($"Successfully removed item from cart: {ticketId}");
             }
             catch (Exception ex)
