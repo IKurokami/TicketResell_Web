@@ -34,14 +34,6 @@ namespace Repositories.Repositories
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
         }
 
-        public async Task<Order?> GetTicketDetailsByIdAsync(string orderId)
-        {
-            return await _context.Orders
-                .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Ticket)
-                .ThenInclude(t => t.Seller)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
-        }
 
 
         public async Task<IEnumerable<Order?>> GetOrdersByBuyerIdAsync(string buyerId)

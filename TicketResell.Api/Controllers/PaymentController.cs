@@ -1,7 +1,9 @@
+using Repositories.Core.Dtos.OrderDetail;
 using Repositories.Core.Dtos.Payment;
 using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Payments;
+using TicketResell.Services.Services.Revenues;
 
 namespace Api.Controllers
 {
@@ -14,7 +16,7 @@ namespace Api.Controllers
         private readonly IOrderService _orderService;
         private readonly IPaypalService _paypalService;
         private readonly ICartService _cartService;
-        private readonly IUserService _userService;
+        private readonly IRevenueService _revenueService;
 
         private readonly double _tax = 1.05;
 
@@ -25,7 +27,7 @@ namespace Api.Controllers
             _vnpayService = serviceProvider.GetRequiredService<IVnpayService>();
             _paypalService = serviceProvider.GetRequiredService<IPaypalService>();
             _cartService = serviceProvider.GetRequiredService<ICartService>();
-            _userService = serviceProvider.GetRequiredService<IUserService>();
+            _revenueService = serviceProvider.GetRequiredService<IRevenueService>();
         }
 
         [HttpPost("momo/payment")]
@@ -38,13 +40,17 @@ namespace Api.Controllers
             var orderId = "O" + Guid.NewGuid().ToString("N");
             dto.OrderId = orderId;
             var virtualCart = await _cartService.CreateVirtualCartAsync(dto);
+            bool isCartValid = !virtualCart.Any(item => item.OrderId == null);
+            if(!isCartValid){
+                return ResponseParser.Result(ResponseModel.Error("Not enought tickets in storage", virtualCart));
+            }
             double totalAmount = await _cartService.CalculateVirtualCartTotalAsync(virtualCart);
             var momoResponse = await _momoService.CreatePaymentAsync(dto, totalAmount * _tax);
 
-            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart);
+            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart, "momo");
             var response = ResponseList.AggregateResponses(new List<ResponseModel> { momoResponse, cartResponse }, "Success create momo payment");
             return ResponseParser.Result(response);
-        }
+        } 
 
         [HttpPost("momo/verify")]
         public async Task<IActionResult> CheckMomoTransaction([FromBody] PaymentDto dto)
@@ -60,6 +66,8 @@ namespace Api.Controllers
             string message = "Payment Success";
             ResponseModel orderResponse = new ResponseModel();
             ResponseModel paypalResponse2 = new ResponseModel();
+            ResponseModel revenueResponse = new ResponseModel();
+            ResponseModel updateTicketQuantity = new ResponseModel();
             if (momoService.Status == "Success")
             {
                 orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 0);
@@ -67,14 +75,17 @@ namespace Api.Controllers
                 {
                     await _cartService.RemoveFromCart(order);
                 }
-                paypalResponse2 = await _paypalService.CreatePayoutAsync(dto.OrderId);
+                var orderWithDetails = (Order)(await _orderService.GetTicketDetailsByIdAsync(dto.OrderId)).Data;
+                paypalResponse2 = await _paypalService.CreatePayoutAsync(orderWithDetails);
+                revenueResponse = await _revenueService.AddRevenueByDateAsync(orderWithDetails);
+                updateTicketQuantity = await _cartService.UpdateTicketQuantitiesAsync(dto.OrderId);
                 // paypalResponse3 = await _paypalService.CheckPayoutStatusAsync((string)paypalResponse2.Data);
             }
             else
             {
                 message = "Payment Failed";
             }
-            var response = ResponseList.AggregateResponses(new List<ResponseModel> { momoService, orderResponse, paypalResponse2 }, message);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { momoService, orderResponse, paypalResponse2, revenueResponse, updateTicketQuantity}, message);
             return ResponseParser.Result(response);
         }
 
@@ -88,10 +99,14 @@ namespace Api.Controllers
             var orderId = "O" + Guid.NewGuid().ToString("N");
             dto.OrderId = orderId;
             var virtualCart = await _cartService.CreateVirtualCartAsync(dto);
+            bool isCartValid = !virtualCart.Any(item => item.OrderId == null);
+            if(!isCartValid){
+                return ResponseParser.Result(ResponseModel.Error("Not enought tickets in storage", virtualCart));
+            }
             double totalAmount = await _cartService.CalculateVirtualCartTotalAsync(virtualCart);
             var vnpayResponse = await _vnpayService.CreatePaymentAsync(dto, totalAmount * _tax);
 
-            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart);
+            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart, "vnpay");
             var response = ResponseList.AggregateResponses(new List<ResponseModel> { vnpayResponse, cartResponse }, "Success create vnpay payment");
             return ResponseParser.Result(response);
         }
@@ -110,6 +125,8 @@ namespace Api.Controllers
             string message = "Payment Success";
             ResponseModel orderResponse = new ResponseModel();
             ResponseModel paypalResponse2 = new ResponseModel();
+            ResponseModel revenueResponse = new ResponseModel();
+            ResponseModel updateTicketQuantity = new ResponseModel();
             if (vnpayResponse.Status == "Success")
             {
                 orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 0);
@@ -117,14 +134,17 @@ namespace Api.Controllers
                 {
                     await _cartService.RemoveFromCart(order);
                 }
-                paypalResponse2 = await _paypalService.CreatePayoutAsync(dto.OrderId);
+                var orderWithDetails = (Order)(await _orderService.GetTicketDetailsByIdAsync(dto.OrderId)).Data;
+                paypalResponse2 = await _paypalService.CreatePayoutAsync(orderWithDetails);
+                revenueResponse = await _revenueService.AddRevenueByDateAsync(orderWithDetails);
+                updateTicketQuantity = await _cartService.UpdateTicketQuantitiesAsync(dto.OrderId);
                 // paypalResponse3 = await _paypalService.CheckPayoutStatusAsync((string)paypalResponse2.Data);
             }
             else
             {
                 message = "Payment Failed";
             }
-            var response = ResponseList.AggregateResponses(new List<ResponseModel> { vnpayResponse, orderResponse, paypalResponse2 }, message);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { vnpayResponse, orderResponse, paypalResponse2,revenueResponse,updateTicketQuantity }, message);
             return ResponseParser.Result(response);
         }
 
@@ -138,10 +158,14 @@ namespace Api.Controllers
             var orderId = "O" + Guid.NewGuid().ToString("N");
             dto.OrderId = orderId;
             var virtualCart = await _cartService.CreateVirtualCartAsync(dto);
+            bool isCartValid = !virtualCart.Any(item => item.OrderId == null);
+            if(!isCartValid){
+                return ResponseParser.Result(ResponseModel.Error("Not enought tickets in storage", virtualCart));
+            }
             double totalAmount = await _cartService.CalculateVirtualCartTotalAsync(virtualCart);
             var paypalResponse = await _paypalService.CreatePaymentAsync(dto, totalAmount * _tax);
 
-            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart);
+            var cartResponse = await _cartService.CreateOrderFromVirtualDetailsDirectly(dto.OrderId, userId, virtualCart, "paypal");
             var response = ResponseList.AggregateResponses(new List<ResponseModel> { paypalResponse, cartResponse }, "Success create paypal payment");
             return ResponseParser.Result(response);
         }
@@ -154,11 +178,12 @@ namespace Api.Controllers
             if (((Order)(await _orderService.GetOrderById(dto.OrderId)).Data).Status == 0)
                 return ResponseParser.Result(ResponseModel.Error("Already payed"));
 
-
             var paypalResponse = await _paypalService.CheckTransactionStatus(dto.Token);
             string message = "Payment Success";
             ResponseModel orderResponse = new ResponseModel();
             ResponseModel paypalResponse2 = new ResponseModel();
+            ResponseModel revenueResponse = new ResponseModel();
+            ResponseModel updateTicketQuantity = new ResponseModel();
             if (paypalResponse.Status == "Success")
             {
                 orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 0);
@@ -166,14 +191,17 @@ namespace Api.Controllers
                 {
                     await _cartService.RemoveFromCart(order);
                 }
-                paypalResponse2 = await _paypalService.CreatePayoutAsync(dto.OrderId);
+                var orderWithDetails = (Order)(await _orderService.GetTicketDetailsByIdAsync(dto.OrderId)).Data;
+                paypalResponse2 = await _paypalService.CreatePayoutAsync(orderWithDetails);
+                revenueResponse = await _revenueService.AddRevenueByDateAsync(orderWithDetails);
+                updateTicketQuantity = await _cartService.UpdateTicketQuantitiesAsync(dto.OrderId);
                 // paypalResponse3 = await _paypalService.CheckPayoutStatusAsync((string)paypalResponse2.Data);
             }
             else
             {
                 message = "Payment Failed";
             }
-            var response = ResponseList.AggregateResponses(new List<ResponseModel> { paypalResponse, orderResponse, paypalResponse2 }, message);
+            var response = ResponseList.AggregateResponses(new List<ResponseModel> { paypalResponse, orderResponse, paypalResponse2, revenueResponse ,updateTicketQuantity}, message);
             return ResponseParser.Result(response);
         }
 

@@ -1,4 +1,5 @@
 using Repositories.Core.Dtos.Revenue;
+using Repositories.Core.Entities;
 
 namespace TicketResell.Services.Services.Revenues;
 
@@ -19,5 +20,5 @@ public interface IRevenueService
     public Task<ResponseModel> DeleteRevenuesAsync(string id,bool saveAll=true);
 
     public Task<ResponseModel> DeleteRevenuesBySellerIdAsync(string id,bool saveAll=true);
-    public Task<ResponseModel> AddRevenueByDateAsync(DateTime date, double amount, bool saveAll);
+    public Task<ResponseModel> AddRevenueByDateAsync(Order order, bool saveAll=true);
 }

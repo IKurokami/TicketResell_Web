@@ -13,6 +13,7 @@ using TicketResell.Repositories.Core.Dtos.Cart;
 using TicketResell.Repositories.Core.Dtos.Chat;
 using Category = Repositories.Core.Entities.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
+using TicketResell.Repositories.Core.Dtos.Rating;
 
 namespace Repositories.Core.AutoMapperConfig
 {
@@ -31,6 +32,11 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<SellerRegisterDto, User>()
                 .ForMember(dest => dest.Username, opt => opt.Ignore())
                 .ForMember(dest => dest.Password, opt => opt.Ignore());
+
+            //Rating
+            CreateMap<Rating, RatingReadDto>();
+            CreateMap<RatingCreateDto, Rating>();
+            CreateMap<RatingUpdateDto, Rating>();
 
             //Revenue
             CreateMap<RevenueCreateDto, Revenue>();
