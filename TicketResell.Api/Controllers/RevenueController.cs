@@ -40,10 +40,10 @@ namespace TicketResell.Repositories.Controllers
         {
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to view revenues"));
-
+ 
             var response = await _revenueService.GetRevenuesAsync();
             return ResponseParser.Result(response);
-        }
+        } 
 
         [HttpGet("readbyid/{id}")]
         public async Task<IActionResult> GetRevenuesById(string id)
@@ -54,7 +54,7 @@ namespace TicketResell.Repositories.Controllers
             var response = await _revenueService.GetRevenuesByIdAsync(id);
             return ResponseParser.Result(response);
         }
-
+ 
         [HttpGet("readbysellerid/{id}")]
         public async Task<IActionResult> GetRevenuesBySellerId(string id)
         {
