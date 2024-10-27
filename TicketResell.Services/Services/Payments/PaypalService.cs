@@ -30,12 +30,12 @@ namespace TicketResell.Services.Services.Payments
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ResponseModel> CreatePayoutAsync(string orderId)
+        public async Task<ResponseModel> CreatePayoutAsync(Order order)
         {
             try
             {
                 var accessToken = await GenerateAccessTokenAsync();
-                var payout = await CreatePayPalPayoutAsync(orderId, accessToken);
+                var payout = await CreatePayPalPayoutAsync(order, accessToken);
                 string batchId = (string)payout.Data;
                 return ResponseModel.Success("PayPal payout created successfully", batchId);
             }
@@ -59,12 +59,12 @@ namespace TicketResell.Services.Services.Payments
                 return ResponseModel.Error($"Error checking payout status: {ex.Message}");
             }
         }
-        private async Task<ResponseModel> CreatePayPalPayoutAsync(string orderId, string accessToken)
+        private async Task<ResponseModel> CreatePayPalPayoutAsync(Order order, string accessToken)
         {
             try
             {
                 double rate = await GetConversionRateVndToUsd();
-                var order = await _unitOfWork.OrderRepository.GetTicketDetailsByIdAsync(orderId);
+                
 
                 if (order == null)
                     return ResponseModel.Error("Order not found");

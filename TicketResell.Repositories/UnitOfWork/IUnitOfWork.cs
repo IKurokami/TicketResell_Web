@@ -20,6 +20,7 @@ namespace TicketResell.Repositories.UnitOfWork
         ICartRepository CartRepository { get; }
         
         IChatRepository ChatRepository { get; }
+        IRatingRepository RatingRepository { get; }
         
         Task<int> CompleteAsync();
     }

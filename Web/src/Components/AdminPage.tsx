@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { fetchTickets } from "@/models/TicketFetch";
 import { UserService, User } from "@/models/UserManagement";
 import {
@@ -20,12 +21,18 @@ import OrderManager from "./OrderManager";
 import RevenueManager from "./RevenueManager";
 import {
   AccountStatusDialog,
-  EditRolesDialog,
   EditUserDialog,
   RoleStatusDialog,
 } from "./EditUserPage";
+import { LogOut } from "lucide-react";
+import Cookies from "js-cookie";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { removeAllCookies } from "./Cookie";
+import { logoutUser } from "./Logout";
+import { cookies } from "next/headers";
 
 const AdminPage = () => {
+  const [id, setId] = useState("");
   const [tickets, setTickets] = useState<any[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
@@ -53,6 +60,10 @@ const AdminPage = () => {
   const [currentCategory, setCurrentCategory] = useState<any>(null);
   const [isCategoryDeleteConfirmOpen, setIsCategoryDeleteConfirmOpen] =
     useState(false);
+
+  useEffect(() => {
+    setId(Cookies.get("id") || "Not found");
+  }, []);
 
   useEffect(() => {
     if (searchParams) {
@@ -119,10 +130,11 @@ const AdminPage = () => {
           method: "GET",
           credentials: "include",
         });
+        const data = await response.json();
+        console.log("orders", data);
         if (!response.ok) {
           throw new Error("Failed to fetch orders");
         }
-        const data = await response.json();
         setOrders(data.data);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -580,7 +592,6 @@ const AdminPage = () => {
   const handleOrderRefresh = async (orderID: string) => {};
 
   const handleNavigation = (tabName: string) => {
-    console.log("Navigate to:", tabName);
     router.push(`/admin?page=${tabName}`, undefined);
     setActiveTab(tabName);
   };
@@ -633,6 +644,17 @@ const AdminPage = () => {
     }
   };
 
+  const handleLogout = async () => {
+    router.push("/");
+
+    if (Cookies.get("id")) {
+      await logoutUser(Cookies.get("id"));
+    }
+
+    await signOut();
+    removeAllCookies();
+  };
+
   return (
     <>
       <button
@@ -662,7 +684,7 @@ const AdminPage = () => {
         } sm:translate-x-0`}
         aria-label="Sidebar"
       >
-        <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+        <div className="flex flex-col h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-xl font-semibold text-border">
               <span className="text-emerald-500 text-2xl font-bold">
@@ -693,7 +715,9 @@ const AdminPage = () => {
               <span className="sr-only">Close sidebar</span>
             </button>
           </div>
-          <ul className="space-y-2 font-medium">
+
+          {/* Main navigation */}
+          <ul className="space-y-2 font-medium flex-grow">
             {sidebarTabs.map((tab, index) => (
               <li key={index}>
                 <button
@@ -710,6 +734,23 @@ const AdminPage = () => {
               </li>
             ))}
           </ul>
+
+          {/* Logout button at the bottom */}
+          <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+            {/* User ID display */}
+            <div className="flex items-center p-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg">
+              <span className="ms-3 font-medium text-sm overflow-hidden max-w-64 text-nowrap">
+                ID: {id}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center p-2 w-full text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 dark:text-red-400 dark:hover:bg-gray-700"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="ms-3 font-medium">Logout</span>
+            </button>
+          </div>
         </div>
       </aside>
 

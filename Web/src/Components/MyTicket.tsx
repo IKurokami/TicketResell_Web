@@ -19,8 +19,14 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Star,
 } from "lucide-react";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  LoadScript,
+  Marker,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 import QRCode from "qrcode";
 import JSZip from "jszip";
 import Cookies from "js-cookie";
@@ -39,6 +45,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/Components/ui/tooltip";
+import TicketCard from "./TicketCard";
 
 interface TicketData {
   id: string;
@@ -75,6 +82,7 @@ interface Order {
 
 const MyTicketPage = () => {
   const [tickets, setTickets] = useState<TicketData[]>([]);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -85,7 +93,7 @@ const MyTicketPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategory, setSelectedCategory] = useState("all");
-
+  const center = { lat: 10.762622, lng: 106.660172 };
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
@@ -119,7 +127,6 @@ const MyTicketPage = () => {
                 const startDate = detail.ticket.startDate;
                 const formattedDate = formatDate(startDate);
                 const { imageUrl } = await fetchImage(detail.ticket.image);
-
                 return {
                   id: detail.ticket.id,
                   name: detail.ticket.name,
@@ -348,89 +355,16 @@ const MyTicketPage = () => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
     >
-      <Card
-        className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 bg-white/90 backdrop-blur-sm"
-        onClick={() => {
+      <TicketCard
+        ticket={{
+          ...ticket,
+          status: calculateDaysFromNow(ticket.date),
+        }}
+        onCardClick={() => {
           setSelectedTicket(ticket);
           setIsModalOpen(true);
         }}
-      >
-        <CardContent className="p-0">
-          <div className="relative overflow-hidden">
-            <img
-              src={ticket.image}
-              alt={ticket.name}
-              className="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div
-              className={`absolute left-4 top-4 ${getStatusColor(
-                calculateDaysFromNow(ticket.date)
-              )} px-4 py-1.5 rounded-full text-sm font-medium shadow-sm`}
-            >
-              {calculateDaysFromNow(ticket.date)}
-            </div>
-            {ticket.categories && (
-              <div className="absolute right-4 top-4 flex gap-2">
-                {ticket.categories.map((category, index) => (
-                  <span
-                    key={index}
-                    className="bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1 rounded-full text-xs font-medium"
-                  >
-                    {category}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-lg group-hover:text-blue-600 transition-colors line-clamp-1">
-                {ticket.name}
-              </h3>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
-                      <Ticket className="w-5 h-5 text-blue-600" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Xem chi tiết vé</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-600">
-                <Calendar className="w-4 h-4 flex-shrink-0" />
-                <span className="text-sm truncate">{ticket.date}</span>
-              </div>
-
-              {ticket.location && (
-                <div className="flex items-center gap-3 text-gray-600">
-                  <MapPin className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm truncate">{ticket.location}</span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3 text-gray-600">
-                <CreditCard className="w-4 h-4 flex-shrink-0" />
-                <span className="text-sm">Số lượng: {ticket.quantity}</span>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                <span className="text-sm text-gray-500">Giá mỗi vé</span>
-                <p className="text-lg font-bold text-green-600">
-                  {formatPrice(ticket.cost)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      />
     </motion.div>
   );
 
@@ -792,179 +726,178 @@ const MyTicketPage = () => {
       </div>
 
       {/* Enhanced Modal */}
-      {isModalOpen && selectedTicket && (
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center"
-          >
+      <LoadScript googleMapsApiKey="AlzaSy7A_nU8ZLyo2CpKnG8jzdIns81KrCC-zAI">
+        {isModalOpen && selectedTicket && (
+          <AnimatePresence>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setIsModalOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-auto mt-20"
+              className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center"
             >
-              <button
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                 onClick={() => setIsModalOpen(false)}
-                className="absolute right-4 top-4 z-10 p-2 bg-black/20 hover:bg-black/30 rounded-full transition-colors text-white"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-auto mt-20"
               >
-                <X className="w-6 h-6" />
-              </button>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="absolute right-4 top-4 z-10 p-2 bg-black/20 hover:bg-black/30 rounded-full transition-colors text-white"
+                >
+                  <X className="w-6 h-6" />
+                </button>
 
-              <div className="relative h-64">
-                <img
-                  src={selectedTicket.image}
-                  alt={selectedTicket.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-                <div className="absolute bottom-0 p-6 text-white">
-                  <h3 className="text-2xl font-bold mb-2">
-                    {selectedTicket.name}
-                  </h3>
-                  <div className="flex items-center space-x-4">
-                    <span className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>{selectedTicket.date}</span>
-                    </span>
-                    {selectedTicket.location && (
+                <div className="relative h-64">
+                  <img
+                    src={selectedTicket.image}
+                    alt={selectedTicket.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+                  <div className="absolute bottom-0 p-6 text-white">
+                    <h3 className="text-2xl font-bold mb-2">
+                      {selectedTicket.name}
+                    </h3>
+                    <div className="flex items-center space-x-4">
                       <span className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4" />
-                        <span>{selectedTicket.location}</span>
+                        <Calendar className="w-4 h-4" />
+                        <span>{selectedTicket.date}</span>
                       </span>
-                    )}
+                      {selectedTicket.location && (
+                        <span className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>{selectedTicket.location}</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6 space-y-6 overflow-auto">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
-                        <Info className="w-5 h-5 text-blue-500" />
-                        <span>Chi tiết sự kiện</span>
-                      </h4>
-                      <p className="text-gray-600 leading-relaxed">
-                        {selectedTicket.description}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
-                        <span>Bản đồ</span>
-                      </h4>
-                      <div className="w-full h-64">
-                        {/* Nhúng Google Map ở đây */}
-                        <LoadScript googleMapsApiKey="AlzaSyNa20bToeNXLJ6qTZR19bANY6nwn9ZaGjo">
+                <div className="p-6 space-y-6 overflow-auto">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
+                          <Info className="w-5 h-5 text-blue-500" />
+                          <span>Chi tiết sự kiện</span>
+                        </h4>
+                        <p className="text-gray-600 leading-relaxed">
+                          {selectedTicket.description}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
+                          <span>Bản đồ</span>
+                        </h4>
+                        <div className="w-full h-64">
+                          {/* Nhúng Google Map ở đây */}
+
                           <GoogleMap
                             mapContainerStyle={{
                               width: "300px",
                               height: "250px",
                             }}
-                            center={{ lat: 10.762622, lng: 106.660172 }} // Tọa độ trung tâm (có thể thay đổi theo vị trí thực tế)
+                            center={center} // Tọa độ trung tâm (có thể thay đổi theo vị trí thực tế)
                             zoom={15}
                           >
-                            <Marker
-                              position={{ lat: 10.762622, lng: 106.660172 }}
-                            />
+                            <Marker position={center} />
                           </GoogleMap>
-                        </LoadScript>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
-                        <User className="w-5 h-5 text-blue-500" />
-                        <span>Thông tin người bán</span>
-                      </h4>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-gray-500" />
-                          </div>
-                          <div>
-                            <p className="font-medium">
-                              {selectedTicket.sellerId}
-                            </p>
-                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div>
-                      <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
-                        <CreditCard className="w-5 h-5 text-blue-500" />
-                        <span>Thông tin thanh toán</span>
-                      </h4>
-                      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">Giá mỗi vé</span>
-                          <span className="font-semibold">
-                            {formatPrice(selectedTicket.cost)}
-                          </span>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
+                          <User className="w-5 h-5 text-blue-500" />
+                          <span>Thông tin người bán</span>
+                        </h4>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                              <User className="w-6 h-6 text-gray-500" />
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {selectedTicket.sellerId}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">Số lượng</span>
-                          <span className="font-semibold">
-                            {selectedTicket.quantity}
-                          </span>
-                        </div>
-                        <div className="border-t border-gray-200 pt-2 mt-2">
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
+                          <CreditCard className="w-5 h-5 text-blue-500" />
+                          <span>Thông tin thanh toán</span>
+                        </h4>
+                        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">Tổng tiền</span>
-                            <span className="text-lg font-bold text-green-600">
-                              {formatPrice(
-                                selectedTicket.cost * selectedTicket.quantity
-                              )}
+                            <span className="text-gray-600">Giá mỗi vé</span>
+                            <span className="font-semibold">
+                              {formatPrice(selectedTicket.cost)}
                             </span>
                           </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Số lượng</span>
+                            <span className="font-semibold">
+                              {selectedTicket.quantity}
+                            </span>
+                          </div>
+                          <div className="border-t border-gray-200 pt-2 mt-2">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">Tổng tiền</span>
+                              <span className="text-lg font-bold text-green-600">
+                                {formatPrice(
+                                  selectedTicket.cost * selectedTicket.quantity
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
+                          <Clock className="w-5 h-5 text-blue-500" />
+                          <span>Trạng thái</span>
+                        </h4>
+                        <div
+                          className={`inline-flex items-center px-4 py-2 rounded-full ${getStatusColor(
+                            calculateDaysFromNow(selectedTicket.date)
+                          )}`}
+                        >
+                          {calculateDaysFromNow(selectedTicket.date)}
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <div>
-                      <h4 className="text-lg font-semibold mb-2 flex items-center space-x-2">
-                        <Clock className="w-5 h-5 text-blue-500" />
-                        <span>Trạng thái</span>
-                      </h4>
-                      <div
-                        className={`inline-flex items-center px-4 py-2 rounded-full ${getStatusColor(
-                          calculateDaysFromNow(selectedTicket.date)
-                        )}`}
+                  <div className="border-t border-gray-200 pt-6">
+                    <div className="flex items-center justify-end space-x-4">
+                      <button
+                        onClick={() => downloadQRCodes(selectedTicket)}
+                        className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                       >
-                        {calculateDaysFromNow(selectedTicket.date)}
-                      </div>
+                        <Download className="w-5 h-5" />
+                        <span>Tải về</span>
+                      </button>
                     </div>
                   </div>
                 </div>
-
-                <div className="border-t border-gray-200 pt-6">
-                  <div className="flex items-center justify-end space-x-4">
-                    <button
-                      onClick={() => downloadQRCodes(selectedTicket)}
-                      className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                    >
-                      <Download className="w-5 h-5" />
-                      <span>Tải về</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </AnimatePresence>
-      )}
+          </AnimatePresence>
+        )}
+      </LoadScript>
     </div>
   );
 };

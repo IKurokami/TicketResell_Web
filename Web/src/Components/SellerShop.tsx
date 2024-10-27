@@ -29,7 +29,7 @@ export interface Category {
   description: string;
 }
 export interface Seller {
-  userId: string | undefined;
+  userId: string;
   username: string | undefined;
   fullname: string | undefined;
   address: string | undefined;
@@ -451,11 +451,18 @@ const SellerShop = () => {
     }
     return text;
   };
+  const handleSave = (formData: any) => {};
   return (
     <div className="bg-transparent pb-32">
       ""
       <main className="bg-white text-black">
         <SellProfile
+          bio=""
+          birthday=""
+          gmail=""
+          onSave={handleSave}
+          sex=""
+          userId={id}
           address={sellerResult?.address}
           avatar={sellerResult?.avatar}
           fullname={sellerResult?.fullname}
