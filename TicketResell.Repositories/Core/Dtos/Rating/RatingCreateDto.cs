@@ -7,8 +7,6 @@ namespace TicketResell.Repositories.Core.Dtos.Rating
 {
     public class RatingCreateDto
     {
-        public string RatingId { get; set; } = null!;
-
         public string? SellerId { get; set; }
 
         public int? Stars { get; set; }

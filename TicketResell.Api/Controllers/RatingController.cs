@@ -3,7 +3,7 @@ using TicketResell.Repositories.Core.Dtos.Rating;
 using TicketResell.Services.Services.Ratings;
 using TicketResell.Repositories.Helper;
 
-namespace Repositories.Controllers
+namespace Api.Controllers
 {
     [Route("/api/[controller]")]
     [ApiController]
@@ -23,7 +23,8 @@ namespace Repositories.Controllers
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to create a rating."));
 
-            var response = await _ratingService.CreateRatingAsync(dto);
+            string userId =  HttpContext.GetUserId();
+            var response = await _ratingService.CreateRatingAsync(dto, userId);
             return ResponseParser.Result(response);
         }
 

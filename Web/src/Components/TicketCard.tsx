@@ -120,11 +120,29 @@ const TicketCard = ({ ticket, onCardClick }) => {
 
   const handleSubmitRating = async () => {
     try {
-      console.log("Submitting rating:", {
-        sellerId: ticket.sellerId,
-        rating,
-        comment,
+      const response = await fetch("http://localhost:5296/api/Rating/create", {
+        method: "POST",
+        credentials:"include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sellerId: ticket.sellerId,
+          stars: rating,
+          comment: comment,
+        }),
       });
+  
+      // Parse response
+      const result = await response.json();
+      
+      // Check if request was successful
+      if (!response.ok) {
+        console.error("Error submitting rating:", result.message);
+      } else {
+        console.log("Rating submitted successfully:", result);
+      }
+  
       setIsRatingModalOpen(false);
       setComment("");
     } catch (error) {
