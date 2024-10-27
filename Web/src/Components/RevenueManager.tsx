@@ -15,7 +15,35 @@ import {
   LockIcon,
   TrendingUp,
   TrendingDown,
+  ShoppingCart,
+  Users,
+  DollarSign,
 } from "lucide-react";
+
+interface Order {
+  orderId: string;
+  date: string;
+  user: User;
+}
+
+interface User {
+  userId: string;
+  username: string;
+}
+
+interface Ticket {
+  ticketId: string;
+  name: string;
+}
+
+interface Transaction {
+  date: string;
+  quantity: number;
+  price: number;
+  order: Order;
+  ticket: Ticket;
+}
+
 
 interface RevenueItem {
   revenueId: string;
@@ -28,17 +56,111 @@ interface RevenueItem {
 
 interface RevenueManagerProps {
   revenueData: RevenueItem[];
+  transactions: Transaction[]
 }
 
-const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
+const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData , transactions }) => {
   const [timeframe, setTimeframe] = useState("month");
   const today = new Date();
 
   // Sort revenue data by startDate
   const sortedRevenueData = [...revenueData].sort(
-    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
   );
+  const countTransactionsToday = (transactions: Transaction[]): number => {
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0]; // Get date in YYYY-MM-DD format
 
+    return transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.order.date).toISOString().split('T')[0];
+        return transactionDate === todayString;
+    }).length;
+};
+
+// Function to count transactions for the current month
+const countTransactionsThisMonth = (transactions: Transaction[]): number => {
+    const today = new Date();
+    const month = today.getMonth();
+    const year = today.getFullYear();
+
+    return transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.order.date);
+        return transactionDate.getMonth() === month && transactionDate.getFullYear() === year;
+    }).length;
+};
+
+// Function to count transactions for the current year
+const countTransactionsThisYear = (transactions: Transaction[]): number => {
+    const today = new Date();
+    const year = today.getFullYear();
+
+    return transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.order.date);
+        return transactionDate.getFullYear() === year;
+    }).length;
+};
+
+// Example usage
+const transactionsToday = countTransactionsToday(transactions);
+const transactionsThisMonth = countTransactionsThisMonth(transactions);
+const transactionsThisYear = countTransactionsThisYear(transactions);
+
+
+const countUniqueBuyersToday = (transactions: Transaction[]): number => {
+  const today = new Date();
+  const todayString = today.toISOString().split('T')[0]; // Get date in YYYY-MM-DD format
+
+  const uniqueBuyers = new Set<string>();
+
+  transactions.forEach(transaction => {
+      const transactionDate = new Date(transaction.order.date).toISOString().split('T')[0];
+      if (transactionDate === todayString) {
+          uniqueBuyers.add(transaction.order.user.userId);
+      }
+  });
+
+  return uniqueBuyers.size;
+};
+
+// Function to count unique buyerId's for the current month
+const countUniqueBuyersThisMonth = (transactions: Transaction[]): number => {
+  const today = new Date();
+  const month = today.getMonth();
+  const year = today.getFullYear();
+
+  const uniqueBuyers = new Set<string>();
+
+  transactions.forEach(transaction => {
+      const transactionDate = new Date(transaction.order.date);
+      if (transactionDate.getMonth() === month && transactionDate.getFullYear() === year) {
+          uniqueBuyers.add(transaction.order.user.userId);
+      }
+  });
+
+  return uniqueBuyers.size;
+};
+
+// Function to count unique buyerId's for the current year
+const countUniqueBuyersThisYear = (transactions: Transaction[]): number => {
+  const today = new Date();
+  const year = today.getFullYear();
+
+  const uniqueBuyers = new Set<string>();
+
+  transactions.forEach(transaction => {
+      const transactionDate = new Date(transaction.order.date);
+      if (transactionDate.getFullYear() === year) {
+          uniqueBuyers.add(transaction.order.user.userId);
+      }
+  });
+
+  return uniqueBuyers.size;
+};
+
+// Example usage
+const uniqueBuyersToday = countUniqueBuyersToday(transactions);
+const uniqueBuyersThisMonth = countUniqueBuyersThisMonth(transactions);
+const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
   const calculateAverageDailyRateForToday = (
     revenueData: RevenueItem[]
   ): number => {
@@ -235,34 +357,68 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
     value,
     change,
     subtitle,
+    totalOrders,
+    totalBuyers,
+    icon: Icon
   }: {
     title: string;
     value: string;
     change: string;
     subtitle: string;
     changeClass: string;
+    totalOrders: number;
+    totalBuyers: number;
+    icon: React.ElementType;
   }) => (
-    <Card className="p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div className="space-y-2">
-        <div className="text-sm text-slate-500 flex items-center gap-2">
-          {title}
+    <Card className="relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 translate-y--8">
+        <div className="absolute inset-0 opacity-5">
+          <Icon className="w-full h-full" />
+        </div>
+      </div>
+      <div className="p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-violet-100 rounded-lg">
+              <Icon className="w-5 h-5 text-violet-600" />
+            </div>
+            <h3 className="text-sm font-medium text-slate-600">{title}</h3>
+          </div>
           <LockIcon className="w-4 h-4 text-slate-400" />
         </div>
-        <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 truncate">
-          {value}
+        
+        <div className="space-y-2">
+          <div className="text-2xl font-bold text-slate-900">{value}</div>
+          <div className="flex items-center gap-2">
+            <span className={`flex items-center gap-1 px-2 py-1 text-sm font-medium rounded-full ${
+              parseFloat(change) >= 0 ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+            }`}>
+              {parseFloat(change) >= 0 ? (
+                <TrendingUp className="w-3 h-3" />
+              ) : (
+                <TrendingDown className="w-3 h-3" />
+              )}
+              {change}%
+            </span>
+            <span className="text-sm text-slate-500">{subtitle}</span>
+          </div>
         </div>
-        <div
-          className={`flex items-center gap-1 text-sm font-medium ${
-            parseFloat(change) >= 0 ? "text-green-500" : "text-red-500"
-          }`}
-        >
-          {parseFloat(change) >= 0 ? (
-            <TrendingUp className="w-4 h-4" />
-          ) : (
-            <TrendingDown className="w-4 h-4 text-red-500" />
-          )}
-          <span>{change}%</span>
-          <span className="text-slate-500 font-normal">{subtitle}</span>
+
+        <div className="pt-4 border-t border-slate-100 space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="flex items-center gap-2 text-slate-600">
+              <ShoppingCart className="w-4 h-4" />
+              Transactions
+            </span>
+            <span className="font-medium text-slate-900">{totalOrders}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="flex items-center gap-2 text-slate-600">
+              <Users className="w-4 h-4" />
+               Buyers
+            </span>
+            <span className="font-medium text-slate-900">{totalBuyers}</span>
+          </div>
         </div>
       </div>
     </Card>
@@ -281,6 +437,8 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
     }
     return value;
   };
+
+
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -395,6 +553,8 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
     }
   };
 
+  console.log("sorterrevenue",sortedRevenueData);
+  
   return (
     <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
       {/* Main Revenue Chart Card */}
@@ -509,35 +669,36 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData }) => {
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <StatCard
           title="Daily Revenue"
           value={formatCurrency(calculateDayRevenue(today, sortedRevenueData))}
           change={dailyChangeFormatted}
           subtitle={`${today.getDate()}/${today.getMonth() + 1}`}
           changeClass={dailyChangeClass}
+          totalBuyers={uniqueBuyersToday}
+          totalOrders={transactionsToday}
+          icon={DollarSign}
         />
         <StatCard
           title="Monthly Revenue"
-          value={formatCurrency(
-            calculateMonthRevenue(
-              today.getMonth(),
-              today.getFullYear(),
-              sortedRevenueData
-            )
-          )}
+          value={formatCurrency(calculateMonthRevenue(today.getMonth(), today.getFullYear(), sortedRevenueData))}
           change={monthlyChangeFormatted}
           subtitle={`From ${today.getMonth() + 1}`}
           changeClass={monthlyChangeClass}
+          totalOrders={transactionsThisMonth}
+          totalBuyers={uniqueBuyersThisMonth}
+          icon={Calendar}
         />
         <StatCard
           title="Yearly Revenue"
-          value={formatCurrency(
-            calculateYearRevenue(today.getFullYear(), sortedRevenueData)
-          )}
+          value={formatCurrency(calculateYearRevenue(today.getFullYear(), sortedRevenueData))}
           change={yearlyChangeFormatted}
           subtitle={`From ${today.getFullYear()}`}
           changeClass={yearlyChangeClass}
+          totalOrders={transactionsThisYear}
+          totalBuyers={uniqueBuyersThisYear}
+          icon={TrendingUp}
         />
       </div>
     </div>

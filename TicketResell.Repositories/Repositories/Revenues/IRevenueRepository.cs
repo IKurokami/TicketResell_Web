@@ -6,5 +6,5 @@ public interface IRevenueRepository : IRepository<Revenue>
 
     Task<List<Revenue>> GetRevenuesBySellerIdAsync(string id);
 
-    Task AddRevenueByDateAsync(DateTime date, double amount);
+    Task AddRevenueByDateAsync(DateTime date, double amount, string sellerId);
 }

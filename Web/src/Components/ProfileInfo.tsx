@@ -1,32 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdCake, MdCall, MdEmail, MdLocationOn } from "react-icons/md";
-import { CiBank } from "react-icons/ci";
+import RatingsList from "./rating";
 
 interface props {
+  id: string;
   birthday: string | undefined;
   bio: string | undefined;
   address: string | undefined;
+  api: string;
 }
 
-const ProfileInfo: React.FC<props> = ({ birthday, bio, address }) => {
+const ProfileInfo: React.FC<props> = ({ birthday, bio, address, id, api }) => {
+  const [ratingsData, setRatingsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   // State to manage post likes and example dynamic data
-  const [likes, setLikes] = useState(1498);
-  const [following, setFollowing] = useState(3000);
 
-  const handleLikeClick = () => {
-    setLikes((prevLikes) => prevLikes + 1);
-  };
+  // Fetch data here
+  useEffect(() => {
+    const fetchRatings = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(api);
 
-  const handleFollowClick = () => {
-    setFollowing((prevFollowing) => prevFollowing + 1);
-  };
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
+        const result = await response.json();
+
+        if (result.statusCode === 200 && result.data) {
+          setRatingsData(result.data);
+        } else {
+          throw new Error(result.message || "Failed to fetch ratings");
+        }
+      } catch (err: any) {
+        setError(err.message);
+        console.error("Error fetching ratings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRatings();
+  }, [id]);
   return (
-    <div className="flex flex-col md:flex-row gap-4 p-4">
+    <div className="flex flex-col md:flex-row gap-4 px-4">
       {/* Left Sidebar */}
       <div className="w-full h-fit md:w-1/4 p-4 bg-white rounded-lg shadow-md flex-shrink-0">
         <h2 className="font-bold text-xl mb-4">About</h2>
-        <div className="flex items-center mb-2">
+        <div className="flex mb-1">
           <span>
             <MdCake />
           </span>
@@ -37,25 +61,30 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address }) => {
               : "No birthday provided"}
           </p>{" "}
         </div>
-        <div className="flex mb-2">
+        <div className="flex mb-1">
           <span>
             <MdLocationOn />
           </span>
           <p className="ml-2">{address ? address : "No address provided"}</p>
         </div>
-        <div className="flex items-center mb-2">
+        <div className="flex mb-2">
           <p className="ml-2 text-gray-500">{bio ? bio : "No bio provided"}</p>
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="w-full h-fit md:w-2/4 p-4 bg-white rounded-lg shadow-md">
+      <RatingsList ratings={ratingsData} />;{/* Main Content */}
+      {/* <div className="w-full h-fit md:w-2/4 p-4 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <nav className="flex space-x-4">
-            <a href="#" className="no-underline	text-gray-500 hover:text-green-500">
+            <a
+              href="#"
+              className="no-underline	text-gray-500 hover:text-green-500"
+            >
               Followers
             </a>
-            <a href="#" className="no-underline	text-gray-500 hover:text-green-500">
+            <a
+              href="#"
+              className="no-underline	text-gray-500 hover:text-green-500"
+            >
               Following
             </a>
             <a
@@ -67,7 +96,6 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address }) => {
           </nav>
         </div>
 
-        {/* Posts */}
         <div className="mb-4">
           <div className="flex items-center mb-2">
             <img
@@ -106,11 +134,9 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address }) => {
           </div>
         </div>
 
-        {/* Add more dynamic posts here */}
-      </div>
-
+      </div> */}
       {/* Right Sidebar */}
-      <div className="w-full h-fit md:w-1/4 p-4 bg-white rounded-lg shadow-md flex-shrink-0">
+      {/* <div className="w-full h-fit md:w-1/4 p-4 bg-white rounded-lg shadow-md flex-shrink-0">
         <div className="mb-4">
           <h3 className="font-bold text-xl">You might know</h3>
           <div className="flex items-center mb-2">
@@ -124,7 +150,6 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address }) => {
               <p className="text-gray-500 text-sm">vkev@gmail.com</p>
             </div>
           </div>
-          {/* More suggested contacts... */}
         </div>
 
         <div>
@@ -140,9 +165,8 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address }) => {
               <p className="text-green-500 text-sm">Online</p>
             </div>
           </div>
-          {/* More active users... */}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

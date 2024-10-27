@@ -8,6 +8,14 @@ import TicketList, {
 } from "@/models/RankItemCard";
 import { log } from "console";
 import { Bank } from "vnpay";
+import { BannerItemCard, fetchBannerItems, fetchCategories } from "@/models/CategoryCard";
+import CategoryCarousel from "./TicketByCategory";
+
+interface Category {
+  categoryId: string;
+  name: string;
+  description: string;
+}
 const Trend = () => {
   const [buttonLeftActive, setButtonLeftActive] = useState(0);
   const [buttonRightActive, setButtonRightActive] = useState(6);
@@ -15,7 +23,8 @@ const Trend = () => {
   const [ticketTimeRange, setTicketTimeRange] = useState("60.00:00:00");
   const [error, setError] = useState("");
   const [banks, setBanks] = useState<Bank[]>([]);
-
+  const [bannerItems, setBannerItems] = useState<BannerItemCard[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   useEffect(() => {
     const fetchData = async () => {
       const ticketData = await fetchTopTicketData(
@@ -28,6 +37,18 @@ const Trend = () => {
       console.error("Failed to fetch top ticket data:", error);
     });
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const banner = await fetchBannerItems();
+      setBannerItems(banner);
+      const cate = await fetchCategories();
+      setCategories(cate);
+    };
+
+    fetchData();
+  }, []);
+
 
   const splitTicketList = (list: RankItemCardProps[]) => {
     let newList = [...list];
@@ -96,7 +117,7 @@ const Trend = () => {
       fetchStartingSoonTickets();
     }
   };
-
+  const limitedCategories = categories.slice(0, 6);
   const handleRightButtonClick = (index: any) => {
     setButtonRightActive(index);
 
@@ -246,6 +267,15 @@ const Trend = () => {
           </div>
         </div>
       </div>
+      <div className="p-16 pt-5">
+      {limitedCategories.length > 0 ? (
+        limitedCategories.map((category) => (
+          <CategoryCarousel key={category.categoryId} category={category} />
+        ))
+      ) : (
+        <p>Loading categories...</p>
+      )}
+    </div>
     </div>
   );
 };

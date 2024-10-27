@@ -8,10 +8,11 @@ import {
   CardContent,
   CardFooter,
 } from "@/Components/ui/card";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 import TextField from "@mui/material/TextField";
 import AddressFields from "@/Hooks/location";
 import TermsModal from "./TermModal";
+import { InputAdornment } from "@mui/material";
 
 interface ProfileData {
   gmail: string | null;
@@ -119,7 +120,7 @@ const ProfileForm: React.FC = () => {
       !profileData.fullname ||
       !profileData.gmail ||
       !profileData.birthday ||
-      !profileData.location||
+      !profileData.location ||
       !isChecked
     ) {
       setNotification("Please fill in all required fields.");
@@ -213,8 +214,19 @@ const ProfileForm: React.FC = () => {
                 placeholder="Enter your email address"
                 onChange={handleChange}
                 sx={textFieldStyle}
-              />
-              <p className="text-red-600 text-sm ">* Email is account PayPal</p>
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <img
+                        src={"https://th.bing.com/th/id/OIP.wBKSzdf1HTUgx1Ax_EecKwHaHa?rs=1&pid=ImgDetMain"}
+                        alt="Logo"
+                        style={{ width: 30, height: 30 }}
+                      />
+                    </InputAdornment>
+                  ),
+                }}
+              />    
+              <p className="text-red-600 text-sm ">* Email is your PayPal account  </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextField
@@ -294,12 +306,14 @@ const ProfileForm: React.FC = () => {
                     Đồng ý với điều khoản
                   </label>
                 </div>
-                <Button onClick={handleOpenModal} className="bg-gray-200 shadow-none ">
+                <Button
+                  onClick={handleOpenModal}
+                  className="bg-gray-200 shadow-none "
+                >
                   Xem điều khoản
                 </Button>
               </div>
 
-           
               {notification && (
                 <div className="text-red-600 text-sm mb-2">{notification}</div>
               )}
@@ -316,9 +330,8 @@ const ProfileForm: React.FC = () => {
           </form>
         </Card>
         <div className="pt-20">
-        <TermsModal isOpen={isOpen} onClose={handleCloseModal} />
+          <TermsModal isOpen={isOpen} onClose={handleCloseModal} />
         </div>
-
       </div>
     </div>
   );

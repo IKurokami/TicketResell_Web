@@ -19,7 +19,7 @@ using TicketResell.Api.Hubs;
 using TicketResell.Services.Services.History;
 using TicketResell.Services.Services.Revenues;
 using TicketResell.Services.Services.Mail;
-
+using TicketResell.Services.Services.Ratings;
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +83,7 @@ builder.Services.AddScoped<IRevenueService, RevenueService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
 
 builder.Services.AddHttpClient<IMomoService, MomoService>();
 builder.Services.AddHttpClient<IVnpayService, VnpayService>();

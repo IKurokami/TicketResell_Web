@@ -21,7 +21,7 @@ public class AuthenticationService : IAuthenticationService
     private readonly IConnectionMultiplexer _redis;
 
     private readonly IAppLogger _logger;
-    
+
     public AuthenticationService(
         IUnitOfWork unitOfWork,
         IMapper mapper,
@@ -36,8 +36,8 @@ public class AuthenticationService : IAuthenticationService
         _redis = redis;
     }
 
-    
-    
+
+
     public async Task<ResponseModel> RegisterAsync(RegisterDto registerDto)
     {
 
@@ -48,11 +48,13 @@ public class AuthenticationService : IAuthenticationService
         _logger.LogError(registerDto.UserId);
         var cacheOtp = await GetCachedAccessKeyAsync("email_verification", registerDto.UserId);
         _logger.LogError(cacheOtp);
-        if (!cacheOtp.HasValue){
+        if (!cacheOtp.HasValue)
+        {
             _logger.LogError("test");
             return ResponseModel.BadRequest("Registration failed", "Otp not found for user");
         }
-        if (cacheOtp != registerDto.OTP){
+        if (cacheOtp != registerDto.OTP)
+        {
             _logger.LogError("test2");
             return ResponseModel.BadRequest("Registration failed", "OTP provided is invalid");
         }
@@ -71,11 +73,11 @@ public class AuthenticationService : IAuthenticationService
             _logger.LogError("Email exist");
             return ResponseModel.BadRequest("Registration failed", "Email already exists");
         }
-        
+
         user.Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
         user.CreateDate = DateTime.UtcNow;
         user.Status = 1;
-        
+
         await _unitOfWork.UserRepository.CreateAsync(user);
         await _unitOfWork.CompleteAsync();
 
@@ -86,7 +88,7 @@ public class AuthenticationService : IAuthenticationService
     public async Task<ResponseModel> PutOtpAsync(string data)
     {
         try
-        {   
+        {
             var decryptedData = (new CryptoService()).Decrypt(data);
             var splitedData = decryptedData.Split("|");
             if (await _unitOfWork.UserRepository.GetByIdAsync(splitedData[0]) != null)
@@ -100,7 +102,7 @@ public class AuthenticationService : IAuthenticationService
             return ResponseModel.BadRequest("Decryption failed");
         }
 
-        return ResponseModel.Error("Something failed");;
+        return ResponseModel.Error("Something failed"); ;
     }
 
     public async Task<ResponseModel> LoginAsync(LoginDto loginDto)
@@ -115,7 +117,7 @@ public class AuthenticationService : IAuthenticationService
         {
             return ResponseModel.BadRequest("Login failed", "Password wrong");
         }
-        
+
         var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
 
         if (cachedAccessKey.IsNullOrEmpty)
@@ -194,7 +196,7 @@ public class AuthenticationService : IAuthenticationService
                 Status = 1,
                 Verify = 1,
             };
-            
+
             await _unitOfWork.UserRepository.CreateAsync(user);
             await _unitOfWork.CompleteAsync();
         }
@@ -217,17 +219,17 @@ public class AuthenticationService : IAuthenticationService
     public async Task<bool> ValidateAccessKeyAsync(string userId, string accessKey)
     {
         var cachedAccessKey = await GetCachedAccessKeyAsync(userId);
-        
+
         if (cachedAccessKey.IsNullOrEmpty || !cachedAccessKey.HasValue)
             return false;
-        
+
         return cachedAccessKey == accessKey;
     }
     public async Task<bool> ValidateAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto)
     {
         return await ValidateAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
     }
-    
+
     public async Task<ResponseModel> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
     {
         var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
@@ -263,7 +265,7 @@ public class AuthenticationService : IAuthenticationService
 
         var db = _redis.GetDatabase();
         var storedTokenJson = await db.StringGetAsync($"email_verification:{userId}");
-        
+
         if (!storedTokenJson.HasValue)
         {
             return ResponseModel.BadRequest("Invalid or expired token");
@@ -284,7 +286,7 @@ public class AuthenticationService : IAuthenticationService
 
         return ResponseModel.Success("Email verified successfully");
     }
-    
+
     private string GenerateAccessKey()
     {
         var key = new byte[32];
@@ -295,6 +297,8 @@ public class AuthenticationService : IAuthenticationService
 
         return Convert.ToBase64String(key);
     }
+
+
     private async Task CacheAccessKeyAsync(string cacheName, string userId, string cacheKey, TimeSpan timeSpan)
     {
         var db = _redis.GetDatabase();
@@ -304,6 +308,58 @@ public class AuthenticationService : IAuthenticationService
     {
         await CacheAccessKeyAsync("access_key", userId, accessKey, TimeSpan.FromHours(24));
     }
+
+
+
+    public async Task<string> CreatePasswordKeyAsync(string userId)
+    {
+        // Check if the user ID is valid
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
+        }
+
+        // Fetch the user by ID
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            // Optionally log this event
+            Console.WriteLine($"User with ID {userId} not found.");
+            return null; // or throw an exception if you want to enforce existence
+        }
+
+        // Generate and hash the access key
+        string key = GenerateAccessKey();
+        string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
+        
+        // Return the plain access key to send in the email
+        return key; // This key can be sent via email
+    }
+
+    public async Task<ResponseModel> CheckPassswordKeyAsync(string passwordKey, string userId, string newPassword)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ResponseModel.NotFound("User not found");
+        }
+        var key = await GetCachedAccessKeyAsync("forgot_password", userId);
+        if (key == passwordKey)
+        {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _unitOfWork.UserRepository.Update(user);
+            await _unitOfWork.CompleteAsync();
+            return ResponseModel.Success("Password changed successfully");
+        }
+
+        return ResponseModel.Error("Key is not found or expired");
+    }
+
+
+
+
+
+
     private async Task<RedisValue> GetCachedAccessKeyAsync(string cacheName, string userId)
     {
         var db = _redis.GetDatabase();

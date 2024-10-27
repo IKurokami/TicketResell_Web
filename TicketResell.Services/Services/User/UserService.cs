@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Repositories.Core.Dtos.User;
 using Repositories.Core.Entities;
 using TicketResell.Repositories.Logger;
@@ -209,5 +210,29 @@ namespace TicketResell.Services.Services
             await _unitOfWork.CompleteAsync(); // Assuming you have a SaveChanges method to save changes to the database
             return ResponseModel.Success($"Successfully change status");
         }
+        
+        public async Task<ResponseModel> GetBuyerSeller(string id)
+        {
+            var userIds = await _unitOfWork.TransactionRepository.GetBuyerSellerId(id);
+            if (userIds.IsNullOrEmpty())
+            {
+                return ResponseModel.BadRequest("Not found");
+            }
+
+            var userDtos = new List<BuyerOrderReadDto>();
+
+            foreach (var userId in userIds)
+            {
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+                if (user != null) 
+                {
+                    var userDto = _mapper.Map<BuyerOrderReadDto>(user); 
+                    userDtos.Add(userDto);
+                }
+            }
+            return ResponseModel.Success($"Successfully retrieved users", userDtos);
+        }
+
+        
     }
 }

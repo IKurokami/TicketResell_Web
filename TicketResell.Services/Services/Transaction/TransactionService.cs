@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Repositories.Core.Dtos.OrderDetail;
+using Repositories.Core.Dtos.User;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
 using TicketResell.Repositories.UnitOfWork;
@@ -54,6 +55,4 @@ public class TransactionService : ITransactionService
         return ResponseModel.Success($"Successfully retrieved buyers for seller {sellerId}", orderDtos );
     }
     
-    
-
 }

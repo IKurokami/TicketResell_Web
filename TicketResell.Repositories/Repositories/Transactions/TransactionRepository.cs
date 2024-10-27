@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TicketResell.Repositories.Logger;
 using Microsoft.Extensions.Logging;
 using Repositories.Core.Dtos.OrderDetail;
+using TicketResell.Repositories.Core.Dtos.Order;
 
 namespace Repositories.Repositories;
 
@@ -50,10 +51,20 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
             .Include(od => od.Order)
             .ThenInclude(o => o.Buyer)
             .Where(od => od.Ticket.SellerId == sellerId && od.Order.Status == 0)
+            .OrderByDescending(od => od.Order != null ? od.Order.Date : DateTime.MinValue)
             .ToListAsync();
 
         return result;
     }
-    
-    
+
+    public async Task<List<string>> GetBuyerSellerId(string sellerId)
+    {
+        var buyerIds = await _context.OrderDetails
+            .Where(od => od.Ticket.SellerId == sellerId && od.Order.Status == 0)
+            .Select(od => od.Order.BuyerId)
+            .Distinct()
+            .ToListAsync();
+
+        return buyerIds;
+    }
 }

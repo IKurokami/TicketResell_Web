@@ -30,7 +30,7 @@ const StaffDashboard = () => {
     setSidebarOpen(false);
   };
 
-  const handleNavigation = (tabName) => {
+  const handleNavigation = (tabName :any) => {
     setActiveTab(tabName);
     closeSidebar();
   };

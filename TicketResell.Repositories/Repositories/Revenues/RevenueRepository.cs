@@ -2,6 +2,7 @@ using Repositories.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Entities;
 using TicketResell.Repositories.Logger;
+using Repositories.Constants;
 
 namespace Repositories.Repositories;
 
@@ -36,6 +37,7 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
         var revenues = await _context.Revenues
             .Include(x=>x.Seller)
             .Where(x => x.SellerId == id)
+            .OrderByDescending(x => x.StartDate)
             .ToListAsync();
         if (revenues == null)
         {
@@ -45,7 +47,7 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
         return revenues;
     }
 
-    public async Task AddRevenueByDateAsync(DateTime date, double amount)
+    public async Task AddRevenueByDateAsync(DateTime date, double amount, string sellerId)
     {
         // Normalize the input date to the start of the day (12 AM) and end of the day (11:59 PM)
         DateTime startDate = date.Date; // 12 AM of the input date
@@ -53,7 +55,7 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
 
         // Find existing revenue item within the date range
         var existingRevenue = await _context.Revenues
-            .FirstOrDefaultAsync(r => r.StartDate <= startDate && r.EndDate >= endDate);
+            .FirstOrDefaultAsync(r => r.StartDate <= startDate && r.EndDate >= endDate && r.SellerId == sellerId);
 
         if (existingRevenue != null)
         {
@@ -66,11 +68,11 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
             var newRevenue = new Revenue
             {
                 RevenueId = "RE"+ Guid.NewGuid().ToString(), 
-                SellerId = null,
+                SellerId = sellerId,
                 StartDate = startDate,
                 EndDate = endDate,
                 Revenue1 = amount,
-                Type = startDate.ToString("MMMM") 
+                Type = RevenueConstant.DAY_TYPE
             };
 
             await _context.Revenues.AddAsync(newRevenue);

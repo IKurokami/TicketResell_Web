@@ -22,6 +22,7 @@ interface Ticket {
 }
 
 interface Transaction {
+  orderDetailId: string;
   date: string;
   quantity: number;
   price: number;
@@ -29,7 +30,13 @@ interface Transaction {
   ticket: Ticket;
 }
 
-const toISODate = ({ year, month, day }) => {
+interface DateParams {
+  year: number;
+  month: number;
+  day: number;
+}
+
+const toISODate = ({ year, month, day }: DateParams): string => {
   const date = new Date(year, month - 1, day);
   return date.toISOString();
 };
@@ -69,6 +76,14 @@ const TransactionTable: React.FC = () => {
     end: null,
   });
   const [isMobile, setIsMobile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Define items per page (adjust based on your grid)
+
+  // Calculate total pages
+  const totalPages = Math.ceil(transactions.length / itemsPerPage);
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when transactions change
+  }, [transactions]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -78,7 +93,6 @@ const TransactionTable: React.FC = () => {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-
   }, []);
 
   const fetchTransactions = async () => {
@@ -101,7 +115,7 @@ const TransactionTable: React.FC = () => {
       }
       const result = await response.json();
       console.log(result.data);
-      
+
       setTransactions(result.data);
     } catch (error: any) {
       setError("Transaction is available");
@@ -122,7 +136,6 @@ const TransactionTable: React.FC = () => {
   if (loading) {
     return <div className="p-4 text-center">Loading transactions...</div>;
   }
-
 
   const startDate = dateRange.start ? toISODate(dateRange.start) : null;
   const endDate = dateRange.end ? toISODate(dateRange.end) : null;
@@ -148,12 +161,13 @@ const TransactionTable: React.FC = () => {
     return withinDateRange && matchesSearchTerm;
   });
 
-  const MobileCard = ({ transaction }) => (
+  const currentItems = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const MobileCard = ({ transaction }: { transaction: Transaction }) => (
     <div className="bg-white p-4 rounded-lg shadow mb-4 border border-gray-200">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm text-gray-600">
-          {formatDate(transaction.order.date)}
-        </span>
         <span className="text-sm text-gray-600">
           {formatDate(transaction.order.date)}
         </span>
@@ -183,11 +197,13 @@ const TransactionTable: React.FC = () => {
         <div className="relative flex items-center bg-white rounded-full h-12 p-1 px-3 border border-gray-300 w-3/5 lg:w-64">
           <input
             type="text"
+            aria-label="Search ticket"
             placeholder="Search ticket"
             className="border-none outline-none p-1 bg-transparent w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+
           <FontAwesomeIcon
             className="text-lg p-1 cursor-pointer"
             icon={faMagnifyingGlass}
@@ -201,13 +217,16 @@ const TransactionTable: React.FC = () => {
 
       {isMobile ? (
         <div className="space-y-4">
-          {filteredTransactions.length === 0 ? (
+          {currentItems.length === 0 ? (
             <div className="text-center text-gray-500 py-4">
               No transactions available.
             </div>
           ) : (
-            filteredTransactions.map((transaction, index) => (
-              <MobileCard key={index} transaction={transaction} />
+            currentItems.map((transaction) => (
+              <MobileCard
+                key={transaction.order.orderId}
+                transaction={transaction}
+              />
             ))
           )}
         </div>
@@ -230,35 +249,43 @@ const TransactionTable: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {error || filteredTransactions.length === 0 ? (
+                {error ? (
                   <tr>
-                    <td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-gray-500">
-                      {error ? "No transactions available." : "No transactions available."}
+                    <td
+                      colSpan={6}
+                      className="px-4 lg:px-6 py-4 text-center text-gray-500"
+                    >
+                      {error}
+                    </td>
+                  </tr>
+                ) : currentItems.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-4 lg:px-6 py-4 text-center text-gray-500"
+                    >
+                      No transactions available.
                     </td>
                   </tr>
                 ) : (
-                  filteredTransactions.map((transaction, index) => (
-                    <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
-                      <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm text-center text-gray-600">
+                  currentItems.map((transaction) => (
+                    <tr key={transaction.orderDetailId}>
+                      <td className="px-4 lg:px-6 py-4 text-center">
                         {formatDate(transaction.order.date)}
                       </td>
-                      <td className="px-4 lg:px-6 py-3 lg:py-4 text-sm text-left text-gray-900">
-                        <div className="font-medium max-w-xs">
-                          {truncateText(transaction.ticket.name, 20)}
-                        </div>
+                      <td className="px-4 lg:px-6 py-4 text-left">
+                        {truncateText(transaction.ticket.name, 30)}
                       </td>
-                      <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm text-center text-gray-600">
+                      <td className="px-4 lg:px-6 py-4 text-center">
                         {formatVND(transaction.price)}
                       </td>
-                      <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm text-center text-gray-600">
-                        <span className="px-3 py-1 rounded-full bg-green-100 text-green-800">
-                          {transaction.quantity}
-                        </span>
+                      <td className="px-4 lg:px-6 py-4 text-center">
+                        {transaction.quantity}
                       </td>
-                      <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm font-medium text-center text-green-700">
+                      <td className="px-4 lg:px-6 py-4 text-center">
                         {formatVND(transaction.price * transaction.quantity)}
                       </td>
-                      <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm text-center text-gray-600">
+                      <td className="px-4 lg:px-6 py-4 text-center">
                         {transaction.order.user.username}
                       </td>
                     </tr>
@@ -267,11 +294,57 @@ const TransactionTable: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          
         </div>
       )}
+      <div className="flex justify-center space-x-2 mt-4">
+            <button
+              className={`p-2 rounded-full ${
+                currentPage === 1 ? "text-gray-300" : "text-green-500"
+              }`}
+              onClick={() => {
+                currentPage > 1 && setCurrentPage(currentPage - 1);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              disabled={currentPage === 1}
+            >
+              &lt;
+            </button>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index + 1}
+                className={`p-2 rounded-full ${
+                  currentPage === index + 1
+                    ? "bg-green-500 text-white"
+                    : "text-green-500"
+                }`}
+                onClick={() => {
+                  setCurrentPage(index + 1); // Navigate to the clicked page
+                  window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to the top
+                }}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button
+              className={`p-2 rounded-full ${
+                currentPage === totalPages ? "text-gray-300" : "text-green-500"
+              }`}
+              onClick={() => {
+                if (currentPage < totalPages) {
+                  setCurrentPage(currentPage + 1);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
+              disabled={currentPage === totalPages}
+            >
+              &gt;
+            </button>
+          </div>
     </div>
   );
 };
 
 export default TransactionTable;
-

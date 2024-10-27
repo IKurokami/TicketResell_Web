@@ -9,6 +9,7 @@ import fs from "fs"; // Import the file system module
 import path from "path"; // Import path module for working with file paths
 import CategoriesBanner from "@/Components/CategoriesBanner";
 import HorizontalCards from "@/Components/CategoriesBanner";
+import TicketByCategory from "@/Components/TicketByCategory";
 // import PaymentStatus from "@/Components/PaymentStatus";
 const Home = () => {
   return (

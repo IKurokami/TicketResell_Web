@@ -10,8 +10,11 @@ using Repositories.Core.Dtos.Role;
 using Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Core.Dtos.Cart;
+using TicketResell.Repositories.Core.Dtos.Order;
+using TicketResell.Repositories.Core.Dtos.Chat;
 using Category = Repositories.Core.Entities.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
+using TicketResell.Repositories.Core.Dtos.Rating;
 
 namespace Repositories.Core.AutoMapperConfig
 {
@@ -30,6 +33,13 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<SellerRegisterDto, User>()
                 .ForMember(dest => dest.Username, opt => opt.Ignore())
                 .ForMember(dest => dest.Password, opt => opt.Ignore());
+            CreateMap<User, BuyerOrderReadDto>();
+            
+
+            //Rating
+            CreateMap<Rating, RatingReadDto>();
+            CreateMap<RatingCreateDto, Rating>();
+            CreateMap<RatingUpdateDto, Rating>();
 
             //Revenue
             CreateMap<RevenueCreateDto, Revenue>();
@@ -45,7 +55,7 @@ namespace Repositories.Core.AutoMapperConfig
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.user, opt => opt.MapFrom(src => src.Buyer));
-
+            CreateMap<Order, OrderBuyerDto>();
 
             //OrderDetail
             CreateMap<VirtualOrderDetailDto, OrderDetail>();
@@ -61,8 +71,9 @@ namespace Repositories.Core.AutoMapperConfig
                 .ForMember(dest => dest.order, opt => opt.MapFrom(src => src.Order));
 
 
-
-
+            //Chat
+            CreateMap<Chat, ChatReadDto>();
+            
             //Cart
             CreateMap<Order, CartDto>();
 

@@ -28,6 +28,7 @@ namespace TicketResell.Repositories.UnitOfWork
             CategoryRepository = new CategoryRepository(_logger, _context);
             CartRepository = new CartRepository(_logger, _context);
             ChatRepository = new ChatRepository(_logger, _context);
+            RatingRepository = new RatingRepository(_logger, _context);
         }
 
         public IUserRepository UserRepository { get; }
@@ -41,6 +42,7 @@ namespace TicketResell.Repositories.UnitOfWork
         public ICategoryRepository CategoryRepository { get; }
         public ICartRepository CartRepository { get; }
         public IChatRepository ChatRepository { get; }
+        public IRatingRepository RatingRepository { get; }
         
         public async Task<int> CompleteAsync()
         {

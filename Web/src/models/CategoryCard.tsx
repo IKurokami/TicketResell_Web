@@ -4,16 +4,26 @@ import React, { useState } from "react";
 import { fetchImage } from "./FetchImage";
 import Image from "next/image";
 
+
+interface Category {
+  categoryId: string;
+  name: string;
+  description: string;
+}
+
 export interface BannerItemCard {
+  categories:Category[]
   imageUrl: string;
   name: string;
   date: string;
   author: string;
   description: string;
-  price: string;
+  price: number;
   id: string;
   categories: string;
 }
+
+
 
 const DEFAULT_IMAGE =
   "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
@@ -41,10 +51,9 @@ const convertToBannerItemCards = async (
   const bannerItemCards = await Promise.all(
     response.map(async (item) => {
       let imageUrl = DEFAULT_IMAGE;
-
       if (item.image) {
         const { imageUrl: fetchedImageUrl, error } = await fetchImage(
-          item.ticketId
+          item.image
         );
 
         if (fetchedImageUrl) {
@@ -57,6 +66,7 @@ const convertToBannerItemCards = async (
       }
 
       return {
+        categories:item.categories,
         imageUrl,
         name: item.name,
         date: formatDate(item.createDate), // Format the date here
@@ -79,7 +89,6 @@ interface CategoriesPageProps {
 export const fetchBannerItems = async (): Promise<BannerItemCard[]> => {
   const bannerItemsRes = await fetch("http://localhost:5296/api/ticket/read");
   const response = await bannerItemsRes.json();
-  console.log(response.data);
 
   const bannerItems: Promise<BannerItemCard[]> = convertToBannerItemCards(
     response.data
@@ -158,4 +167,18 @@ export const CategoriesPage = ({
       {renderBannerItems(bannerItems, currentIndex, itemsToShow)}
     </div>
   );
+};
+
+export const fetchCategories = async ()=> {
+  try {
+    const response = await fetch("http://localhost:5296/api/Category/read");
+    if (!response.ok) {
+      throw new Error("Failed to fetch categories");
+    }
+    const result= await response.json();
+    return result.data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return undefined;
+  }
 };

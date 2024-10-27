@@ -15,9 +15,17 @@ namespace Api.Controllers
             _mailService = serviceProvider.GetRequiredService<IMailService>();
         }
 
+        [HttpPost("sendPasswordKey")]
+        public async Task<IActionResult> SendPasswordKey([FromBody] MailRequest request)
+        {
+            var result = await _mailService.SendPasswordKeyAsync(request.To);
+            return ResponseParser.Result(result);
+
+        }
+
         // Send a simple email
         [HttpPost("sendopt")]
-        public async Task<IActionResult> SendOtp([FromBody] OtpRequest request)
+        public async Task<IActionResult> SendOtp([FromBody] MailRequest request)
         {
             var result = await _mailService.SendOtpAsync(request.To);
             
@@ -35,6 +43,7 @@ namespace Api.Controllers
     }
 
     // Request models
+
     public class EmailRequest
     {
         public string To { get; set; }
@@ -42,7 +51,7 @@ namespace Api.Controllers
         public string Body { get; set; }
     }
 
-    public class OtpRequest
+    public class MailRequest
     {
         public string To { get; set; }
     }
