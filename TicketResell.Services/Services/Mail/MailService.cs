@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Repositories.Config;
+using Repositories.Core.Entities;
 using StackExchange.Redis;
 using TicketResell.Repositories.Logger;
+using TicketResell.Repositories.UnitOfWork;
+using TicketResell.Services.Services.Crypto;
+using static System.Net.WebRequestMethods;
+using File = System.IO.File;
 
 namespace TicketResell.Services.Services.Mail
 {
@@ -23,6 +29,10 @@ namespace TicketResell.Services.Services.Mail
         private readonly string _fromEmail;
         private readonly string _fromDisplayName;
         private readonly IConnectionMultiplexer _redis;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IAuthenticationService _authenticationService;
+        private readonly IUserService _userService;
+
 
         public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis)
         {
@@ -37,6 +47,160 @@ namespace TicketResell.Services.Services.Mail
             _smtpPassword = _config.Password;
             _fromEmail = _config.FromEmail;
             _fromDisplayName = _config.FromDisplayName;
+        }
+
+        public async Task<ResponseModel> SendPasswordKeyAsync(string to)
+        {      
+            string key = GenerateAccessKey();
+            string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
+
+            string body = $@"
+<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Khôi phục mật khẩu TicketResell</title>
+    <style>
+        body, html {{
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f7f0;
+            line-height: 1.6;
+            color: #333;
+        }}
+        .container {{
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+        }}
+        .header {{
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }}
+        .header h1 {{
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }}
+        .header p {{
+            margin: 10px 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }}
+        .content {{
+            padding: 40px 30px;
+            color: #333;
+        }}
+        .content h2 {{
+            color: #2ecc71;
+            margin-top: 0;
+            font-size: 24px;
+        }}
+        .reset-button {{
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto;
+            padding: 14px 28px;
+            background-color: #2ecc71;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            border-radius: 50px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }}
+        .reset-button:hover {{
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }}
+        .info-box {{
+            background-color: #e8f6e8;
+            border-left: 4px solid #2ecc71;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }}
+        .highlight {{
+            color: #2ecc71;
+            font-weight: bold;
+        }}
+        .reset-link {{
+            word-break: break-all;
+            background-color: #e0f2e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }}
+        .footer {{
+            background-color: #e8f6e8;
+            text-align: center;
+            padding: 25px;
+            font-size: 14px;
+            color: #555;
+        }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>TicketResell</h1>
+            <p>Khôi phục mật khẩu</p>
+        </div>
+        <div class='content'>
+            <h2>Xin chào</h2>
+            <p>Chúng tôi nhận được yêu cầu khôi phục mật khẩu cho tài khoản TicketResell của bạn. Để tạo mật khẩu mới, vui lòng nhấp vào nút bên dưới:</p>
+            
+            <a href='http://localhost:5296/api/Mail/sendPasswordKey?key={key}' class='reset-button'>Đặt lại mật khẩu</a>
+            
+            <p>Hoặc sao chép đường dẫn sau vào trình duyệt:</p>
+            <div class='reset-link'>
+                http://localhost:5296/api/Mail/sendPasswordKey?key={key}
+            </div>
+
+            <div class='info-box'>
+                <p><strong>Lưu ý quan trọng:</strong></p>
+                <ul>
+                    <li>Liên kết này có hiệu lực trong vòng <span class='highlight'>15 phút</span>.</li>
+                    <li>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</li>
+                    <li>Không chia sẻ liên kết này với bất kỳ ai để bảo vệ tài khoản của bạn.</li>
+                </ul>
+            </div>
+
+            <p>Vì lý do bảo mật, liên kết sẽ hết hạn sau 15 phút. Nếu bạn cần đặt lại mật khẩu sau thời gian này, vui lòng thực hiện lại quy trình khôi phục mật khẩu.</p>
+            
+            <p>Trân trọng,<br><strong>Đội ngũ TicketResell</strong></p>
+        </div>
+        <div class='footer'>
+            <p>&copy; 2024 TicketResell. Tất cả các quyền được bảo lưu.</p>
+            <p>Cần hỗ trợ? Liên hệ chúng tôi tại <a href='mailto:quanglmse184185@fpt.edu.vn' style='color: #2ecc71;'>quanglmse184185@fpt.edu.vn</a></p>
+        </div>
+    </div>
+</body>
+</html>";            var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
+            if (response != null && response.StatusCode == 200)
+            {
+                await CacheAccessKeyAsync("forgot_password", to, key, TimeSpan.FromHours(2));
+                return ResponseModel.Success("Sucess");
+            }
+
+            return ResponseModel.Error(response.Message ?? "Error");
+
+
         }
 
         public async Task<ResponseModel> SendOtpAsync(string to)
@@ -167,7 +331,7 @@ namespace TicketResell.Services.Services.Mail
                 <p>&copy; 2024 TicketResell. Tất cả các quyền được bảo lưu.</p>
                 <p>Cần hỗ trợ? Liên hệ chúng tôi tại <a href='mailto:quanglmse184185@fpt.edu.vn' style='color: #2ecc71;'>quanglmse184185@fpt.edu.vn</a></p>
             </div>
-        </div>
+        </div> 
     </body>
     </html>";
             var response = await SendEmailAsync(to, "TicketResell: Here is your OTP code", body);
@@ -188,6 +352,18 @@ namespace TicketResell.Services.Services.Mail
             await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
         }
 
+        private string GenerateAccessKey()
+        {
+            var key = new byte[32];
+            using (var generator = RandomNumberGenerator.Create())
+            {
+                generator.GetBytes(key);
+            }
+
+            return Convert.ToBase64String(key);
+        }
+
+        
         public static string GenerateNumericOTP(int length)
         {
             var random = new Random();
