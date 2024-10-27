@@ -39,5 +39,6 @@ namespace Api.Controllers
 
             return ResponseParser.Result(await _transactionService.GetTicketOrderDetailsBySeller(sellerId));
         }
+        
     }
 }

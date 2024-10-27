@@ -36,21 +36,16 @@ interface Transaction {
   ticket: Ticket;
 }
 
-interface TopBuyer {
-  buyerId:string;
-  username: string;
-  total: number;
-}
 const RevenueCard = () => {
   const [revenueData, setRevenueData] = useState<RevenueItem[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [topBuyers, setTopBuyers] = useState<TopBuyer[]>([]); // State to hold top buyers
+
+  const sellerId = Cookies.get("id");
 
   const fetchTransactions = async () => {
-    const id = Cookies.get("id");
-    if (!id) {
+    if (!sellerId) {
       setError("User ID not found in cookies.");
       setLoading(false);
       return;
@@ -58,7 +53,7 @@ const RevenueCard = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Transaction/buyers/${id}`,
+        `http://localhost:5296/api/Transaction/buyers/${sellerId}`,
         {
           credentials: "include",
         }
@@ -67,19 +62,17 @@ const RevenueCard = () => {
         throw new Error("Failed to fetch transactions");
       }
       const result = await response.json();
-      console.log(result.data);
-
       setTransactions(result.data);
     } catch (error) {
       console.error("Error fetching transactions:", error);
+      setTransactions([]);
     } finally {
       setLoading(false);
-      setTransactions([]);
+      
     }
   };
 
   const fetchRevenueBySellerId = async () => {
-    const sellerId = Cookies.get("id");
     if (sellerId) {
       try {
         const response = await fetch(
@@ -92,6 +85,7 @@ const RevenueCard = () => {
           throw new Error("Network response was not ok");
         }
         const result = await response.json();
+        
         setRevenueData(result.data);
       } catch (error) {
         console.error("Error fetching revenue data:", error);
@@ -99,54 +93,12 @@ const RevenueCard = () => {
       }
     }
   };
-
   useEffect(() => {
     fetchRevenueBySellerId();
-    fetchTransactions(); // Call fetchTransactions here
+    fetchTransactions();
   }, []);
 
-  useEffect(() => {
-    // Calculate top buyers once transactions are fetched
-    if (transactions.length > 0) {
-      calculateTopBuyers(transactions);
-    }
-  }, [transactions]);
 
-  const calculateTopBuyers = (transactions: Transaction[]) => {
-    const buyerTotals: { [key: string]: number } = {};
-    const buyerUsernames: { [key: string]: string } = {}; // Store usernames
-  
-    transactions.forEach(transaction => {
-      const buyerId = transaction.order.user.userId; // Get buyer ID
-      const total = transaction.price * transaction.quantity;
-  
-      // Sum the total price for each buyer
-      if (buyerTotals[buyerId]) {
-        buyerTotals[buyerId] += total;
-      } else {
-        buyerTotals[buyerId] = total;
-      }
-  
-      // Store username if not already present
-      if (!buyerUsernames[buyerId]) {
-        buyerUsernames[buyerId] = transaction.order.user.username; // Get username
-      }
-    });
-  
-    // Convert to an array and sort by total revenue
-    const sortedBuyers = Object.entries(buyerTotals)
-      .map(([buyerId, total]) => ({
-        buyerId,
-        total,
-        username: buyerUsernames[buyerId], // Include username
-      }))
-      .sort((a, b) => b.total - a.total) // Sort descending
-      .slice(0, 3); // Get top 3
-  console.log(sortedBuyers);
-  
-    setTopBuyers(sortedBuyers); // Set state with top buyers
-  };
-  
 
   if (loading) {
     return <div>Loading...</div>;
@@ -156,13 +108,16 @@ const RevenueCard = () => {
     return <div>Error: {error}</div>;
   }
 
+  
   return (
     <div className="p-6">
-      <RevenueManager revenueData={revenueData} />
+      <RevenueManager revenueData={revenueData} transactions={transactions} />
       <div>
-        <OrderDetailsDashboard topBuyers={topBuyers} transactions={transactions} /> {/* Pass transactions to your dashboard if needed */}
+        <OrderDetailsDashboard
+        revenue={revenueData}
+          transactions={transactions}
+        />
       </div>
-      {/* Display top buyers */}
     </div>
   );
 };

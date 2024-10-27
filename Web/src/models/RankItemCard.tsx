@@ -29,9 +29,9 @@ const convertToRankItemCards = async (
     data.map(async (ticket: any, index: number) => {
       let ticketImage = DEFAULT_IMAGE;
 
-      if (ticket.ticketId) {
-        ticket.ticketId;
-        const { imageUrl, error } = await fetchImage(ticket.ticketId);
+      if (ticket.image) {
+    
+        const { imageUrl, error } = await fetchImage(ticket.image);
 
         if (imageUrl) {
           ticketImage = imageUrl;

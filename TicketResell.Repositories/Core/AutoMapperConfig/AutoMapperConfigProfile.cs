@@ -10,6 +10,7 @@ using Repositories.Core.Dtos.Role;
 using Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Core.Dtos.Cart;
+using TicketResell.Repositories.Core.Dtos.Order;
 using Category = Repositories.Core.Entities.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 
@@ -30,7 +31,8 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<SellerRegisterDto, User>()
                 .ForMember(dest => dest.Username, opt => opt.Ignore())
                 .ForMember(dest => dest.Password, opt => opt.Ignore());
-
+            CreateMap<User, BuyerOrderReadDto>();
+            
             //Revenue
             CreateMap<RevenueCreateDto, Revenue>();
             CreateMap<Revenue, RevenueReadDto>();
@@ -45,7 +47,7 @@ namespace Repositories.Core.AutoMapperConfig
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.user, opt => opt.MapFrom(src => src.Buyer));
-
+            CreateMap<Order, OrderBuyerDto>();
 
             //OrderDetail
             CreateMap<VirtualOrderDetailDto, OrderDetail>();

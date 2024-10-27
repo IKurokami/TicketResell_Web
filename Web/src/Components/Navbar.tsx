@@ -16,10 +16,14 @@ import { LogIn } from "lucide-react";
 import { CheckSeller } from "./CheckSeller";
 import { NumberContext } from "./NumberContext";
 import { checkLogin } from "./checkLogin";
+import { fetchImage } from "@/models/FetchImage";
 interface NavbarProps {
   page: string;
 }
 
+const DEFAULT_IMAGE =
+  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+  
 const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const context = useContext(NumberContext);
   if (context) {
@@ -61,7 +65,11 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
   const [countCartItems, setCountCartItems] = useState<number>(0);
+  const [image,setImage]= useState<string>("");
   const router = useRouter();
+
+
+  
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
   };
@@ -162,8 +170,22 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
   useEffect(() => {
     // Function to check if the user is logged in by checking for the 'id' cookie
-    const checkUserLoginStatus = () => {
-      const id = Cookies.get("id"); // Get the user ID from the cookie
+    const checkUserLoginStatus =async () => {
+      const id = Cookies.get("id"); 
+      if (id) {
+        const { imageUrl: fetchedImageUrl, error } = await fetchImage(
+          id
+        );
+
+        if (fetchedImageUrl) {
+          setImage(fetchedImageUrl);
+        } else {
+          setImage(DEFAULT_IMAGE)
+          console.error(
+            `Error fetching image for user ${id}: ${error}`
+          );
+        }
+      }// Get the user ID from the cookie
       if (id) {
         setIsLoggedIn(true); // User is logged in
       } else {
@@ -327,7 +349,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
               className="focus:outline-none"
             >
               <img
-                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                src= {image}
                 alt="User"
                 className="w-8 h-8 rounded-full border-2 border-gray-200"
               />

@@ -7,7 +7,7 @@ INSERT INTO [Role] (
 VALUES
 ('RO1', 'Buyer', 'Administrator with full system access and permissions'),
 ('RO2', 'Staff', 'Staff member responsible for managing operations'),
-('RO3', 'Staff', 'User with permissions to browse and purchase products'),
+('RO3', 'Seller', 'User with permissions to browse and purchase products'),
 ('RO4', 'Admin', 'User with permissions to list and sell products');
 
 -- Inserting 10 sample records into SellConfig table
@@ -50,15 +50,15 @@ INSERT INTO [User] (
     [Cccd]
 )
 VALUES
-('USER001', 'SELLCONFIG009', 'hoangtrong@gmail.com', 'password123', 1, GETDATE(), 'hoangtrong@gmail.com', N'Hoàng Trọng', N'Nam', '0901234567', N'Hà Nội, Việt Nam', 'USER009', '1990-05-12', N'Bio của Hoàng Trọng, một người yêu công nghệ và du lịch.', 1, N'Ngân hàng Techcombank', 'Savings', N'Hà Nội', 'CCCD009'),
+('USER001', 'SELLCONFIG009', N'Nguyễn Chí Cường', 'password123', 1, GETDATE(), 'cuongdola@personal.example.com', N'Nguyễn Chí Cường', N'Nam', '0901234567', N'Hà Nội, Việt Nam', 'USER009', '1990-05-12', N'Bio của Hoàng Trọng, một người yêu công nghệ và du lịch.', 1, N'Ngân hàng Techcombank', 'Savings', N'Hà Nội', 'CCCD009'),
 
-('USER002', 'SELLCONFIG010', 'lanhuyen@gmail.com', 'password123', 1, GETDATE(), 'lanhuyen@gmail.com', N'Lê Huyền', N'Nữ', '0902345678', N'TP.HCM, Việt Nam', 'USER010', '1992-08-15', N'Bio của Lê Huyền, thích đọc sách và nấu ăn.', 1, N'Ngân hàng Vietcombank', 'Checking', 'TP.HCM', 'CCCD010'),
+('USER002', 'SELLCONFIG010', 'Giap Cao', 'password123', 1, GETDATE(), 'giap@personal.example.com', N'Cao Đình Giáp', N'Nam', '0902345678', N'TP.HCM, Việt Nam', 'USER010', '1992-08-15', N'Bio của Lê Huyền, thích đọc sách và nấu ăn.', 1, N'Ngân hàng Vietcombank', 'Checking', 'TP.HCM', 'CCCD010'),
 
-('USER003', 'SELLCONFIG001', 'tuananh@gmail.com', 'password123', 1, GETDATE(), 'tuananh@gmail.com', N'Nguyễn Tuấn Anh', N'Nam', '0903456789', N'Đà Nẵng, Việt Nam', 'USER011', '1993-02-20', N'Bio của Nguyễn Tuấn Anh, đam mê thể thao và du lịch.', 1, N'Ngân hàng BIDV', 'Savings', N'Đà Nẵng', 'CCCD011'),
+('USER003', 'SELLCONFIG001', 'Do Vinh', 'password123', 1, GETDATE(), 'vinhseller@personal.example.com', N'Đỗ Khắc Phú Vinh', N'Nam', '0903456789', N'Đà Nẵng, Việt Nam', 'USER011', '1993-02-20', N'Bio của Nguyễn Tuấn Anh, đam mê thể thao và du lịch.', 1, N'Ngân hàng BIDV', 'Savings', N'Đà Nẵng', 'CCCD011'),
 
-('USER004', 'SELLCONFIG002', 'thuyduong@gmail.com', 'password123', 1, GETDATE(), 'thuyduong@gmail.com', N'Nguyễn Thùy Dương', N'Nữ', '0904567890', N'Hải Phòng, Việt Nam', 'USER012', '1994-04-25', N'Bio của Nguyễn Thùy Dương, yêu thích nghệ thuật và du lịch.', 1, N'Ngân hàng Agribank', 'Checking', N'Hải Phòng', 'CCCD012'),
+('USER004', 'SELLCONFIG002', 'Khang Huynh', 'password123', 1, GETDATE(), 'khangseller@personal.example.com', N'Huỳnh Vương Khang', N'Nam', '0904567890', N'Hải Phòng, Việt Nam', 'USER012', '1994-04-25', N'Bio của Nguyễn Thùy Dương, yêu thích nghệ thuật và du lịch.', 1, N'Ngân hàng Agribank', 'Checking', N'Hải Phòng', 'CCCD012'),
 
-('USER005', 'SELLCONFIG003', 'minhchieu@gmail.com', 'password123', 1, GETDATE(), 'minhchieu@gmail.com', N'Trần Minh Chiếu', N'Nam', '0905678901', N'Nha Trang, Việt Nam', 'USER013', '1995-07-30', N'Bio của Trần Minh Chiếu, thích khám phá ẩm thực.', 1, N'Ngân hàng MB Bank', 'Savings', N'Nha Trang', 'CCCD013'),
+('USER005', 'SELLCONFIG003', 'Le Quang', 'password123', 1, GETDATE(), 'khongphaiquang@personal.example.com', N'Lê Minh Quang', N'Nam', '0905678901', N'Nha Trang, Việt Nam', 'USER013', '1995-07-30', N'Bio của Trần Minh Chiếu, thích khám phá ẩm thực.', 1, N'Ngân hàng MB Bank', 'Savings', N'Nha Trang', 'CCCD013'),
 
 ('USER006', 'SELLCONFIG004', 'ngoclan@gmail.com', 'password123', 1, GETDATE(), 'ngoclan@gmail.com', N'Nguyễn Ngọc Lan', N'Nữ', '0906789012', N'Cần Thơ, Việt Nam', 'USER014', '1996-10-10', N'Bio của Nguyễn Ngọc Lan, thích yoga và phim ảnh.', 1, N'Ngân hàng Vietinbank', 'Checking', N'Cần Thơ', 'CCCD014'),
 
@@ -141,127 +141,168 @@ VALUES
 ('TICKET029', 'USER008', N'Chương trình xiếc thú', 110000.0, N'32 Lê Thánh Tôn, Quận 1, TP. Hồ Chí Minh', '2024-11-29', GETDATE(), GETDATE(), 1, 'TICKET029', N'Chương trình xiếc thú vui nhộn dành cho trẻ em.', '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'),
 ('TICKET030', 'USER008', N'Chương trình biểu diễn nghệ thuật đường phố', 50000.0, N'10 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', '2024-11-30', GETDATE(), GETDATE(), 1, 'TICKET030', N'Chương trình biểu diễn nghệ thuật đường phố tại Phố đi bộ Nguyễn Huệ.', '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');
 
+--Rating
+INSERT INTO [TicketResellManagement].[dbo].[Rating] ([RatingId], [UserId], [SellerId], [Stars], [Comment], [CreateDate]) VALUES
+('RAT001', 'USER003', 'USER007', 5, N'Dịch vụ tuyệt vời, rất đáng để giới thiệu!', '2023-10-12'),
+('RAT002', 'USER009', 'USER002', 4, N'Trải nghiệm khá tốt.', '2023-10-15'),
+('RAT003', 'USER001', 'USER004', 3, N'Dịch vụ trung bình, có thể cải thiện.', '2023-10-18'),
+('RAT004', 'USER005', 'USER008', 2, N'Không hài lòng với thời gian phản hồi.', '2023-10-20'),
+('RAT005', 'USER010', 'USER003', 5, N'Tuyệt vời! Sẽ quay lại.', '2023-10-25'),
+('RAT006', 'USER006', 'USER010', 4, N'Tốt nhưng giao hàng hơi chậm.', '2023-10-26'),
+('RAT007', 'USER004', 'USER001', 5, N'Trải nghiệm tuyệt vời! Nhanh chóng và đáng tin cậy.', '2023-10-28'),
+('RAT008', 'USER008', 'USER006', 1, N'Rất thất vọng với dịch vụ.', '2023-11-01'),
+('RAT009', 'USER002', 'USER009', 3, N'Bình thường, không có gì nổi bật.', '2023-11-03'),
+('RAT0010', 'USER007', 'USER005', 4, N'Dịch vụ tốt, tôi khá hài lòng.', '2023-11-04'),
+('RAT011', 'USER003', 'USER007', 5, N'Hoàn hảo, không có vấn đề gì.', '2023-11-06'),
+('RAT012', 'USER009', 'USER002', 4, N'Có trải nghiệm tốt.', '2023-11-08'),
+('RAT013', 'USER001', 'USER004', 2, N'Nên cải thiện hỗ trợ khách hàng.', '2023-11-09'),
+('RAT014', 'USER005', 'USER008', 3, N'Mong đợi nhiều hơn một chút.', '2023-11-10'),
+('RAT015', 'USER010', 'USER003', 5, N'Trải nghiệm tuyệt vời, sẽ quay lại!', '2023-11-12'),
+('RAT016', 'USER006', 'USER010', 5, N'Dịch vụ nhanh chóng và thân thiện.', '2023-11-14'),
+('RAT017', 'USER004', 'USER001', 4, N'Tốt, nhưng có một số vấn đề về sản phẩm.', '2023-11-15'),
+('RAT018', 'USER008', 'USER006', 2, N'Không hài lòng với dịch vụ.', '2023-11-17'),
+('RAT019', 'USER002', 'USER009', 3, N'Trải nghiệm trung bình.', '2023-11-18'),
+('RAT020', 'USER007', 'USER005', 5, N'Rất hài lòng với quy trình nhanh gọn!', '2023-11-20');
+
+--Revenue
+INSERT INTO [TicketResellManagement].[dbo].[Revenue] ([RevenueId], [SellerId], [StartDate], [EndDate], [Revenue], [Type]) VALUES
+('RE001', 'USER001', '2024-01-01', '2024-01-01', 1500000, 'Day'),
+('RE002', 'USER001', '2024-01-02', '2024-01-02', 1250000, 'Day'),
+('RE003', 'USER001', '2024-01-03', '2024-01-03', 1600000, 'Day'),
+('RE004', 'USER001', '2024-01-04', '2024-01-04', 1400000, 'Day'),
+('RE005', 'USER001', '2024-01-05', '2024-01-05', 1800000, 'Day'),
+('RE006', 'USER001', '2024-01-06', '2024-01-06', 1300000, 'Day'),
+('RE007', 'USER001', '2024-01-07', '2024-01-07', 1200000, 'Day'),
+('RE008', 'USER001', '2024-01-08', '2024-01-08', 1100000, 'Day'),
+('RE009', 'USER001', '2024-01-09', '2024-01-09', 1700000, 'Day'),
+('RE010', 'USER001', '2024-01-10', '2024-01-10', 1550000, 'Day'),
+('RE011', 'USER001', '2024-01-11', '2024-01-11', 1450000, 'Day'),
+('RE012', 'USER001', '2024-01-12', '2024-01-12', 1750000, 'Day'),
+('RE013', 'USER001', '2024-01-13', '2024-01-13', 1350000, 'Day'),
+('RE014', 'USER001', '2024-01-14', '2024-01-14', 1500000, 'Day'),
+('RE015', 'USER001', '2024-01-15', '2024-01-15', 1800000, 'Day'),
+('RE016', 'USER001', '2024-01-16', '2024-01-16', 1600000, 'Day'),
+('RE017', 'USER001', '2024-01-17', '2024-01-17', 1500000, 'Day'),
+('RE018', 'USER001', '2024-01-18', '2024-01-18', 1700000, 'Day'),
+('RE019', 'USER001', '2024-01-19', '2024-01-19', 1450000, 'Day'),
+('RE020', 'USER001', '2024-01-20', '2024-01-20', 1550000, 'Day'),
+('RE021', 'USER001', '2024-01-21', '2024-01-21', 1300000, 'Day'),
+('RE022', 'USER001', '2024-01-22', '2024-01-22', 1400000, 'Day'),
+('RE023', 'USER001', '2024-01-23', '2024-01-23', 1650000, 'Day'),
+('RE024', 'USER001', '2024-01-24', '2024-01-24', 1500000, 'Day'),
+('RE025', 'USER001', '2024-01-25', '2024-01-25', 1350000, 'Day'),
+('RE026', 'USER001', '2024-01-26', '2024-01-26', 1450000, 'Day'),
+('RE027', 'USER001', '2024-01-27', '2024-01-27', 1750000, 'Day'),
+('RE028', 'USER001', '2024-01-28', '2024-01-28', 1800000, 'Day'),
+('RE029', 'USER001', '2024-01-29', '2024-01-29', 1550000, 'Day'),
+('RE030', 'USER001', '2024-01-30', '2024-01-30', 1650000, 'Day');
+
 
 -- Inserting sample data into the [Order] table
-INSERT INTO [Order] (
-    [OrderId], 
-    [BuyerId], 
-    [Total], 
-    [Date], 
-    [Status]
-)
-VALUES
--- Orders for USER001
-('ORD001', 'USER001', 120.50, '2024-09-01 10:15:00', 1),
-('ORD002', 'USER001', 250.00, '2024-09-05 12:30:00', 0),
-('ORD003', 'USER001', 90.75, '2024-09-10 14:00:00', 0),
+-- Sample data for Order table
+INSERT INTO [TicketResellManagement].[dbo].[Order] ([OrderId], [BuyerId], [Total], [Date], [Status], [PaymentMethod]) VALUES
+('ORD001', 'USER001', 150000, '2024-01-05', 0, 'PayPal'),
+('ORD002', 'USER002', 200000, '2024-01-12', 0, 'PayPal'),
+('ORD003', 'USER003', 300000, '2024-01-20', 0, 'PayPal'),
+('ORD004', 'USER001', 250000, '2024-01-25', 0, 'PayPal'),
+('ORD005', 'USER004', 180000, '2024-02-01', 0, 'PayPal'),
+('ORD006', 'USER002', 220000, '2024-02-10', 0, 'PayPal'),
+('ORD007', 'USER005', 320000, '2024-02-15', 0, 'PayPal'),
+('ORD008', 'USER003', 270000, '2024-02-20', 0, 'PayPal'),
+('ORD009', 'USER004', 150000, '2024-03-01', 0, 'PayPal'),
+('ORD010', 'USER001', 290000, '2024-03-05', 0, 'PayPal'),
+('ORD011', 'USER002', 210000, '2024-03-10', 0, 'PayPal'),
+('ORD012', 'USER003', 300000, '2024-03-15', 0, 'PayPal'),
+('ORD013', 'USER004', 160000, '2024-03-20', 0, 'PayPal'),
+('ORD014', 'USER005', 280000, '2024-03-25', 0, 'PayPal'),
+('ORD015', 'USER001', 340000, '2024-04-01', 0, 'PayPal'),
+('ORD016', 'USER002', 190000, '2024-04-05', 0, 'PayPal'),
+('ORD017', 'USER003', 220000, '2024-04-10', 0, 'PayPal'),
+('ORD018', 'USER004', 170000, '2024-04-15', 0, 'PayPal'),
+('ORD019', 'USER005', 360000, '2024-04-20', 0, 'PayPal'),
+('ORD020', 'USER001', 310000, '2024-04-25', 0, 'PayPal');
 
--- Orders for USER002
-('ORD004', 'USER002', 300.99, '2024-09-01 09:30:00', 0),
-('ORD005', 'USER002', 150.25, '2024-09-05 10:45:00', 1),
-
--- Orders for USER003
-('ORD006', 'USER003', 80.00, '2024-09-02 08:15:00', 1),
-('ORD007', 'USER003', 200.00, '2024-09-08 16:00:00', 0),
-
--- Orders for USER004
-('ORD008', 'USER004', 175.75, '2024-09-03 13:00:00', 1),
-('ORD009', 'USER004', 320.50, '2024-09-09 18:00:00', 0),
-
--- Orders for USER005
-('ORD010', 'USER005', 215.00, '2024-09-02 11:30:00', 0),
-('ORD011', 'USER005', 130.00, '2024-09-06 12:00:00', 1),
-
--- Orders for USER006
-('ORD012', 'USER006', 400.99, '2024-09-04 17:45:00', 1),
-('ORD013', 'USER006', 260.75, '2024-09-10 14:30:00', 0),
-
--- Orders for USER007
-('ORD014', 'USER007', 190.00, '2024-09-05 12:15:00', 0),
-('ORD015', 'USER007', 275.50, '2024-09-07 13:30:00', 1),
-
--- Orders for USER008
-('ORD016', 'USER008', 300.25, '2024-09-04 09:45:00', 0),
-('ORD017', 'USER008', 125.75, '2024-09-08 14:30:00', 1),
-
--- Orders for USER009
-('ORD018', 'USER009', 180.00, '2024-09-01 15:30:00', 1),
-('ORD019', 'USER009', 200.50, '2024-09-06 10:30:00', 0),
-
--- Orders for USER010
-('ORD020', 'USER010', 240.00, '2024-09-02 18:00:00', 0),
-('ORD021', 'USER010', 175.25, '2024-09-09 12:15:00', 1);
 
 -- Inserting sample data into the [OrderDetail] table using TicketId and OrderId
-INSERT INTO [OrderDetail] (
-    [OrderDetailId], 
-    [OrderId], 
-    [TicketId], 
-    [Price], 
-    [Quantity]
-)
-VALUES
--- Order Details for ORD001
-('OD001', 'ORD001', 'TICKET001', 100.0, 2),
-('OD002', 'ORD001', 'TICKET002', 150.0, 1),
+-- Sample data for OrderDetail table
+INSERT INTO [OrderDetail] ([OrderDetailId], [OrderId], [TicketId], [Price], [Quantity]) VALUES
+('OD001', 'ORD001', 'TICKET001', 150000, 1),
+('OD002', 'ORD001', 'TICKET002', 150000, 1),
+('OD003', 'ORD002', 'TICKET003', 200000, 1),
+('OD004', 'ORD002', 'TICKET004', 200000, 1),
+('OD005', 'ORD003', 'TICKET005', 300000, 1),
+('OD006', 'ORD003', 'TICKET006', 300000, 1),
+('OD007', 'ORD004', 'TICKET007', 250000, 1),
+('OD008', 'ORD005', 'TICKET008', 180000, 1),
+('OD009', 'ORD006', 'TICKET009', 220000, 1),
+('OD010', 'ORD007', 'TICKET010', 320000, 1),
+('OD011', 'ORD008', 'TICKET011', 270000, 1),
+('OD012', 'ORD009', 'TICKET012', 150000, 1),
+('OD013', 'ORD010', 'TICKET013', 290000, 1),
+('OD014', 'ORD011', 'TICKET014', 210000, 1),
+('OD015', 'ORD012', 'TICKET015', 300000, 1),
+('OD016', 'ORD013', 'TICKET016', 160000, 1),
+('OD017', 'ORD014', 'TICKET017', 280000, 1),
+('OD018', 'ORD015', 'TICKET018', 340000, 1),
+('OD019', 'ORD016', 'TICKET019', 190000, 1),
+('OD020', 'ORD017', 'TICKET020', 220000, 1);
 
--- Order Details for ORD002
-('OD003', 'ORD002', 'TICKET004', 75.0, 3),
-
--- Order Details for ORD003
-('OD004', 'ORD003', 'TICKET007', 250.0, 1),
-
--- Order Details for ORD004
-('OD005', 'ORD004', 'TICKET006', 180.0, 1),
-
--- Order Details for ORD005
-('OD006', 'ORD005', 'TICKET009', 175.0, 2),
-('OD007', 'ORD005', 'TICKET010', 200.0, 1),
-
--- Order Details for ORD006
-('OD008', 'ORD006', 'TICKET011', 300.0, 1),
-
--- Order Details for ORD007
-('OD009', 'ORD007', 'TICKET013', 220.0, 2),
-
--- Order Details for ORD008
-('OD010', 'ORD008', 'TICKET014', 190.0, 1),
-('OD011', 'ORD008', 'TICKET015', 270.0, 1),
-
--- Order Details for ORD009
-('OD012', 'ORD009', 'TICKET017', 240.0, 1),
-
--- Order Details for ORD010
-('OD013', 'ORD010', 'TICKET019', 280.0, 2),
-
--- Order Details for ORD011
-('OD014', 'ORD011', 'TICKET020', 70.0, 3),
-
--- Order Details for ORD012
-('OD015', 'ORD012', 'TICKET028', 225.0, 1),
-
--- Order Details for ORD013
-('OD016', 'ORD013', 'TICKET030', 155.0, 1);
 
 USE [TicketResellManagement]
 GO
 
-INSERT INTO [dbo].[TicketCategory] ([TicketId], [CategoryId])
-VALUES
+-- Sample data for TicketCategory table ensuring all tickets have categories
+INSERT INTO [TicketResellManagement].[dbo].[TicketCategory] ([TicketId], [CategoryId]) VALUES
 ('TICKET001', 'CAT001'),
-('TICKET002', 'CAT002'),
-('TICKET003', 'CAT003'),
-('TICKET004', 'CAT004'),
-('TICKET005', 'CAT005'),
-('TICKET006', 'CAT005'),
-('TICKET007', 'CAT005'),
-('TICKET010', 'CAT005'),
-('TICKET005', 'CAT004'),
+('TICKET001', 'CAT002'),
+('TICKET002', 'CAT001'),
+('TICKET002', 'CAT003'),
 ('TICKET002', 'CAT004'),
-('TICKET004', 'CAT001'),
+('TICKET003', 'CAT002'),
+('TICKET003', 'CAT005'),
+('TICKET004', 'CAT003'),
+('TICKET004', 'CAT006'),
+('TICKET004', 'CAT007'),
+('TICKET005', 'CAT001'),
 ('TICKET005', 'CAT002'),
-('TICKET005', 'CAT003')
-GO
+('TICKET005', 'CAT008'),
+('TICKET006', 'CAT002'),
+('TICKET006', 'CAT009'),
+('TICKET007', 'CAT004'),
+('TICKET007', 'CAT010'),
+('TICKET008', 'CAT001'),
+('TICKET009', 'CAT003'),
+('TICKET009', 'CAT005'),
+('TICKET010', 'CAT006'),
+('TICKET010', 'CAT007'),
+('TICKET011', 'CAT008'),
+('TICKET012', 'CAT002'),
+('TICKET012', 'CAT003'),
+('TICKET012', 'CAT005'),
+('TICKET013', 'CAT001'),
+('TICKET014', 'CAT009'),
+('TICKET014', 'CAT010'),
+('TICKET015', 'CAT001'),
+('TICKET015', 'CAT002'),
+('TICKET016', 'CAT003'),
+('TICKET017', 'CAT004'),
+('TICKET017', 'CAT005'),
+('TICKET018', 'CAT006'),
+('TICKET019', 'CAT007'),
+('TICKET020', 'CAT001'),
+('TICKET021', 'CAT002'),
+('TICKET022', 'CAT008'),
+('TICKET022', 'CAT010'),
+('TICKET023', 'CAT003'),
+('TICKET024', 'CAT005'),
+('TICKET025', 'CAT006'),
+('TICKET026', 'CAT001'),
+('TICKET027', 'CAT002'),
+('TICKET028', 'CAT003'),
+('TICKET029', 'CAT004'),
+('TICKET030', 'CAT009'),
+('TICKET030', 'CAT010');
+
 
 
 

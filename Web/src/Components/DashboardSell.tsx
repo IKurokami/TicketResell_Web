@@ -1,36 +1,33 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { LayoutDashboard, Settings } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { GrTransaction } from "react-icons/gr";
 import { IoTicketOutline } from "react-icons/io5";
-import { MdAttachMoney } from "react-icons/md";
 import TicketsPage from "./TicketSeller";
 import TransactionTable from "./TransactionPage";
 import RevenueCard from "./RevenuePage";
 
 const Dashboard = () => {
-  const [selectedTab, setSelectedTab] = useState("Ticket"); // Set default to "Ticket"
+  const [selectedTab, setSelectedTab] = useState("Dashboard"); // Set default to "Dashboard"
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarRef = useRef(null);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
 
   const menuItems = [
     {
       id: "dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
-      disable: true,
     },
     { id: "ticket", label: "Ticket", icon: IoTicketOutline },
     { id: "transactions", label: "Transactions", icon: GrTransaction },
-    { id: "revenue", label: "Revenue", icon: MdAttachMoney }
   ];
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
   };
 
-  const handleClickOutside = (event) => {
-    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
       setSidebarOpen(false);
     }
   };
@@ -44,14 +41,14 @@ const Dashboard = () => {
 
   const renderContent = () => {
     switch (selectedTab) {
+      case "Dashboard":
+        return <RevenueCard />;
       case "Ticket":
         return <TicketsPage />;
       case "Transactions":
         return <TransactionTable />;
-      case "Revenue":
-        return <RevenueCard />;
       default:
-        return <TicketsPage />; // Default to TicketsPage
+        return <RevenueCard />;
     }
   };
 
@@ -60,7 +57,7 @@ const Dashboard = () => {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 left-0 transform bg-white  transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 w-64 z-10 ${
+        className={`fixed inset-y-0 left-0 transform bg-white transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 w-64 z-10 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -68,19 +65,6 @@ const Dashboard = () => {
           <div className="space-y-4">
             {menuItems.map((item) => {
               const Icon = item.icon;
-
-              if (item.disable) {
-                return (
-                  <div
-                    key={item.id}
-                    className="flex items-center w-full px-4 py-3 text-lg font-bold text-gray-400"
-                  >
-                    <Icon className="w-5 h-5 mr-3 text-gray-400" />
-                    {item.label}
-                  </div>
-                );
-              }
-
               return (
                 <button
                   key={item.id}
@@ -101,8 +85,8 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 pt-16   ">
-        <div className="max-[1024px]:p-1">
+      <div className="flex-1 pt-16">
+        <div className="md:p-1">
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
             onClick={toggleSidebar}

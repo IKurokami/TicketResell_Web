@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "@/Components/ui/card";
+import Cookies from "js-cookie";
 import {
   CalendarDays,
   Package,
@@ -8,6 +9,15 @@ import {
   TrendingUp,
   ShoppingBag,
 } from "lucide-react";
+
+interface RevenueItem {
+  revenueId: string;
+  sellerId: string;
+  startDate: string;
+  endDate: string;
+  revenue1: number;
+  type: string;
+}
 
 interface Order {
   orderId: string;
@@ -33,23 +43,28 @@ interface Transaction {
   ticket: Ticket;
 }
 
-interface TopBuyer {
+interface Orders {
+  orderId: string;
   buyerId: string;
-  username: string;
   total: number;
+}
+
+interface TopBuyer {
+  userId: string;
+  username: string;
+  orders: Orders[];
 }
 
 interface OrderDetailsDashboardProps {
   transactions: Transaction[];
-  topBuyers: TopBuyer[];
+  revenue: RevenueItem[];
 }
 
 const OrderDetailsDashboard = ({
   transactions,
-  topBuyers,
+  revenue
 }: OrderDetailsDashboardProps) => {
-
-
+  const [topBuyers, setTopBuyers] = useState<TopBuyer[]>([]);
   const formatCurrency = (amount: number) => {
     return `${new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
@@ -57,27 +72,55 @@ const OrderDetailsDashboard = ({
     }).format(amount)} đ`;
   };
 
-  const formatDate = (dateString:string) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns month index (0-11)
-    const day = String(date.getDate()).padStart(2, '0'); // getDate() returns the day (1-31)
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() returns month index (0-11)
+    const day = String(date.getDate()).padStart(2, "0"); // getDate() returns the day (1-31)
     const year = date.getFullYear(); // getFullYear() returns the full year
-  
+
     return `${day}/${month}/${year}`; // Format as mm/dd/yyyy
   };
-  
+
   const recentTransactions = transactions
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 3);
-    console.log("Recent Transactions:", recentTransactions);
-  // Calculate total revenue
-  const totalRevenue = transactions.reduce(
-    (sum, transaction) => sum + transaction.price * transaction.quantity,
-    0
-  );
+  console.log("Recent Transactions:", recentTransactions);
+
+  const calculateTotalRevenue = (revenueItems: RevenueItem[]): number => {
+    return revenueItems.reduce((sum, item) => sum + item.revenue1, 0);
+};
+
+  const sumOrderTotals = (orders: Orders[]): number => {
+    return orders.reduce((acc, order) => acc + order.total, 0);
+  };
+
+  useEffect(() => {
+    const fetchTopBuyers = async () => {
+      const sellerId = Cookies.get("id");
+      try {
+        const response = await fetch(
+          `http://localhost:5296/api/User/topbuyer/${sellerId}`,
+          {
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const result = await response.json();
+        console.log("topbuyr:", result.data);
+
+        setTopBuyers(result.data);
+      } catch (error) {
+        setTopBuyers([]);
+      }
+    };
+
+    fetchTopBuyers();
+  }, []);
 
   return (
-    <div className="p-2 sm:p-4 md:p-6 bg-slate-50 ">
+    <div className="p-3 sm:p-4 md:p-6 bg-slate-50 ">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6">
         {/* Total Revenue Card */}
@@ -91,7 +134,7 @@ const OrderDetailsDashboard = ({
                 Total Revenue
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
-                {formatCurrency(totalRevenue)}
+                {formatCurrency(calculateTotalRevenue(revenue))}
               </p>
             </div>
           </div>
@@ -105,7 +148,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Total Orders
+                Total Transaction
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900">
                 {transactions.length}
@@ -142,7 +185,7 @@ const OrderDetailsDashboard = ({
                 Avg. Order Value
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
-                {formatCurrency(totalRevenue / transactions.length)}
+                {formatCurrency(calculateTotalRevenue(revenue) / transactions.length)}
               </p>
             </div>
           </div>
@@ -157,8 +200,8 @@ const OrderDetailsDashboard = ({
             <h2 className="text-lg md:text-xl font-semibold text-slate-900">
               Recent Transactions
             </h2>
-            <span className="text-xs md:text-sm text-slate-500">
-              {transactions.length} orders
+            <span className="text-xs md:text-sm pr-5 text-slate-500">
+              Price
             </span>
           </div>
 
@@ -213,7 +256,7 @@ const OrderDetailsDashboard = ({
           <div className="space-y-3 md:space-y-4 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
             {topBuyers.map((buyer, index) => (
               <div
-                key={buyer.buyerId}
+                key={buyer.userId}
                 className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 hover:bg-slate-50 rounded-lg transition-colors gap-3 sm:gap-4"
               >
                 <div className="flex items-center space-x-3 md:space-x-4 w-full sm:w-auto">
@@ -235,13 +278,10 @@ const OrderDetailsDashboard = ({
                     <p className="font-medium text-sm md:text-base text-slate-900 truncate">
                       {buyer.username}
                     </p>
-                    <p className="text-xs md:text-sm text-slate-500 truncate">
-                      Customer ID: {buyer.buyerId.slice(0, 8)}
-                    </p>
                   </div>
                 </div>
                 <span className="font-semibold text-sm md:text-base text-slate-900 w-full sm:w-auto text-left sm:text-right">
-                  {formatCurrency(buyer.total)}
+                  {formatCurrency(sumOrderTotals(buyer.orders))}
                 </span>
               </div>
             ))}
