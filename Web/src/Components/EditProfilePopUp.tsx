@@ -470,7 +470,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center overflow-y-auto p-4">
+    <div className="fixed top-12 inset-0 bg-black/50 flex items-center justify-center overflow-y-auto p-4">
       <Card className="w-full max-w-4xl bg-white">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Edit Profile</CardTitle>
@@ -480,7 +480,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
         </CardHeader>
 
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsList className="grid w-full grid-cols-2 mb-2">
             <TabsTrigger value="personal">Personal Information</TabsTrigger>
             <TabsTrigger value="additional">Additional Details</TabsTrigger>
           </TabsList>
@@ -532,7 +532,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Gender" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white">
                           <SelectItem value="male">Male</SelectItem>
                           <SelectItem value="female">Female</SelectItem>
                           <SelectItem value="other">Other</SelectItem>
@@ -560,6 +560,19 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                         className="w-full"
                       />
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bio" className="text-sm font-medium">
+                      Bio
+                    </Label>
+                    <Input
+                      id="bio"
+                      value={formData.bio}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bio: e.target.value })
+                      }
+                      className="w-full"
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -591,20 +604,6 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                         houseNumber={houseNumber}
                         setHouseNumber={setHouseNumber}
                         setFormData={setFormData}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="bio" className="text-sm font-medium">
-                        Bio
-                      </Label>
-                      <Input
-                        id="bio"
-                        value={formData.bio}
-                        onChange={(e) =>
-                          setFormData({ ...formData, bio: e.target.value })
-                        }
-                        className="w-full"
                       />
                     </div>
                   </div>

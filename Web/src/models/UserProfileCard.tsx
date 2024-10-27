@@ -86,9 +86,10 @@ export const fetchUserProfile = async (
   return userProfile;
 };
 
-export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
-  userProfile,
-}) => {
+export const UserProfilePage: React.FC<{
+  isSellerProfile: boolean;
+  userProfile: UserProfileCard;
+}> = ({ isSellerProfile, userProfile }) => {
   const [profile, setProfile] = useState(userProfile);
   const [avatarPreview, setAvatarPreview] = useState<string>(
     profile.avatar || "https://picsum.photos/200"
@@ -104,7 +105,7 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
     confirmNewPassword: "",
   });
 
-  const handleSave = (updatedData:any) => {
+  const handleSave = (updatedData: any) => {
     // Update the profile with the transformed data
     setProfile((currentProfile) =>
       convertFormDataToUserProfileCard(updatedData, currentProfile)
@@ -296,11 +297,17 @@ export const UserProfilePage: React.FC<{ userProfile: UserProfileCard }> = ({
             );
           }}
         />
+
         <ProfileInfo
+          id={profile.id}
           address={profile.address}
           bio={profile.bio}
           birthday={profile.birthday}
+          api={`http://localhost:5296/api/Rating/${
+            isSellerProfile ? "byseller" : "byuser"
+          }/${profile.id}`}
         />
+
         {/* Profile Actions */}
         {/* <div className="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <button
