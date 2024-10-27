@@ -11,6 +11,5 @@ public interface IOrderRepository : IRepository<Order>
     Task<IEnumerable<Order?>> GetOrdersByTotalPriceRangeAsync(DoubleRange priceDoubleRange);
     Task<double> CalculateTotalPriceForOrderAsync(string orderId);
     Task<bool> HasOrder(string orderId);
-    Task<Order?> GetTicketDetailsByIdAsync(string orderId);
     Task<Order?> GetDetailsByIdAsync(string orderId);
 }
