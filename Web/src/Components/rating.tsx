@@ -7,7 +7,7 @@ const DEFAULT_IMAGE =
   "https://th.bing.com/th?id=OIP.lcY5HRpW-xdbGVrC1DsbcAHaHa&w=250&h=250&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2";
 const RatingsList = ({ ratings }: any) => {
   const [userImages, setUserImages] = useState<any>({});
-  
+
   const fetchUserAvatarImage = async () => {
     try {
       const imageFetchPromises = ratings.map((rating: any) =>
@@ -72,7 +72,7 @@ const RatingsList = ({ ratings }: any) => {
   return (
     <div className="w-full max-w-4xl ">
       <div className="bg-white rounded-lg ">
-        <h2 className="text-2xl font-bold mb-6 text-center">Đánh giá khách hàng</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Đánh giá</h2>
 
         {/* Individual Reviews */}
         <div className="space-y-4">
@@ -89,6 +89,7 @@ const RatingsList = ({ ratings }: any) => {
                   </div>
                   <p className="text-md text-gray-500">{rating.userId}</p>
                 </div>
+                <p className="text-sm text-gray-500">To {rating.sellerId}</p>
 
                 <div className="flex justify-between items-start mb-2">
                   <div>

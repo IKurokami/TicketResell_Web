@@ -20,7 +20,6 @@ using TicketResell.Services.Services.History;
 using TicketResell.Services.Services.Revenues;
 using TicketResell.Services.Services.Mail;
 using TicketResell.Services.Services.Ratings;
-
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
