@@ -208,12 +208,11 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
         foreach (var ticket in tickets)
         {
-            if (!ticketIds.Contains(ticket.TicketId))
+            if (ticketIds.Contains(ticket.TicketId))
             {
                 ticket.Status = 0;
             }
         }
-
         await _context.SaveChangesAsync();
     }
 

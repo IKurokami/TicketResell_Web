@@ -1,3 +1,5 @@
+using System.Runtime.ExceptionServices;
+using System.Text.RegularExpressions;
 using AutoMapper;
 using Repositories.Core.Dtos.Order;
 using Repositories.Core.Dtos.OrderDetail;
@@ -188,7 +190,7 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully retrieved cart items for user: {userId}", cartItems);
         }
 
-        public async Task<ResponseModel> CreateOrderFromVirtualDetailsDirectly(string orderId, string userId, List<VirtualOrderDetailDto> virtualOrderDetails, bool saveAll = true)
+        public async Task<ResponseModel> CreateOrderFromVirtualDetailsDirectly(string orderId, string userId, List<VirtualOrderDetailDto> virtualOrderDetails, string paymentMethod, bool saveAll = true)
         {
             if (virtualOrderDetails == null || !virtualOrderDetails.Any())
             {
@@ -204,7 +206,8 @@ namespace TicketResell.Services.Services
                 Date = DateTime.UtcNow,
                 OrderDetails = orderDetails,
                 Total = orderDetails.Sum(od => od.Price * od.Quantity),
-                Status = (int)OrderStatus.Processing  // Assuming you have an OrderStatus enum
+                Status = (int)OrderStatus.Processing,
+                PaymentMethod = paymentMethod
             };
 
             var validator = _validatorFactory.GetValidator<Order>();
@@ -273,25 +276,71 @@ namespace TicketResell.Services.Services
 
             var tickets = await _unitOfWork.TicketRepository.GetTicketsByIds(ticketIds);
 
-            var result = paymentDto.OrderInfo.SelectedTicketIds
-               .Join(tickets,
-                   selected => selected.TicketId,
-                   ticket => ticket.TicketId,
-                   (selected, ticket) =>
-                   {
+            // Fetch all base tickets data first
+            var baseTicketsDict = new Dictionary<string, int>();
+            foreach (var ticket in tickets)
+            {
+                var baseTickets = await _unitOfWork.TicketRepository.GetTicketsByBaseIdAsync(ticket.TicketId);
+                baseTicketsDict[ticket.TicketId] = baseTickets.Count;
+            }
 
-                       var dto = new VirtualOrderDetailDto
-                       {
-                           OrderDetailId = "OD" + Guid.NewGuid(),
-                           OrderId = paymentDto.OrderId,
-                           TicketId = selected.TicketId,
-                           Quantity = selected.Quantity,
-                           Price = ticket.Cost ?? -1
-                       };
-                       _logger.LogInformation($"Created detail - TicketId: {dto.TicketId}, Quantity: {dto.Quantity}, Price: {dto.Price}");
-                       return dto;
-                   }).ToList();
+            var result = paymentDto.OrderInfo.SelectedTicketIds
+                .Join(tickets,
+                    selected => selected.TicketId,
+                    ticket => ticket.TicketId,
+                    (selected, ticket) =>
+                    {
+                        var baseTicketCount = baseTicketsDict[ticket.TicketId];
+                        if (baseTicketCount < selected.Quantity)
+                        {
+                            _logger.LogInformation($"Insufficient tickets for TicketId: {ticket.TicketId}, Required: {selected.Quantity}, Available: {baseTicketCount}");
+                            var dtot = new VirtualOrderDetailDto
+                            {
+                                OrderDetailId = null,
+                                OrderId = paymentDto.OrderId,
+                                TicketId = selected.TicketId,
+                                Quantity = selected.Quantity,
+                                Price = ticket.Cost ?? -1
+                            };
+                            return dtot;
+                        }
+                        var dto = new VirtualOrderDetailDto
+                        {
+                            OrderDetailId = "OD" + Guid.NewGuid(),
+                            OrderId = paymentDto.OrderId,
+                            TicketId = selected.TicketId,
+                            Quantity = selected.Quantity,
+                            Price = ticket.Cost ?? -1
+                        };
+                        _logger.LogInformation($"Created detail - TicketId: {dto.TicketId}, Quantity: {dto.Quantity}, Price: {dto.Price}");
+                        return dto;
+                    }).ToList();
+
             return result;
+        }
+
+        public async Task<ResponseModel> UpdateTicketQuantitiesAsync(string orderId)
+        {
+            var order = await _unitOfWork.OrderRepository.GetDetailsByIdAsync(orderId);
+            if (order?.OrderDetails == null) return ResponseModel.Error("No order found");
+
+            foreach (var detail in order.OrderDetails)
+            {
+                var baseTickets = await _unitOfWork.TicketRepository.GetTicketsByBaseIdAsync(detail.TicketId);
+
+                var ticketsToRemove = baseTickets
+                    .Take(detail.Quantity?? 0)
+                    .Select(t => t.TicketId)
+                    .ToList();
+                await _unitOfWork.TicketRepository.DeleteManyTicket(RemoveSuffix(detail.TicketId), ticketsToRemove);
+
+                _logger.LogInformation($"Removed {ticketsToRemove.Count} tickets for TicketId: {detail.TicketId}");
+            }
+            return ResponseModel.Success("Success delete ticket");
+        }
+        public string RemoveSuffix(string ticketId)
+        {
+            return Regex.Replace(ticketId, @"_\d+$", "");
         }
 
         public async Task<ResponseModel> Checkout(string userId)

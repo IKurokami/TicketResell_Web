@@ -19,5 +19,7 @@ public interface ICartService
     Task<ResponseModel> RemoveFromCart(OrderDto order);
     Task<double> CalculateVirtualCartTotalAsync(List<VirtualOrderDetailDto> virtualCart);
     Task<List<VirtualOrderDetailDto>> CreateVirtualCartAsync(PaymentDto paymentDto);
-    Task<ResponseModel> CreateOrderFromVirtualDetailsDirectly(string orderId, string userId, List<VirtualOrderDetailDto> virtualOrderDetails, bool saveAll = true);
+    Task<ResponseModel> CreateOrderFromVirtualDetailsDirectly(string orderId, string userId, List<VirtualOrderDetailDto> virtualOrderDetails, string paymentMethod,bool saveAll = true);
+
+    Task<ResponseModel> UpdateTicketQuantitiesAsync(string orderId);
 }

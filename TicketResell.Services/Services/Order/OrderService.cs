@@ -48,6 +48,10 @@ public class OrderService : IOrderService
 
         return ResponseModel.Success($"Order status updated successfully to {(OrderStatus)status}", orderDto);
     }
+    public async Task<ResponseModel> GetTicketDetailsByIdAsync(string orderId){
+        var order = await _unitOfWork.OrderRepository.GetDetailsByIdAsync(orderId);
+        return ResponseModel.Success("Success", order);
+    }
 
     public async Task<ResponseModel> CreateOrder(OrderDto dto, bool saveAll = true)
     {
