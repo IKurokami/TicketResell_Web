@@ -39,6 +39,7 @@ namespace Repositories.Repositories
             return await _context.Users
                 .Where(u => u.UserId == id)
                 .Include(x => x.Roles)
+                .Include(x=>x.Orders)
                 .FirstOrDefaultAsync();
         }
 

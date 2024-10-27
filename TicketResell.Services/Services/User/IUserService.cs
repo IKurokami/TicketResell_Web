@@ -12,6 +12,8 @@ namespace TicketResell.Services.Services
         public Task<ResponseModel> GetUserByIdAsync(string id);
         public Task<ResponseModel> GetUserByEmailAsync(string email);
 
+        public Task<ResponseModel> GetBuyerSeller(string id);
+        
         public Task<ResponseModel> UpdateUserByIdAsync(string id, UserUpdateDto dto, bool saveAll = true);
         public Task<ResponseModel> UpdateUserAdminByIdAsync(string id, UserUpdateByAdminDto dto, bool saveAll = true);
         public Task<ResponseModel> UpdateRoleAsync(string id, List<Role> roles);

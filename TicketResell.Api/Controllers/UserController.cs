@@ -165,5 +165,14 @@ namespace Repositories.Controllers
             var response = await _userService.ChangeUserStatusAsync(id);
             return ResponseParser.Result(response);
         }
+        
+        [HttpGet("topbuyer/{sellerId}")]
+        public async Task<IActionResult> GetTopBuyer(string sellerId)
+        {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to get buyer information."));
+
+            return ResponseParser.Result(await _userService.GetBuyerSeller(sellerId));
+        }
     }
 }

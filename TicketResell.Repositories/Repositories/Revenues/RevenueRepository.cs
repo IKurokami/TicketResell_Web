@@ -37,6 +37,7 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
         var revenues = await _context.Revenues
             .Include(x=>x.Seller)
             .Where(x => x.SellerId == id)
+            .OrderByDescending(x => x.StartDate)
             .ToListAsync();
         if (revenues == null)
         {

@@ -11,6 +11,10 @@ module.exports = {
   ],
   theme: {
   	extend: {
+		screens: {
+			'laptop': '1024px', 
+			'laptop-lg': '1280px', 
+		  },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

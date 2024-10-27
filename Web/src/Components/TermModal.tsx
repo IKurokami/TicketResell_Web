@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/Components/ui/scroll-area";
 
 interface TermsModalProps {

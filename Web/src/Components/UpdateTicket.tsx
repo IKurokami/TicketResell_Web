@@ -570,7 +570,7 @@ const UpdateTicketModal: React.FC = () => {
     console.log("Tickets to update:", tickets);
 
     // Function to update QR codes
-    const updateQrCodes = async (tickets:any) => {
+    const updateQrCodes = async (tickets:any[]) => {
       const qrCodePromises = tickets.map(async (ticket) => {
         if (ticket.Qrcode) {
           const response = await fetch(
