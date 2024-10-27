@@ -29,6 +29,17 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Role } from "@/models/UserManagement";
+import AddressFields from "@/Hooks/location";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import InputAddressFields from "@/Hooks/locationInputTemplate";
 
 interface FormData {
   userId: string;
@@ -65,6 +76,10 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
   user,
   onSave,
 }) => {
+  const [houseNumber, setHouseNumber] = useState<string>("");
+  const [formDataLocation, setFormDataLocation] = useState<any>({
+    location: user?.address || "",
+  });
   const [formData, setFormData] = useState<FormData>({
     userId: user?.userId || "",
     username: user?.username || "",
@@ -133,161 +148,234 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
   const hasR02Role = roles.some((r) => r.roleId === "RO2");
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Edit User</DialogTitle>
-          <DialogDescription>Update user profile information</DialogDescription>
-        </DialogHeader>
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 p-4 bg-white rounded-lg shadow-md"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label
-                htmlFor="username"
-                className="text-sm font-medium text-gray-700"
-              >
-                Username
-              </Label>
-              <Input
-                id="username"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label
-                htmlFor="gmail"
-                className="text-sm font-medium text-gray-700"
-              >
-                Email
-              </Label>
-              <Input
-                id="gmail"
-                value={formData.gmail}
-                onChange={(e) =>
-                  setFormData({ ...formData, gmail: e.target.value })
-                }
-                required
-              />
-            </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center overflow-y-auto p-4">
+      <Card className="w-full max-w-4xl bg-white">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Edit Profile</CardTitle>
+          <CardDescription>
+            Make changes to your profile information
+          </CardDescription>
+        </CardHeader>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                required
-              />
-            </div>
+        <Tabs defaultValue="personal" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="personal">Personal Information</TabsTrigger>
+            <TabsTrigger value="additional">Additional Details</TabsTrigger>
+          </TabsList>
 
-            <div className="space-y-2">
-              <Label htmlFor="fullname">Full Name</Label>
-              <Input
-                id="fullname"
-                value={formData.fullname}
-                onChange={(e) =>
-                  setFormData({ ...formData, fullname: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sex">Sex</Label>
-              <Select
-                value={formData.sex}
-                onValueChange={(value: string) =>
-                  setFormData({ ...formData, sex: value })
-                }
+          <form onSubmit={handleSubmit}>
+            <TabsContent value="personal">
+              <Card>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="username" className="text-sm font-medium">
+                        Username
+                      </Label>
+                      <Input
+                        id="username"
+                        value={formData.username}
+                        onChange={(e) =>
+                          setFormData({ ...formData, username: e.target.value })
+                        }
+                        className="w-full"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="gmail" className="text-sm font-medium">
+                        Email
+                      </Label>
+                      <Input
+                        id="gmail"
+                        type="email"
+                        value={formData.gmail}
+                        onChange={(e) =>
+                          setFormData({ ...formData, gmail: e.target.value })
+                        }
+                        className="w-full"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="fullname" className="text-sm font-medium">
+                        Full Name
+                      </Label>
+                      <Input
+                        id="fullname"
+                        value={formData.fullname}
+                        onChange={(e) =>
+                          setFormData({ ...formData, fullname: e.target.value })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-sm font-medium">
+                        Phone
+                      </Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
+                        className="w-full"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="sex" className="text-sm font-medium">
+                        Gender
+                      </Label>
+                      <Select
+                        value={formData.sex}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, sex: value })
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="birthday" className="text-sm font-medium">
+                        Birthday
+                      </Label>
+                      <Input
+                        id="birthday"
+                        type="date"
+                        value={
+                          formData.birthday
+                            ? new Date(formData.birthday)
+                                .toISOString()
+                                .split("T")[0]
+                            : ""
+                        }
+                        onChange={(e) =>
+                          setFormData({ ...formData, birthday: e.target.value })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="additional">
+              <Card>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-4">
+                    {hasR02Role && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="bank" className="text-sm font-medium">
+                            Bank
+                          </Label>
+                          <Input
+                            id="bank"
+                            value={formData.bank}
+                            onChange={(e) =>
+                              setFormData({ ...formData, bank: e.target.value })
+                            }
+                            className="w-full"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="bankType"
+                            className="text-sm font-medium"
+                          >
+                            Bank Type
+                          </Label>
+                          <Input
+                            id="bankType"
+                            value={formData.bankType}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                bankType: e.target.value,
+                              })
+                            }
+                            className="w-full"
+                            required
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label htmlFor="address" className="text-sm font-medium">
+                        Current Address
+                      </Label>
+                      <Input
+                        id="address"
+                        value={formData.address}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address: e.target.value })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">
+                        Update Address
+                      </Label>
+                      <InputAddressFields
+                        houseNumber={houseNumber}
+                        setHouseNumber={setHouseNumber}
+                        setFormData={setFormData}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="bio" className="text-sm font-medium">
+                        Bio
+                      </Label>
+                      <Input
+                        id="bio"
+                        value={formData.bio}
+                        onChange={(e) =>
+                          setFormData({ ...formData, bio: e.target.value })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <CardFooter className="mt-6 flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-green-500 text-white hover:bg-green-600"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="birthday">Birthday</Label>
-              <Input
-                id="birthday"
-                name="birthday"
-                type="date"
-                value={
-                  formData.birthday
-                    ? new Date(formData.birthday).toISOString().split("T")[0]
-                    : "No birthday provided"
-                }
-                onChange={(e) =>
-                  setFormData({ ...formData, birthday: e.target.value })
-                }
-              />
-            </div>
-            {hasR02Role && (
-              <div className="space-y-2">
-                <Label htmlFor="bank">Bank</Label>
-                <Input
-                  id="bank"
-                  value={formData.bank}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bank: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            )}
-            {hasR02Role && (
-              <div className="space-y-2">
-                <Label htmlFor="bankType">Bank Type</Label>
-                <Input
-                  id="bankType"
-                  value={formData.bankType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bankType: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={formData.address}
-              onChange={(e) =>
-                setFormData({ ...formData, address: e.target.value })
-              }
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Input
-              id="bio"
-              value={formData.bio}
-              onChange={(e) =>
-                setFormData({ ...formData, bio: e.target.value })
-              }
-            />
-          </div>
-          <DialogFooter>
-            <Button type="submit" className="bg-green-500 hover:bg-green-400">
-              Save changes
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+                Save Changes
+              </Button>
+            </CardFooter>
+          </form>
+        </Tabs>
+      </Card>
+    </div>
   );
 };
 

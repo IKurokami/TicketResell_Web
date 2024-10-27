@@ -39,7 +39,7 @@ const Profile = () => {
   if (isLoading) return <div>Loading...</div>;
   if (!userProfile) return <div>No user profile found.</div>;
 
-  return <UserProfilePage isSellerProfile={true} userProfile={userProfile} />;
+  return <UserProfilePage isSellerProfile={false} userProfile={userProfile} />;
 };
 
 export default Profile;

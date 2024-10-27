@@ -104,7 +104,7 @@ const SellProfile: React.FC<props> = ({
   return (
     <div className="relative profile">
       <img
-        className="w-full object-cover mt-[10vh] max-w-full h-[50vh] bg-gray-100"
+        className="w-full object-cover mt-[10vh] max-w-full h-[45vh] bg-gray-100"
         src={coverImageUrl}
         alt=""
       />
@@ -112,7 +112,7 @@ const SellProfile: React.FC<props> = ({
         <>
           <label
             htmlFor="coveravatar"
-            className="flex items-center absolute top-[40vh] left-[87vw] px-4 py-2 bg-gray-500 rounded text-gray-600 p-1.5 cursor-pointer"
+            className="flex items-center absolute top-[35vh] left-[87vw] px-4 py-2 bg-gray-500 rounded text-gray-600 p-1.5 cursor-pointer"
           >
             <FaPencilAlt className="mr-2 text-white" size={12} />
             <span className="text-white">Thêm ảnh bìa</span>
@@ -126,7 +126,7 @@ const SellProfile: React.FC<props> = ({
           />
         </>
       )}
-      <div className="absolute w-[20vh] h-[20vh] rounded-full left-[3vw] top-[35vh] border-4 border-white bg-gray-100">
+      <div className="absolute w-[20vh] h-[20vh] rounded-full left-[3vw] top-[30vh] border-4 border-white bg-gray-100">
         <img
           src={avatarUrl} // Use the fetched avatarUrl or fallback to default
           alt="Avatar"
