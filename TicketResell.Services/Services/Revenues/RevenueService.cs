@@ -99,10 +99,17 @@ public class RevenueService : IRevenueService
         return ResponseModel.Success($"Successfully deleted Revenue(s) with SellerID: {id}");
     }
 
-    public async Task<ResponseModel> AddRevenueByDateAsync(DateTime date, double amount, bool saveAll)
+    public async Task<ResponseModel> AddRevenueByDateAsync(Order order, bool saveAll = true)
     {
         // Using the updated repository method to add revenue by date
-        await _unitOfWork.RevenueRepository.AddRevenueByDateAsync(date, amount);
+        foreach (var orderDetail in order.OrderDetails)
+        {
+            User seller = orderDetail.Ticket.Seller;
+            double ticketCost = orderDetail.Ticket.Cost ?? -1.0;
+            int quantity = orderDetail.Quantity ?? -1;
+
+            await _unitOfWork.RevenueRepository.AddRevenueByDateAsync(DateTime.Now,ticketCost*quantity,seller.UserId);
+        }
 
         if (saveAll)
         {

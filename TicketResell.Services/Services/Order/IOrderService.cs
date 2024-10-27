@@ -16,4 +16,5 @@ public interface IOrderService
     public Task<ResponseModel> UpdateOrder(Order? order, bool saveAll = true);
     public Task<ResponseModel> DeleteOrder(string orderId, bool saveAll = true);
     Task<ResponseModel> SetOrderStatus(string orderId, int status);
+    public Task<ResponseModel> GetTicketDetailsByIdAsync(string orderId);
 }
