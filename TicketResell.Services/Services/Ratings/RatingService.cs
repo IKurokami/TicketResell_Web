@@ -1,6 +1,7 @@
 using AutoMapper;
 using Repositories.Core.Entities;
 using TicketResell.Repositories.Core.Dtos.Rating;
+using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
 
 namespace TicketResell.Services.Services.Ratings;
@@ -9,17 +10,21 @@ public class RatingService : IRatingService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-
-    public RatingService(IUnitOfWork unitOfWork, IMapper mapper)
+    private readonly IAppLogger _logger;
+    public RatingService(IUnitOfWork unitOfWork, IMapper mapper, IAppLogger logger)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _logger = logger;
     }
 
-    public async Task<ResponseModel> CreateRatingAsync(RatingCreateDto dto, bool saveAll= true)
+    public async Task<ResponseModel> CreateRatingAsync(RatingCreateDto dto, string userId,bool saveAll= true)
     {
         var newRating = _mapper.Map<Rating>(dto);
+        newRating.RatingId= "RAT"+Guid.NewGuid();
         newRating.CreateDate = DateTime.UtcNow;
+        newRating.UserId =userId;
+        _logger.LogError(newRating.RatingId);
         await _unitOfWork.RatingRepository.CreateAsync(newRating);
         if (saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success("Successfully created Rating");
