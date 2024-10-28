@@ -15,6 +15,10 @@ public partial class Chat
 
     public DateTime? Date { get; set; }
 
+    public string? ChatboxId { get; set; }
+
+    public virtual Chatbox? Chatbox { get; set; }
+
     public virtual User Receiver { get; set; } = null!;
 
     public virtual User Sender { get; set; } = null!;

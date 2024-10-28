@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { FaEnvelope, FaPencilAlt, FaPhoneAlt } from "react-icons/fa";
 import EditProfilePopup from "./EditProfilePopUp";
 import uploadImageForTicket from "@/models/UpdateImage";
+import Link from "next/link";
 
 const DEFAULT_IMAGE = "https://images7.alphacoders.com/129/1297416.png";
 
@@ -153,9 +154,15 @@ const SellProfile: React.FC<props> = ({
       <div className="px-[3vw] mt-[8vh] mb[5vh]">
         <div className="flex justify-between">
           <div className="seller-desc">
-            <p className="text-2xl font-medium">
-              {fullname ? fullname : "Unknown"}
-            </p>
+            <Link
+              href={`/profile/${userId}`}
+              className="no-underline text-black"
+              passHref
+            >
+              <p className="text-2xl font-medium">
+                {fullname ? fullname : "Unknown"}
+              </p>
+            </Link>
           </div>
           <div className="flex space-x-2">
             {isAdjustVisible ? (

@@ -469,22 +469,7 @@ const TicketDetail = () => {
 
         {/* Related Tickets Section */}
         <section className="mt-8 md:mt-16 px-4 md:px-0">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-0">
-              Gợi ý sự kiện
 
-            </h2>
-            <Link
-              href="/search"
-              className="group flex items-center space-x-2 text-sm md:text-base text-green-600 hover:text-green-700 transition-colors duration-200"
-            >
-              <span>Xem tất cả sự kiện</span>
-              <FontAwesomeIcon
-                icon={faArrowRight}
-                className="w-3 h-3 md:w-4 md:h-4 transform group-hover:translate-x-1 transition-transform duration-200"
-              />
-            </Link>
-          </div>
 
           <div className=" rounded-lg md:rounded-2xl  p-4 md:p-8 transition-shadow duration-200 ">
             <div className="overflow-hidden text-ellipsis whitespace-nowrap">

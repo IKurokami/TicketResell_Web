@@ -98,8 +98,35 @@ const MyTicketPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const center = { lat: 10.762622, lng: 106.660172 };
+  const [center,setCenter] = useState({ lat: 10.762622, lng: 106.660172 });
   const ITEMS_PER_PAGE = 6;
+
+  const fetchLocation = async (address) => {
+    const apiKey = 'b2abc07babmsh30e6177f039fd88p18a238jsn5ec9739e64ae';
+    const encodedAddress = encodeURIComponent(address);
+    
+    const url = `https://google-map-places.p.rapidapi.com/maps/api/geocode/json?address=${encodedAddress}&language=vn&region=vn&result_type=administrative_area_level_1&location_type=APPROXIMATE`;
+    
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-host': 'google-map-places.p.rapidapi.com',
+          'x-rapidapi-key': apiKey
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching location data:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     fetchTickets();
@@ -371,10 +398,21 @@ const MyTicketPage = () => {
         onCardClick={() => {
           setSelectedTicket(ticket);
           setIsModalOpen(true);
+          handleGoogleMapSearch(ticket.location);
         }}
       />
     </motion.div>
   );
+  const handleGoogleMapSearch = async (address) => {
+    const locationData = await fetchLocation(address);
+    
+    if (locationData && locationData.results.length > 0) {
+      const { lat, lng } = locationData.results[0].geometry.location;
+      setCenter({ lat, lng });
+    } else {
+      console.log("No results found for the provided address.");
+    }
+  };
 
   const renderListItem = (ticket: TicketData) => (
     <motion.div
