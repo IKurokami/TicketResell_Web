@@ -60,7 +60,7 @@ public class AuthenticationService : IAuthenticationService
         }
 
         var user = _mapper.Map<User>(registerDto);
-        user.UserId = registerDto.UserId;
+        user.UserId = registerDto.Gmail;
         var validator = _validatorFactory.GetValidator<User>();
         var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid)

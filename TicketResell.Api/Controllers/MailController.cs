@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using TicketResell.Repositories.Core.Dtos.Mail;
 using TicketResell.Services.Services.Mail;
 
 namespace Api.Controllers
@@ -49,11 +50,6 @@ namespace Api.Controllers
         public string To { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
-    }
-
-    public class MailRequest
-    {
-        public string To { get; set; }
     }
 
     public class EmailWithAttachmentRequest

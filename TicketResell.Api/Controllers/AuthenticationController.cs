@@ -1,9 +1,7 @@
-using System.Text;
-using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Helper;
-using Api.Controllers.Models; // Thêm namespace cho lớp DTO
+using Api.Controllers.Models;
 
 namespace Api.Controllers
 {

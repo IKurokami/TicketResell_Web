@@ -79,7 +79,6 @@ const Login: React.FC = () => {
           const result = await response.json();
           if (!response.ok) {
             console.error("Lỗi đăng nhập:", result);
-            setError(result.message || "Lỗi đăng nhập.");
           } else {
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);
@@ -88,7 +87,7 @@ const Login: React.FC = () => {
             // Determine navigation path based on user roles
             let navigationPath = "/";
             const userRoles = result.data.user.roles.map(
-              (role) => role.rolename
+              (role: any) => role.rolename
             );
 
             if (userRoles.includes("Admin")) {

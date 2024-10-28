@@ -35,5 +35,4 @@ public class TicketReadDto
     public string? Description { get; set; }
 
     public virtual ICollection<CategoryReadDto> Categories { get; set; }
-
 }
