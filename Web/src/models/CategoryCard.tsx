@@ -13,7 +13,7 @@ interface Category {
 }
 
 export interface BannerItemCard {
-  categories:Category[]
+  categories: Category[]
   imageUrl: string;
   name: string;
   date: string;
@@ -49,7 +49,7 @@ const convertToBannerItemCards = async (
       }
 
       return {
-        categories:item.categories,
+        categories: item.categories,
         imageUrl,
         name: item.name,
         date: item.createDate,
@@ -78,7 +78,20 @@ export const fetchBannerItems = async (): Promise<BannerItemCard[]> => {
 
   return bannerItems;
 };
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
 
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
+const formatPrice = (price: string): string => {
+  const priceNumber = parseFloat(price); // Chuyển đổi chuỗi thành số
+  return priceNumber.toLocaleString('vi-VN'); // Định dạng theo kiểu Việt Nam
+};
 const BannerItemCard = ({ itemCart }: { itemCart: BannerItemCard }) => {
   return (
     <div className="category-card">
@@ -90,19 +103,36 @@ const BannerItemCard = ({ itemCart }: { itemCart: BannerItemCard }) => {
       />
       <div className="overlay">
         <div className="description">
-          <div>
-            <h4>{itemCart.name}</h4>
-            <p>{itemCart.date}</p>
-            <p>By {itemCart.author}</p>
-            <p dangerouslySetInnerHTML={{ __html: itemCart.description }} />
-          </div>
-          <p>{itemCart.price}</p>
+          <div className="mt-5">
+            <h4
+              style={{
+                whiteSpace: 'nowrap',  // Prevent line break
+                overflow: 'hidden',     // Hide overflow content
+                textOverflow: 'ellipsis', // Add ... for truncated text
+                width: '300px'          // Fixed width
+              }}
+            >
+              {itemCart.name}
+            </h4>
+            <p
+              style={{
+                whiteSpace: 'nowrap',  // Prevent line break
+                overflow: 'hidden',     // Hide overflow content
+                textOverflow: 'ellipsis', // Add ... for truncated text
+                width: '650px'          // Fixed width
+              }}
+            >
+              Người bán: {itemCart.author}
+            </p>
+
+            <p>Giá: {itemCart.price} VND</p>
+            <p className="text-sm">Ngày diễn ra: {formatDate(itemCart.date)}</p>
+            </div>
         </div>
       </div>
     </div>
   );
 };
-
 const renderBannerItems = (
   BannerItemCards: BannerItemCard[],
   currentIndex: number,
@@ -133,13 +163,13 @@ export const CategoriesPage = ({
   );
 };
 
-export const fetchCategories = async ()=> {
+export const fetchCategories = async () => {
   try {
     const response = await fetch("http://localhost:5296/api/Category/read");
     if (!response.ok) {
       throw new Error("Failed to fetch categories");
     }
-    const result= await response.json();
+    const result = await response.json();
     return result.data;
   } catch (error) {
     console.error("Error fetching categories:", error);

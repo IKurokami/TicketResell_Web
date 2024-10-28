@@ -14,8 +14,8 @@ const StaffDashboard = () => {
   const [activeTab, setActiveTab] = useState("Users");
 
   const sidebarTabs = [
-    { name: "Users", icon: <Users className="w-6 h-6" /> },
-    { name: "Categories", icon: <FolderTree className="w-6 h-6" /> },
+    { name: "Người dùng", icon: <Users className="w-6 h-6" /> },
+    { name: "Danh mục", icon: <FolderTree className="w-6 h-6" /> },
   ];
 
   const toggleSidebar = () => {
@@ -33,9 +33,9 @@ const StaffDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "Users":
+      case "Người dùng":
         return <UserManagement />;
-      case "Categories":
+      case "Danh mục":
         return <CategoryManagement />;
       default:
         return <div>{activeTab} content goes here</div>;
@@ -179,7 +179,7 @@ const StaffDashboard = () => {
                   {activeTab}
                 </h1>
                 <p className="mt-2 text-base text-gray-500">
-                  Manage {activeTab.toLowerCase()} in the system
+                  Quản lí {activeTab.toLowerCase()} trong hệ thống
                 </p>
               </div>
 

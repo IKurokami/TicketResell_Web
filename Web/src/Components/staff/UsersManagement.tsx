@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { PlusCircle, Search, Send, X, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
   DialogTitle,
 } from "@/Components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/Components/ui/input";
 import Cookies from "js-cookie";
 import * as signalR from "@microsoft/signalr";
@@ -202,6 +204,11 @@ const UserManagement = () => {
       console.error("Error sending message:", error);
     }
   };
+  const handleOrder = (userEmail: any) => {
+    // Mở một trang mới với đường dẫn hiển thị đơn hàng
+    const orderPageUrl = `/order?email=${encodeURIComponent(userEmail)}`;
+    window.open(orderPageUrl, '_blank'); // Mở trang mới
+  };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -263,11 +270,13 @@ const UserManagement = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                <th className="py-3 px-4 text-left">Tên người dùng</th>
-                <th className="py-3 px-4 text-left">Email</th>
-                <th className="py-3 px-4 text-left">Số điện thoại</th>
-                <th className="py-3 px-4 text-left">Địa chỉ</th>
-                <th className="py-3 px-4 text-left">Liên hệ</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Tên người dùng</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Email</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Số điện thoại</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Địa chỉ</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Liên hệ</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Lịch sử đơn hàng</th>
+
               </tr>
             </thead>
             <tbody>
@@ -277,7 +286,7 @@ const UserManagement = () => {
                   <td className="py-3 px-4">{user.gmail}</td>
                   <td className="py-3 px-4">{user.phone}</td>
                   <td className="py-3 px-4">{user.address}</td>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-4 text-center">
                     <button
                       onClick={() => handleChat(user)}
                       className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -289,6 +298,17 @@ const UserManagement = () => {
 
 
                   </td>
+                  <td className="py-3 px-4 text-center">
+                    <Button
+                      onClick={() => handleOrder(user.gmail)}
+                      variant="default"
+                      color="success"
+                      className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                      >
+                      <VisibilityIcon />
+                    </Button>
+                  </td>
+
                 </tr>
               ))}
             </tbody>
