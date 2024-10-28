@@ -9,18 +9,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/Components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/Components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
-import { Checkbox } from "@/Components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -29,7 +20,6 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Role } from "@/models/UserManagement";
-import AddressFields from "@/Hooks/location";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Card,
@@ -165,8 +155,8 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
           <form onSubmit={handleSubmit}>
             <TabsContent value="personal">
-              <Card>
-                <CardContent className="space-y-4 pt-4">
+              <Card className="space-y-4 pt-4 shadow-none border-none rounded-none">
+                <CardContent className="space-y-4 pt-4 shadow-none border-none rounded-none">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="username" className="text-sm font-medium">
