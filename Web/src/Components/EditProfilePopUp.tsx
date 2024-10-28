@@ -363,6 +363,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
     await updateUserProfile(userId, formData);
     onSave(formData);
     onClose();
+    onClose();
   };
   const [formData, setFormData] = useState<FormData>(
     initialData || {

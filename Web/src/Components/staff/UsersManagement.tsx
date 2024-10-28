@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { PlusCircle, Search, Send, Menu } from "lucide-react";
+import { PlusCircle, Search, Send, X, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import {
   Dialog,
@@ -36,19 +36,17 @@ interface ChatMessage {
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState<Record<string, boolean>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Partial<User>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>({});
+  const [newMessages, setNewMessages] = useState<Record<string, string>>({});
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Fetch users
     fetch("http://localhost:5296/api/User/read")
       .then((response) => response.json())
       .then((data) => {
@@ -62,7 +60,6 @@ const UserManagement = () => {
         console.error("Error fetching users:", error);
       });
 
-    // Initialize SignalR connection
     setupSignalRConnection();
 
     return () => {
@@ -112,7 +109,10 @@ const UserManagement = () => {
         chatId: Date.now().toString(),
         date: new Date().toISOString(),
       };
-      setChatMessages((prev) => [...prev, newMessage]);
+      setChatMessages((prev) => ({
+        ...prev,
+        [senderId]: [...(prev[senderId] || []), newMessage],
+      }));
     });
 
     try {
@@ -141,7 +141,10 @@ const UserManagement = () => {
       );
       const data = await response.json();
       if (data.statusCode === 200 && data.data) {
-        setChatMessages(data.data);
+        setChatMessages((prev) => ({
+          ...prev,
+          [receiverId]: data.data,
+        }));
       } else {
         console.error("Failed to fetch chat messages:", data.message);
       }
@@ -164,32 +167,37 @@ const UserManagement = () => {
 
   const handleChat = (user: User) => {
     setSelectedUser(user);
-    setIsChatOpen(true);
+    setIsChatOpen((prev) => ({ ...prev, [user.userId]: true }));
     fetchChatMessages(user.userId);
+    // Initialize new message for this user
+    setNewMessages((prev) => ({ ...prev, [user.userId]: "" }));
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !selectedUser || !hubConnectionRef.current)
-      return;
+  const handleSendMessage = async (receiverId: string) => {
+    if (!newMessages[receiverId].trim() || !hubConnectionRef.current) return;
 
     try {
       await hubConnectionRef.current.invoke(
         "SendMessageAsync",
-        selectedUser.userId,
-        newMessage
+        receiverId,
+        newMessages[receiverId] // Use the specific message for the receiver
       );
 
-      // Add message to local state immediately for UI feedback
       const newChatMessage: ChatMessage = {
         senderId: Cookies.get("id") || "",
-        receiverId: selectedUser.userId,
-        message: newMessage,
+        receiverId,
+        message: newMessages[receiverId],
         chatId: Date.now().toString(),
         date: new Date().toISOString(),
       };
-      setChatMessages((prev) => [...prev, newChatMessage]);
-      setNewMessage("");
+
+      setChatMessages((prev) => ({
+        ...prev,
+        [receiverId]: [...(prev[receiverId] || []), newChatMessage],
+      }));
+
+      // Clear the input for this user after sending the message
+      setNewMessages((prev) => ({ ...prev, [receiverId]: "" }));
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -215,25 +223,24 @@ const UserManagement = () => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-4">
-          <CardTitle>User Management</CardTitle>
+          <CardTitle>Quản lý người dùng</CardTitle>
           <span
-            className={`text-sm ${
-              connectionStatus === "Authenticated"
-                ? "text-green-500"
-                : connectionStatus === "Connected"
+            className={`text-sm ${connectionStatus === "Authenticated"
+              ? "text-green-500"
+              : connectionStatus === "Connected"
                 ? "text-yellow-500"
                 : "text-red-500"
-            }`}
+              }`}
           >
             {connectionStatus}
           </span>
         </div>
         <div className="flex space-x-4">
           <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
             <Input
-              placeholder="Search users..."
-              className="px-8 rounded-xl"
+              placeholder="Tìm kiếm người dùng..."
+              className="px-10 py-4 rounded-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-80"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -243,191 +250,149 @@ const UserManagement = () => {
               setFormData({});
               setIsOpen(true);
             }}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full py-3 px-6 shadow-md"
           >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add User
+            <PlusCircle className="mr-2 h-6 w-6" />
+            Thêm người dùng
           </Button>
         </div>
+
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                <th className="py-3 px-4 text-left">Full Name</th>
+                <th className="py-3 px-4 text-left">Tên người dùng</th>
                 <th className="py-3 px-4 text-left">Email</th>
-                <th className="py-3 px-4 text-left">Phone</th>
-                <th className="py-3 px-4 text-left">Address</th>
-                <th className="py-3 px-4 text-left">Actions</th>
+                <th className="py-3 px-4 text-left">Số điện thoại</th>
+                <th className="py-3 px-4 text-left">Địa chỉ</th>
+                <th className="py-3 px-4 text-left">Liên hệ</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.userId} className="border-b hover:bg-gray-50">
+                <tr key={user.userId} className="border-b hover:bg-gray-100">
                   <td className="py-3 px-4">{user.fullname}</td>
-                  <td className="py-3 px-4">{user.userId}</td>
+                  <td className="py-3 px-4">{user.gmail}</td>
                   <td className="py-3 px-4">{user.phone}</td>
                   <td className="py-3 px-4">{user.address}</td>
                   <td className="py-3 px-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <button
                       onClick={() => handleChat(user)}
-                      className="relative flex items-center justify-center w-10 h-10 rounded-full 
-                        bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
-                        border-none text-white shadow-md
-                        hover:shadow-lg hover:scale-105
-                        transition-all duration-200 ease-in-out"
+                      className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                     >
-                      <span className="text-xl transition-transform duration-200 group-hover:scale-110 drop-shadow-md">
-                        💬
-                      </span>
-                      <span
-                        className="absolute inset-0 rounded-full bg-white opacity-0 
-                        hover:opacity-20 transition-opacity duration-200"
-                      ></span>
-                    </Button>
+                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
+                      <span className="font-medium">Chat</span>
+                      <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                    </button>
+
+
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </CardContent>
+        {Object.keys(isChatOpen)
+          .filter((userId) => isChatOpen[userId])
+          .map((userId, index) => {
+            const user = users.find((u) => u.userId === userId);
+            if (!user) return null;
 
-      {/* Add User Dialog */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-white">
-          <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Full Name</label>
-                <Input
-                  value={formData.fullname || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullname: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Email</label>
-                <Input
-                  type="email"
-                  value={formData.userId || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, gmail: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Phone</label>
-                <Input
-                  value={formData.phone || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Sex</label>
-                <select
-                  className="w-full rounded-md border border-gray-300 p-2"
-                  value={formData.sex || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, sex: e.target.value })
-                  }
-                  required
-                >
-                  <option value="">Select gender</option>
-                  <option value="Nam">Male</option>
-                  <option value="Nữ">Female</option>
-                </select>
-              </div>
-              <div className="col-span-2 space-y-2">
-                <label className="text-sm font-medium">Address</label>
-                <Input
-                  value={formData.address || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="col-span-2 space-y-2">
-                <label className="text-sm font-medium">Bio</label>
-                <textarea
-                  className="w-full rounded-md border border-gray-300 p-2"
-                  value={formData.bio || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
-                  }
-                  rows={3}
-                />
-              </div>
-            </div>
-            <Button type="submit" className="w-full">
-              Add User
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Chat Dialog */}
-      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <DialogContent className="bg-white max-w-md">
-          <DialogHeader>
-            <DialogTitle>Chat with {selectedUser?.fullname}</DialogTitle>
-          </DialogHeader>
-          <div className="h-96 flex flex-col">
-            <div
-              ref={chatContainerRef}
-              className="flex-1 overflow-y-auto p-4 space-y-4"
-            >
-              {chatMessages.map((message) => (
-                <div
-                  key={message.chatId}
-                  className={`flex ${
-                    message.senderId === Cookies.get("id")
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[70%] rounded-lg p-3 ${
-                      message.senderId === Cookies.get("id")
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100"
-                    }`}
+            return (
+              <div
+                key={userId}
+                className="fixed bottom-4 w-80 bg-white shadow-xl rounded-lg overflow-hidden transition-all duration-200 ease-in-out"
+                style={{
+                  right: `${index * 330 + 30}px`
+                }}
+              >
+                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500 to-blue-600">
+                  <h4 className="text-white">{user.fullname}</h4>
+                  <button
+                    className="text-white"
+                    onClick={() =>
+                      setIsChatOpen((prev) => ({ ...prev, [userId]: false }))
+                    }
                   >
-                    <p className="break-all">{message.message}</p>
-                    <span className="text-xs opacity-70">
-                      {formatMessageDate(message.date)}
-                    </span>
-                  </div>
+                    <X className="h-5 w-5" />
+                  </button>
                 </div>
-              ))}
-            </div>
-            <form
-              onSubmit={handleSendMessage}
-              className="p-4 border-t flex gap-2"
-            >
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1"
-              />
-              <Button type="submit">
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
-          </div>
+                <div
+                  ref={chatContainerRef}
+                  className="p-4 h-80 overflow-y-auto bg-gray-50"
+                >
+                  {chatMessages[userId]?.map((msg, i) => (
+                    <div
+                      key={i}
+                      className={`flex flex-col ${msg.senderId === Cookies.get("id")
+                        ? "items-end"
+                        : "items-start"
+                        } mb-4`}
+                    >
+                      <div
+                        className={`max-w-[80%] p-3 rounded-2xl ${msg.senderId === Cookies.get("id")
+                          ? "bg-blue-500 text-white rounded-br-none"
+                          : "bg-white text-gray-800 shadow-sm rounded-bl-none"
+                          }`}
+                      >
+                        <p className="text-sm">{msg.message}</p>
+                      </div>
+                      <span className="text-xs text-gray-500 mt-1">
+                        {formatMessageDate(msg.date)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 border-t p-3 bg-white">
+                  <Input
+                    value={newMessages[userId] || ""}
+                    onChange={(e) =>
+                      setNewMessages((prev) => ({
+                        ...prev,
+                        [userId]: e.target.value,
+                      }))
+                    }
+                    placeholder="Type a message..."
+                    className="flex-grow"
+                  />
+                  <Button onClick={() => handleSendMessage(userId)}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+      </CardContent>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add User</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <Input
+              placeholder="Full Name"
+              value={formData.fullname || ""}
+              onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+            />
+            <Input
+              placeholder="Email"
+              value={formData.gmail || ""}
+              onChange={(e) => setFormData({ ...formData, gmail: e.target.value })}
+            />
+            <Input
+              placeholder="Phone"
+              value={formData.phone || ""}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            />
+            <Input
+              placeholder="Address"
+              value={formData.address || ""}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            />
+            <Button type="submit">Add</Button>
+          </form>
         </DialogContent>
       </Dialog>
     </Card>
