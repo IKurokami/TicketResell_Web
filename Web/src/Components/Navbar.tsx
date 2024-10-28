@@ -21,9 +21,8 @@ interface NavbarProps {
   page: string;
 }
 
-const DEFAULT_IMAGE =
-  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-  
+const DEFAULT_IMAGE = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
 const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const context = useContext(NumberContext);
   if (context) {
@@ -65,11 +64,9 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
   const [countCartItems, setCountCartItems] = useState<number>(0);
-  const [image,setImage]= useState<string>("");
+  const [image, setImage] = useState<string>("");
   const router = useRouter();
 
-
-  
   const handleSearchIconClick = () => {
     setIsSearchVisible(!isSearchVisible);
   };
@@ -170,22 +167,18 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
   useEffect(() => {
     // Function to check if the user is logged in by checking for the 'id' cookie
-    const checkUserLoginStatus =async () => {
-      const id = Cookies.get("id"); 
+    const checkUserLoginStatus = async () => {
+      const id = Cookies.get("id");
       if (id) {
-        const { imageUrl: fetchedImageUrl, error } = await fetchImage(
-          id
-        );
+        const { imageUrl: fetchedImageUrl, error } = await fetchImage(id);
 
         if (fetchedImageUrl) {
           setImage(fetchedImageUrl);
         } else {
-          setImage(DEFAULT_IMAGE)
-          console.error(
-            `Error fetching image for user ${id}: ${error}`
-          );
+          setImage(DEFAULT_IMAGE);
+          console.error(`Error fetching image for user ${id}: ${error}`);
         }
-      }// Get the user ID from the cookie
+      } // Get the user ID from the cookie
       if (id) {
         setIsLoggedIn(true); // User is logged in
       } else {
@@ -348,7 +341,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
               className="focus:outline-none"
             >
               <img
-                src= {image}
+                src={image}
                 alt="User"
                 className="w-8 h-8 rounded-full border-2 border-gray-200"
               />
@@ -357,29 +350,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
           {isDropdownVisible && (
             <div className="user-dropdown visible absolute right-0 mt-2 w-48 rounded-2xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden">
               <div className="py-1">
-                <a
-                  href="#"
-                  onClick={(e) => handleMenuItemClick(e, "/profile")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className="w-4 h-4 mr-2 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      ></path>
-                    </svg>
-                    Hồ sơ
-                  </div>
-                </a>
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/profileuser")}

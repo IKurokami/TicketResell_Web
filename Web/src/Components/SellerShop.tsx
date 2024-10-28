@@ -78,7 +78,7 @@ const SellerShop = () => {
   const itemsPerPage = 15;
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
   const params = useParams<{ id: string }>();
-  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;  
   const extractCity = (location: string): string => {
     const parts = location.split(",");
     return parts[parts.length - 1].trim();
