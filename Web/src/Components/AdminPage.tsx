@@ -638,21 +638,20 @@ const AdminPage = () => {
       case "Orders":
         return <OrderManager orders={orders} onRefresh={handleOrderRefresh} />;
       case "Revenues":
-        return <RevenueManager revenueData={revenues} />;
+        return <RevenueManager revenueData={revenues} transactions={[]} />;
       default:
         return <div>{activeTab} content goes here</div>;
     }
   };
 
   const handleLogout = async () => {
-    router.push("/");
-
     if (Cookies.get("id")) {
       await logoutUser(Cookies.get("id"));
     }
 
     await signOut();
     removeAllCookies();
+    window.location.href= ('/login');
   };
 
   return (
