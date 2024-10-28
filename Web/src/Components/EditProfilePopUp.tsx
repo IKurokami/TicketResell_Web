@@ -360,8 +360,10 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
   const [formDataLocation, setFormDataLocation] = useState({
     location: "",
   });
-  const HandleSubmitClick = () => {
+  const HandleSubmitClick = async() => {
+    await updateUserProfile(userId, formData);
     onSave(formData);
+    onClose();
   };
   const [formData, setFormData] = useState<FormData>(
     initialData || {
@@ -548,11 +550,13 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                         id="birthday"
                         type="date"
                         value={
-                          formData.birthday
+                          formData.birthday &&
+                          !isNaN(Date.parse(formData.birthday))
                             ? new Date(formData.birthday)
                                 .toISOString()
                                 .split("T")[0]
                             : ""
+                            
                         }
                         onChange={(e) =>
                           setFormData({ ...formData, birthday: e.target.value })
