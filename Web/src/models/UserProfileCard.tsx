@@ -87,9 +87,10 @@ export const fetchUserProfile = async (
 };
 
 export const UserProfilePage: React.FC<{
+  isadjustvisible: boolean;
   isSellerProfile: boolean;
   userProfile: UserProfileCard;
-}> = ({ isSellerProfile, userProfile }) => {
+}> = ({ isSellerProfile, userProfile, isadjustvisible }) => {
   const [profile, setProfile] = useState(userProfile);
   const [avatarPreview, setAvatarPreview] = useState<string>(
     profile.avatar || "https://picsum.photos/200"
@@ -289,7 +290,7 @@ export const UserProfilePage: React.FC<{
           avatar={profile.avatar}
           fullname={profile.fullname}
           phoneNumber={profile.phone}
-          isAdjustVisible={true}
+          isAdjustVisible={isadjustvisible}
           onSave={(updatedData) => {
             // Update profile if IDs match, transforming FormData to UserProfileCard
             setProfile((currentProfile) =>

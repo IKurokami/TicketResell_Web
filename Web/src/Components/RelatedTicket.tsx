@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { fetchImage } from "@/models/FetchImage";
 import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 interface Category {
   categoryId: string;
   name: string;
@@ -133,8 +135,21 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
   return (
     <div className="ticket--related">
-      <h2 className="text-2xl font-bold text-center">Related Tickets</h2>
-      <div className=" mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw] ">
+      <div className="flex justify-between items-center px-4">
+        <h3 className="text-2xl font-bold mx-auto">Có thể bạn sẽ thích</h3>
+        <Link
+          href="/search"
+          className="group flex items-center space-x-2 text-sm md:text-base text-green-600 hover:text-green-700 transition-colors duration-200"
+        >
+          <span>Xem tất cả sự kiện</span>
+          <FontAwesomeIcon
+            icon={faArrowRight}
+            className="w-3 h-3 md:w-4 md:h-4 transform group-hover:translate-x-1 transition-transform duration-200"
+          />
+        </Link>
+      </div>
+
+      <div className="mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw]">
         {tickets.map((ticket) => (
           <Link className="no-underline" href={`/ticket/${ticket.ticketId}`}>
             <div
@@ -149,16 +164,14 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                     className="w-full h-48 object-cover"
                   />
                   <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-2xl">
-                    {formatVND(ticket.cost)} 
+                    {formatVND(ticket.cost)}
                   </div>
                 </div>
                 <div className="p-4 space-y-2 flex-grow">
                   <h3 className="text-lg font-semibold mb-1 text-gray-900">
                     {ticket.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-1">
-                    {ticket.location}
-                  </p>
+                  <p className="text-sm text-gray-600 mb-1">{ticket.location}</p>
                   <p className="text-sm text-gray-600">
                     {new Date(ticket.startDate).toLocaleDateString("en-US", {
                       year: "numeric",
@@ -200,6 +213,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
         ))}
       </div>
     </div>
+
   );
 };
 
