@@ -184,6 +184,6 @@ const Order: React.FC<OrderProps> = ({ email }) => {
       )}
     </div>
   );
-};
+};  
 
 export default Order;

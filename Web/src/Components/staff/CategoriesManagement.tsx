@@ -13,8 +13,8 @@ import { Input } from "@/Components/ui/input";
 
 interface Category {
   categoryId: string;
-  name?: string; // Make name optional
-  description?: string; // Make description optional
+  name?: string; // Làm cho tên không bắt buộc
+  description?: string; // Làm cho mô tả không bắt buộc
 }
 
 const CategoryManagement = () => {
@@ -24,7 +24,7 @@ const CategoryManagement = () => {
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState<Partial<Category>>({});
 
-  // Fetch categories from API
+  // Lấy danh mục từ API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -33,10 +33,10 @@ const CategoryManagement = () => {
         if (result.statusCode === 200) {
           setCategories(result.data);
         } else {
-          console.error("Failed to fetch categories:", result.message);
+          console.error("Lấy danh mục không thành công:", result.message);
         }
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Lỗi khi lấy danh mục:", error);
       }
     };
 
@@ -45,14 +45,14 @@ const CategoryManagement = () => {
 
   const generateUniqueCategoryId = (existingIds: string[]) => {
     const prefix = "CAT";
-    let newIdNumber = 1; // Start with 1
+    let newIdNumber = 1; // Bắt đầu từ 1
     let newId;
 
-    // Find a unique ID
+    // Tìm ID duy nhất
     while (true) {
       newId = `${prefix}${newIdNumber.toString().padStart(3, "0")}`;
       if (!existingIds.includes(newId)) {
-        break; // Found a unique ID
+        break; // Tìm thấy ID duy nhất
       }
       newIdNumber++;
     }
@@ -64,7 +64,7 @@ const CategoryManagement = () => {
     e.preventDefault();
 
     if (currentCategory) {
-      // Edit category
+      // Chỉnh sửa danh mục
       try {
         const response = await fetch(
           `http://localhost:5296/api/Category/update/${currentCategory.categoryId}`,
@@ -91,16 +91,16 @@ const CategoryManagement = () => {
             )
           );
         } else {
-          console.error("Failed to update category:", result.message);
+          console.error("Cập nhật danh mục không thành công:", result.message);
         }
       } catch (error) {
-        console.error("Error updating category:", error);
+        console.error("Lỗi khi cập nhật danh mục:", error);
       }
     } else {
-      // Add new category
+      // Thêm danh mục mới
       try {
-        const existingIds = categories.map((cat) => cat.categoryId); // Fetch existing category IDs
-        const newCategoryId = generateUniqueCategoryId(existingIds); // Generate a unique ID
+        const existingIds = categories.map((cat) => cat.categoryId); // Lấy ID danh mục hiện có
+        const newCategoryId = generateUniqueCategoryId(existingIds); // Tạo ID duy nhất
 
         const response = await fetch(
           "http://localhost:5296/api/Category/create",
@@ -125,10 +125,10 @@ const CategoryManagement = () => {
             { categoryId: newCategoryId, ...formData },
           ]);
         } else {
-          console.error("Failed to create category:", result.message);
+          console.error("Tạo danh mục không thành công:", result.message);
         }
       } catch (error) {
-        console.error("Error creating category:", error);
+        console.error("Lỗi khi tạo danh mục:", error);
       }
     }
 
@@ -153,10 +153,10 @@ const CategoryManagement = () => {
           categories.filter((category) => category.categoryId !== categoryId)
         );
       } else {
-        console.error("Failed to delete category:", result.message);
+        console.error("Xóa danh mục không thành công:", result.message);
       }
     } catch (error) {
-      console.error("Error deleting category:", error);
+      console.error("Lỗi khi xóa danh mục:", error);
     }
   };
 
@@ -201,12 +201,13 @@ const CategoryManagement = () => {
           </Button>
         </div>
 
+
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b">
+              <tr className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
                 <th className="py-3 px-4 text-left">ID</th>
                 <th className="py-3 px-4 text-left">Danh mục</th>
                 <th className="py-3 px-4 text-left">Mô tả</th>
@@ -259,6 +260,7 @@ const CategoryManagement = () => {
 
                     </div>
 
+
                   </td>
                 </tr>
               ))}
@@ -271,13 +273,13 @@ const CategoryManagement = () => {
         <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>
-              {currentCategory ? "Edit Category" : "Add New Category"}
+              {currentCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Name</label>
+                <label className="text-sm font-medium">Tên</label>
                 <Input
                   value={formData.name || ""}
                   onChange={(e) =>
@@ -287,7 +289,7 @@ const CategoryManagement = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
+                <label className="text-sm font-medium">Mô tả</label>
                 <textarea
                   className="w-full rounded-md border border-gray-300 p-2"
                   rows={3}
@@ -299,18 +301,9 @@ const CategoryManagement = () => {
                 />
               </div>
             </div>
-            <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                {currentCategory ? "Update" : "Create"}
-              </Button>
-            </div>
+            <Button type="submit">
+              {currentCategory ? "Cập nhật" : "Tạo"}
+            </Button>
           </form>
         </DialogContent>
       </Dialog>

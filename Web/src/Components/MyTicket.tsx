@@ -54,6 +54,9 @@ interface TicketData {
   cost: number;
   quantity: number;
   sellerId: string;
+  seller:string;
+  fullname:string;
+
   description: string;
   categories?: string[];
   image: string;
@@ -67,6 +70,8 @@ interface OrderDetail {
     startDate: string;
     cost: number;
     sellerId: string;
+    seller:string;
+    fullname:string;
     description?: string;
     categories?: string[];
     image: string;
@@ -154,20 +159,23 @@ const MyTicketPage = () => {
                 const startDate = detail.ticket.startDate;
                 const formattedDate = formatDate(startDate);
                 const { imageUrl } = await fetchImage(detail.ticket.image);
-                return {
-                  id: detail.ticket.id,
-                  name: detail.ticket.name,
-                  date: formattedDate,
-                  cost: detail.ticket.cost,
-                  quantity: detail.quantity,
-                  sellerId: detail.ticket.sellerId,
-                  description: detail.ticket.description || "Không có mô tả",
-                  categories: detail.ticket.categories || ["Chung"],
-                  image: imageUrl || detail.ticket.image,
-                  location: detail.ticket.location,
-                };
-              })
-            )
+
+              return {
+                id: detail.ticket.id,
+                name: detail.ticket.name,
+                date: formattedDate,
+                cost: detail.ticket.cost,
+                quantity: detail.quantity,
+                sellerId: detail.ticket.seller.fullname, // Use seller's fullname
+               
+                description: detail.ticket.description || 'Không có mô tả',
+                categories: detail.ticket.categories || ['Chung'],
+                image: imageUrl || detail.ticket.image,
+                location: detail.ticket.location
+              };
+              
+            })
+          )
         );
 
         setTickets(completedTickets);
