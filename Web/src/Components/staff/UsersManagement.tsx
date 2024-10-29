@@ -299,7 +299,7 @@ const UserManagement = () => {
                       onClick={() => handleOrder(user.gmail)}
                       variant="default"
                       color="success"
-                      className="text-white font-bold py-2 px-4 rounded"
+                      className=" font-bold py-2 px-4 rounded"
                     >
                       <VisibilityIcon />
                     </Button>
