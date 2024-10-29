@@ -1,10 +1,5 @@
-import Navbar from "@/Components/Navbar";
-import Footer from "@/Components/Footer";
-
-export const metadata = {
-  title: "Ticket Resell - Buy & Sell Event Tickets Legitimately",
-  description: "Shop",
-};
+// app/layout.tsx
+ // Adjust the import based on the location
 
 export default function RootLayout({
   children,
@@ -14,8 +9,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
-       
+          {children}
       </body>
     </html>
   );

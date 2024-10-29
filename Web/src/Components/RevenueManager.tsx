@@ -65,7 +65,7 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData , transacti
 
   // Sort revenue data by startDate
   const sortedRevenueData = [...revenueData].sort(
-    (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
   );
   const countTransactionsToday = (transactions: Transaction[]): number => {
     const today = new Date();
@@ -427,7 +427,7 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
   // Format date for X-axis
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return `${date.getDate()}/${date.getMonth() + 1}`;
+    return `${date.getDate()}/${date.getMonth()+1}`;
   };
 
   // Format Y-axis values
@@ -671,7 +671,7 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
       {/* Stats Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <StatCard
-          title="Daily Revenue"
+          title="Daily "
           value={formatCurrency(calculateDayRevenue(today, sortedRevenueData))}
           change={dailyChangeFormatted}
           subtitle={`${today.getDate()}/${today.getMonth() + 1}`}
@@ -681,7 +681,7 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
           icon={DollarSign}
         />
         <StatCard
-          title="Monthly Revenue"
+          title="Monthly"
           value={formatCurrency(calculateMonthRevenue(today.getMonth(), today.getFullYear(), sortedRevenueData))}
           change={monthlyChangeFormatted}
           subtitle={`From ${today.getMonth() + 1}`}
@@ -691,7 +691,7 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
           icon={Calendar}
         />
         <StatCard
-          title="Yearly Revenue"
+          title="Yearly"
           value={formatCurrency(calculateYearRevenue(today.getFullYear(), sortedRevenueData))}
           change={yearlyChangeFormatted}
           subtitle={`From ${today.getFullYear()}`}

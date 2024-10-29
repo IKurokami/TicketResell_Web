@@ -136,9 +136,9 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
       <h2 className="text-2xl font-bold text-center">Related Tickets</h2>
       <div className=" mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw] ">
         {tickets.map((ticket) => (
-          <Link className="no-underline" href={`/ticket/${ticket.ticketId}`}>
+          <Link className="no-underline"  key={ticket.ticketId} href={`/ticket/${ticket.ticketId}`}>
             <div
-              key={ticket.ticketId}
+             
               className="movie-card-wrapper cursor-pointer no-underline visited:no-underline transform transition-transform duration-300 hover:scale-105"
             >
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">

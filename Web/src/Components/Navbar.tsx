@@ -167,25 +167,33 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   };
 
   // Handle show icon when login
+useEffect(()=>{
+  const fetchAvatar= async ()=>{
+    const id = Cookies.get("id"); 
+    if (id) {
+      const { imageUrl: fetchedImageUrl, error } = await fetchImage(
+        id
+      );
+  
+      if (fetchedImageUrl) {
+        
+        setImage(fetchedImageUrl);
+        
+      } else {
+        setImage(DEFAULT_IMAGE)
+        console.error(
+          `Error fetching image for user ${id}: ${error}`
+        );
+      }
+    }
+  }
+ fetchAvatar()
+},[])
 
   useEffect(() => {
     // Function to check if the user is logged in by checking for the 'id' cookie
     const checkUserLoginStatus =async () => {
-      const id = Cookies.get("id"); 
-      if (id) {
-        const { imageUrl: fetchedImageUrl, error } = await fetchImage(
-          id
-        );
-
-        if (fetchedImageUrl) {
-          setImage(fetchedImageUrl);
-        } else {
-          setImage(DEFAULT_IMAGE)
-          console.error(
-            `Error fetching image for user ${id}: ${error}`
-          );
-        }
-      }// Get the user ID from the cookie
+     // Get the user ID from the cookie
       if (id) {
         setIsLoggedIn(true); // User is logged in
       } else {

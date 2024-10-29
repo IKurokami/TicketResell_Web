@@ -58,13 +58,14 @@ interface TopBuyer {
 interface OrderDetailsDashboardProps {
   transactions: Transaction[];
   revenue: RevenueItem[];
+  topBuyers:TopBuyer[];
 }
 
 const OrderDetailsDashboard = ({
   transactions,
-  revenue
+  revenue,  topBuyers
 }: OrderDetailsDashboardProps) => {
-  const [topBuyers, setTopBuyers] = useState<TopBuyer[]>([]);
+
   const formatCurrency = (amount: number) => {
     return `${new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
@@ -94,30 +95,7 @@ const OrderDetailsDashboard = ({
     return orders.reduce((acc, order) => acc + order.total, 0);
   };
 
-  useEffect(() => {
-    const fetchTopBuyers = async () => {
-      const sellerId = Cookies.get("id");
-      try {
-        const response = await fetch(
-          `http://localhost:5296/api/User/topbuyer/${sellerId}`,
-          {
-            credentials: "include",
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const result = await response.json();
-        console.log("topbuyr:", result.data);
-
-        setTopBuyers(result.data);
-      } catch (error) {
-        setTopBuyers([]);
-      }
-    };
-
-    fetchTopBuyers();
-  }, []);
+ 
 
   return (
     <div className="p-3 sm:p-4 md:p-6 bg-slate-50 ">
@@ -253,15 +231,15 @@ const OrderDetailsDashboard = ({
             </span>
           </div>
 
-          <div className="space-y-3 md:space-y-4 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-            {topBuyers.map((buyer, index) => (
+          <div className="space-y-3  md:space-y-4 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            {topBuyers.slice(0,3).map((buyer, index) => (
               <div
                 key={buyer.userId}
                 className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 hover:bg-slate-50 rounded-lg transition-colors gap-3 sm:gap-4"
               >
                 <div className="flex items-center space-x-3 md:space-x-4 w-full sm:w-auto">
                   <div
-                    className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-white font-semibold shrink-0
+                    className={`w-6 h-6  md:w-8 md:h-8 rounded-full flex items-center justify-center text-white font-semibold shrink-0
                   ${
                     index === 0
                       ? "bg-yellow-500"

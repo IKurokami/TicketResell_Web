@@ -50,6 +50,28 @@ namespace TicketResell.Services.Services
             return ResponseModel.Success($"Successfully get all user", users);
         }
 
+        public async Task<ResponseModel> GetAllBuyer()
+        {
+            var userIds = await _unitOfWork.TransactionRepository.GetAllBuyer();
+            if (userIds.IsNullOrEmpty())
+            {
+                return ResponseModel.BadRequest("Not found");
+            }
+
+            var userDtos = new List<BuyerOrderReadDto>();
+
+            foreach (var userId in userIds)
+            {
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+                if (user != null) 
+                {
+                    var userDto = _mapper.Map<BuyerOrderReadDto>(user); 
+                    userDtos.Add(userDto);
+                }
+            }
+            return ResponseModel.Success($"Successfully retrieved users", userDtos);
+        }
+
         public async Task<ResponseModel> GetUserByIdAsync(string id)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);

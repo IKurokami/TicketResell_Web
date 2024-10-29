@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretRight, faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import useShowItem from "@/Hooks/useShowItem";
+import DOMPurify from "dompurify";
 
 interface Category {
   categoryId: string;
@@ -66,7 +67,15 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
   };
 
   const truncateText = (text: string, maxLength: number) => {
-    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+
+    const tempElement = document.createElement("div");
+    tempElement.innerHTML = text;
+  
+
+    const plainText = tempElement.innerText;
+  
+
+    return plainText.length > maxLength ? plainText.slice(0, maxLength) + "..." : plainText;
   };
 
   const formatVND = (amount: number) => {
@@ -91,7 +100,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
     const year = date.getFullYear();
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
-  
+
     return `${day}/${month}/${year}, ${hours}:${minutes}`;
   };
 
@@ -152,7 +161,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
                             {item.author}
                           </h4>
                           <p className="text-sm md:text-base text-gray-600 mb-4 line-clamp-2">
-                            {truncateText(item.description, 20)}
+                          {truncateText(DOMPurify.sanitize(item.description), 20)}
                           </p>
                           <div className="mt-auto">
                             <span className="inline-block bg-gray-100 rounded-full px-3 py-1.5 text-sm text-gray-600">

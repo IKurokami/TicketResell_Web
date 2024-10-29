@@ -1,10 +1,9 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { Users, FolderTree } from "lucide-react";
 import UserManagement from "@/Components/staff/UsersManagement";
 import CategoryManagement from "@/Components/staff/CategoriesManagement";
-import "@/Css/Staff.css"
-
+import "@/Css/Staff.css";
 
 const StaffDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -38,7 +37,7 @@ const StaffDashboard = () => {
         return <div>{activeTab} content goes here</div>;
     }
   };
- 
+
   return (
     <div className="relative min-h-screen flex bg-gray-100">
       {/* Hamburger Menu Button (Mobile) */}
@@ -73,8 +72,9 @@ const StaffDashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed sm:relative inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } sm:translate-x-0`}
+        className={`fixed sm:relative inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } sm:translate-x-0`}
       >
         <div className="h-full px-6 py-8 overflow-y-auto bg-white border-r border-gray-200">
           {/* Sidebar Header */}
@@ -83,12 +83,12 @@ const StaffDashboard = () => {
               <span className="text-emerald-500 text-3xl font-bold">
                 Ticket{" "}
               </span>
-              <span className="text-black text-3xl font-bold">
-                Resell{" "}
-              </span>
-              <span className="text-gray-600 text-2xl inline mt-1">Staff</span> {/* Thay đổi ở đây */}
+              <span className="text-black text-3xl font-bold">Resell </span>
+              <span className="text-gray-600 text-2xl inline mt-1">
+                Staff
+              </span>{" "}
+              {/* Thay đổi ở đây */}
             </h2>
-
 
             <button
               onClick={closeSidebar}
@@ -116,15 +116,19 @@ const StaffDashboard = () => {
               <button
                 key={index}
                 onClick={() => handleNavigation(tab.name)}
-                className={`w-full flex items-center px-5 py-4 text-base font-medium rounded-xl transition-colors duration-150 ease-in-out ${activeTab === tab.name
+                className={`w-full flex items-center px-5 py-4 text-base font-medium rounded-xl transition-colors duration-150 ease-in-out ${
+                  activeTab === tab.name
                     ? "bg-emerald-50 text-emerald-600"
                     : "text-gray-700 hover:bg-gray-50"
-                  }`}
+                }`}
               >
-                <span className={`mr-4 ${activeTab === tab.name
-                    ? "text-emerald-600"
-                    : "text-gray-500"
-                  }`}>
+                <span
+                  className={`mr-4 ${
+                    activeTab === tab.name
+                      ? "text-emerald-600"
+                      : "text-gray-500"
+                  }`}
+                >
                   {tab.icon}
                 </span>
                 <span className="flex-1">{tab.name}</span>
@@ -153,9 +157,7 @@ const StaffDashboard = () => {
               </div>
 
               {/* Content Area */}
-              <div className="p-8">
-                {renderContent()}
-              </div>
+              <div className="p-8">{renderContent()}</div>
             </div>
           </div>
         </div>

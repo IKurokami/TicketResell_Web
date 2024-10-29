@@ -54,7 +54,18 @@ namespace TicketResell.Repositories.Controllers
             var response = await _revenueService.GetRevenuesByIdAsync(id);
             return ResponseParser.Result(response);
         }
- 
+
+        [HttpGet("readAllRevenues")]
+        public async Task<IActionResult> GetAllRevenues()
+        {
+            // if (!HttpContext.GetIsAuthenticated())
+            //     return ResponseParser.Result(
+            //         ResponseModel.Unauthorized("You need to be authenticated to view revenues by seller ID"));
+
+            var response = await _revenueService.GetAllRevenues();
+            return ResponseParser.Result(response);
+        }
+
         [HttpGet("readbysellerid/{id}")]
         public async Task<IActionResult> GetRevenuesBySellerId(string id)
         {

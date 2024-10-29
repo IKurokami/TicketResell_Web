@@ -20,7 +20,7 @@ import TicketGrid, { TICKET_STATUS } from "./TicketGrid";
 import { fetchImage } from "@/models/FetchImage";
 import { useParams } from "next/navigation";
 import SellProfile from "./sellprofile";
-
+import React from "react";
 const baseUrl = "http://localhost:5296";
 
 export interface Category {
