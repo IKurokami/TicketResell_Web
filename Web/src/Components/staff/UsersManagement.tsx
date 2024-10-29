@@ -266,10 +266,10 @@ const UserManagement = () => {
 
       </CardHeader>
       <CardContent>
-        <div className="shadow-lg border rounded-xl p-4 overflow-x-auto bg-white">
+        <div className=" border rounded-xl overflow-x-auto bg-white">
           <table className="w-full">
-            <thead className="bg-blue-50">
-              <tr className="border-b">
+          <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
+          <tr className="border-b">
                 <th className="py-3 px-4  text-left whitespace-nowrap">Tên người dùng</th>
                 <th className="py-3 px-4  text-left whitespace-nowrap">Email</th>
                 <th className="py-3 px-4  text-left whitespace-nowrap">Số điện thoại</th>
@@ -287,10 +287,10 @@ const UserManagement = () => {
                   <td className="py-3 px-4 text-center">
                     <button
                       onClick={() => handleChat(user)}
-                      className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                      className="group relative flex items-center gap-2 px-4 py-2  rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                     >
-                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                      <span className="font-medium">Chat</span>
+                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110 " />
+                      
                       <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                     </button>
                   </td>
@@ -299,7 +299,7 @@ const UserManagement = () => {
                       onClick={() => handleOrder(user.gmail)}
                       variant="default"
                       color="success"
-                      className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                      className=" font-bold py-2 px-4 rounded"
                     >
                       <VisibilityIcon />
                     </Button>

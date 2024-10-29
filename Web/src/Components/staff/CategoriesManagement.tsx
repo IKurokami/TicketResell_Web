@@ -204,7 +204,7 @@ const CategoryManagement = () => {
 
       </CardHeader>
       <CardContent>
-        <div className="shadow-lg border rounded-xl p-4 overflow-x-auto bg-white">
+        <div className=" border rounded-xl overflow-x-auto bg-white">
           <table className="w-full">
             <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
               <tr>
