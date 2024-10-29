@@ -21,6 +21,87 @@ public class ChatRepository : GenericRepository<Chat>, IChatRepository
         await _context.Chats.AddAsync(chat);
         return chat;
     }
+    public async Task<bool> UpdateChatAsync(Chat chat)
+    {
+        if (chat == null)
+        {
+            _logger.LogError("Update failed: Chat object is null.");
+            return false;
+        }
+
+        try
+        {
+            var existingChat = await _context.Chats.FindAsync(chat.ChatId); // assuming ChatId is the primary key
+            if (existingChat == null)
+            {
+                _logger.LogError($"Update failed: Chat with ID {chat.ChatId} not found.");
+                return false;
+            }
+
+            // Update properties as needed
+            existingChat.Message = chat.Message;
+            existingChat.SenderId = chat.SenderId;
+            existingChat.ReceiverId = chat.ReceiverId;
+            
+            _context.Chats.Update(existingChat);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error updating chat with ID {chat.ChatId}: {ex.Message}");
+            return false;
+        }
+    }
+    public async Task<string?> GetLatestChatboxIdAsync(string senderId, string receiverId)
+    {
+        if (string.IsNullOrWhiteSpace(senderId) || string.IsNullOrWhiteSpace(receiverId))
+            return null;
+        _logger.LogError(senderId);
+        _logger.LogError(receiverId);
+        try
+        {
+            var latestChat = await _context.Chats
+                .Where(c => (c.SenderId == senderId && c.ReceiverId == receiverId) || 
+                           (c.ReceiverId == senderId && c.SenderId == receiverId))
+                .OrderByDescending(c => c.Date)
+                .FirstOrDefaultAsync();
+            _logger.LogError("Latest chat"+latestChat?.ChatboxId);
+            return latestChat?.ChatboxId;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error getting latest chatbox ID for sender {senderId} and receiver {receiverId}: {ex.Message}");
+            return null;
+        }
+    } 
+
+    public async Task<Chat?> GetLatestChatByChatboxIdAsync(string senderId, string receiverId)
+    {
+        if (string.IsNullOrWhiteSpace(senderId) || string.IsNullOrWhiteSpace(receiverId))
+            return null;
+        _logger.LogError(senderId);
+        _logger.LogError(receiverId);
+        try
+        {
+            var latestChat = await _context.Chats
+                .Where(c => (c.SenderId == senderId && c.ReceiverId == receiverId) || 
+                           (c.ReceiverId == senderId && c.SenderId == receiverId))
+                .OrderByDescending(c => c.Date)
+                .FirstOrDefaultAsync();
+            _logger.LogError("Latest chat"+latestChat?.ChatboxId);
+            if(latestChat == null){
+                _logger.LogError($"NULL {senderId} {receiverId}");
+            }
+            return latestChat;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error getting latest chatbox ID for sender {senderId} and receiver {receiverId}: {ex.Message}");
+            return null;
+        }
+    } 
+
 
     public async Task<IEnumerable<Chat>> GetChatsBySenderIdToReceiverIdAsync(string senderId, string receiverId)
     {

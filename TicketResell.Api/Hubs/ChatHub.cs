@@ -83,7 +83,7 @@ public class ChatHub : Hub
 
         var sanitizer = new HtmlSanitizer();
         var sanitizedMessage = sanitizer.Sanitize(message);
-
+        
         var sentChat = await chatService.CreateChatAsync(new Chat()
         {
             SenderId = senderID,

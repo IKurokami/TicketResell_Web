@@ -6,6 +6,7 @@ using Repositories.Repositories;
 using Repositories.Repositories.Carts;
 using Repositories.Repositories.Chats;
 using TicketResell.Repositories.Logger;
+using TicketResell.Repositories.Repositories.Chatboxs;
 
 namespace TicketResell.Repositories.UnitOfWork
 {
@@ -29,6 +30,7 @@ namespace TicketResell.Repositories.UnitOfWork
             CartRepository = new CartRepository(_logger, _context);
             ChatRepository = new ChatRepository(_logger, _context);
             RatingRepository = new RatingRepository(_logger, _context);
+            ChatboxRepository = new ChatboxRepository(_logger, _context);
         }
 
         public IUserRepository UserRepository { get; }
@@ -43,6 +45,7 @@ namespace TicketResell.Repositories.UnitOfWork
         public ICartRepository CartRepository { get; }
         public IChatRepository ChatRepository { get; }
         public IRatingRepository RatingRepository { get; }
+        public IChatboxRepository ChatboxRepository { get; }
         
         public async Task<int> CompleteAsync()
         {
