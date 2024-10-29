@@ -271,10 +271,10 @@ const UserManagement = () => {
             <thead>
               <tr className="border-b">
                 <th className="py-3 px-4 text-left whitespace-nowrap">Tên người dùng</th>
-                <th className="py-3 px-4 text-left whitespace-nowrap">Email</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Email</th>
                 <th className="py-3 px-4 text-left whitespace-nowrap">Số điện thoại</th>
-                <th className="py-3 px-4 text-left whitespace-nowrap">Địa chỉ</th>
-                <th className="py-3 px-4 text-left whitespace-nowrap">Liên hệ</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Địa chỉ</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Liên hệ</th>
                 <th className="py-3 px-4 text-left whitespace-nowrap">Lịch sử đơn hàng</th>
 
               </tr>

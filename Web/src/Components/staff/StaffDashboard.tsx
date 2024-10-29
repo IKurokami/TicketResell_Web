@@ -38,7 +38,7 @@ const StaffDashboard = () => {
       case "Danh mục":
         return <CategoryManagement />;
       default:
-        return <div>{activeTab} content goes here</div>;
+        return <UserManagement />;
     }
   };
   const handleLogout = async () => {
