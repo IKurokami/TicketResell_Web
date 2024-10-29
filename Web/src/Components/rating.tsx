@@ -7,6 +7,8 @@ const DEFAULT_IMAGE =
   "https://th.bing.com/th?id=OIP.lcY5HRpW-xdbGVrC1DsbcAHaHa&w=250&h=250&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2";
 const RatingsList = ({ ratings }: any) => {
   const [userImages, setUserImages] = useState<any>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
 
   const fetchUserAvatarImage = async () => {
     try {
@@ -35,6 +37,89 @@ const RatingsList = ({ ratings }: any) => {
     fetchUserAvatarImage();
   }, [ratings]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, []);
+
+  // Pagination logic
+  const totalPages = Math.ceil(ratings.length / itemsPerPage);
+  const paginatedRatings = ratings.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const renderPaginationButtons = () => {
+    const maxVisiblePages = 5;
+    const pageButtons = [];
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    if (startPage > 1) {
+      pageButtons.push(
+        <button
+          key="first"
+          onClick={() => handlePageChange(1)}
+          className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+        >
+          1
+        </button>
+      );
+      if (startPage > 2) {
+        pageButtons.push(
+          <span key="ellipsis1" className="mx-1">
+            ...
+          </span>
+        );
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageButtons.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`w-10 h-10 mx-1 rounded-full transition-colors duration-200 ${
+            currentPage === i
+              ? "bg-blue-500 text-white"
+              : "bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pageButtons.push(
+          <span key="ellipsis2" className="mx-1">
+            ...
+          </span>
+        );
+      }
+      pageButtons.push(
+        <button
+          key="last"
+          onClick={() => handlePageChange(totalPages)}
+          className="w-10 h-10 mx-1 rounded-full transition-colors duration-200 bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+        >
+          {totalPages}
+        </button>
+      );
+    }
+
+    return pageButtons;
+  };
   // Function to format date
 
   const formatDate = (dateString: any) => {
@@ -76,7 +161,7 @@ const RatingsList = ({ ratings }: any) => {
 
         {/* Individual Reviews */}
         <div className="space-y-4">
-          {ratings.map((rating: any, index: number) => (
+          {paginatedRatings.map((rating: any, index: number) => (
             <Card key={rating.ratingId}>
               <CardContent className="pt-6">
                 <div className="flex pb-3">
@@ -107,6 +192,26 @@ const RatingsList = ({ ratings }: any) => {
           ))}
         </div>
       </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="w-10 h-10 mx-1 rounded-full bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50"
+          >
+            &lt;
+          </button>
+          {renderPaginationButtons()}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="w-10 h-10 mx-1 rounded-full bg-white text-blue-500 border border-blue-500 hover:bg-blue-100 disabled:opacity-50"
+          >
+            &gt;
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -363,7 +363,6 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
     await updateUserProfile(userId, formData);
     onSave(formData);
     onClose();
-    onClose();
   };
   const [formData, setFormData] = useState<FormData>(
     initialData || {
@@ -376,16 +375,27 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
       bio: "",
     }
   );
+  const handleBirthdayChange = (e: any) => {
+    const { value } = e.target;
 
-  // Function to validate if the age is 18 or over
-  const validateBirthday = (birthday: string) => {
+    // Update the form data
+    setFormData((prevData) => ({
+      ...prevData,
+      birthday: value,
+    }));
+
+    // Validate the birthday
+    validateBirthday(value);
+  };
+
+  // Validation function
+  const validateBirthday = (birthday: any) => {
     const selectedDate = new Date(birthday);
     const today = new Date();
 
-    // Calculate age by subtracting birth year from current year
     const age = today.getFullYear() - selectedDate.getFullYear();
 
-    // Adjust age if the birthday hasn't occurred yet this year
+    // Check if birthday has already happened this year
     const hasHadBirthdayThisYear =
       today.getMonth() > selectedDate.getMonth() ||
       (today.getMonth() === selectedDate.getMonth() &&
@@ -403,38 +413,6 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
         ...prevErrors,
         birthday: "",
       }));
-    }
-  };
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-    // Clear errors when user types
-    if (errors[name as keyof Errors]) {
-      setErrors({
-        ...errors,
-        [name]: "",
-      });
-    }
-    // Check if the input name is birthday to perform age validation
-    if (name === "birthday") {
-      validateBirthday(value); // Call validation function
-    }
-  };
-
-  const handleSexChange = (value: string) => {
-    setFormData({
-      ...formData,
-      sex: value,
-    });
-    if (errors.sex) {
-      setErrors({
-        ...errors,
-        sex: "",
-      });
     }
   };
 
@@ -557,11 +535,12 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                                 .split("T")[0]
                             : ""
                         }
-                        onChange={(e) =>
-                          setFormData({ ...formData, birthday: e.target.value })
-                        }
+                        onChange={handleBirthdayChange}
                         className="w-full"
                       />
+                      {errors.birthday && (
+                        <p style={{ color: "red" }}>{errors.birthday}</p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -596,6 +575,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                           setFormData({ ...formData, address: e.target.value })
                         }
                         className="w-full"
+                        disabled
                       />
                     </div>
 
