@@ -230,7 +230,7 @@ const UserManagement = () => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-4">
-          <CardTitle>Quản lý người dùng</CardTitle>
+          <CardTitle>Trạng thái:</CardTitle>
           <span
             className={`text-sm ${connectionStatus === "Authenticated"
               ? "text-green-500"
@@ -266,26 +266,24 @@ const UserManagement = () => {
 
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        <div className="shadow-lg border rounded-xl p-4 overflow-x-auto bg-white">
           <table className="w-full">
-            <thead>
+            <thead className="bg-blue-50">
               <tr className="border-b">
-                <th className="py-3 px-4 text-left whitespace-nowrap">Tên người dùng</th>
-                <th className="py-3 px-4 text-center whitespace-nowrap">Email</th>
-                <th className="py-3 px-4 text-left whitespace-nowrap">Số điện thoại</th>
-                <th className="py-3 px-4 text-center whitespace-nowrap">Địa chỉ</th>
-                <th className="py-3 px-4 text-center whitespace-nowrap">Liên hệ</th>
-                <th className="py-3 px-4 text-left whitespace-nowrap">Lịch sử đơn hàng</th>
-
+                <th className="py-3 px-4  text-left whitespace-nowrap">Tên người dùng</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Email</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Số điện thoại</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Liên hệ</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Lịch sử đơn hàng</th>
               </tr>
             </thead>
+
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.userId} className="border-b hover:bg-gray-100">
                   <td className="py-3 px-4">{user.fullname}</td>
-                  <td className="py-3 px-4">{user.gmail}</td>
+                  <td className="py-3 px-4">{user.userId}</td>
                   <td className="py-3 px-4">{user.phone}</td>
-                  <td className="py-3 px-4">{user.address}</td>
                   <td className="py-3 px-4 text-center">
                     <button
                       onClick={() => handleChat(user)}
@@ -295,8 +293,6 @@ const UserManagement = () => {
                       <span className="font-medium">Chat</span>
                       <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                     </button>
-
-
                   </td>
                   <td className="py-3 px-4 text-center">
                     <Button
@@ -304,16 +300,16 @@ const UserManagement = () => {
                       variant="default"
                       color="success"
                       className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-                      >
+                    >
                       <VisibilityIcon />
                     </Button>
                   </td>
-
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
         {Object.keys(isChatOpen)
           .filter((userId) => isChatOpen[userId])
           .map((userId, index) => {
