@@ -20,6 +20,8 @@ public partial class TicketResellManagementContext : DbContext
 
     public virtual DbSet<Chat> Chats { get; set; }
 
+    public virtual DbSet<Chatbox> Chatboxes { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
@@ -62,6 +64,9 @@ public partial class TicketResellManagementContext : DbContext
             entity.HasIndex(e => e.SenderId, "IX_Chat_SenderId");
 
             entity.Property(e => e.ChatId).HasDefaultValue("");
+            entity.Property(e => e.ChatboxId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.Message).HasMaxLength(1000);
             entity.Property(e => e.ReceiverId)
                 .HasMaxLength(50)
@@ -69,6 +74,10 @@ public partial class TicketResellManagementContext : DbContext
             entity.Property(e => e.SenderId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.Chatbox).WithMany(p => p.Chats)
+                .HasForeignKey(d => d.ChatboxId)
+                .HasConstraintName("FK_Chat_Chatbox");
 
             entity.HasOne(d => d.Receiver).WithMany(p => p.ChatReceivers)
                 .HasForeignKey(d => d.ReceiverId)
@@ -79,6 +88,22 @@ public partial class TicketResellManagementContext : DbContext
                 .HasForeignKey(d => d.SenderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Chat_Sender");
+        });
+
+        modelBuilder.Entity<Chatbox>(entity =>
+        {
+            entity.HasKey(e => e.ChatboxId).HasName("PK__Chatbox__FC2C542683201E28");
+
+            entity.ToTable("Chatbox");
+
+            entity.Property(e => e.ChatboxId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.CreateDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Title).HasMaxLength(255);
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -136,6 +161,10 @@ public partial class TicketResellManagementContext : DbContext
             entity.HasKey(e => e.RatingId).HasName("PK__Rating__FCCDF87C6FC41DB2");
 
             entity.ToTable("Rating");
+
+            entity.HasIndex(e => e.SellerId, "IX_Rating_SellerId");
+
+            entity.HasIndex(e => e.UserId, "IX_Rating_UserId");
 
             entity.Property(e => e.RatingId)
                 .HasMaxLength(50)
