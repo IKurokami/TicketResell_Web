@@ -1,29 +1,36 @@
 using Ganss.Xss;
 using Microsoft.AspNetCore.SignalR;
+using Repositories.Constants;
+using TicketResell.Repositories.Core.Dtos.Chat;
+using TicketResell.Repositories.Core.Dtos.Chatbox;
 using TicketResell.Repositories.Helper;
+using TicketResell.Repositories.Logger;
+using TicketResell.Services.Services.Chatbox;
 
 namespace TicketResell.Api.Hubs;
 
 public class ChatHub : Hub
 {
     private static Dictionary<string, string> Users = new Dictionary<string, string>();
-    
-    private readonly IServiceProvider _serviceProvider;
 
-    public ChatHub(IServiceProvider serviceProvider)
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IAppLogger _logger;
+
+    public ChatHub(IServiceProvider serviceProvider, IAppLogger logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     public override async Task OnConnectedAsync()
     {
         await Clients.Client(Context.ConnectionId).SendAsync("Welcome", $"Welcome to ChatHub. Please login first to send messages.");
     }
-    
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var user = Users.FirstOrDefault(x => x.Value == Context.ConnectionId);
-    
+
         if (!string.IsNullOrEmpty(user.Key))
         {
             Users.Remove(user.Key);
@@ -47,7 +54,7 @@ public class ChatHub : Hub
         var httpContext = Context.GetHttpContext();
         httpContext.SetAccessKey(accessKey);
         httpContext.SetUserId(userId);
-        
+
         await Clients.Client(Context.ConnectionId).SendAsync("Authenticating", $"We are doing some authentication for user {userId}.");
         var authenticate = await httpContext.CheckAuthenTicatedDataAsync(_serviceProvider);
 
@@ -61,15 +68,15 @@ public class ChatHub : Hub
             await Clients.Client(Context.ConnectionId).SendAsync("LoginFail", $"You are not logged in.");
         }
     }
-    
-    public async Task SendMessageAsync(string receiverID, string message)
+
+    public async Task SendMessageAsync(string receiverID, string message, string boxchatId)
     {
         if (string.IsNullOrWhiteSpace(message) || message.Length > 500)
         {
             await Clients.Client(Context.ConnectionId).SendAsync("InvalidMessage", "Message cannot be empty or too long.");
             return;
         }
-        
+
         var httpContext = Context.GetHttpContext();
 
         if (!httpContext.GetIsAuthenticated())
@@ -80,25 +87,64 @@ public class ChatHub : Hub
 
         var senderID = httpContext.GetUserId();
         var chatService = _serviceProvider.GetRequiredService<IChatService>();
+        var userService = _serviceProvider.GetRequiredService<IUserService>();
+        var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
 
         var sanitizer = new HtmlSanitizer();
         var sanitizedMessage = sanitizer.Sanitize(message);
-        
-        var sentChat = await chatService.CreateChatAsync(new Chat()
+
+        var newChat = new ChatReadDto()
         {
             SenderId = senderID,
             ReceiverId = receiverID,
             Message = sanitizedMessage,
-        });
+            ChatboxId = boxchatId
+        };
 
-        if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+        bool isStaff = (bool)(await userService.CheckUserRole(receiverID, RoleConstant.roleStaff)).Data;
+        bool isAdmin = (bool)(await userService.CheckUserRole(receiverID, RoleConstant.roleAdmin)).Data;
+
+        if ((httpContext.HasEnoughtRoleLevel(UserRole.Staff) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)) && (isStaff || isAdmin))
         {
-            await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", senderID, message);
-            await Clients.Client(Context.ConnectionId).SendAsync("MessageSent", receiverID, sentChat);
+            newChat.ChatboxId = null;
+        }else if(!(httpContext.HasEnoughtRoleLevel(UserRole.Staff) || httpContext.HasEnoughtRoleLevel(UserRole.Staff))){
+            await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
+        }
+        if (newChat.ChatboxId != null)
+        {
+            var chatbox = (ChatboxReadDto)(await chatboxService.GetChatboxByIdAsync(boxchatId)).Data;
+            if (chatbox.Status != 3 && chatbox.Status != 1 && chatbox.Status != 0)
+            {
+                var sentChat = await chatService.CreateChatDtoAsync(newChat);
+                if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+                {
+                    await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", senderID, message);
+                    await Clients.Client(Context.ConnectionId).SendAsync("MessageSent", receiverID, sentChat);
+                    await Clients.Client(Context.ConnectionId).SendAsync("Unblock", senderID, "Chat is unblock");
+                } 
+                else
+                {
+                    await Clients.Client(Context.ConnectionId).SendAsync("UserNotFound", $"User {receiverID} is not connected.");
+                }
+            }
+            else
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("Block", senderID, "Chat is block");
+            }
         }
         else
         {
-            await Clients.Client(Context.ConnectionId).SendAsync("UserNotFound", $"User {receiverID} is not connected.");
+            var sentChat = await chatService.CreateChatDtoAsync(newChat);
+            if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+            {
+                await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", senderID, message);
+                await Clients.Client(Context.ConnectionId).SendAsync("MessageSent", receiverID, sentChat);
+                await Clients.Client(Context.ConnectionId).SendAsync("Unblock", senderID, "Chat is unblock");
+            }
+            else
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("UserNotFound", $"User {receiverID} is not connected.");
+            }
         }
     }
 }

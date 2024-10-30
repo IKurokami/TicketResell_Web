@@ -32,7 +32,9 @@ interface ChatMessage {
   chatId: string;
   date: string | null;
 }
-
+interface BlockStatus {
+  [userId: string]: boolean;
+}
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -45,7 +47,7 @@ const UserManagement = () => {
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
   const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
+  const [blockStatus, setBlockStatus] = useState<BlockStatus>({});
   useEffect(() => {
     fetch("http://localhost:5296/api/User/read")
       .then((response) => response.json())
@@ -115,6 +117,22 @@ const UserManagement = () => {
       }));
     });
 
+    connection.on("Block", (senderId: string, message: string) => {
+      console.log(`Block event received for ${senderId}: ${message}`);
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: true
+      }));
+    });
+  
+    connection.on("Unblock", (senderId: string, message: string) => {
+      console.log(`Unblock event received for ${senderId}: ${message}`);
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: false
+      }));
+    });
+
     try {
       await connection.start();
       const userId = Cookies.get("id");
@@ -180,7 +198,7 @@ const UserManagement = () => {
       await hubConnectionRef.current.invoke(
         "SendMessageAsync",
         receiverId,
-        newMessages[receiverId] // Use the specific message for the receiver
+        newMessages[receiverId], "CB215edde9-0129-49b2-94d0-105356caee43" // Use the specific message for the receiver
       );
 
       const newChatMessage: ChatMessage = {

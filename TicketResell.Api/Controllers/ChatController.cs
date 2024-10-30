@@ -1,5 +1,7 @@
+using Repositories.Constants;
 using TicketResell.Repositories.Core.Dtos.Chat;
 using TicketResell.Repositories.Helper;
+using TicketResell.Services.Services.Chatbox;
 
 namespace TicketResell.API.Controllers
 {
@@ -7,11 +9,15 @@ namespace TicketResell.API.Controllers
     [Route("api/[controller]")]
     public class ChatController : ControllerBase
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly IChatService _chatService;
+        private readonly IChatboxService _chatboxService;
 
-        public ChatController(IChatService chatService)
+        public ChatController(IServiceProvider serviceProvider)
         {
-            _chatService = chatService;
+            _serviceProvider = serviceProvider;
+            _chatboxService = serviceProvider.GetRequiredService<IChatboxService>();
+            _chatService = serviceProvider.GetRequiredService<IChatService>();
         }
 
         [HttpPost("create")]
@@ -31,8 +37,20 @@ namespace TicketResell.API.Controllers
 
             return ResponseParser.Result(await _chatService.GetChatsBySenderIdToReceiverIdAsync(senderId, receiverId));
         }
+        [HttpPost("get/{userId}")]
+        public async Task<IActionResult> GetAllChatById(string userId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            {
 
-        [HttpGet("maprequest/{receiverId}")]
+                if (!HttpContext.IsUserIdAuthenticated(userId))
+                    return ResponseParser.Result(ResponseModel.Unauthorized("You need to login first to get chat"));
+            }
+
+            return ResponseParser.Result(await _chatService.GetAllChatById(userId));
+        }
+
+        [HttpPost("maprequest/{receiverId}")]
         public async Task<IActionResult> GetLatestChat(string receiverId)
         {
             var senderId = HttpContext.GetUserId();
@@ -44,8 +62,35 @@ namespace TicketResell.API.Controllers
             var response = await _chatService.GetLatestChatBySenderAndReceiverAsync(receiverId, receiverId);
             ChatReadDto latestChat = (ChatReadDto)response.Data;
             latestChat.ReceiverId = senderId;
+            await _chatboxService.UpdateChatboxStatusAsync(latestChat.ChatboxId, 2);
             await _chatService.UpdateChat(latestChat);
             return ResponseParser.Result(ResponseModel.Success("Success", latestChat));
+        }
+
+        [HttpPost("getValidChats/{userId}")]
+        public async Task<IActionResult> GetValidChatByUserId(string userId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            {
+
+                if (!HttpContext.IsUserIdAuthenticated(userId))
+                    return ResponseParser.Result(ResponseModel.Unauthorized("You need to login first to get chat"));
+            }
+            var chats = await _chatService.GetValidChatByUserId(userId);
+            return ResponseParser.Result(chats);
+        }
+        [HttpPost("getChatsByBoxchatId/{boxchatId}")]
+        public async Task<IActionResult> GetChatsByBoxchatId(string boxchatId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            {
+
+                var userId = HttpContext.GetUserId();
+                if (!HttpContext.IsUserIdAuthenticated(userId))
+                    return ResponseParser.Result(ResponseModel.Unauthorized("You need to login first to get chat"));
+            }
+            var chats = await _chatService.GetChatsByChatboxIdAsync(boxchatId);
+            return ResponseParser.Result(chats);
         }
     }
 }

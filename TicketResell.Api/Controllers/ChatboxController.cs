@@ -14,9 +14,9 @@ namespace Api.Controllers
         private readonly IChatService _chatService;
         private readonly IServiceProvider _serviceProvider;
 
-        public ChatboxController( IServiceProvider serviceProvider)
+        public ChatboxController(IServiceProvider serviceProvider)
         {
-            _chatboxService = serviceProvider.GetRequiredService<IChatboxService>();;
+            _chatboxService = serviceProvider.GetRequiredService<IChatboxService>(); ;
             _serviceProvider = serviceProvider;
             _chatService = serviceProvider.GetRequiredService<IChatService>();
         }
@@ -32,28 +32,33 @@ namespace Api.Controllers
             if (string.IsNullOrEmpty(userId))
                 return ResponseParser.Result(
                     ResponseModel.BadRequest("User ID not found in the authentication context"));
-            
+
             // var chatboxId = await _chatboxService.GetLatestChatbox(userId,)
             // var chatbox = await _chatboxService.GetChatboxByIdAsync(id);
-            ChatboxReadDto? latestRequest =(ChatboxReadDto?)(await _chatboxService.GetLatestChatbox(userId, userId)).Data;
-            if(latestRequest == null){
-                dto.ChatboxId = "CB"+Guid.NewGuid();
+            ChatboxReadDto? latestRequest = (ChatboxReadDto?)(await _chatboxService.GetLatestChatbox(userId, userId)).Data;
+            if (latestRequest == null)
+            {
+                dto.ChatboxId = "CB" + Guid.NewGuid();
                 var response = await _chatboxService.CreateChatboxAsync(dto, userId);
-                Chat newChat = new Chat{
+                Chat newChat = new Chat
+                {
                     SenderId = userId,
                     ReceiverId = userId,
-                    Message = dto.Description??"Default",
+                    Message = dto.Description ?? "Default",
                     ChatboxId = dto.ChatboxId
                 };
-                await _chatService.CreateChatAsync(newChat);
+                if(response.StatusCode == 200)
+                    await _chatService.CreateChatAsync(newChat);
                 return ResponseParser.Result(response);
-            }else{
+            }
+            else
+            {
                 return ResponseParser.Result(ResponseModel.Error("Request already exist"));
             }
-            
+
         }
 
-        [HttpGet("{id}")]
+        [HttpPost("{id}")]
         public async Task<IActionResult> GetChatbox(string id)
         {
             if (!HttpContext.GetIsAuthenticated())
@@ -61,11 +66,11 @@ namespace Api.Controllers
                     ResponseModel.Unauthorized("You need to be authenticated to view chatbox"));
 
             var chatbox = await _chatboxService.GetChatboxByIdAsync(id);
-            
+
             return ResponseParser.Result(chatbox);
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> GetAllChatboxes()
         {
             if (!HttpContext.GetIsAuthenticated())
@@ -78,6 +83,35 @@ namespace Api.Controllers
             return ResponseParser.Result(await _chatboxService.GetChatboxesAsync());
         }
 
+        [HttpPost("getall/{userId}")]
+        public async Task<IActionResult> GetChatboxsByUserId(string userId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+            {
+                if (!HttpContext.IsUserIdAuthenticated(userId))
+                    return ResponseParser.Result(
+                        ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
+            }
+            return ResponseParser.Result(await _chatboxService.GetChatboxsByUserId(userId));
+        }
+        [HttpPost("blockChat/{chatboxId}")]
+        public async Task<IActionResult> BlockChatbox(string chatboxId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
+            
+            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 3));
+        }
+        [HttpPost("unblockChat/{chatboxId}")]
+        public async Task<IActionResult>UnblockChatbox(string chatboxId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
+            
+            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 2));
+        }
 
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Repositories;
@@ -14,10 +15,12 @@ namespace TicketResell.Repositories.UnitOfWork
     {
         private readonly TicketResellManagementContext _context;
         private readonly IAppLogger _logger;
-        public UnitOfWork(IAppLogger logger, TicketResellManagementContext context)
+        private readonly IMapper _mapper;
+        public UnitOfWork(IAppLogger logger, TicketResellManagementContext context, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
             UserRepository = new UserRepository(_logger, _context);
             TransactionRepository = new TransactionRepository(_logger, _context);
             TicketRepository = new TicketRepository(_logger, _context);

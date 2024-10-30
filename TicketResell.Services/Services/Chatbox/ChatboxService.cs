@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Org.BouncyCastle.Asn1;
+using TicketResell.Repositories.Core.Dtos.Chat;
 using TicketResell.Repositories.Core.Dtos.Chatbox;
 using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
@@ -40,21 +42,27 @@ namespace TicketResell.Services.Services.Chatbox
             return ResponseModel.Error("No last chatboxId that has status 1");
         }
         
+        
         public async Task<ResponseModel> CreateChatboxAsync(ChatboxCreateDto dto, string userId, bool saveAll = true)
         {
             try
-            {
-                // Attempt to create or get existing chatbox
-                var chatbox = await _unitOfWork.ChatboxRepository.CreateChatboxAsync(
-                    dto.ChatboxId,
-                    dto.Title,
-                    dto.Description
-                );
+            {   
+                bool canCreateRequest = await _unitOfWork.ChatboxRepository.CheckChatboxHasValidStatusAsync(userId);
+                if(canCreateRequest == true){
+                    // Attempt to create or get existing chatbox
+                    var chatbox = await _unitOfWork.ChatboxRepository.CreateChatboxAsync(
+                        dto.ChatboxId,
+                        dto.Title,
+                        dto.Description
+                    );
 
-                if (saveAll) await _unitOfWork.CompleteAsync();
+                    if (saveAll) await _unitOfWork.CompleteAsync();
 
-                var chatboxDto = _mapper.Map<ChatboxReadDto>(chatbox);
-                return ResponseModel.Success("Successfully created/retrieved chatbox", chatboxDto);
+                    var chatboxDto = _mapper.Map<ChatboxReadDto>(chatbox);
+                    return ResponseModel.Success("Successfully created/retrieved chatbox", chatboxDto);
+                }else{
+                    return ResponseModel.Error("Request already created");
+                }
             }
             catch (Exception ex)
             {
@@ -96,6 +104,24 @@ namespace TicketResell.Services.Services.Chatbox
                 return ResponseModel.Error($"Failed to retrieve chatbox: {ex.Message}");
             }
         }
+
+        public async Task<ResponseModel> GetChatboxsByUserId(string userId){
+            var chats = await _unitOfWork.ChatRepository.GetChatsByUserIdAsync(userId);
+            if (chats == null || !chats.Any()){
+                return ResponseModel.Error("No chat found");
+            }
+            // Get distinct chatbox IDs from the chats
+            var chatboxIds = chats
+                .Where(c => !string.IsNullOrWhiteSpace(c.ChatboxId))
+                .Select(c => c.ChatboxId)
+                .Distinct();
+
+            // Fetch the chatboxes with those IDs
+            var chatboxes = await _unitOfWork.ChatboxRepository.GetChatboxesByIdsAsync(chatboxIds);
+            var results = _mapper.Map<IEnumerable<ChatboxReadDto>>(chatboxes);
+            return ResponseModel.Success("Success get all chatbox",results);
+        }   
+
 
         public async Task<ResponseModel> UpdateChatboxStatusAsync(string id, int status, bool saveAll = true)
         {

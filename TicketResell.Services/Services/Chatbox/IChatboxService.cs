@@ -17,5 +17,6 @@ namespace TicketResell.Services.Services.Chatbox
         Task<ResponseModel> GetChatboxesBySenderIdAsync(string senderId);
         Task<ResponseModel> GetChatboxesByReceiverIdAsync(string receiverId);
         Task<ResponseModel> GetLatestChatbox(string senderId, string receiverId);
+        Task<ResponseModel> GetChatboxsByUserId(string userId);
     }
 }

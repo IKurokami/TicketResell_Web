@@ -12,7 +12,7 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
 {
     public class ChatboxRepository : GenericRepository<Chatbox>, IChatboxRepository
     {
-         private readonly TicketResellManagementContext _context;
+        private readonly TicketResellManagementContext _context;
         private readonly IAppLogger _logger;
 
         public ChatboxRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
@@ -55,6 +55,31 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
             throw new InvalidOperationException($"Unable to create or return chatbox with ID: {chatboxId}");
         }
 
+        public async Task<IEnumerable<Chatbox>> GetChatboxesByIdsAsync(IEnumerable<string> chatboxIds)
+        {
+            if (chatboxIds == null || !chatboxIds.Any())
+                return [];
+
+            return await _context.Chatboxes
+                .Include(c => c.Chats)
+                .Where(c => chatboxIds.Contains(c.ChatboxId))
+                .ToListAsync();
+        }
+
+        public async Task<bool> CheckChatboxHasValidStatusAsync(string userId)
+        {
+            var chatboxes = await _context.Chatboxes
+                .Include(c => c.Chats)
+                .Where(c => c.Chats.Any(chat => chat.SenderId == userId || chat.ReceiverId == userId))
+                .ToListAsync();
+
+            if (!chatboxes.Any())
+                return false;
+
+            // Return true if there is NO chatbox with status 1 or 2
+            return !chatboxes.Any(c => c.Status == 1 || c.Status == 2 || c.Status == 3);
+        }
+
         public async Task UpdateChatboxStatusAsync(string chatboxId, int status)
         {
             var chatbox = await GetByIdAsync(chatboxId);
@@ -71,7 +96,7 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
         {
             return await _context.Chatboxes
                 .Include(c => c.Chats)
-                .Where(chatbox => chatbox.Chats.Any(chat => 
+                .Where(chatbox => chatbox.Chats.Any(chat =>
                     (chat.SenderId == senderId && chat.ReceiverId == receiverId) ||
                     (chat.SenderId == receiverId && chat.ReceiverId == senderId)))
                 .ToListAsync();
@@ -81,9 +106,9 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
         {
             return await _context.Chatboxes
                 .Include(c => c.Chats)
-                .Where(chatbox => 
-                    chatbox.Status == 1 && 
-                    chatbox.Chats.Any(chat => 
+                .Where(chatbox =>
+                    chatbox.Status == 1 &&
+                    chatbox.Chats.Any(chat =>
                         (chat.SenderId == senderId && chat.ReceiverId == receiverId) ||
                         (chat.SenderId == receiverId && chat.ReceiverId == senderId)))
                 .ToListAsync();

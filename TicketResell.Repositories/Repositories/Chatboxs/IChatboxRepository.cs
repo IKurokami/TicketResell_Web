@@ -15,5 +15,7 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
         Task<IEnumerable<Chatbox>> GetActiveChatboxesBySenderAndReceiverAsync(string senderId, string receiverId);
         Task<IEnumerable<Chatbox>> GetChatboxesBySenderIdAsync(string senderId);
         Task<IEnumerable<Chatbox>> GetChatboxesByReceiverIdAsync(string receiverId);
+        Task<IEnumerable<Chatbox>> GetChatboxesByIdsAsync(IEnumerable<string> chatboxIds);
+        Task<bool> CheckChatboxHasValidStatusAsync(string userId);
     }
 }

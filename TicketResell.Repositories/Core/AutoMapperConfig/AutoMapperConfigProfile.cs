@@ -82,6 +82,8 @@ namespace Repositories.Core.AutoMapperConfig
             //Chat
             CreateMap<Chat, ChatReadDto>();
             CreateMap<ChatReadDto, Chat>();
+            CreateMap<ChatboxReadDto, Chatbox>();
+            CreateMap<Chatbox, ChatboxReadDto>();
             
             //Cart
             CreateMap<Order, CartDto>();

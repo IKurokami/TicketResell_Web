@@ -1,4 +1,6 @@
 using AutoMapper;
+using Azure;
+using Microsoft.IdentityModel.Tokens;
 using Repositories.Core.Entities;
 using TicketResell.Repositories.Core.Dtos.Chat;
 using TicketResell.Repositories.Logger;
@@ -28,6 +30,23 @@ public class ChatService : IChatService
         var chatSent = await _unitOfWork.ChatRepository.CreateChatAsync(chat);
         await _unitOfWork.CompleteAsync();
         return ResponseModel.Success("Created chat successfully", chatSent);
+    }
+    public async Task<ResponseModel> CreateChatDtoAsync(ChatReadDto chat)
+    {
+        chat.ChatId = DateTime.Now.Ticks.ToString();
+        chat.Date = DateTime.Now;
+        // string chatboxId = await _unitOfWork.ChatRepository.GetLatestChatboxIdAsync(chat.SenderId, chat.ReceiverId);
+        // await _unitOfWork.ChatboxRepository.CreateChatboxAsync(chatboxId, )
+        // chat.ChatboxId = chatboxId;
+        var newchat = _mapper.Map<Chat>(chat);
+        var chatSent = await _unitOfWork.ChatRepository.CreateChatAsync(newchat);
+        await _unitOfWork.CompleteAsync();
+        return ResponseModel.Success("Created chat successfully", chatSent);
+    }
+    public async Task<ResponseModel> GetAllChatById(string id){
+        var chats = await _unitOfWork.ChatRepository.GetChatsByUserIdAsync(id);
+        var results = _mapper.Map<IEnumerable<ChatReadDto>>(chats);
+        return ResponseModel.Success($"Success get all chats of user {id}", results);
     }
     public async Task<ResponseModel> UpdateChat(ChatReadDto? chatDto)
     {
@@ -89,4 +108,22 @@ public class ChatService : IChatService
             await _unitOfWork.ChatRepository.GetChatsBySenderIdToReceiverIdAsync(senderId, receiverId));
         return ResponseModel.Success("Get chat lists successfully", chatReadDtos);
     }
+
+    public async Task<ResponseModel> GetValidChatByUserId(string userId){
+        var chats = await _unitOfWork.ChatRepository.GetChatsByUserIdAndChatboxStatusAsync(userId, 2);
+        if(chats.IsNullOrEmpty())
+            return ResponseModel.NotFound("Not found chat");
+        
+        var results = _mapper.Map<IEnumerable<ChatReadDto>>(chats);
+        return ResponseModel.Success("Success",results);
+    }
+    public async Task<ResponseModel> GetChatsByChatboxIdAsync(string chatboxId){
+        var chats = await _unitOfWork.ChatRepository.GetChatsByChatboxIdAsync(chatboxId);
+        if(chats.IsNullOrEmpty())
+            return ResponseModel.NotFound("Not found chat");
+        
+        var results = _mapper.Map<IEnumerable<ChatReadDto>>(chats);
+        return ResponseModel.Success("Success",results);
+    }
+
 }
