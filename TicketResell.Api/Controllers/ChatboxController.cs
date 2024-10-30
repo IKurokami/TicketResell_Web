@@ -128,14 +128,15 @@ namespace Api.Controllers
             }
             return ResponseParser.Result(await _chatboxService.GetChatboxsByUserId(userId));
         }
-        [HttpPost("blockChat/{chatboxId}")]
-        public async Task<IActionResult> BlockChatbox(string chatboxId)
+
+        [HttpPost("closeboxchat/{chatboxId}")]
+        public async Task<IActionResult> CloseBoxChat(string chatboxId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
                 return ResponseParser.Result(
                     ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
             
-            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 3));
+            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 0));
         }
 
 
