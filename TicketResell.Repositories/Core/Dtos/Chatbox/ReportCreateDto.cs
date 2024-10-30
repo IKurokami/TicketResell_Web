@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TicketResell.Repositories.Core.Dtos.Chatbox
 {
-    public class ChatboxCreateDto
+    public class ReportCreateDto
     {
         [Required]
         public string ChatboxId { get; set; } = null!;
@@ -15,6 +15,7 @@ namespace TicketResell.Repositories.Core.Dtos.Chatbox
         public string Title { get; set; } = null!;
 
         public string? Description { get; set; }
-        
+
+        public int Status {get;set;}
     }
 }

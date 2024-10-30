@@ -40,8 +40,9 @@ public class ChatService : IChatService
         // chat.ChatboxId = chatboxId;
         var newchat = _mapper.Map<Chat>(chat);
         var chatSent = await _unitOfWork.ChatRepository.CreateChatAsync(newchat);
+        var newSentChat = _mapper.Map<ChatReadDto>(chatSent);
         await _unitOfWork.CompleteAsync();
-        return ResponseModel.Success("Created chat successfully", chatSent);
+        return ResponseModel.Success("Created chat successfully", newSentChat);
     }
     public async Task<ResponseModel> GetAllChatById(string id){
         var chats = await _unitOfWork.ChatRepository.GetChatsByUserIdAsync(id);

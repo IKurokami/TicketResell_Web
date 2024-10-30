@@ -74,7 +74,7 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
                 .ToListAsync();
 
             if (!chatboxes.Any())
-                return false;
+                return true;
 
             // Return true if there is NO chatbox with status 1 or 2
             return !chatboxes.Any(c => c.Status == 1 || c.Status == 2 || c.Status == 3);

@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Repositories.Constants;
 using TicketResell.Repositories.Core.Dtos.Chatbox;
+using TicketResell.Repositories.Core.Helper;
 using TicketResell.Repositories.Helper;
+using TicketResell.Repositories.Logger;
 using TicketResell.Services.Services.Chatbox;
 
 namespace Api.Controllers
@@ -13,9 +15,11 @@ namespace Api.Controllers
         private readonly IChatboxService _chatboxService;
         private readonly IChatService _chatService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IAppLogger _logger;
 
-        public ChatboxController(IServiceProvider serviceProvider)
+        public ChatboxController(IServiceProvider serviceProvider, IAppLogger logger)
         {
+            _logger = logger;
             _chatboxService = serviceProvider.GetRequiredService<IChatboxService>(); ;
             _serviceProvider = serviceProvider;
             _chatService = serviceProvider.GetRequiredService<IChatService>();
@@ -36,6 +40,7 @@ namespace Api.Controllers
             // var chatboxId = await _chatboxService.GetLatestChatbox(userId,)
             // var chatbox = await _chatboxService.GetChatboxByIdAsync(id);
             ChatboxReadDto? latestRequest = (ChatboxReadDto?)(await _chatboxService.GetLatestChatbox(userId, userId)).Data;
+            
             if (latestRequest == null)
             {
                 dto.ChatboxId = "CB" + Guid.NewGuid();
@@ -58,6 +63,7 @@ namespace Api.Controllers
 
         }
 
+
         [HttpPost("{id}")]
         public async Task<IActionResult> GetChatbox(string id)
         {
@@ -68,6 +74,34 @@ namespace Api.Controllers
             var chatbox = await _chatboxService.GetChatboxByIdAsync(id);
 
             return ResponseParser.Result(chatbox);
+        }
+
+        [HttpPost("createreport/{status}")]
+        public async Task<IActionResult> CreateReport(int status)
+        {   
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to create a report"));
+            if (status < 4)
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You not have permission to set status less than 3"));
+            var userId = HttpContext.GetUserId();
+            ChatboxCreateDto dto = new ChatboxCreateDto(){
+                ChatboxId = "CB"+ Guid.NewGuid(),
+                Title="Report",
+                Description= ReportHelper.GetStatusString(status)
+            };
+            var response = await _chatboxService.CreateChatboxAsync(dto, userId);
+            Chat newChat = new Chat
+                {
+                    SenderId = userId,
+                    ReceiverId = userId,
+                    Message = dto.Description ?? "Default",
+                    ChatboxId = dto.ChatboxId
+                };
+            if(response.StatusCode == 200)
+                await _chatService.CreateChatAsync(newChat);
+            return ResponseParser.Result(response);
         }
 
         [HttpPost]
@@ -103,15 +137,7 @@ namespace Api.Controllers
             
             return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 3));
         }
-        [HttpPost("unblockChat/{chatboxId}")]
-        public async Task<IActionResult>UnblockChatbox(string chatboxId)
-        {
-            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
-                return ResponseParser.Result(
-                    ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
-            
-            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 2));
-        }
+
 
     }
 

@@ -135,6 +135,15 @@ const UserManagement = () => {
       }));
     });
 
+    connection.on("UnblockEvent", (senderId: string, message: string) => {
+      console.log(`moi lan staff bam unlock, ham nay se hoat dong ${senderId}: ${message}`);
+      
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: false
+      }));
+    });
+
     try {
       await connection.start();
       const userId = Cookies.get("id");
@@ -200,7 +209,12 @@ const UserManagement = () => {
       await hubConnectionRef.current.invoke(
         "SendMessageAsync",
         receiverId,
-        newMessages[receiverId], "CB215edde9-0129-49b2-94d0-105356caee43" // Use the specific message for the receiver
+        newMessages[receiverId], "CB318b7ea9-ac94-46a9-a40c-807085f384ed" // Nút này chỉnh boxchatId tương ứng
+      );
+      await hubConnectionRef.current.invoke(
+        "UnblockChatbox",
+        "CB318b7ea9-ac94-46a9-a40c-807085f384ed",
+        receiverId // Nút unblock của staff sẽ xài hàm này
       );
 
       const newChatMessage: ChatMessage = {

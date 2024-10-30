@@ -48,6 +48,18 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
+    public async Task UnblockChatbox(string chatboxId, string receiverID)
+    {
+        var httpContext = Context.GetHttpContext();
+        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff) && !httpContext.HasEnoughtRoleLevel(UserRole.Admin))
+            return;
+        var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
+        if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+        {
+            await Clients.Client(receiverConnectionId).SendAsync("UnblockEvent", receiverID, "Chat is unblock");
+            await chatboxService.UpdateChatboxStatusAsync(chatboxId, 2);
+        }
+    }
 
     public async Task LoginAsync(string userId, string accessKey)
     {
@@ -104,27 +116,33 @@ public class ChatHub : Hub
         bool isStaff = (bool)(await userService.CheckUserRole(receiverID, RoleConstant.roleStaff)).Data;
         bool isAdmin = (bool)(await userService.CheckUserRole(receiverID, RoleConstant.roleAdmin)).Data;
 
-        if ((httpContext.HasEnoughtRoleLevel(UserRole.Staff) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)) && (isStaff || isAdmin))
+        if ((httpContext.HasEnoughtRoleLevel(UserRole.Staff) || httpContext.HasEnoughtRoleLevel(UserRole.Admin)) && (isStaff || isAdmin))
         {
             newChat.ChatboxId = null;
-        }else if(!(httpContext.HasEnoughtRoleLevel(UserRole.Staff) || httpContext.HasEnoughtRoleLevel(UserRole.Staff))){
-            await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
         }
+
         if (newChat.ChatboxId != null)
         {
             var chatbox = (ChatboxReadDto)(await chatboxService.GetChatboxByIdAsync(boxchatId)).Data;
-            if (chatbox.Status != 3 && chatbox.Status != 1 && chatbox.Status != 0)
+            if ((chatbox.Status != 3 && chatbox.Status != 1 && chatbox.Status != 0) || httpContext.HasEnoughtRoleLevel(UserRole.Staff) || httpContext.HasEnoughtRoleLevel(UserRole.Admin))
             {
+                _logger.LogError("IS");
                 var sentChat = await chatService.CreateChatDtoAsync(newChat);
+                _logger.LogError("WHERE");
                 if (Users.TryGetValue(receiverID, out var receiverConnectionId))
                 {
+                    _logger.LogError("ERROR");
                     await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", senderID, message);
                     await Clients.Client(Context.ConnectionId).SendAsync("MessageSent", receiverID, sentChat);
                     await Clients.Client(Context.ConnectionId).SendAsync("Unblock", senderID, "Chat is unblock");
-                } 
+                }
                 else
                 {
                     await Clients.Client(Context.ConnectionId).SendAsync("UserNotFound", $"User {receiverID} is not connected.");
+                }
+                if (!(httpContext.HasEnoughtRoleLevel(UserRole.Admin) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)))
+                {
+                    await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
                 }
             }
             else
