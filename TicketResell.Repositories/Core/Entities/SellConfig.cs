@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace Repositories.Core.Entities;
 
-namespace Repositories.Core.Entities;
-
-public partial class SellConfig
+public class SellConfig
 {
     public string SellConfigId { get; set; } = null!;
 

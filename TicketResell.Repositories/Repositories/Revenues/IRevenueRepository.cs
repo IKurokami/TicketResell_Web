@@ -1,5 +1,7 @@
+using Repositories.Core.Entities;
+
 namespace Repositories.Repositories;
-using global::Repositories.Core.Entities;
+
 public interface IRevenueRepository : IRepository<Revenue>
 {
     Task<List<Revenue>> GetRevenuesBySellerId_MonthAsync(string id, string type);

@@ -27,9 +27,11 @@ public class ChatRepository : GenericRepository<Chat>, IChatRepository
         if (string.IsNullOrWhiteSpace(senderId) || string.IsNullOrWhiteSpace(receiverId))
             return [];
 
-        var chats = await _context.Chats.Where(c => (c.SenderId == senderId && c.ReceiverId == receiverId) || (c.ReceiverId ==
-            senderId && c.SenderId == receiverId)).Include(c => c.Receiver).OrderBy(c => c.Date).ToListAsync();
-        
+        var chats = await _context.Chats.Where(c => (c.SenderId == senderId && c.ReceiverId == receiverId) ||
+                                                    (c.ReceiverId ==
+                                                        senderId && c.SenderId == receiverId)).Include(c => c.Receiver)
+            .OrderBy(c => c.Date).ToListAsync();
+
         return chats;
     }
 }

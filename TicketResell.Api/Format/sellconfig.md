@@ -53,11 +53,14 @@
     ]
 }
 ```
+
 ---
+
 ### **Update Sell Config (`api/SellConfig/update/"id"`)**
-												
+
 - **Method:**`PUT`
 - **Input:**
+
 ```json
 {
 	"Commision"	  : "0.5""
@@ -66,7 +69,6 @@
 ```
 
 - **Output:**
-
 
 ```json
 {
@@ -80,6 +82,7 @@
     }
 }
 ```
+
 ---
 
 ### **Delete Sell Config (`api/SellConfig/delete/"id"`)**
