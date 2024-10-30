@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import Cookies from "js-cookie";
 import * as signalR from "@microsoft/signalr";
-import DialogComponent from "../request/RequestDialog";
-import UserRequest from "../request/UserRequest";
+import DialogComponent from "../ChatBox/RequestDialog";
+import UserRequest from "../ChatBox/UserRequest";
 
 export interface Role {
   roleId: string;
