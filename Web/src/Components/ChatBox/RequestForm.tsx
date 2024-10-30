@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import ChatComponent from "./ChatComponent";
 import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
+import { IoMdClose } from "react-icons/io";
 
 interface Chatbox {
   ChatboxId: number;
@@ -21,6 +22,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChatbox, setSelectedChatbox] = useState<Chatbox | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [chatboxes, setChatboxes] = useState<Chatbox[]>(chatboxData);
 
   const initialMessages = [
     {
@@ -73,15 +75,39 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
       setSelectedChatbox(chatbox);
       setIsChatOpen(true);
     } else {
-      setSelectedChatbox(chatbox)
+      setSelectedChatbox(chatbox);
       setIsChatOpen(true);
     }
   };
 
   const confirmChatOpen = () => {
-    Cookies.set("confirm", "true"); // Set cookie with 1-day expiry
-    setIsChatOpen(true); // Open the chat after confirmation
-    setIsModalOpen(false); // Close the modal
+    Cookies.set("confirm", "true");
+    setIsChatOpen(true);
+    setIsModalOpen(false);
+  };
+
+  const handleProcessingUpdate = (chatboxId: number) => {
+    setChatboxes((prevChatboxes) =>
+      prevChatboxes.map((chatbox) =>
+        chatbox.ChatboxId === chatboxId ? { ...chatbox, Status: 1 } : chatbox
+      )
+    );
+  };
+
+  const handleRejectsUpdate = (chatboxId: number) => {
+    setChatboxes((prevChatboxes) =>
+      prevChatboxes.map((chatbox) =>
+        chatbox.ChatboxId === chatboxId ? { ...chatbox, Status: -1 } : chatbox
+      )
+    );
+  };
+
+  const handleCompletesUpdate = (chatboxId: number) => {
+    setChatboxes((prevChatboxes) =>
+      prevChatboxes.map((chatbox) =>
+        chatbox.ChatboxId === chatboxId ? { ...chatbox, Status: 2 } : chatbox
+      )
+    );
   };
 
   const getStatusLabel = (status: number) => {
@@ -92,6 +118,8 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
         return { text: "Processing", color: "bg-blue-100 text-blue-800" };
       case 2:
         return { text: "Complete", color: "bg-green-100 text-green-800" };
+      case 3:
+        return { text: "Report", color: "bg-red-500 text-white font-bold" };
       case -1:
         return { text: "Rejected", color: "bg-red-100 text-red-800" };
       default:
@@ -120,7 +148,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
           </tr>
         </thead>
         <tbody>
-          {chatboxData.map((chatbox) => {
+          {chatboxes.map((chatbox) => {
             const { text, color } = getStatusLabel(chatbox.Status);
             return (
               <tr
@@ -143,33 +171,106 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                 </td>
                 <td className="items-center py-3 px-4 text-gray-700 text-center">
                   {chatbox.Status === 1 ? (
-                    <div className="px-4">
-                      <button
-                        onClick={() => openChat(chatbox)}
-                        className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                      >
-                        <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                        <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-                      </button>
+                    <div className="flex justify-center gap-2">
+                      {sampleUser.userole === "RO2" ||
+                      sampleUser.userole === "RO1" ? (
+                        <button
+                          onClick={() => openChat(chatbox)}
+                          className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                        >
+                          <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
+                          <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                        </button>
+                      ) : (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openChat(chatbox)}
+                            className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
+                            <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleCompletesUpdate(chatbox.ChatboxId)
+                            }
+                            className="group relative flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <FaCheck className="text-gray-500 hover:text-green-500" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : chatbox.Status === 0 ? (
-                    <div className="px-5">
-                      <FaClock className="text-yellow-500" />
+                    <div className="flex items-center justify-center gap-2">
+                      {sampleUser.userole === "RO2" ||
+                      sampleUser.userole === "RO1" ? (
+                        <div className="flex justify-center">
+                          <FaClock className=" text-yellow-500 " />
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() =>
+                              handleProcessingUpdate(chatbox.ChatboxId)
+                            }
+                            className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <FaCheck className="text-gray-500 hover:text-green-500" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleRejectsUpdate(chatbox.ChatboxId)
+                            }
+                            className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <IoMdClose className="fa-solid fa-x text-gray-600 hover:text-red-500 text-xl" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : chatbox.Status === -1 ? (
-                    <div className="pr-14">
-                      <i className="fa-solid fa-x text-red-600"></i>
+                    <div className="flex justify-center">
+                      <IoMdClose className="fa-solid fa-x text-red-600 text-xl" />
+                    </div>
+                  ) : chatbox.Status === 3 ? (
+                    <div className="flex items-center justify-center gap-2">
+                      {sampleUser.userole === "RO2" ||
+                      sampleUser.userole === "RO1" ? (
+                        <FaClock className=" text-yellow-500" />
+                      ) : (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() =>
+                              handleProcessingUpdate(chatbox.ChatboxId)
+                            }
+                            className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <FaCheck className="text-gray-500 hover:text-green-500" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleRejectsUpdate(chatbox.ChatboxId)
+                            }
+                            className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <IoMdClose className="fa-solid fa-x text-gray-600 hover:text-red-500 text-xl" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="flex px-4 items-center gap-2">
+                    <div className="flex justify-center items-center gap-2">
                       <button
                         onClick={() => openChat(chatbox)}
-                        className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                        className="group relative flex items-center gap-2 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                       >
-                        <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                        <div className="absolute inset-0 rounded-full p-4 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                        <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
                       </button>
-                      <FaCheck className="text-green-500" />
+                      <div className="pl-7">
+                        <FaCheck className="text-green-500" />
+                      </div>
                     </div>
                   )}
                 </td>
@@ -178,7 +279,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
           })}
         </tbody>
       </table>
-
       {isChatOpen && (
         <ChatComponent
           onCloseChat={() => {
@@ -191,7 +291,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
         />
       )}
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}

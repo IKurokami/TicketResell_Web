@@ -60,10 +60,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         </div>
         <div className="flex justify-end items-center">
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-100">
+            <AlertDialogCancel className="bg-gray-100 ">
               Cancel
             </AlertDialogCancel>
-            <div className="pt-2">
+            <div className="">
             <AlertDialogAction
               onClick={handleConfirm}
               disabled={!isChecked}

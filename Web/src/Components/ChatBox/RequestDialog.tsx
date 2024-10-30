@@ -101,7 +101,7 @@ const DialogComponent: React.FC = () => {
   return (
     <>
       <button
-        className="border border-gray-300 rounded-full bg-green-500 hover:bg-green-600 text-white px-4 py-2"
+        className="border border-gray-300 rounded-full mb-5  bg-green-500 hover:bg-green-600 text-white px-4 py-2"
         onClick={handleOpen}
       >
         Thêm

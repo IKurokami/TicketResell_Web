@@ -58,6 +58,9 @@ interface EditUserDialogProps {
   onSave: (data: FormData) => void;
 }
 
+interface Errors {
+  [key: string]: string; // Định nghĩa rằng key có thể là bất kỳ chuỗi nào và value là một chuỗi
+}
 // Edit User Dialog
 const EditUserDialog: React.FC<EditUserDialogProps> = ({
   roles,
@@ -87,9 +90,48 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     bank: user?.bank || "",
     bankType: user?.bankType || "",
   });
-  console.log("alo alo");
-  console.log(user);
-  console.log(roles);
+  const [errors, setErrors] = useState<Errors>({});
+  const handleBirthdayChange = (e: any) => {
+    const { value } = e.target;
+
+    // Update the form data
+    setFormData((prevData) => ({
+      ...prevData,
+      birthday: value,
+    }));
+
+    // Validate the birthday
+    validateBirthday(value);
+  };
+
+  // Validation function
+  const validateBirthday = (birthday: any) => {
+    const selectedDate = new Date(birthday);
+    const today = new Date();
+
+    const age = today.getFullYear() - selectedDate.getFullYear();
+
+    // Check if birthday has already happened this year
+    const hasHadBirthdayThisYear =
+      today.getMonth() > selectedDate.getMonth() ||
+      (today.getMonth() === selectedDate.getMonth() &&
+        today.getDate() >= selectedDate.getDate());
+
+    const finalAge = hasHadBirthdayThisYear ? age : age - 1;
+
+    if (finalAge < 18) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        birthday: "You must be at least 18 years old.",
+      }));
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        birthday: "",
+      }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const userId = user?.userId; // Replace with actual userId
@@ -253,11 +295,12 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                                 .split("T")[0]
                             : ""
                         }
-                        onChange={(e) =>
-                          setFormData({ ...formData, birthday: e.target.value })
-                        }
+                        onChange={handleBirthdayChange}
                         className="w-full"
                       />
+                      {errors.birthday && (
+                        <p style={{ color: "red" }}>{errors.birthday}</p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -319,6 +362,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                           setFormData({ ...formData, address: e.target.value })
                         }
                         className="w-full"
+                        disabled
                       />
                     </div>
 

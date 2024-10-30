@@ -9,6 +9,7 @@ import { useSession, signIn } from "next-auth/react";
 import { getOTP } from "@/pages/api/getOTP";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -79,7 +80,6 @@ const Login: React.FC = () => {
           const result = await response.json();
           if (!response.ok) {
             console.error("Lỗi đăng nhập:", result);
-            setError(result.message || "Lỗi đăng nhập.");
           } else {
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);
@@ -355,12 +355,15 @@ const Login: React.FC = () => {
                       Ghi nhớ tôi
                     </label>
                   </div>
-                  <label
-                    htmlFor="forgot"
-                    className="text-gray-600 cursor-pointer"
-                  >
-                    Quên mật khẩu?
-                  </label>
+                    <Link
+                      href="/forgotpassword"
+                      passHref
+                      className="no-underline"
+                    >
+                      <span className="text-gray-600 cursor-pointer">
+                        Quên mật khẩu?
+                      </span>
+                    </Link>
                 </div>
 
                 {error && <p className="text-red-500">{error}</p>}

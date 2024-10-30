@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { PlusCircle, Search, Send, X, MessageCircle } from "lucide-react";
+import { PlusCircle, Search, Send, X, MessageCircle, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import {
   Dialog,
@@ -11,6 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import Cookies from "js-cookie";
 import * as signalR from "@microsoft/signalr";
+import DialogComponent from "../ChatBox/RequestDialog";
+import UserRequest from "../ChatBox/UserRequest";
+
+export interface Role {
+  roleId: string;
+  rolename: string;
+  description: string;
+}
 
 interface User {
   userId: string;
@@ -23,6 +31,7 @@ interface User {
   status: number;
   birthday: string;
   bio: string;
+  roles: Role[];
 }
 
 interface ChatMessage {
@@ -40,7 +49,23 @@ const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Partial<User>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>({});
+  const [chatMessages, setChatMessages] = useState<
+    Record<string, ChatMessage[]>
+  >({});
+  const popupRef = useRef<any>(null);
+  const [showRequestPopup, setShowRequestPopup] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const requests = [
+    { id: 1, title: "Request 1", message: "Sample request message 1" },
+    { id: 2, title: "Request 2", message: "Sample request message 2" },
+  ];
+  const handleRequestClick = () => {
+    setShowRequestPopup(true);
+  };
+  const handleRequestSelect = (request: any) => {
+    setSelectedRequest(request);
+  };
+
   const [newMessages, setNewMessages] = useState<Record<string, string>>({});
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
   const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
@@ -75,7 +100,18 @@ const UserManagement = () => {
         chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages]);
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setShowRequestPopup(false);
+      }
+    };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const setupSignalRConnection = async () => {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("http://localhost:5296/chat-hub", {
@@ -225,12 +261,13 @@ const UserManagement = () => {
         <div className="flex items-center space-x-4">
           <CardTitle>Quản lý người dùng</CardTitle>
           <span
-            className={`text-sm ${connectionStatus === "Authenticated"
-              ? "text-green-500"
-              : connectionStatus === "Connected"
+            className={`text-sm ${
+              connectionStatus === "Authenticated"
+                ? "text-green-500"
+                : connectionStatus === "Connected"
                 ? "text-yellow-500"
                 : "text-red-500"
-              }`}
+            }`}
           >
             {connectionStatus}
           </span>
@@ -256,7 +293,6 @@ const UserManagement = () => {
             Thêm người dùng
           </Button>
         </div>
-
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -267,6 +303,7 @@ const UserManagement = () => {
                 <th className="py-3 px-4 text-left">Email</th>
                 <th className="py-3 px-4 text-left">Số điện thoại</th>
                 <th className="py-3 px-4 text-left">Địa chỉ</th>
+                <th className="px-3 py-4 text-left">Vai trò</th>
                 <th className="py-3 px-4 text-left">Liên hệ</th>
               </tr>
             </thead>
@@ -278,22 +315,48 @@ const UserManagement = () => {
                   <td className="py-3 px-4">{user.phone}</td>
                   <td className="py-3 px-4">{user.address}</td>
                   <td className="py-3 px-4">
+                    <div className="flex flex-wrap gap-1">
+                      {user.roles.map((role, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                        >
+                          {role.rolename}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
                     <button
-                      onClick={() => handleChat(user)}
-                      className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                      onClick={() => {
+                        user.roles.some(
+                          (role) =>
+                            role.roleId === "RO1" || role.roleId === "RO2"
+                        )
+                          ? handleRequestClick()
+                          : handleChat(user);
+                      }}
+                      className="group relative flex items-center gap-2 px-4 py-2  text-white rounded-full  transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                     >
-                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                      <span className="font-medium">Chat</span>
-                      <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                      {user.roles.some(
+                        (role) => role.roleId === "RO1" || role.roleId === "RO2"
+                      ) ? (
+                        <>
+                          <Mail className="h-5 w-5 text-green-500 transition-transform group-hover:scale-110" />
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircle className="h-5 w-5 text-green-500 transition-transform group-hover:scale-110" />
+                        </>
+                      )}
                     </button>
-
-
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
         {Object.keys(isChatOpen)
           .filter((userId) => isChatOpen[userId])
           .map((userId, index) => {
@@ -305,7 +368,7 @@ const UserManagement = () => {
                 key={userId}
                 className="fixed bottom-4 w-80 bg-white shadow-xl rounded-lg overflow-hidden transition-all duration-200 ease-in-out"
                 style={{
-                  right: `${index * 330 + 30}px`
+                  right: `${index * 330 + 30}px`,
                 }}
               >
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500 to-blue-600">
@@ -326,16 +389,18 @@ const UserManagement = () => {
                   {chatMessages[userId]?.map((msg, i) => (
                     <div
                       key={i}
-                      className={`flex flex-col ${msg.senderId === Cookies.get("id")
-                        ? "items-end"
-                        : "items-start"
-                        } mb-4`}
+                      className={`flex flex-col ${
+                        msg.senderId === Cookies.get("id")
+                          ? "items-end"
+                          : "items-start"
+                      } mb-4`}
                     >
                       <div
-                        className={`max-w-[80%] p-3 rounded-2xl ${msg.senderId === Cookies.get("id")
-                          ? "bg-blue-500 text-white rounded-br-none"
-                          : "bg-white text-gray-800 shadow-sm rounded-bl-none"
-                          }`}
+                        className={`max-w-[80%] p-3 rounded-2xl ${
+                          msg.senderId === Cookies.get("id")
+                            ? "bg-blue-500 text-white rounded-br-none"
+                            : "bg-white text-gray-800 shadow-sm rounded-bl-none"
+                        }`}
                       >
                         <p className="text-sm">{msg.message}</p>
                       </div>
@@ -366,35 +431,55 @@ const UserManagement = () => {
           })}
       </CardContent>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add User</DialogTitle>
+        <DialogContent className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+          <DialogHeader className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+            <Button variant="ghost" onClick={() => setIsOpen(false)}>
+              Cancel
+            </Button>
+            <DialogTitle>Add New User</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               placeholder="Full Name"
               value={formData.fullname || ""}
-              onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, fullname: e.target.value })
+              }
             />
             <Input
               placeholder="Email"
               value={formData.gmail || ""}
-              onChange={(e) => setFormData({ ...formData, gmail: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, gmail: e.target.value })
+              }
             />
             <Input
               placeholder="Phone"
               value={formData.phone || ""}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
             />
             <Input
               placeholder="Address"
               value={formData.address || ""}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, address: e.target.value })
+              }
             />
-            <Button type="submit">Add</Button>
+            <div className="flex justify-end">
+              <Button type="submit">Add</Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
+      {showRequestPopup && (
+        <div className=" z-50 fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div ref={popupRef}>
+            <UserRequest />
+          </div>
+        </div>
+      )}
     </Card>
   );
 };
