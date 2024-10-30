@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { PlusCircle, Search, Send, X, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
   DialogTitle,
 } from "@/Components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/Components/ui/input";
 import Cookies from "js-cookie";
 import * as signalR from "@microsoft/signalr";
@@ -220,6 +222,11 @@ const UserManagement = () => {
       console.error("Error sending message:", error);
     }
   };
+  const handleOrder = (userEmail: any) => {
+    // Mở một trang mới với đường dẫn hiển thị đơn hàng
+    const orderPageUrl = `/order?email=${encodeURIComponent(userEmail)}`;
+    window.open(orderPageUrl, '_blank'); // Mở trang mới
+  };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -241,7 +248,7 @@ const UserManagement = () => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-4">
-          <CardTitle>Quản lý người dùng</CardTitle>
+          <CardTitle>Trạng thái:</CardTitle>
           <span
             className={`text-sm ${connectionStatus === "Authenticated"
               ? "text-green-500"
@@ -277,41 +284,50 @@ const UserManagement = () => {
 
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        <div className=" border rounded-xl overflow-x-auto bg-white">
           <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="py-3 px-4 text-left">Tên người dùng</th>
-                <th className="py-3 px-4 text-left">Email</th>
-                <th className="py-3 px-4 text-left">Số điện thoại</th>
-                <th className="py-3 px-4 text-left">Địa chỉ</th>
-                <th className="py-3 px-4 text-left">Liên hệ</th>
+          <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
+          <tr className="border-b">
+                <th className="py-3 px-4  text-left whitespace-nowrap">Tên người dùng</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Email</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Số điện thoại</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Liên hệ</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Lịch sử đơn hàng</th>
               </tr>
             </thead>
+
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.userId} className="border-b hover:bg-gray-100">
                   <td className="py-3 px-4">{user.fullname}</td>
-                  <td className="py-3 px-4">{user.gmail}</td>
+                  <td className="py-3 px-4">{user.userId}</td>
                   <td className="py-3 px-4">{user.phone}</td>
-                  <td className="py-3 px-4">{user.address}</td>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-4 text-center">
                     <button
                       onClick={() => handleChat(user)}
-                      className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                      className="group relative flex items-center gap-2 px-4 py-2  rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                     >
-                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                      <span className="font-medium">Chat</span>
+                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110 " />
+                      
                       <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                     </button>
-
-
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <Button
+                      onClick={() => handleOrder(user.gmail)}
+                      variant="default"
+                      color="success"
+                      className=" font-bold py-2 px-4 rounded"
+                    >
+                      <VisibilityIcon />
+                    </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
         {Object.keys(isChatOpen)
           .filter((userId) => isChatOpen[userId])
           .map((userId, index) => {
