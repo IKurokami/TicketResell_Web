@@ -68,7 +68,7 @@ const UserRequest = () => {
         </div>
         <RequestDialog />
       </div>
-      <div className="justify-center w-full ">
+      <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
           {" "}
           {/* Set a max-width for the card container */}

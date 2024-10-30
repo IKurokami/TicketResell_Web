@@ -1,22 +1,18 @@
 "use client";
 import {
-  faBars,
-  faCheck,
   faClock,
   faSortAmountDown,
   faSortAmountUp,
-  faTag,
 } from "@fortawesome/free-solid-svg-icons";
 import "../Css/SellerShop.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Dropdown } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
 import { MdClose, MdFilterList, MdKeyboardArrowDown } from "react-icons/md";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { fetchRemainingByID, getCategoryNames } from "@/models/TicketFetch";
-import TicketGrid, { TICKET_STATUS } from "./TicketGrid";
+import { getCategoryNames } from "@/models/TicketFetch";
+import TicketGrid from "./TicketGrid";
 import { fetchImage } from "@/models/FetchImage";
 import { useParams } from "next/navigation";
 import SellProfile from "./sellprofile";
@@ -59,11 +55,9 @@ const SellerShop = () => {
   const cateName = searchParams?.get("cateName") || "";
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTime, setSelectedTime] = useState<string>("");
   const [priceRange, setPriceRange] = useState(23000000);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedDateFilter, setSelectedDateFilter] = useState("all");
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
     null,
     null,
@@ -80,7 +74,7 @@ const SellerShop = () => {
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("Price low to high");
-  const [statusOption, setStatusOption] = useState("Sắp diễn ra");
+  // const [statusOption, setStatusOption] = useState("Sắp diễn ra");
   const itemsPerPage = 4;
   const [uniqueCities, setUniqueCities] = useState<string[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -132,11 +126,11 @@ const SellerShop = () => {
     { text: "Recently listed", icon: faClock },
   ];
 
-  const statusOptions = [
-    { text: "Sắp diễn ra", icon: faCheck },
-    { text: "Hết hạn", icon: faClock },
-    { text: "Hết hàng", icon: faTag },
-  ];
+  // const statusOptions = [
+  //   { text: "Sắp diễn ra", icon: faCheck },
+  //   { text: "Hết hạn", icon: faClock },
+  //   { text: "Hết hàng", icon: faTag },
+  // ];
 
   const fetchTicketsBySeller = async (): Promise<Ticket[]> => {
     try {
@@ -215,12 +209,12 @@ const SellerShop = () => {
     setSortOption(option);
     setIsDropdownOpen(false);
   };
-  const handleStatusChange = (newStatus: string) => {
-    // Logic to update the status
-    // You may need to update some state or pass the status back to your data handling logic
-    setStatusOption(newStatus);
-    setIsDropdownOpen(false);
-  };
+  // const handleStatusChange = (newStatus: string) => {
+  //   // Logic to update the status
+  //   // You may need to update some state or pass the status back to your data handling logic
+  //   setStatusOption(newStatus);
+  //   setIsDropdownOpen(false);
+  // };
 
   const sortTickets = (tickets: any[]) => {
     switch (sortOption) {
@@ -238,40 +232,23 @@ const SellerShop = () => {
     }
   };
 
-  const getMonthName = (monthIndex: number) => {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    return months[monthIndex];
-  };
-
-  const getCurrentMonthName = () => {
-    const currentDate = new Date();
-    return getMonthName(currentDate.getMonth());
-  };
-
-  const getNextMonthName = () => {
-    const currentDate = new Date();
-    const nextMonth = (currentDate.getMonth() + 1) % 12;
-    return getMonthName(nextMonth);
-  };
-
-  const getTwoMonthsAheadName = () => {
-    const currentDate = new Date();
-    const twoMonthsAhead = (currentDate.getMonth() + 2) % 12;
-    return getMonthName(twoMonthsAhead);
-  };
+  // const getMonthName = (monthIndex: number) => {
+  //   const months = [
+  //     "January",
+  //     "February",
+  //     "March",
+  //     "April",
+  //     "May",
+  //     "June",
+  //     "July",
+  //     "August",
+  //     "September",
+  //     "October",
+  //     "November",
+  //     "December",
+  //   ];
+  //   return months[monthIndex];
+  // };
 
   useEffect(() => {
     localStorage.setItem("searchData", searchTerm);
@@ -405,10 +382,6 @@ const SellerShop = () => {
   };
 
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
-  const paginatedRatings = filteredTickets.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
