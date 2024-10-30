@@ -41,7 +41,14 @@ namespace TicketResell.Services.Services
                 await _unitOfWork.CompleteAsync();
             return ResponseModel.Success($"Successfully created user: {dto.Username}");
         }
+        public async Task<ResponseModel> CheckUserRole(string userId, string roleId){
+            bool hasRole = await _unitOfWork.UserRepository.HasRoleAsync(userId, roleId);
+            if (hasRole){
+                 ResponseModel.Success("User has role!", hasRole);
+            }
 
+            return ResponseModel.NotFound("User dont have role", hasRole);
+        }
         public async Task<ResponseModel> GetAllUser()
         {
             var user = await _unitOfWork.UserRepository.GetAllAsync();

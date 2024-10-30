@@ -16,6 +16,11 @@ namespace Repositories.Repositories
             _logger = logger;
         }
 
+        public async Task<bool> HasRoleAsync(string userId, string roleId)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.UserId == userId && u.Roles.Any(r => r.RoleId == roleId));
+        }
         public new async Task CreateAsync(User? user)
         {
             var roleId = RoleConstant.roleBuyer;
@@ -39,7 +44,7 @@ namespace Repositories.Repositories
             return await _context.Users
                 .Where(u => u.UserId == id)
                 .Include(x => x.Roles)
-                .Include(x=>x.Orders)
+                .Include(x => x.Orders)
                 .FirstOrDefaultAsync();
         }
 
@@ -78,18 +83,18 @@ namespace Repositories.Repositories
                 _context.Users.Update(user);
         }
 
-        public async Task RemoveSeller (User? user)
+        public async Task RemoveSeller(User? user)
         {
             var roleId = RoleConstant.roleSeller;
-            var role = await _context.Roles.FindAsync (roleId);
-            if (role != null) 
+            var role = await _context.Roles.FindAsync(roleId);
+            if (role != null)
             {
                 user?.Roles.Remove(role);
             }
             if (user != null)
-                {
-                    _context.Users.Update(user);
-                }
+            {
+                _context.Users.Update(user);
+            }
         }
 
         public async Task UpdateRole(User user, List<Role> roles)

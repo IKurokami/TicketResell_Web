@@ -34,7 +34,9 @@ interface ChatMessage {
   chatId: string;
   date: string | null;
 }
-
+interface BlockStatus {
+  [userId: string]: boolean;
+}
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +49,7 @@ const UserManagement = () => {
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
   const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
+  const [blockStatus, setBlockStatus] = useState<BlockStatus>({});
   useEffect(() => {
     fetch("http://localhost:5296/api/User/read")
       .then((response) => response.json())
@@ -117,6 +119,31 @@ const UserManagement = () => {
       }));
     });
 
+    connection.on("Block", (senderId: string, message: string) => {
+      console.log(`Block event received for ${senderId}: ${message}`);
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: true
+      }));
+    });
+  
+    connection.on("Unblock", (senderId: string, message: string) => {
+      console.log(`Unblock event received for ${senderId}: ${message}`);
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: false
+      }));
+    });
+
+    connection.on("UnblockEvent", (senderId: string, message: string) => {
+      console.log(`moi lan staff bam unlock, ham nay se hoat dong ${senderId}: ${message}`);
+      
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: false
+      }));
+    });
+
     try {
       await connection.start();
       const userId = Cookies.get("id");
@@ -182,7 +209,12 @@ const UserManagement = () => {
       await hubConnectionRef.current.invoke(
         "SendMessageAsync",
         receiverId,
-        newMessages[receiverId] // Use the specific message for the receiver
+        newMessages[receiverId], "CB318b7ea9-ac94-46a9-a40c-807085f384ed" // Nút này chỉnh boxchatId tương ứng
+      );
+      await hubConnectionRef.current.invoke(
+        "UnblockChatbox",
+        "CB318b7ea9-ac94-46a9-a40c-807085f384ed",
+        receiverId // Nút unblock của staff sẽ xài hàm này
       );
 
       const newChatMessage: ChatMessage = {
