@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from "@/Components/ui/select";
 import { useToast } from "@/Hooks/use-toast";
-import AddressFields from "@/Hooks/location";
 import {
   Card,
   CardContent,
@@ -360,8 +359,11 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
   const [formDataLocation, setFormDataLocation] = useState({
     location: "",
   });
-  const HandleSubmitClick = () => {
+  const HandleSubmitClick = async () => {
+    await updateUserProfile(userId, formData);
     onSave(formData);
+    onClose();
+    onClose();
   };
   const [formData, setFormData] = useState<FormData>(
     initialData || {
@@ -470,7 +472,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
   };
 
   return (
-    <div className="fixed top-12 inset-0 bg-black/50 flex items-center justify-center overflow-y-auto p-4">
+    <div className="fixed top-12 inset-0 bg-black/50 flex items-center justify-center overflow-y-auto p-4 shadow-none">
       <Card className="w-full max-w-4xl bg-white">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Edit Profile</CardTitle>
@@ -480,15 +482,15 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
         </CardHeader>
 
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-2">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="personal">Personal Information</TabsTrigger>
             <TabsTrigger value="additional">Additional Details</TabsTrigger>
           </TabsList>
 
           <form onSubmit={handleSubmit}>
             <TabsContent value="personal">
-              <Card>
-                <CardContent className="space-y-4 pt-4">
+              <Card className="border-0 space-y-4 pt-4 shadow-none border-none rounded-none">
+                <CardContent className="space-y-4 pt-4 shadow-none border-none rounded-none">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="fullname" className="text-sm font-medium">
@@ -548,7 +550,8 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                         id="birthday"
                         type="date"
                         value={
-                          formData.birthday
+                          formData.birthday &&
+                          !isNaN(Date.parse(formData.birthday))
                             ? new Date(formData.birthday)
                                 .toISOString()
                                 .split("T")[0]

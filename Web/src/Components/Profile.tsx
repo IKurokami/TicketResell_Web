@@ -9,8 +9,11 @@ import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
 import "@/Css/UserProfile.css";
+import { useParams } from "next/navigation";
 
 const Profile = () => {
+  const params = useParams<{ id: string }>();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [userProfile, setUserProfile] = useState<UserProfileCard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +22,7 @@ const Profile = () => {
     const loadUserProfile = async () => {
       try {
         setIsLoading(true);
-        const id = Cookies.get("id");
+
         if (!id) {
           throw new Error("User ID not found in cookies");
         }
@@ -32,14 +35,20 @@ const Profile = () => {
         setIsLoading(false);
       }
     };
-
+    console.log("adasdsa");
     loadUserProfile();
   }, []);
 
   if (isLoading) return <div>Loading...</div>;
   if (!userProfile) return <div>No user profile found.</div>;
 
-  return <UserProfilePage isSellerProfile={true} userProfile={userProfile} />;
+  return (
+    <UserProfilePage
+      isadjustvisible={false}
+      isSellerProfile={true}
+      userProfile={userProfile}
+    />
+  );
 };
 
 export default Profile;

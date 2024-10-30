@@ -1,39 +1,72 @@
-// middleware.ts
-import { log } from 'console';
-import { NextResponse } from 'next/server';
-import { NextRequest } from 'next/server';
-// import Cookies from 'js-cookie';
+import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   // Get the access key from cookies
-  const accessKey = request.cookies.get('.AspNetCore.Session')?.value;
-
-  // Define the paths that require authentication 
-  const protectedRoutes = ['/profile', '/favorites', '/history', '/myticket', '/settings', '/admin','/sell'];
+  const accessKey = request.cookies.get(".AspNetCore.Session")?.value;
   
-  const validate = await fetch('http://localhost:5296/api/Authentication/islogged', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Cookie: `.AspNetCore.Session=${accessKey}`
-    },
-    body: JSON.stringify({
-      accessKey: accessKey,
-    }),
-  });
+  // Define role-based access for each route
+  const roleMap: { [key: string]: string } = {
+    "/admin": "RO4",
+    "/staff": "RO3",
+    "/sell": "RO2",
+    "/profileuser": "RO1",
+    "/favorites": "RO1",
+    "/history": "RO1",
+    "/myticket": "RO1",
+    "/settings": "RO1",
+  };
 
-  const response = await validate.json(); // Parse the JSON response
-  // Check if the current route is protected and the accessKey is missing
-  if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route)) && response.message == 'False') {
-    // Redirect to the login page if not authenticated
-    return NextResponse.redirect(new URL('/login', request.url));
+  // Find the appropriate route for the requested path
+  const matchedRoute = Object.keys(roleMap).find((route) =>
+    request.nextUrl.pathname.startsWith(route)
+  );
+
+  // Get the roleId for the matched route
+  const roleId = matchedRoute ? roleMap[matchedRoute] : null;
+  
+  console.log(roleId);
+  
+  // If the route requires a roleId but it was not found, continue to next middleware
+  if (!roleId) return NextResponse.next();
+
+  // Validate the user's session and role
+// Construct the URL with the roleId as a query parameter
+const validateUrl = `http://localhost:5296/api/Authentication/isRolelogged?roleId=${roleId}`;
+
+const validate = await fetch(validateUrl, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Cookie: `.AspNetCore.Session=${accessKey}`,
+  },
+  // Remove the body since we're now sending roleId in the URL
+});
+
+console.log(validate);
+
+  const response = await validate.json();
+  console.log(response);
+  
+  // Redirect if access is denied
+  if (response.message === "False") {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Continue to the requested page if authenticated or if route does not require authentication
+  // Continue to the requested page if authenticated and authorized
   return NextResponse.next();
 }
 
 // Specify which routes should trigger this middleware
 export const config = {
-  matcher: ['/profile/:path*', '/favorites/:path*', '/history/:path*', '/myticket/:path*', '/settings/:path*','/sell/:path*'],
+  matcher: [
+    "/profileuser/:path*",
+    "/favorites/:path*",
+    "/history/:path*",
+    "/myticket/:path*",
+    "/settings/:path*",
+    "/admin/:path*",
+    "/sell/:path*",
+    "/staff/:path*",
+  ],
 };

@@ -71,6 +71,9 @@ const RevenueManager: React.FC<RevenueManagerProps> = ({ revenueData , transacti
     const today = new Date();
     const todayString = today.toISOString().split('T')[0]; // Get date in YYYY-MM-DD format
 
+    if(!transactions)
+      return 0;
+
     return transactions.filter(transaction => {
         const transactionDate = new Date(transaction.order.date).toISOString().split('T')[0];
         return transactionDate === todayString;
@@ -83,6 +86,8 @@ const countTransactionsThisMonth = (transactions: Transaction[]): number => {
     const month = today.getMonth();
     const year = today.getFullYear();
 
+    if(!transactions)
+      return 0;
     return transactions.filter(transaction => {
         const transactionDate = new Date(transaction.order.date);
         return transactionDate.getMonth() === month && transactionDate.getFullYear() === year;
@@ -94,6 +99,8 @@ const countTransactionsThisYear = (transactions: Transaction[]): number => {
     const today = new Date();
     const year = today.getFullYear();
 
+    if(!transactions)
+      return 0;
     return transactions.filter(transaction => {
         const transactionDate = new Date(transaction.order.date);
         return transactionDate.getFullYear() === year;
@@ -111,7 +118,8 @@ const countUniqueBuyersToday = (transactions: Transaction[]): number => {
   const todayString = today.toISOString().split('T')[0]; // Get date in YYYY-MM-DD format
 
   const uniqueBuyers = new Set<string>();
-
+  if(!transactions)
+    return 0;
   transactions.forEach(transaction => {
       const transactionDate = new Date(transaction.order.date).toISOString().split('T')[0];
       if (transactionDate === todayString) {
@@ -129,7 +137,8 @@ const countUniqueBuyersThisMonth = (transactions: Transaction[]): number => {
   const year = today.getFullYear();
 
   const uniqueBuyers = new Set<string>();
-
+  if(!transactions)
+    return 0;
   transactions.forEach(transaction => {
       const transactionDate = new Date(transaction.order.date);
       if (transactionDate.getMonth() === month && transactionDate.getFullYear() === year) {
@@ -146,7 +155,8 @@ const countUniqueBuyersThisYear = (transactions: Transaction[]): number => {
   const year = today.getFullYear();
 
   const uniqueBuyers = new Set<string>();
-
+  if(!transactions)
+    return 0;
   transactions.forEach(transaction => {
       const transactionDate = new Date(transaction.order.date);
       if (transactionDate.getFullYear() === year) {

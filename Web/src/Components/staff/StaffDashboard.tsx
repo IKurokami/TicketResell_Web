@@ -4,7 +4,11 @@ import { Users, FolderTree } from "lucide-react";
 import UserManagement from "@/Components/staff/UsersManagement";
 import CategoryManagement from "@/Components/staff/CategoriesManagement";
 import "@/Css/Staff.css";
-
+import { logoutUser } from "@/Components/Logout";
+import { removeAllCookies } from "@/Components/Cookie";
+import Cookies from "js-cookie";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 const StaffDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Users");
@@ -37,7 +41,17 @@ const StaffDashboard = () => {
         return <div>{activeTab} content goes here</div>;
     }
   };
+  const handleLogout = async () => {
+    const userId = Cookies.get("id");
+    const isLoggedOut = await logoutUser(userId);
 
+    if (isLoggedOut) {
+      removeAllCookies();
+      window.location.href = "/login";
+    } else {
+      console.error("Đăng xuất không thành công.");
+    }
+  };
   return (
     <div className="relative min-h-screen flex bg-gray-100">
       {/* Hamburger Menu Button (Mobile) */}
@@ -137,6 +151,19 @@ const StaffDashboard = () => {
                 )}
               </button>
             ))}
+            <nav className="space-y-2 font-medium">
+              {/* Các tab khác */}
+
+              {/* Nút Đăng Xuất */}
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                className="w-full flex items-center justify-start space-x-2 px-4 py-6 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="font-medium">Đăng xuất</span>
+              </Button>
+            </nav>
           </nav>
         </div>
       </aside>

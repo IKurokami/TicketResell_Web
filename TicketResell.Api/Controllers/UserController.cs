@@ -103,6 +103,7 @@ namespace Repositories.Controllers
             var response = await _userService.GetAllUser();
             return ResponseParser.Result(response);
         }
+        
         [HttpPut]
         [Route("updateadmin/{id}")]
         public async Task<IActionResult> UpdateUserByAdmin(string id, [FromBody]  UserUpdateByAdminDto dto)
@@ -113,6 +114,7 @@ namespace Repositories.Controllers
             var response = await _userService.UpdateUserAdminByIdAsync(id, dto);
             return ResponseParser.Result(response);
         }
+        
         [HttpPut]
         [Route("update/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDto dto)
@@ -134,8 +136,7 @@ namespace Repositories.Controllers
             var response = await _userService.UpdateRoleAsync(id, roles);
             return ResponseParser.Result(response);
         }
-
-
+        
         [HttpGet]
         [Route("check/{id}")]
         public async Task<IActionResult> CheckSeller(string id)

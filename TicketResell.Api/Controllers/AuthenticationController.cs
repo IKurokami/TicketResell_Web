@@ -105,6 +105,16 @@ namespace Api.Controllers
             return ResponseParser.Result(ResponseModel.Success(HttpContext.GetIsAuthenticated().ToString()));
         }
         
+        [HttpPost("isRolelogged")]
+        public async Task<IActionResult> IsRoleLogged(string roleId)
+        {
+            if (!HttpContext.GetIsAuthenticated())
+            {
+                return ResponseParser.Result(ResponseModel.Unauthorized("False"));
+            }
+            return ResponseParser.Result(ResponseModel.Success(HttpContext.HasEnoughtRoleLevel(RoleHelper.GetUserRole(roleId)).ToString()));
+        }
+        
 
         [HttpPost("logout/{userId}")]
         public async Task<IActionResult> Logout(string userId)

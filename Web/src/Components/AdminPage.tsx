@@ -165,7 +165,6 @@ const AdminPage = () => {
       }
     };
     const getTopBuyers = async () => {
-      const sellerId = Cookies.get("id");
       try {
         const response = await fetch(
           `http://localhost:5296/api/User/allBuyer`,
@@ -712,14 +711,13 @@ const AdminPage = () => {
   };
 
   const handleLogout = async () => {
-    router.push("/");
-
     if (Cookies.get("id")) {
       await logoutUser(Cookies.get("id"));
     }
 
     await signOut();
     removeAllCookies();
+    window.location.href= ('/login');
   };
 
   return (
