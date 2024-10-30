@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/Components/ui/dialog";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 
 interface Category {
