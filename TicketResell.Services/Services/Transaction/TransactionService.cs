@@ -54,5 +54,16 @@ public class TransactionService : ITransactionService
         var orderDtos = _mapper.Map<List<OrderDetailTransactionDto>>(buyers);
         return ResponseModel.Success($"Successfully retrieved buyers for seller {sellerId}", orderDtos );
     }
-    
+
+    public async Task<ResponseModel> GetAllTransaction()
+    {
+        var buyers = await _unitOfWork.TransactionRepository.GetAllTransaction();
+
+        if (buyers == null || !buyers.Any())
+        {
+            return ResponseModel.NotFound($"No buyers found .");
+        }
+        var orderDtos = _mapper.Map<List<OrderDetailTransactionDto>>(buyers);
+        return ResponseModel.Success($"Successfully retrieved buyers for page", orderDtos );
+    }
 }

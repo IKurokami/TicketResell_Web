@@ -28,6 +28,14 @@ public class RevenueService : IRevenueService
         return ResponseModel.Success("Successfully created Revenue");
     }
 
+    public async Task<ResponseModel> GetAllRevenues()
+    {
+        var revenues = await _unitOfWork.RevenueRepository.GetAllRevenues();
+        
+        var revenueDtos = _mapper.Map<IEnumerable<RevenueReadDto>>(revenues);
+        return ResponseModel.Success($"Successfully get revenues with sellerId ", revenueDtos);
+    }
+
     // public async Task<ResponseModel> GetRevenueFromOrder(string orderId, bool saveAll = true)
     // {
     //     var order = _unitOfWork.OrderRepository.GetByIdAsync(orderId);

@@ -15,7 +15,7 @@ interface ChatMessage {
 interface Chatbox {
   ChatboxId: number;
   Status: number;
-  CreateDate: string; 
+  CreateDate: string;
   Title: string;
   Description: string;
 }
@@ -30,32 +30,20 @@ interface ChatProps {
 
 const Chat: React.FC<ChatProps> = ({ user, chatMessages, onSendMessage, onCloseChat, chatbox }) => {
   const [newMessage, setNewMessage] = useState("");
-  const [isInputDisabled, setIsInputDisabled] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const isInputDisabled = chatbox?.Status === 2;
 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-
-    // Enable input if a response from staff is received
-    if (chatMessages.length > 0) {
-      const lastMessage = chatMessages[chatMessages.length - 1];
-      if (lastMessage.senderId !== user.userId && user.userole === "RO1") {
-        setIsInputDisabled(false);
-      }
-    }
-  }, [chatMessages, user.userole]);
+  }, [chatMessages]);
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
       onSendMessage(newMessage, user.userId);
       setNewMessage("");
-
-      // Disable input for restricted users after sending a message
-      if (user.userole === "RO1") {
-        setIsInputDisabled(true);
-      }
     }
   };
 
@@ -84,7 +72,7 @@ const Chat: React.FC<ChatProps> = ({ user, chatMessages, onSendMessage, onCloseC
                   <div className={`flex items-center justify-center h-8 w-8 rounded-full ${msg.senderId === user.userId ? "bg-indigo-500" : "bg-gray-500"} flex-shrink-0 text-white text-sm`}>
                     {msg.senderId === user.userId ? user.fullname.charAt(0) : "U"}
                   </div>
-                  <div className={`relative ml-3 text-sm ${msg.senderId === user.userId ? "bg-indigo-100" : "bg-white"} py-2 px-4 shadow rounded-xl min-w-[120px] max-w-[100%]  overflow-hidden break-words`}>
+                  <div className={`relative ml-3 text-sm ${msg.senderId === user.userId ? "bg-indigo-100" : "bg-white"} py-2 px-4 shadow rounded-xl min-w-[120px] max-w-[100%] overflow-hidden break-words`}>
                     <div>{msg.message}</div>
                     {msg.date && <div className="absolute text-xs bottom-0 right-0 -mb-5 mr-2 text-gray-500">{msg.date}</div>}
                   </div>

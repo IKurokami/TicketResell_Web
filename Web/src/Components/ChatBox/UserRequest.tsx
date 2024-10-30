@@ -14,7 +14,6 @@ const UserRequest = () => {
       CreateDate: "2024-10-29T10:00:00Z",
       Title: "Sample Chatbox Title 1",
       Description: "This is a sample description for chatbox 1.",
-      chatboxId: "1",
     },
     {
       ChatboxId: 2,
@@ -22,7 +21,6 @@ const UserRequest = () => {
       CreateDate: "2024-10-28T11:30:00Z",
       Title: "Sample Chatbox Title 2",
       Description: "This is a sample description for chatbox 2.",
-      chatboxId: "2",
     },
     {
       ChatboxId: 3,
@@ -30,7 +28,6 @@ const UserRequest = () => {
       CreateDate: "2024-10-27T09:15:00Z",
       Title: "Sample Chatbox Title 3",
       Description: "This is a sample description for chatbox 3.",
-      chatboxId: "3",
     },
     {
       ChatboxId: 4,
@@ -38,7 +35,6 @@ const UserRequest = () => {
       CreateDate: "2024-10-26T08:45:00Z",
       Title: "Sample Chatbox Title 4",
       Description: "This is a sample description for chatbox 4.",
-      chatboxId: "4",
     },
     {
       ChatboxId: 4,
@@ -46,7 +42,6 @@ const UserRequest = () => {
       CreateDate: "2024-10-26T08:45:00Z",
       Title: "Sample Chatbox Title 5",
       Description: "This is a sample description for chatbox 5.",
-      chatboxId: "5",
     },
   ];
   return (
@@ -70,7 +65,6 @@ const UserRequest = () => {
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
-          {" "}
           {/* Set a max-width for the card container */}
           <ChatboxTable chatboxData={chatboxData} />
         </div>

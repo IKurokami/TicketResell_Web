@@ -2,6 +2,8 @@ import { MessageCircle } from "lucide-react";
 import { FaCheck, FaClock } from "react-icons/fa";
 import React, { useState } from "react";
 import ChatComponent from "./ChatComponent";
+import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
+import Cookies from "js-cookie";
 import { IoMdClose } from "react-icons/io";
 
 interface Chatbox {
@@ -10,7 +12,6 @@ interface Chatbox {
   CreateDate: string;
   Title: string;
   Description: string;
-  chatboxId: string;
 }
 
 interface ChatboxTableProps {
@@ -20,7 +21,7 @@ interface ChatboxTableProps {
 const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChatbox, setSelectedChatbox] = useState<Chatbox | null>(null);
-  // Add state to manage the chatboxes
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [chatboxes, setChatboxes] = useState<Chatbox[]>(chatboxData);
 
   const initialMessages = [
@@ -47,7 +48,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
     fullname: "Jane Doe",
     email: "jane.doe@example.com",
     avatarUrl: "https://example.com/avatar.jpg",
-    userole: "RO3",
+    userole: "RO1",
   };
 
   const [chatMessages, setChatMessages] = useState(initialMessages);
@@ -65,7 +66,26 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
 
-  // Add handler for status update
+  const openChat = (chatbox: Chatbox) => {
+    const accessKey = Cookies.get("confirm");
+    if (chatbox.Status === 1 && !accessKey) {
+      setSelectedChatbox(chatbox);
+      setIsModalOpen(true);
+    } else if (chatbox.Status === 1 && accessKey) {
+      setSelectedChatbox(chatbox);
+      setIsChatOpen(true);
+    } else {
+      setSelectedChatbox(chatbox);
+      setIsChatOpen(true);
+    }
+  };
+
+  const confirmChatOpen = () => {
+    Cookies.set("confirm", "true");
+    setIsChatOpen(true);
+    setIsModalOpen(false);
+  };
+
   const handleProcessingUpdate = (chatboxId: number) => {
     setChatboxes((prevChatboxes) =>
       prevChatboxes.map((chatbox) =>
@@ -88,11 +108,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
         chatbox.ChatboxId === chatboxId ? { ...chatbox, Status: 2 } : chatbox
       )
     );
-  };
-
-  const openChat = (chatbox: Chatbox) => {
-    setSelectedChatbox(chatbox);
-    setIsChatOpen(true);
   };
 
   const getStatusLabel = (status: number) => {
@@ -156,7 +171,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                 </td>
                 <td className="items-center py-3 px-4 text-gray-700 text-center">
                   {chatbox.Status === 1 ? (
-                    <div className="flex gap-2">
+                    <div className="flex justify-center gap-2">
                       {sampleUser.userole === "RO2" ||
                       sampleUser.userole === "RO1" ? (
                         <button
@@ -192,7 +207,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                       {sampleUser.userole === "RO2" ||
                       sampleUser.userole === "RO1" ? (
                         <div className="flex justify-center">
-                          <FaClock className=" text-yellow-500" />
+                          <FaClock className=" text-yellow-500 " />
                         </div>
                       ) : (
                         <div className="flex justify-center gap-2">
@@ -223,9 +238,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                     <div className="flex items-center justify-center gap-2">
                       {sampleUser.userole === "RO2" ||
                       sampleUser.userole === "RO1" ? (
-                        <div className="flex justify-center">
                         <FaClock className=" text-yellow-500" />
-                        </div>
                       ) : (
                         <div className="flex justify-center gap-2">
                           <button
@@ -277,6 +290,12 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
           onSendMessage={handleSendMessage}
         />
       )}
+
+      <ConfirmationModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onConfirm={confirmChatOpen}
+      />
     </div>
   );
 };

@@ -89,7 +89,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
           result.push(...remainingTickets.slice(0, 4 - result.length));
         }
-        let updatedTickets = await Promise.all(
+        const updatedTickets = await Promise.all(
           result.map(async (ticket: any) => {
             let imageUrl = DEFAULT_IMAGE; // Default image
 

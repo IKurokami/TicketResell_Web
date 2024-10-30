@@ -80,7 +80,6 @@ const Login: React.FC = () => {
           const result = await response.json();
           if (!response.ok) {
             console.error("Lỗi đăng nhập:", result);
-            setError(result.message || "Lỗi đăng nhập.");
           } else {
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);

@@ -10,7 +10,7 @@ import { log } from "console";
 import { Bank } from "vnpay";
 import { BannerItemCard, fetchBannerItems, fetchCategories } from "@/models/CategoryCard";
 import CategoryCarousel from "./TicketByCategory";
-
+import React from "react";
 interface Category {
   categoryId: string;
   name: string;

@@ -30,6 +30,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { removeAllCookies } from "./Cookie";
 import { logoutUser } from "./Logout";
 import { cookies } from "next/headers";
+import OrderDetailsDashboard from "./BuyerSellDashboard";
 
 const AdminPage = () => {
   const [id, setId] = useState("");
@@ -39,6 +40,8 @@ const AdminPage = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [revenues, setRevenues] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [topBuyers, setTopBuyers] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Tickets");
   const router = useRouter();
@@ -143,10 +146,13 @@ const AdminPage = () => {
 
     const getRevenues = async () => {
       try {
-        const response = await fetch("http://localhost:5296/api/Revenue/read", {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          "http://localhost:5296/api/Revenue/readAllRevenues",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
         const data = await response.json();
         console.log("revenueData", data);
         if (!response.ok) {
@@ -154,10 +160,50 @@ const AdminPage = () => {
         }
         setRevenues(data.data);
       } catch (error) {
+        setRevenues([])
         console.error("Error fetching Revenues:", error);
       }
     };
-
+    const getTopBuyers = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5296/api/User/allBuyer`,
+          {
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const result = await response.json();
+        console.log("topbuyer:", result.data);
+        setTopBuyers(result.data);
+      } catch (error) {
+        setTopBuyers([]);
+      }
+    };
+    const getTransactions = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5296/api/Transaction/allBuyers",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+        console.log("transactionData", data);
+        if (!response.ok) {
+          throw new Error("Failed to fetch Revenues");
+        }
+        setTransactions(data.data);
+      } catch (error) {
+        setTransactions([]);
+        console.error("Error fetching Revenues:", error);
+      }
+    };
+    getTopBuyers();
+    getTransactions();
     getUsers();
     getTickets();
     getRoles();
@@ -596,6 +642,14 @@ const AdminPage = () => {
     setActiveTab(tabName);
   };
 
+  const revenuesWithPercentage = revenues.map((item) => ({
+    ...item,
+    revenue1: item.revenue1 * 0.05
+  }));
+
+
+  
+
   const renderContent = () => {
     switch (activeTab) {
       case "Tickets":
@@ -638,7 +692,19 @@ const AdminPage = () => {
       case "Orders":
         return <OrderManager orders={orders} onRefresh={handleOrderRefresh} />;
       case "Revenues":
-        return <RevenueManager revenueData={revenues} transactions={[]} />;
+        return (
+          <>
+            <RevenueManager
+              transactions={transactions}
+              revenueData={ revenuesWithPercentage}
+            />
+            <OrderDetailsDashboard
+            topBuyers={topBuyers}
+              revenue={revenuesWithPercentage}
+              transactions={transactions}
+            />
+          </>
+        );
       default:
         return <div>{activeTab} content goes here</div>;
     }

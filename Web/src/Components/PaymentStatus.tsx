@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-
+import React from "react";
 const PaymentStatus = () => {
   const [countdown, setCountdown] = useState(3);
   const [success, setSuccess] = useState(false);

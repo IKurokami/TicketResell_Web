@@ -4,6 +4,7 @@ import {
   faSortAmountDown,
   faSortAmountUp,
 } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
 import "../Css/SellerShop.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

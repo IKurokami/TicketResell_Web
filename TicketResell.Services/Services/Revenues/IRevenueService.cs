@@ -8,6 +8,8 @@ public interface IRevenueService
     public Task<ResponseModel> CreateRevenueAsync(RevenueCreateDto dto,bool saveAll=true);
 
     // public Task<ResponseModel> GetRevenueFromOrder(string orderId, bool saveAll = true);
+
+    public Task<ResponseModel> GetAllRevenues();
     
     public Task<ResponseModel> GetRevenuesAsync();
 
