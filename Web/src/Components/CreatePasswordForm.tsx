@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useLocation, useParams } from "react-router-dom";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { motion } from "framer-motion";
+import { RiLockPasswordFill } from "react-icons/ri";
 
 // Password requirements constant remains the same
 const PASSWORD_REQUIREMENTS = [
@@ -53,9 +54,9 @@ const InputField: React.FC<InputFieldProps> = ({
       {icon}
     </div>
     <input
-      className={`w-full pl-10 pr-10 py-4 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 
+      className={`w-full pl-10 pr-10 py-4 bg-gray-100 border-none rounded-full focus:outline-none focus:ring-2 
         ${
-          error ? "ring-2 ring-red-500" : "focus:ring-blue-500"
+          error ? "ring-2 ring-red-500" : "focus:ring-green-500"
         } transition-all`}
       {...props}
     />
@@ -83,13 +84,15 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   isLoading,
   type = "button",
 }) => (
-  <button
+  <motion.button
     type={type}
-    className="w-full px-4 py-4 mt-6 font-bold text-white bg-blue-500 rounded-lg hover:bg-blue-600 
-      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 
+    className="w-full px-4 py-4 mt-6 font-bold text-white bg-green-500 rounded-full hover:bg-green-600 
+      focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 
       transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     onClick={onClick}
     disabled={isLoading}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
   >
     {isLoading ? (
       <div className="flex items-center justify-center">
@@ -99,12 +102,18 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     ) : (
       children
     )}
-  </button>
+  </motion.button>
 );
 
 const CreatePasswordForm: React.FC = () => {
-  // Use useLocation to access the current URL
-  const { key, to } = useParams();
+  // Update URL parameter handling
+  const urlParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : null;
+  const to = urlParams ? urlParams.get("to") : null;
+  const key = urlParams ? urlParams.get("key") : null;
+
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",
@@ -145,8 +154,7 @@ const CreatePasswordForm: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Authentication/change-passwordKey
-`,
+        `http://localhost:5296/api/Authentication/change-passwordKey`,
         {
           method: "POST",
           headers: {
@@ -160,37 +168,13 @@ const CreatePasswordForm: React.FC = () => {
         }
       );
 
-      // Check response type and handle accordingly
-      const contentType = response.headers.get("content-type");
-      let errorMessage = "Failed to change password";
-
       if (!response.ok) {
-        if (contentType?.includes("application/json")) {
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorMessage;
-          } catch {
-            // If JSON parsing fails, try to get text content
-            const textContent = await response.text();
-            errorMessage = textContent || errorMessage;
-          }
-        } else {
-          // For non-JSON responses, get the text content
-          const textContent = await response.text();
-          errorMessage = textContent || errorMessage;
-        }
-        throw new Error(errorMessage);
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to change password");
       }
 
-      // Handle successful response
-      try {
-        const data = await response.json();
-        // Handle success - you can add your notification system here
-        setFormData({ newPassword: "", confirmPassword: "" });
-      } catch {
-        // Even if parsing success response fails, we still treat it as success
-        setFormData({ newPassword: "", confirmPassword: "" });
-      }
+      // Handle success
+      window.location.href = "/login"; // Redirect to login page after success
     } catch (error) {
       setErrors({
         submit:
@@ -204,83 +188,107 @@ const CreatePasswordForm: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Change Password</h1>
-          <p className="text-gray-600 mt-2">Please enter your new password</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <InputField
-            icon={<Eye className="h-4 w-4" />}
-            rightIcon={
-              showPassword.new ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )
-            }
-            type={showPassword.new ? "text" : "password"}
-            placeholder="New Password"
-            name="newPassword"
-            value={formData.newPassword}
-            onChange={handleChange}
-            onRightIconClick={() =>
-              setShowPassword((prev) => ({ ...prev, new: !prev.new }))
-            }
-            error={errors.newPassword}
-          />
-
-          <InputField
-            icon={<Eye className="h-4 w-4" />}
-            rightIcon={
-              showPassword.confirm ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )
-            }
-            type={showPassword.confirm ? "text" : "password"}
-            placeholder="Confirm Password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            onRightIconClick={() =>
-              setShowPassword((prev) => ({ ...prev, confirm: !prev.confirm }))
-            }
-            error={errors.confirmPassword}
-          />
-
-          {errors.submit && (
-            <Alert variant="destructive">
-              <AlertDescription>{errors.submit}</AlertDescription>
-            </Alert>
-          )}
-
-          <ActionButton type="submit" isLoading={isLoading}>
-            Change Password
-          </ActionButton>
-
-          <div className="mt-4 space-y-2">
-            {PASSWORD_REQUIREMENTS.map((req, index) => (
-              <div
-                key={index}
-                className={`flex items-center text-sm ${
-                  req.test(formData.newPassword)
-                    ? "text-green-500"
-                    : "text-gray-500"
-                }`}
-              >
-                <span className="mr-2">
-                  {req.test(formData.newPassword) ? "✓" : "○"}
-                </span>
-                {req.label}
-              </div>
-            ))}
+    <div className="flex items-center justify-center min-h-screen p-5">
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-xl"
+      >
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden mt-20 p-10 max-w-lg mx-auto">
+          <div className="mb-8 text-center">
+            <h1 className="text-5xl font-bold">
+              <span className="text-green-500">Ticket</span>
+              <span className="text-black">Resell</span>
+            </h1>
           </div>
-        </form>
-      </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="p-8"
+          >
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-gray-900">Đổi mật khẩu</h1>
+              <p className="text-gray-600 mt-2">Vui lòng đổi mật khẩu mới</p>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <InputField
+                  icon={<RiLockPasswordFill />}
+                  rightIcon={
+                    showPassword.new ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )
+                  }
+                  type={showPassword.new ? "text" : "password"}
+                  placeholder="Nhập mật khẩu mới"
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  onRightIconClick={() =>
+                    setShowPassword((prev) => ({ ...prev, new: !prev.new }))
+                  }
+                  error={errors.newPassword}
+                />
+              </div>
+              <InputField
+                icon={<Eye className="h-4 w-4" />}
+                rightIcon={
+                  showPassword.confirm ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )
+                }
+                type={showPassword.confirm ? "text" : "password"}
+                placeholder="Confirm Password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                onRightIconClick={() =>
+                  setShowPassword((prev) => ({
+                    ...prev,
+                    confirm: !prev.confirm,
+                  }))
+                }
+                error={errors.confirmPassword}
+              />
+
+              {errors.submit && (
+                <Alert variant="destructive">
+                  <AlertDescription>{errors.submit}</AlertDescription>
+                </Alert>
+              )}
+
+              <ActionButton type="submit" isLoading={isLoading}>
+                Change Password
+              </ActionButton>
+
+              <div className="mt-4 space-y-2">
+                {PASSWORD_REQUIREMENTS.map((req, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center text-sm ${
+                      req.test(formData.newPassword)
+                        ? "text-green-500"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    <span className="mr-2">
+                      {req.test(formData.newPassword) ? "✓" : "○"}
+                    </span>
+                    {req.label}
+                  </div>
+                ))}
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      </motion.div>
     </div>
   );
 };

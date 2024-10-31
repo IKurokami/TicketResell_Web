@@ -34,11 +34,13 @@ namespace TicketResell.Services.Services.Mail
         private readonly IUserService _userService;
 
 
-        public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis)
+        public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis, IUnitOfWork unitOfWork)
         {
+            
             _config = config.Value;
             _logger = logger;
             _redis = redis;
+            _unitOfWork = unitOfWork;
 
             // Load email configuration from appsettings.json
             _smtpHost = _config.SmtpHost;
@@ -50,7 +52,13 @@ namespace TicketResell.Services.Services.Mail
         }
 
         public async Task<ResponseModel> SendPasswordKeyAsync(string to)
-        {      
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(to);
+            if (user == null)
+            {
+                return ResponseModel.Error("Email not exist");
+
+            }
             string key = GenerateAccessKey();
             string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
 
@@ -193,7 +201,7 @@ namespace TicketResell.Services.Services.Mail
         </div>
     </div>
 </body>
-</html>";            var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
+</html>"; var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
             if (response != null && response.StatusCode == 200)
             {
                 await CacheAccessKeyAsync("forgot_password", to, hashedKey, TimeSpan.FromHours(2));
@@ -365,7 +373,7 @@ namespace TicketResell.Services.Services.Mail
             return Convert.ToBase64String(key);
         }
 
-        
+
         public static string GenerateNumericOTP(int length)
         {
             var random = new Random();
