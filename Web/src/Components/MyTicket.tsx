@@ -166,8 +166,8 @@ const MyTicketPage = () => {
                 date: formattedDate,
                 cost: detail.ticket.cost,
                 quantity: detail.quantity,
-                sellerId: detail.ticket.seller.fullname, // Use seller's fullname
-               
+                sellerId: detail.ticket.sellerId, // Use seller's fullname
+                fullname: detail.ticket.seller.fullname,
                 description: detail.ticket.description || 'Không có mô tả',
                 categories: detail.ticket.categories || ['Chung'],
                 image: imageUrl || detail.ticket.image,
@@ -873,7 +873,7 @@ const MyTicketPage = () => {
                             </div>
                             <div>
                               <p className="font-medium">
-                                {selectedTicket.sellerId}
+                                {selectedTicket.fullname}
                               </p>
                             </div>
                           </div>
