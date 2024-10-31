@@ -54,6 +54,39 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
             // This case shouldn't occur given the above conditions, but included for completeness
             throw new InvalidOperationException($"Unable to create or return chatbox with ID: {chatboxId}");
         }
+        public async Task<Chatbox> CreateReportAsync(string chatboxId, string title, string description, int status)
+        {
+            // Try to find existing chatbox
+            var existingChatbox = await _context.Chatboxes
+                .FirstOrDefaultAsync(c => c.ChatboxId == chatboxId);
+
+            // If chatbox exists and is active (status 1), return it
+            if (existingChatbox != null)
+            {
+                _logger.LogInformation($"Returning existing active chatbox with ID: {chatboxId}");
+                return existingChatbox;
+            }
+
+            // If chatbox doesn't exist or has status 0, create new one
+            if (existingChatbox == null)
+            {
+                var newChatbox = new Chatbox
+                {
+                    ChatboxId = chatboxId,
+                    Title = title,
+                    Description = description,
+                    Status = status,
+                    CreateDate = DateTime.UtcNow
+                };
+
+                await CreateAsync(newChatbox);
+                _logger.LogInformation($"Created new chatbox with ID: {chatboxId}");
+                return newChatbox;
+            }
+
+            // This case shouldn't occur given the above conditions, but included for completeness
+            throw new InvalidOperationException($"Unable to create or return chatbox with ID: {chatboxId}");
+        }
 
         public async Task<IEnumerable<Chatbox>> GetChatboxesByIdsAsync(IEnumerable<string> chatboxIds)
         {
@@ -78,6 +111,20 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
 
             // Return true if there is NO chatbox with status 1 or 2
             return !chatboxes.Any(c => c.Status == 1 || c.Status == 2 || c.Status == 3);
+        }
+
+        public async Task<bool> CheckChatboxHasValidReportAsync(string userId)
+        {
+            var chatboxes = await _context.Chatboxes
+                .Include(c => c.Chats)
+                .Where(c => c.Chats.Any(chat => chat.SenderId == userId || chat.ReceiverId == userId))
+                .ToListAsync();
+
+            if (!chatboxes.Any())
+                return true;
+
+            // Return true if there is NO chatbox with status 1 or 2
+            return !chatboxes.Any(c => c.Status == 4 || c.Status == 5 || c.Status == 6 || c.Status == 7);
         }
 
         public async Task UpdateChatboxStatusAsync(string chatboxId, int status)
