@@ -90,12 +90,33 @@ const DialogComponent: React.FC = () => {
     setDescription("");
   };
 
-  const handleSend = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSend = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Add your logic to handle the "send" action here
-    console.log("Title:", title);
-    console.log("Description:", description);
-    handleClose();
+    try {
+      const response = await fetch('http://localhost:5296/api/Chatbox/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          chatboxId: "string",
+          title,
+          status: 0,
+          description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create chatbox');
+      }
+
+      const data = await response.json();
+      console.log('Success:', data);
+      handleClose();
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (

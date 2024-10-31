@@ -219,7 +219,6 @@ const StaffDashboard = () => {
               <div className="p-8">{renderContent()}</div>
             </div>
           </div>
-          <div className="p-2">{renderContent()}</div>
         </div>
       </main>
     </div>

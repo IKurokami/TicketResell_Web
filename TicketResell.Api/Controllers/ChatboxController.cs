@@ -118,7 +118,7 @@ namespace Api.Controllers
             return ResponseParser.Result(await _chatboxService.GetChatboxesAsync());
         }
 
-        [HttpPost("getall/{userId}")]
+        [HttpGet("getall/{userId}")]
         public async Task<IActionResult> GetChatboxsByUserId(string userId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
