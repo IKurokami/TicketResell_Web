@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { PlusCircle, Search, Send, X, MessageCircle, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
   DialogTitle,
 } from "@/Components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/Components/ui/input";
 import Cookies from "js-cookie";
 import * as signalR from "@microsoft/signalr";
@@ -41,7 +43,9 @@ interface ChatMessage {
   chatId: string;
   date: string | null;
 }
-
+interface BlockStatus {
+  [userId: string]: boolean;
+}
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -70,7 +74,7 @@ const UserManagement = () => {
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
   const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
+  const [blockStatus, setBlockStatus] = useState<BlockStatus>({});
   useEffect(() => {
     fetch("http://localhost:5296/api/User/read")
       .then((response) => response.json())
@@ -151,6 +155,31 @@ const UserManagement = () => {
       }));
     });
 
+    connection.on("Block", (senderId: string, message: string) => {
+      console.log(`Block event received for ${senderId}: ${message}`);
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: true
+      }));
+    });
+  
+    connection.on("Unblock", (senderId: string, message: string) => {
+      console.log(`Unblock event received for ${senderId}: ${message}`);
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: false
+      }));
+    });
+
+    connection.on("UnblockEvent", (senderId: string, message: string) => {
+      console.log(`moi lan staff bam unlock, ham nay se hoat dong ${senderId}: ${message}`);
+      
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: false
+      }));
+    });
+
     try {
       await connection.start();
       const userId = Cookies.get("id");
@@ -216,7 +245,12 @@ const UserManagement = () => {
       await hubConnectionRef.current.invoke(
         "SendMessageAsync",
         receiverId,
-        newMessages[receiverId] // Use the specific message for the receiver
+        newMessages[receiverId], "CB318b7ea9-ac94-46a9-a40c-807085f384ed" // Nút này chỉnh boxchatId tương ứng
+      );
+      await hubConnectionRef.current.invoke(
+        "UnblockChatbox",
+        "CB318b7ea9-ac94-46a9-a40c-807085f384ed",
+        receiverId // Nút unblock của staff sẽ xài hàm này
       );
 
       const newChatMessage: ChatMessage = {
@@ -237,6 +271,11 @@ const UserManagement = () => {
     } catch (error) {
       console.error("Error sending message:", error);
     }
+  };
+  const handleOrder = (userEmail: any) => {
+    // Mở một trang mới với đường dẫn hiển thị đơn hàng
+    const orderPageUrl = `/order?email=${encodeURIComponent(userEmail)}`;
+    window.open(orderPageUrl, '_blank'); // Mở trang mới
   };
 
   const filteredUsers = users.filter(
@@ -259,7 +298,7 @@ const UserManagement = () => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-4">
-          <CardTitle>Quản lý người dùng</CardTitle>
+          <CardTitle>Trạng thái:</CardTitle>
           <span
             className={`text-sm ${
               connectionStatus === "Authenticated"
@@ -295,23 +334,25 @@ const UserManagement = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        <div className=" border rounded-xl overflow-x-auto bg-white">
           <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="py-3 px-4 text-left">Tên người dùng</th>
-                <th className="py-3 px-4 text-left">Email</th>
-                <th className="py-3 px-4 text-left">Số điện thoại</th>
+          <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
+          <tr className="border-b">
+                <th className="py-3 px-4  text-left whitespace-nowrap">Tên người dùng</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Email</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Số điện thoại</th>
                 <th className="py-3 px-4 text-left">Địa chỉ</th>
                 <th className="px-3 py-4 text-left">Vai trò</th>
-                <th className="py-3 px-4 text-left">Liên hệ</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Liên hệ</th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">Lịch sử đơn hàng</th>
               </tr>
             </thead>
+
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.userId} className="border-b hover:bg-gray-100">
                   <td className="py-3 px-4">{user.fullname}</td>
-                  <td className="py-3 px-4">{user.gmail}</td>
+                  <td className="py-3 px-4">{user.userId}</td>
                   <td className="py-3 px-4">{user.phone}</td>
                   <td className="py-3 px-4">{user.address}</td>
                   <td className="py-3 px-4">
@@ -350,6 +391,16 @@ const UserManagement = () => {
                         </>
                       )}
                     </button>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                    <Button
+                      onClick={() => handleOrder(user.gmail)}
+                      variant="default"
+                      color="success"
+                      className=" font-bold py-2 px-4 rounded"
+                    >
+                      <VisibilityIcon />
+                    </Button>
                   </td>
                 </tr>
               ))}

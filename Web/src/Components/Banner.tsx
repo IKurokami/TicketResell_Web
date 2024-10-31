@@ -35,10 +35,10 @@ const Banner = () => {
       setCategories(cate);
     };
 
-    fetchData();
-  }, []);
+      fetchData();
+    }, []);
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const getNextIndex = (currentIndex: number): number => {
     const remainingItems = bannerItems.length - currentIndex;
@@ -55,33 +55,33 @@ const Banner = () => {
     return Math.max(0, currentIndex - itemsToShow);
   };
 
-  const nextProduct = () => {
-    setAnimationClass("slide-out-left");
-    setTimeout(() => {
-      setCurrentIndex(getNextIndex(currentIndex));
-      setAnimationClass("slide-in-right");
-    }, 300);
-  };
+    const nextProduct = () => {
+      setAnimationClass("slide-out-left");
+      setTimeout(() => {
+        setCurrentIndex(getNextIndex(currentIndex));
+        setAnimationClass("slide-in-right");
+      }, 300);
+    };
 
-  const prevProduct = () => {
-    setAnimationClass("slide-out-right");
-    setTimeout(() => {
-      setCurrentIndex(getPrevIndex(currentIndex));
-      setAnimationClass("slide-in-left");
-    }, 300);
-  };
+    const prevProduct = () => {
+      setAnimationClass("slide-out-right");
+      setTimeout(() => {
+        setCurrentIndex(getPrevIndex(currentIndex));
+        setAnimationClass("slide-in-left");
+      }, 300);
+    };
 
   const resetTimeout = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(nextProduct, 5000);
   };
 
-  useEffect(() => {
-    resetTimeout();
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [currentIndex]);
+    useEffect(() => {
+      resetTimeout();
+      return () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      };
+    }, [currentIndex]);
 
   const getVisibleItems = () => {
     // Separate items with active category first, then remaining items
@@ -111,8 +111,8 @@ const Banner = () => {
       return sortedItems.slice(0, itemsToShow);
     }
 
-    return items;
-  };
+      return items;
+    };
 
   const visibleItems = getVisibleItems();
   const limitedCategories = categories.slice(0, 6);
@@ -180,29 +180,29 @@ const Banner = () => {
         </nav>
       </div>
 
-      <div className="category-items-container">
-        <FontAwesomeIcon
-          className="caret"
-          icon={faCaretLeft}
-          onClick={() => {
-            prevProduct();
-            resetTimeout();
-          }}
-        />
-        <div className={`category-items ${animationClass}`}>
-          <CategoriesPage bannerItems={visibleItems} />
+        <div className="category-items-container">
+          <FontAwesomeIcon
+            className="caret"
+            icon={faCaretLeft}
+            onClick={() => {
+              prevProduct();
+              resetTimeout();
+            }}
+          />
+          <div className={`category-items ${animationClass}`}>
+            <CategoriesPage bannerItems={visibleItems} />
+          </div>
+          <FontAwesomeIcon
+            className="caret"
+            icon={faCaretRight}
+            onClick={() => {
+              nextProduct();
+              resetTimeout();
+            }}
+          />
         </div>
-        <FontAwesomeIcon
-          className="caret"
-          icon={faCaretRight}
-          onClick={() => {
-            nextProduct();
-            resetTimeout();
-          }}
-        />
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-export default Banner;
+  export default Banner;

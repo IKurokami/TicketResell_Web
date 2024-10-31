@@ -1,103 +1,141 @@
 "use client";
-import React, { useState } from "react";
-import { Users, FolderTree } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import UserManagement from "@/Components/staff/UsersManagement";
 import CategoryManagement from "@/Components/staff/CategoriesManagement";
 import "@/Css/Staff.css";
 import { logoutUser } from "@/Components/Logout";
 import { removeAllCookies } from "@/Components/Cookie";
 import Cookies from "js-cookie";
-import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+
 const StaffDashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("Users");
+  const [activeTab, setActiveTab] = useState<string>("Người dùng");
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null); // Set type to string | null
 
   const sidebarTabs = [
-    { name: "Users", icon: <Users className="w-6 h-6" /> },
-    { name: "Categories", icon: <FolderTree className="w-6 h-6" /> },
+    {
+      name: "Người dùng",
+      icon: (
+        <span className="flex items-center justify-center w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+          <svg
+            focusable="false"
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            data-testid="PersonIcon"
+          >
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4m0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4"></path>
+          </svg>
+        </span>
+      ),
+    },
+    {
+      name: "Danh mục",
+      icon: (
+        <span className="flex items-center justify-center w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
+          <svg
+            focusable="false"
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            data-testid="CategoryIcon"
+          >
+            <path d="m12 2-5.5 9h11z"></path>
+            <circle cx="17.5" cy="17.5" r="4.5"></circle>
+            <path d="M3 13.5h8v8H3z"></path>
+          </svg>
+        </span>
+      ),
+    },
   ];
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-  };
-
-  const handleNavigation = (tabName: any) => {
+  const handleNavigation = (tabName: string) => {
     setActiveTab(tabName);
-    closeSidebar();
+    setSidebarOpen(false);
   };
 
   const renderContent = () => {
     switch (activeTab) {
-      case "Users":
+      case "Người dùng":
         return <UserManagement />;
-      case "Categories":
+      case "Danh mục":
         return <CategoryManagement />;
       default:
-        return <div>{activeTab} content goes here</div>;
+        return <UserManagement />;
     }
   };
-  const handleLogout = async () => {
-    const userId = Cookies.get("id");
-    const isLoggedOut = await logoutUser(userId);
 
-    if (isLoggedOut) {
-      removeAllCookies();
-      window.location.href = "/login";
+  const handleLogout = async () => {
+    if (userId) {
+      const isLoggedOut = await logoutUser(userId);
+      if (isLoggedOut) {
+        removeAllCookies();
+        window.location.href = "/login";
+      } else {
+        console.error("Đăng xuất không thành công.");
+      }
     } else {
-      console.error("Đăng xuất không thành công.");
+      console.error("Không có ID người dùng để đăng xuất.");
     }
   };
+
+  // Function to toggle sidebar visibility
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  // Use useEffect to set userId on client mount
+  useEffect(() => {
+    const idFromCookies = Cookies.get("id");
+    setUserId(idFromCookies || null); // Set userId to string or null
+  }, []);
+
   return (
-    <div className="relative min-h-screen flex bg-gray-100">
-      {/* Hamburger Menu Button (Mobile) */}
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Mobile sidebar toggle button */}
       <button
         onClick={toggleSidebar}
         type="button"
-        className="fixed top-6 left-6 inline-flex items-center p-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600 z-50"
+        className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
       >
-        <span className="sr-only">Open sidebar</span>
+        <span className="sr-only">Mở thanh bên</span>
+        <svg
+          className="w-6 h-6"
+          aria-hidden="true"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            clipRule="evenodd"
+            fillRule="evenodd"
+            d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+          ></path>
+        </svg>
       </button>
-
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 sm:hidden"
-          onClick={closeSidebar}
-        ></div>
-      )}
 
       {/* Sidebar */}
       <aside
         className={`fixed sm:relative inset-y-0 left-0 w-72 transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } sm:translate-x-0`}
+        aria-label="Sidebar"
       >
         <div className="h-full px-6 overflow-y-auto pt-10 bg-white border-r border-gray-200">
           {/* Sidebar Header */}
-          <div className="flex justify-between items-center mb-10">
+          <div className="flex justify-between items-center mb-5">
             <h2 className="text-xl font-semibold">
-              <span className="text-emerald-500 text-3xl font-bold">
-                Ticket{" "}
-              </span>
-              <span className="text-black text-3xl font-bold">Resell </span>
-              <span className="text-gray-600 text-2xl inline mt-1">
-                Staff
-              </span>{" "}
-              {/* Thay đổi ở đây */}
+              <span className="text-emerald-500 text-2xl font-bold">Ticket </span>
+              <span className="text-black text-2xl font-bold">Resell </span>
+              <span className="text-gray-500 text-lg">Staff</span>
             </h2>
-
+            {/* Close button for mobile */}
             <button
-              onClick={closeSidebar}
+              onClick={toggleSidebar}
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-2 inline-flex items-center sm:hidden"
+              className="text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg p-1.5 inline-flex items-center sm:hidden"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -108,19 +146,18 @@ const StaffDashboard = () => {
                   clipRule="evenodd"
                 ></path>
               </svg>
+              <span className="sr-only">Đóng thanh bên</span>
             </button>
           </div>
 
-          {/* Sidebar Navigation */}
-          <nav className="space-y-2">
-            {sidebarTabs.map((tab, index) => (
+          {/* Main navigation */}
+          <nav className="flex flex-col flex-grow space-y-1">
+            {sidebarTabs.map((tab) => (
               <button
-                key={index}
+                key={tab.name}
                 onClick={() => handleNavigation(tab.name)}
-                className={`w-full flex items-center px-5 py-4 text-base font-medium rounded-xl transition-colors duration-150 ease-in-out ${
-                  activeTab === tab.name
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group w-full text-left ${
+                  activeTab === tab.name ? "bg-gray-100" : ""
                 }`}
               >
                 <span
@@ -143,20 +180,23 @@ const StaffDashboard = () => {
                 )}
               </button>
             ))}
-            <nav className="space-y-2 font-medium">
-              {/* Các tab khác */}
-
-              {/* Nút Đăng Xuất */}
-              <Button
-                onClick={handleLogout}
-                variant="ghost"
-                className="w-full flex items-center justify-start space-x-2 px-4 py-6 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
-              >
-                <LogOut className="w-5 h-5" />
-                <span className="font-medium">Đăng xuất</span>
-              </Button>
-            </nav>
           </nav>
+
+          {/* Logout button */}
+          <div className="mt-auto pt-4 border-t border-gray-200">
+            <div className="flex items-center p-2 text-gray-600">
+              <span className="ms-3 font-medium text-sm overflow-hidden max-w-64 text-nowrap">
+                ID: {userId || "Đang tải..."} {/* Display loading while userId is being fetched */}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center p-2 w-full text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="ms-3 font-medium">Đăng xuất</span>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -171,7 +211,7 @@ const StaffDashboard = () => {
                   {activeTab}
                 </h1>
                 <p className="mt-2 text-base text-gray-500">
-                  Manage {activeTab.toLowerCase()} in the system
+                  Quản lí {activeTab.toLowerCase()}
                 </p>
               </div>
 
@@ -179,6 +219,7 @@ const StaffDashboard = () => {
               <div className="p-8">{renderContent()}</div>
             </div>
           </div>
+          <div className="p-2">{renderContent()}</div>
         </div>
       </main>
     </div>

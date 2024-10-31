@@ -9,6 +9,6 @@ public class ChatReadDto
     public string Message { get; set; } = null!;
 
     public string ChatId { get; set; } = null!;
-
+    public string? ChatboxId { get; set; }
     public DateTime? Date { get; set; }
 }
