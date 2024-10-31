@@ -165,11 +165,13 @@ namespace TicketResell.Services.Services.Mail
             <h2>Xin chào</h2>
             <p>Chúng tôi nhận được yêu cầu khôi phục mật khẩu cho tài khoản TicketResell của bạn. Để tạo mật khẩu mới, vui lòng nhấp vào nút bên dưới:</p>
             
-            <a href='http://localhost:3000/createpassword?key={key}' class='reset-button'>Đặt lại mật khẩu</a>
+            <a href='http://localhost:3000/createpassword?key={hashedKey}&to={to}
+' class='reset-button'>Đặt lại mật khẩu</a>
             
             <p>Hoặc sao chép đường dẫn sau vào trình duyệt:</p>
             <div class='reset-link'>
-                http://localhost:3000/createpassword?key={key}
+                http://localhost:3000/createpassword?key={hashedKey}&to={to}
+
             </div>
 
             <div class='info-box'>
@@ -194,7 +196,7 @@ namespace TicketResell.Services.Services.Mail
 </html>";            var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
             if (response != null && response.StatusCode == 200)
             {
-                await CacheAccessKeyAsync("forgot_password", to, key, TimeSpan.FromHours(2));
+                await CacheAccessKeyAsync("forgot_password", to, hashedKey, TimeSpan.FromHours(2));
                 return ResponseModel.Success("Sucess");
             }
 

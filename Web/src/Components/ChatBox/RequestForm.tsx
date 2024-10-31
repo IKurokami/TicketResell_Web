@@ -48,7 +48,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
     fullname: "Jane Doe",
     email: "jane.doe@example.com",
     avatarUrl: "https://example.com/avatar.jpg",
-    userole: "RO1",
+    userole: "RO3",
   };
 
   const [chatMessages, setChatMessages] = useState(initialMessages);
@@ -68,7 +68,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
 
   const openChat = (chatbox: Chatbox) => {
     const accessKey = Cookies.get("confirm");
-    if (chatbox.Status === 1 && !accessKey) {
+    if (chatbox.Status === 1 && !accessKey && sampleUser.userole === "RO1") {
       setSelectedChatbox(chatbox);
       setIsModalOpen(true);
     } else if (chatbox.Status === 1 && accessKey) {
@@ -288,6 +288,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
           chatMessages={chatMessages}
           chatbox={selectedChatbox}
           onSendMessage={handleSendMessage}
+          mode="fullpage"
         />
       )}
 

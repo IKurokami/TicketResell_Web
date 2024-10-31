@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import Cookies from "js-cookie";
 import * as signalR from "@microsoft/signalr";
-import DialogComponent from "../ChatBox/RequestDialog";
 import UserRequest from "../ChatBox/UserRequest";
 
 export interface Role {
@@ -397,7 +396,7 @@ const UserManagement = () => {
                       onClick={() => handleOrder(user.gmail)}
                       variant="default"
                       color="success"
-                      className=" font-bold py-2 px-4 rounded"
+                      className=" font-bold py-2 px-4 rounded shadow-none"
                     >
                       <VisibilityIcon />
                     </Button>

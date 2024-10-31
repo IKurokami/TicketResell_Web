@@ -8,7 +8,7 @@ const DEFAULT_IMAGE =
 const RatingsList = ({ ratings }: any) => {
   const [userImages, setUserImages] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 7;
+  const itemsPerPage = 5;
 
   const fetchUserAvatarImage = async () => {
     try {
