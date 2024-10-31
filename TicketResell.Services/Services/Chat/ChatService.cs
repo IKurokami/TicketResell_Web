@@ -10,7 +10,6 @@ namespace TicketResell.Services.Services;
 
 public class ChatService : IChatService
 {
-    private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IAppLogger _logger;

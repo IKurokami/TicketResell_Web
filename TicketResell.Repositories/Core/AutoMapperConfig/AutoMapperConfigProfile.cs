@@ -1,19 +1,17 @@
 ﻿using AutoMapper;
 using Repositories.Core.Dtos.Category;
+using Repositories.Core.Dtos.Revenue;
 using Repositories.Core.Dtos.Order;
 using Repositories.Core.Dtos.OrderDetail;
-using Repositories.Core.Dtos.Revenue;
-using Repositories.Core.Dtos.Role;
-using Repositories.Core.Dtos.SellConfig;
-using Repositories.Core.Dtos.Ticket;
-using Repositories.Core.Dtos.User;
 using Repositories.Core.Entities;
+using Repositories.Core.Dtos.User;
+using Repositories.Core.Dtos.SellConfig;
+using Repositories.Core.Dtos.Role;
+using Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Core.Dtos.Cart;
-using TicketResell.Repositories.Core.Dtos.Chat;
 using TicketResell.Repositories.Core.Dtos.Order;
-using TicketResell.Repositories.Core.Dtos.Rating;
-using TicketResell.Repositories.Core.Dtos.Ticket;
+using TicketResell.Repositories.Core.Dtos.Chat;
 using Category = Repositories.Core.Entities.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Core.Dtos.Rating;
@@ -56,36 +54,31 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<Revenue, RevenueReadDto>();
             CreateMap<RevenueUpdateDto, Revenue>();
 
-        //SQL
-        CreateMap<Order, OrderDto>();
-        CreateMap<OrderDto, Order>();
-        CreateMap<CartItemDto, OrderDetailDto>();
-        CreateMap<Order, OrderTransactionDto>()
-            .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId))
-            .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
-            .ForMember(dest => dest.user, opt => opt.MapFrom(src => src.Buyer));
-        CreateMap<Order, OrderBuyerDto>();
+            //SQL
+            CreateMap<Order, OrderDto>();
+            CreateMap<OrderDto, Order>();
+            CreateMap<CartItemDto, OrderDetailDto>();
+            CreateMap<Order, OrderTransactionDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.user, opt => opt.MapFrom(src => src.Buyer));
+            CreateMap<Order, OrderBuyerDto>();
 
-        //OrderDetail
-        CreateMap<VirtualOrderDetailDto, OrderDetail>();
-        CreateMap<OrderDetailDto, OrderDetail>();
-        CreateMap<OrderDetail, OrderDetailDto>();
-        CreateMap<OrderDetail, VirtualOrderDetailDto>();
-        CreateMap<OrderDetail, OrderDetailTransactionDto>()
-            .ForMember(dest => dest.OrderDetailId, opt => opt.MapFrom(src => src.OrderDetailId))
-            .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId))
-            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
-            .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
-            .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Ticket))
-            .ForMember(dest => dest.order, opt => opt.MapFrom(src => src.Order));
+            //OrderDetail
+            CreateMap<VirtualOrderDetailDto, OrderDetail>();
+            CreateMap<OrderDetailDto, OrderDetail>();
+            CreateMap<OrderDetail, OrderDetailDto>();
+            CreateMap<OrderDetail, VirtualOrderDetailDto>();
+            CreateMap<OrderDetail, OrderDetailTransactionDto>()
+                .ForMember(dest => dest.OrderDetailId, opt => opt.MapFrom(src => src.OrderDetailId))
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
+                .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Ticket))
+                .ForMember(dest => dest.order, opt => opt.MapFrom(src => src.Order));
 
 
-        //Chat
-        CreateMap<Chat, ChatReadDto>();
-
-        //Cart
-        CreateMap<Order, CartDto>();
             //Chat
             CreateMap<Chat, ChatReadDto>();
             CreateMap<ChatReadDto, Chat>();
@@ -95,29 +88,30 @@ namespace Repositories.Core.AutoMapperConfig
             //Cart
             CreateMap<Order, CartDto>();
 
-        CreateMap<SellConfigCreateDto, SellConfig>();
-        CreateMap<SellConfig, SellConfigReadDto>();
-        CreateMap<SellConfigUpdateDto, SellConfig>();
-        CreateMap<RoleCreateDto, Role>();
-        CreateMap<Role, RoleReadDto>();
-        CreateMap<RoleUpdateDto, Role>();
-        //Ticket
-        CreateMap<TicketCreateDto, Ticket>();
-        CreateMap<Ticket, TicketReadDto>();
-        CreateMap<Ticket, TicketTopDto>();
-        CreateMap<TicketUpdateDto, Ticket>();
-        CreateMap<TicketQrDto, Ticket>()
-            .ForMember(dest => dest.Qr, opt => opt.Ignore());
-        CreateMap<Ticket, TicketTransactionDto>();
+            CreateMap<SellConfigCreateDto, SellConfig>();
+            CreateMap<SellConfig, SellConfigReadDto>();
+            CreateMap<SellConfigUpdateDto, SellConfig>();
+            CreateMap<RoleCreateDto, Role>();
+            CreateMap<Role, RoleReadDto>();
+            CreateMap<RoleUpdateDto, Role>();
+            //Ticket
+            CreateMap<TicketCreateDto, Ticket>();
+            CreateMap<Ticket, TicketReadDto>();
+            CreateMap<Ticket, TicketTopDto>();
+            CreateMap<TicketUpdateDto, Ticket>();
+            CreateMap<TicketQrDto, Ticket>()
+                .ForMember(dest => dest.Qr, opt => opt.Ignore());
+            CreateMap<Ticket, TicketTransactionDto>();
 
-        //Category
-        CreateMap<CategoryCreateDto, Category>();
-        CreateMap<Category, CategoryReadDto>();
-        CreateMap<CategoryUpdateDto, Category>();
-        CreateMap<Category, TicketReadDto>();
+            //Category
+            CreateMap<CategoryCreateDto, Category>();
+            CreateMap<Category, CategoryReadDto>();
+            CreateMap<CategoryUpdateDto, Category>();
+            CreateMap<Category, TicketReadDto>();
 
-        //Authentication
-        CreateMap<LoginDto, User>();
-        CreateMap<RegisterDto, User>();
+            //Authentication
+            CreateMap<LoginDto, User>();
+            CreateMap<RegisterDto, User>();
+        }
     }
 }

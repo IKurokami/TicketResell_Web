@@ -1,7 +1,4 @@
-using System;
-using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Repositories;
 using Repositories.Repositories.Carts;
@@ -49,7 +46,7 @@ namespace TicketResell.Repositories.UnitOfWork
         public IChatRepository ChatRepository { get; }
         public IRatingRepository RatingRepository { get; }
         public IChatboxRepository ChatboxRepository { get; }
-
+        
         public async Task<int> CompleteAsync()
         {
             return await _context.SaveChangesAsync();
@@ -60,3 +57,4 @@ namespace TicketResell.Repositories.UnitOfWork
             _context.Dispose();
         }
     }
+}
