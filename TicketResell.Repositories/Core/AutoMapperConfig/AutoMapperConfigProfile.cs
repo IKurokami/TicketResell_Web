@@ -15,6 +15,7 @@ using TicketResell.Repositories.Core.Dtos.Chat;
 using Category = Repositories.Core.Entities.Category;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 using TicketResell.Repositories.Core.Dtos.Rating;
+using TicketResell.Repositories.Core.Dtos.Chatbox;
 
 namespace Repositories.Core.AutoMapperConfig
 {
@@ -40,6 +41,13 @@ namespace Repositories.Core.AutoMapperConfig
             CreateMap<Rating, RatingReadDto>();
             CreateMap<RatingCreateDto, Rating>();
             CreateMap<RatingUpdateDto, Rating>();
+
+            //Chatbox
+            CreateMap<Chatbox, ChatboxReadDto>();
+            CreateMap<ChatboxReadDto, Chatbox>();
+            CreateMap<ChatboxCreateDto, Chatbox>();
+            CreateMap<ChatboxUpdateStatusDto, Chatbox>();
+
 
             //Revenue
             CreateMap<RevenueCreateDto, Revenue>();
@@ -73,6 +81,9 @@ namespace Repositories.Core.AutoMapperConfig
 
             //Chat
             CreateMap<Chat, ChatReadDto>();
+            CreateMap<ChatReadDto, Chat>();
+            CreateMap<ChatboxReadDto, Chatbox>();
+            CreateMap<Chatbox, ChatboxReadDto>();
             
             //Cart
             CreateMap<Order, CartDto>();

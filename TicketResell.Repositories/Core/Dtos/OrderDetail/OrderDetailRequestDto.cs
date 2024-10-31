@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+namespace TicketResell.Repositories.Core.Dtos.OrderDetail;
 
-namespace TicketResell.Repositories.Core.Dtos.OrderDetail
+public class OrderDetailRequestDto
 {
-    public class OrderDetailRequestDto
-    {
-        public string? TicketId { get; set; }
-        public int Quantity { get; set; }
-    }
+    public string? TicketId { get; set; }
+    public int Quantity { get; set; }
 }

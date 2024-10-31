@@ -1,12 +1,9 @@
 using Repositories.Constants;
 using Repositories.Core.Dtos.Category;
-using Repositories.Core.Dtos.User;
 using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Categories;
 
 namespace TicketResell.Repositories.Controllers;
-
-using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]

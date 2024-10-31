@@ -1,13 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
-using Repositories.Core.Dtos.Category;
 using Repositories.Core.Entities;
+using TicketResell.Repositories.Logger;
 
 namespace Repositories.Repositories;
-
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using TicketResell.Repositories.Logger;
 
 public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 {
@@ -25,7 +21,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         var tickets = await _context.Tickets
             .Include(x => x.Seller)
             .Include(x => x.Categories)
-            .Where(x=>x.Status==1)
+            .Where(x => x.Status == 1)
             .ToListAsync();
 
         var groupedTickets = tickets
@@ -33,10 +29,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Select(g => g.First())
             .ToList();
 
-        if (groupedTickets == null || !groupedTickets.Any())
-        {
-            throw new KeyNotFoundException("No ticket in database");
-        }
+        if (groupedTickets == null || !groupedTickets.Any()) throw new KeyNotFoundException("No ticket in database");
 
         return groupedTickets;
     }
@@ -51,9 +44,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .ToListAsync();
 
         if (tickets == null || tickets.Count == 0)
-        {
             throw new KeyNotFoundException("No tickets found in the specified range");
-        }
 
         return tickets;
     }
@@ -61,33 +52,26 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<Ticket> GetByIdAsync(string id)
     {
         var ticket = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories)
-            .FirstAsync(x => x.TicketId.StartsWith(id) && x.Status==1);
-        if (ticket == null)
-        {
-            throw new KeyNotFoundException("Id is not found");
-        }
+            .FirstAsync(x => x.TicketId.StartsWith(id) && x.Status == 1);
+        if (ticket == null) throw new KeyNotFoundException("Id is not found");
 
         return ticket;
     }
 
     public async Task<List<Ticket>> GetTicketByNameAsync(string name)
     {
-        var tickets = await _context.Tickets.Include(x => x.Seller).Where(x => x.Name == name && x.Status==1).ToListAsync();
-        if (tickets == null || tickets.Count == 0)
-        {
-            throw new KeyNotFoundException("Name is not found");
-        }
+        var tickets = await _context.Tickets.Include(x => x.Seller).Where(x => x.Name == name && x.Status == 1)
+            .ToListAsync();
+        if (tickets == null || tickets.Count == 0) throw new KeyNotFoundException("Name is not found");
 
         return tickets;
     }
 
     public async Task<List<Ticket>> GetTicketByDateAsync(DateTime date)
     {
-        var tickets = await _context.Tickets.Where(x => x.StartDate == date && x.Status==1).Include(x => x.Categories).ToListAsync();
-        if (tickets == null || tickets.Count == 0)
-        {
-            throw new KeyNotFoundException("Don't have ticket in this date");
-        }
+        var tickets = await _context.Tickets.Where(x => x.StartDate == date && x.Status == 1).Include(x => x.Categories)
+            .ToListAsync();
+        if (tickets == null || tickets.Count == 0) throw new KeyNotFoundException("Don't have ticket in this date");
 
         return tickets;
     }
@@ -96,11 +80,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     {
         foreach (var x in categoryList)
         {
-            Category? category = await _context.Categories.FindAsync(x);
-            if (category != null)
-            {
-                ticket.Categories.Add(category);
-            }
+            var category = await _context.Categories.FindAsync(x);
+            if (category != null) ticket.Categories.Add(category);
         }
 
         await _context.Tickets.AddAsync(ticket);
@@ -108,27 +89,21 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<List<Ticket>> GetTicketsByIds(List<string> ticketIds)
     {
-        return await _context.Tickets.Where(t => ticketIds.Contains(t.TicketId) && t.Status==1).ToListAsync();
+        return await _context.Tickets.Where(t => ticketIds.Contains(t.TicketId) && t.Status == 1).ToListAsync();
     }
 
     public async Task UpdateTicketAsync(string id, Ticket ticket, List<string> categoryIds)
     {
         var ticketUpdate = await _context.Tickets
             .Include(t => t.Categories)
-            .FirstOrDefaultAsync(t => t.TicketId == id && t.Status==1);
-        if (ticketUpdate != null)
-        {
-            ticketUpdate.Categories.Clear();
-        }
+            .FirstOrDefaultAsync(t => t.TicketId == id && t.Status == 1);
+        if (ticketUpdate != null) ticketUpdate.Categories.Clear();
 
 
         foreach (var x in categoryIds)
         {
-            Category? category = await _context.Categories.FindAsync(x);
-            if (category != null)
-            {
-                ticket.Categories.Add(category);
-            }
+            var category = await _context.Categories.FindAsync(x);
+            if (category != null) ticket.Categories.Add(category);
         }
 
         _context.Tickets.Update(ticket);
@@ -136,11 +111,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
     public async Task<bool> CheckExist(string id)
     {
-        Ticket? ticket = await _context.Tickets.FindAsync(id);
-        if (ticket != null)
-        {
-            return true;
-        }
+        var ticket = await _context.Tickets.FindAsync(id);
+        if (ticket != null) return true;
 
         return false;
     }
@@ -148,11 +120,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<List<Ticket>> GetTicketBySellerId(string id)
     {
         var tickets = await _context.Tickets.Include(x => x.Seller).Include(x => x.Categories)
-            .Where(x => x.SellerId == id && x.Status==1).ToListAsync();
-        if (tickets == null)
-        {
-            throw new KeyNotFoundException("Ticket not found");
-        }
+            .Where(x => x.SellerId == id && x.Status == 1).ToListAsync();
+        if (tickets == null) throw new KeyNotFoundException("Ticket not found");
 
         var uniqueTicketIds = tickets
             .Select(t => t.TicketId.Split('_')[0])
@@ -172,10 +141,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Include(t => t.Categories)
             .FirstOrDefaultAsync(t => t.TicketId == id);
 
-        if (ticket == null)
-        {
-            throw new KeyNotFoundException("Ticket not found");
-        }
+        if (ticket == null) throw new KeyNotFoundException("Ticket not found");
 
         ticket.Categories.Clear();
 
@@ -187,7 +153,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<ICollection<Category>?> GetTicketCateByIdAsync(string id)
     {
         var categories = await _context.Tickets
-            .Where(t => t.TicketId == id && t.Status==1)
+            .Where(t => t.TicketId == id && t.Status == 1)
             .Select(t => t.Categories)
             .FirstOrDefaultAsync();
         return categories;
@@ -201,18 +167,11 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Where(t => t.TicketId.StartsWith(baseId))
             .ToListAsync();
 
-        if (tickets == null || tickets.Count == 0)
-        {
-            throw new KeyNotFoundException("Tickets not found");
-        }
+        if (tickets == null || tickets.Count == 0) throw new KeyNotFoundException("Tickets not found");
 
         foreach (var ticket in tickets)
-        {
             if (ticketIds.Contains(ticket.TicketId))
-            {
                 ticket.Status = 0;
-            }
-        }
         await _context.SaveChangesAsync();
     }
 
@@ -221,18 +180,12 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         var tickets = await _context.Tickets
             .Include(x => x.Seller)
             .Include(x => x.Categories)
-            .Where(t => t.TicketId.StartsWith(baseId) && t.Status==1)
+            .Where(t => t.TicketId.StartsWith(baseId) && t.Status == 1)
             .ToListAsync();
 
-        if (tickets == null || tickets.Count == 0)
-        {
-            throw new KeyNotFoundException("Tickets not found");
-        }
+        if (tickets == null || tickets.Count == 0) throw new KeyNotFoundException("Tickets not found");
 
-        foreach (var ticket in tickets)
-        {
-            ticket.Status = 0;
-        }
+        foreach (var ticket in tickets) ticket.Status = 0;
 
         await _context.SaveChangesAsync();
     }
@@ -241,7 +194,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<List<Ticket>> GetTicketsByCategoryAndDateAsync(string categoryName, int amount)
     {
         return await _context.Tickets
-            .Where(t => t.Categories.Any(c => c.Name == categoryName) && t.StartDate > DateTime.Now && t.Status==1)
+            .Where(t => t.Categories.Any(c => c.Name == categoryName) && t.StartDate > DateTime.Now && t.Status == 1)
             .OrderBy(t => t.StartDate)
             .Take(amount)
             .ToListAsync();
@@ -260,15 +213,13 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         var endTime = now.Add(timeRange);
 
         var tickets = await _context.Tickets
-            .Where(t => t.StartDate.HasValue && t.StartDate >= now && t.StartDate <= endTime && t.Status==1)
+            .Where(t => t.StartDate.HasValue && t.StartDate >= now && t.StartDate <= endTime && t.Status == 1)
             .OrderBy(t => t.StartDate)
             .Take(ticketAmount)
             .ToListAsync();
 
         if (tickets == null || tickets.Count == 0)
-        {
             throw new KeyNotFoundException("No tickets found in the specified time range.");
-        }
 
         return tickets;
     }
@@ -312,17 +263,14 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Select(t => t.Qr)
             .FirstOrDefaultAsync();
 
-        if (ticket == null || ticket.Length == 0)
-        {
-            return null;
-        }
+        if (ticket == null || ticket.Length == 0) return null;
 
         return Convert.ToBase64String(ticket);
     }
 
     public async Task<int> GetTicketRemainingAsync(string ticketId)
     {
-        int count = await _context.Tickets
+        var count = await _context.Tickets
             .Where(ticket => ticket.TicketId.StartsWith(ticketId) && ticket.Status == 1)
             .CountAsync();
         return count;
@@ -335,7 +283,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         var tickets = await _context.Tickets
             .Include(x => x.Seller)
             .Include(x => x.Categories)
-            .Where(t => t.TicketId.StartsWith(newbaseId) && t.Status==1)
+            .Where(t => t.TicketId.StartsWith(newbaseId) && t.Status == 1)
             .ToListAsync();
         return tickets;
     }
@@ -346,7 +294,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .Include(t => t.Seller)
             .Include(t => t.Categories) // Include the related categories
             .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId)) &&
-                        !t.TicketId.StartsWith(ticketid) && t.Status==1) // Filter tickets by category
+                        !t.TicketId.StartsWith(ticketid) && t.Status == 1) // Filter tickets by category
             .ToListAsync();
         // Filter to keep only the base ticket IDs (e.g., TICKET001)
         var uniqueTicketIds = tickets
@@ -364,7 +312,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<List<Ticket>> GetTicketNotByCateIdAsync(string[] categoriesId)
     {
         var tickets = await _context.Tickets.Include(t => t.Seller)
-            .Where(t => t.Categories.All(c => !categoriesId.Contains(c.CategoryId))&& t.Status==1) // Filter tickets by category
+            .Where(t => t.Categories.All(c => !categoriesId.Contains(c.CategoryId)) &&
+                        t.Status == 1) // Filter tickets by category
             .Include(t => t.Categories) // Include the related categories
             .ToListAsync();
         // Filter to keep only the base ticket IDs (e.g., TICKET001)
@@ -383,7 +332,8 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
     public async Task<List<Ticket>> GetTicketByListCateIdAsync(string[] categoriesId)
     {
         var tickets = await _context.Tickets.Include(t => t.Seller)
-            .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId))&& t.Status==1) // Filter tickets by category
+            .Where(t => t.Categories.Any(c => categoriesId.Contains(c.CategoryId)) &&
+                        t.Status == 1) // Filter tickets by category
             .Include(t => t.Categories) // Include the related categories
             .ToListAsync();
         // Filter to keep only the base ticket IDs (e.g., TICKET001)

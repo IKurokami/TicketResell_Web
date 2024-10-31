@@ -10,8 +10,8 @@ namespace TicketResell.Services.Services;
 public class OrderService : IOrderService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private IMapper _mapper;
-    private IValidatorFactory _validatorFactory;
+    private readonly IMapper _mapper;
+    private readonly IValidatorFactory _validatorFactory;
 
     public OrderService(IUnitOfWork unitOfWork, IMapper mapper, IValidatorFactory validatorFactory)
     {
@@ -24,31 +24,25 @@ public class OrderService : IOrderService
     {
         var order = await _unitOfWork.OrderRepository.GetDetailsByIdAsync(orderId);
 
-        if (order == null)
-        {
-            return ResponseModel.NotFound($"Order with ID {orderId} not found");
-        }
+        if (order == null) return ResponseModel.NotFound($"Order with ID {orderId} not found");
 
         if (!Enum.IsDefined(typeof(OrderStatus), status))
-        {
             return ResponseModel.BadRequest($"Invalid order status: {status}");
-        }
 
         order.Status = status;
 
         var validator = _validatorFactory.GetValidator<Order>();
         var validationResult = await validator.ValidateAsync(order);
-        if (!validationResult.IsValid)
-        {
-            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
-        }
+        if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
 
         _unitOfWork.OrderRepository.Update(order);
         var orderDto = _mapper.Map<OrderDto>(order);
 
         return ResponseModel.Success($"Order status updated successfully to {(OrderStatus)status}", orderDto);
     }
-    public async Task<ResponseModel> GetTicketDetailsByIdAsync(string orderId){
+
+    public async Task<ResponseModel> GetTicketDetailsByIdAsync(string orderId)
+    {
         var order = await _unitOfWork.OrderRepository.GetDetailsByIdAsync(orderId);
         return ResponseModel.Success("Success", order);
     }
@@ -62,10 +56,7 @@ public class OrderService : IOrderService
 
         var validator = _validatorFactory.GetValidator<Order>();
         var validationResult = await validator.ValidateAsync(order);
-        if (!validationResult.IsValid)
-        {
-            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
-        }
+        if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
 
         await _unitOfWork.OrderRepository.CreateAsync(order);
 
@@ -84,7 +75,7 @@ public class OrderService : IOrderService
     public async Task<ResponseModel> GetAllOrders()
     {
         var orders = _mapper.Map<List<OrderDto>>(await _unitOfWork.OrderRepository.GetAllAsync());
-        return ResponseModel.Success($"Successfully get all order", orders);
+        return ResponseModel.Success("Successfully get all order", orders);
     }
 
     public async Task<ResponseModel> GetOrdersByBuyerId(string buyerId)
@@ -123,10 +114,7 @@ public class OrderService : IOrderService
         if (order != null)
         {
             var validationResult = await validator.ValidateAsync(order);
-            if (!validationResult.IsValid)
-            {
-                return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
-            }
+            if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
         }
         else
         {
@@ -144,12 +132,9 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> DeleteOrder(string orderId, bool saveAll = true)
     {
-        Order? order = await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
+        var order = await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
 
-        if (order == null)
-        {
-            return ResponseModel.NotFound($"Order not found");
-        }
+        if (order == null) return ResponseModel.NotFound("Order not found");
 
         _unitOfWork.OrderRepository.Delete(order);
 

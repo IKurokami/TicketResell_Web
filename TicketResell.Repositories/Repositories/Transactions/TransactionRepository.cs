@@ -1,12 +1,9 @@
 using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
-using Microsoft.EntityFrameworkCore;
 using TicketResell.Repositories.Logger;
-using Microsoft.Extensions.Logging;
-using Repositories.Core.Dtos.OrderDetail;
-using TicketResell.Repositories.Core.Dtos.Order;
 
 namespace Repositories.Repositories;
 

@@ -1,25 +1,26 @@
+using Api.Middlewares;
 using Api.Utils;
 using DotNetEnv;
-
 using FluentValidation;
+using Repositories.Config;
 using Repositories.Core.AutoMapperConfig;
 using Repositories.Core.Context;
 using Repositories.Core.Validators;
-using Api.Middlewares;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using StackExchange.Redis;
+using TicketResell.Api.Hubs;
+using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Categories;
-using TicketResell.Services.Services.Tickets;
-using TicketResell.Repositories.Logger;
-using TicketResell.Services.Services.Payments;
-using Repositories.Config;
-using TicketResell.Api.Hubs;
 using TicketResell.Services.Services.History;
-using TicketResell.Services.Services.Revenues;
 using TicketResell.Services.Services.Mail;
+using TicketResell.Services.Services.Payments;
 using TicketResell.Services.Services.Ratings;
+using TicketResell.Services.Services.Revenues;
+using TicketResell.Services.Services.Tickets;
+using IValidatorFactory = Repositories.Core.Validators.IValidatorFactory;
+
+using TicketResell.Services.Services.Chatbox;
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,15 +43,14 @@ builder.Services.Configure<AppConfig>(config =>
     config.SmtpPort = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "default";
     config.Username = Environment.GetEnvironmentVariable("SMTP_USERNAME") ?? "default";
     config.Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? "default";
-    config.FromEmail= Environment.GetEnvironmentVariable("FROM_EMAIL") ?? "default";
+    config.FromEmail = Environment.GetEnvironmentVariable("FROM_EMAIL") ?? "default";
     config.FromDisplayName = Environment.GetEnvironmentVariable("FROM_DISPLAY_NAME") ?? "default";
 });
 builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
 
 
-
-JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", Environment.GetEnvironmentVariable("SQLServer"));
-
+JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json",
+    Environment.GetEnvironmentVariable("SQLServer"));
 
 
 // Dbcontext configuration
@@ -84,6 +84,7 @@ builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IChatboxService, ChatboxService>();
 
 builder.Services.AddHttpClient<IMomoService, MomoService>();
 builder.Services.AddHttpClient<IVnpayService, VnpayService>();
@@ -101,7 +102,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<OrderValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<OrderDetailValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<TicketValidator>();
-builder.Services.AddScoped<Repositories.Core.Validators.IValidatorFactory, ValidatorFactory>();
+builder.Services.AddScoped<IValidatorFactory, ValidatorFactory>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -110,7 +111,7 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials();  // Enable credentials
+                .AllowCredentials(); // Enable credentials
         });
 });
 

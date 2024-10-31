@@ -1,5 +1,3 @@
-using Repositories.Core.Dtos.Ticket;
-
 namespace Repositories.Core.Dtos.OrderDetail;
 
 public class VirtualOrderDetailDto

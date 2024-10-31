@@ -1,9 +1,8 @@
-﻿namespace Repositories.Core.Dtos.SellConfig
-{
-    public class SellConfigCreateDto
-    {
-        public string SellConfigId { get; set; } = null!;
+﻿namespace Repositories.Core.Dtos.SellConfig;
 
-        public double? Commision { get; set; }
-    }
+public class SellConfigCreateDto
+{
+    public string SellConfigId { get; set; } = null!;
+
+    public double? Commision { get; set; }
 }

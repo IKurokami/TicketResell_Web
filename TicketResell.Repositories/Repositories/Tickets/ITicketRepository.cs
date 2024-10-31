@@ -1,8 +1,6 @@
-using Repositories.Core.Dtos.Category;
+using Repositories.Core.Entities;
 
 namespace Repositories.Repositories;
-
-using global::Repositories.Core.Entities;
 
 public interface ITicketRepository : IRepository<Ticket>
 {
@@ -16,7 +14,7 @@ public interface ITicketRepository : IRepository<Ticket>
 
     Task UpdateTicketAsync(string id, Ticket ticket, List<string> categoryIds);
 
-    Task<Boolean> CheckExist(string id);
+    Task<bool> CheckExist(string id);
 
     Task<List<Ticket>> GetTicketBySellerId(string id);
 
@@ -38,6 +36,4 @@ public interface ITicketRepository : IRepository<Ticket>
     Task<List<Ticket>> GetTicketByCateIdAsync(string ticketid, string[] categoriesId);
     Task<List<Ticket>> GetTicketNotByCateIdAsync(string[] categoriesId);
     Task<List<Ticket>> GetTicketByListCateIdAsync(string[] categoriesId);
-
 }
-
