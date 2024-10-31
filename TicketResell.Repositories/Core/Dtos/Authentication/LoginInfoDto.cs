@@ -1,5 +1,4 @@
 using Repositories.Core.Dtos.User;
-using Repositories.Core.Entities;
 
 namespace TicketResell.Repositories.Core.Dtos.Authentication;
 

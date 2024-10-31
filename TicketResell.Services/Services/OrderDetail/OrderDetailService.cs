@@ -9,8 +9,8 @@ namespace TicketResell.Services.Services;
 public class OrderDetailService : IOrderDetailService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private IMapper _mapper;
-    private IValidatorFactory _validatorFactory;
+    private readonly IMapper _mapper;
+    private readonly IValidatorFactory _validatorFactory;
 
     public OrderDetailService(IUnitOfWork unitOfWork, IMapper mapper, IValidatorFactory validatorFactory)
     {
@@ -25,16 +25,10 @@ public class OrderDetailService : IOrderDetailService
 
         var validator = _validatorFactory.GetValidator<OrderDetail>();
         var validationResult = await validator.ValidateAsync(orderDetail);
-        if (!validationResult.IsValid)
-        {
-            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
-        }
+        if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
 
         var order = await _unitOfWork.OrderRepository.HasOrder(dto.OrderId);
-        if (order == false)
-        {
-            return ResponseModel.NotFound("Not found id");
-        }
+        if (order == false) return ResponseModel.NotFound("Not found id");
 
         await _unitOfWork.OrderDetailRepository.CreateAsync(orderDetail);
         if (saveAll)
@@ -53,7 +47,7 @@ public class OrderDetailService : IOrderDetailService
     {
         var orderDetails = await _unitOfWork.OrderDetailRepository.GetAllAsync();
         var data = _mapper.Map<IEnumerable<OrderDetailDto>>(orderDetails);
-        return ResponseModel.Success($"Successfully get all order detail", data);
+        return ResponseModel.Success("Successfully get all order detail", data);
     }
 
     public async Task<ResponseModel> GetOrderDetailsByBuyerId(string buyerId)
@@ -76,10 +70,7 @@ public class OrderDetailService : IOrderDetailService
 
         var validator = _validatorFactory.GetValidator<OrderDetail>();
         var validationResult = await validator.ValidateAsync(orderDetail);
-        if (!validationResult.IsValid)
-        {
-            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
-        }
+        if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
 
         _unitOfWork.OrderDetailRepository.Update(orderDetail);
         if (saveAll)

@@ -1,5 +1,4 @@
 using Repositories.Core.Dtos.Category;
-using Repositories.Core.Entities;
 
 namespace TicketResell.Services.Services.Categories;
 

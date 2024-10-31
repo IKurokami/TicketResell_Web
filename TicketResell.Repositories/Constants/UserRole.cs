@@ -5,5 +5,5 @@ public enum UserRole
     Buyer,
     Seller,
     Staff,
-    Admin,
+    Admin
 }

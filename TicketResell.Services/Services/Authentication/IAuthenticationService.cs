@@ -9,7 +9,7 @@ public interface IAuthenticationService
 
     Task<ResponseModel> LoginAsync(LoginDto loginDto);
     Task<ResponseModel> LogoutAsync(string userId);
-    
+
     Task<ResponseModel> LoginWithAccessKeyAsync(string userId, string accessKey);
     Task<ResponseModel> LoginWithAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto);
     Task<string> CreatePasswordKeyAsync(string userId);
@@ -17,7 +17,7 @@ public interface IAuthenticationService
 
 
     Task<ResponseModel> LoginWithGoogleAsync(GoogleUserInfoDto googleUser);
-    
+
     Task<bool> ValidateAccessKeyAsync(string userId, string accessKey);
     Task<bool> ValidateAccessKeyAsync(AccessKeyLoginDto accessKeyLoginDto);
 

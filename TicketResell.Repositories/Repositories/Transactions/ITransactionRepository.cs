@@ -1,8 +1,6 @@
 using System.Transactions;
-using Repositories.Core.Dtos.OrderDetail;
 using Repositories.Core.Entities;
 using Repositories.Core.Helper;
-using TicketResell.Repositories.Core.Dtos.Order;
 
 namespace Repositories.Repositories;
 
