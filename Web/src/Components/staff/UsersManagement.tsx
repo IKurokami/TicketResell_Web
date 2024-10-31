@@ -34,7 +34,9 @@ interface ChatMessage {
   chatId: string;
   date: string | null;
 }
-
+interface BlockStatus {
+  [userId: string]: boolean;
+}
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +49,7 @@ const UserManagement = () => {
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
   const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
+  const [blockStatus, setBlockStatus] = useState<BlockStatus>({});
   useEffect(() => {
     fetch("http://localhost:5296/api/User/read")
       .then((response) => response.json())
@@ -117,6 +119,31 @@ const UserManagement = () => {
       }));
     });
 
+    connection.on("Block", (senderId: string, message: string) => {
+      console.log(`Block event received for ${senderId}: ${message}`);
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: true
+      }));
+    });
+  
+    connection.on("Unblock", (senderId: string, message: string) => {
+      console.log(`Unblock event received for ${senderId}: ${message}`);
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: false
+      }));
+    });
+
+    connection.on("UnblockEvent", (senderId: string, message: string) => {
+      console.log(`moi lan staff bam unlock, ham nay se hoat dong ${senderId}: ${message}`);
+      
+      setBlockStatus((prev) => ({
+        ...prev,
+        [senderId]: false
+      }));
+    });
+
     try {
       await connection.start();
       const userId = Cookies.get("id");
@@ -182,7 +209,12 @@ const UserManagement = () => {
       await hubConnectionRef.current.invoke(
         "SendMessageAsync",
         receiverId,
-        newMessages[receiverId] // Use the specific message for the receiver
+        newMessages[receiverId], "CB318b7ea9-ac94-46a9-a40c-807085f384ed" // Nút này chỉnh boxchatId tương ứng
+      );
+      await hubConnectionRef.current.invoke(
+        "UnblockChatbox",
+        "CB318b7ea9-ac94-46a9-a40c-807085f384ed",
+        receiverId // Nút unblock của staff sẽ xài hàm này
       );
 
       const newChatMessage: ChatMessage = {
@@ -266,10 +298,10 @@ const UserManagement = () => {
 
       </CardHeader>
       <CardContent>
-        <div className="shadow-lg border rounded-xl p-4 overflow-x-auto bg-white">
+        <div className=" border rounded-xl overflow-x-auto bg-white">
           <table className="w-full">
-            <thead className="bg-blue-50">
-              <tr className="border-b">
+          <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
+          <tr className="border-b">
                 <th className="py-3 px-4  text-left whitespace-nowrap">Tên người dùng</th>
                 <th className="py-3 px-4  text-left whitespace-nowrap">Email</th>
                 <th className="py-3 px-4  text-left whitespace-nowrap">Số điện thoại</th>
@@ -287,10 +319,10 @@ const UserManagement = () => {
                   <td className="py-3 px-4 text-center">
                     <button
                       onClick={() => handleChat(user)}
-                      className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                      className="group relative flex items-center gap-2 px-4 py-2  rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                     >
-                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                      <span className="font-medium">Chat</span>
+                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110 " />
+                      
                       <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                     </button>
                   </td>
@@ -299,7 +331,7 @@ const UserManagement = () => {
                       onClick={() => handleOrder(user.gmail)}
                       variant="default"
                       color="success"
-                      className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                      className=" font-bold py-2 px-4 rounded"
                     >
                       <VisibilityIcon />
                     </Button>

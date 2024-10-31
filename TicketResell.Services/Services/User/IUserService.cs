@@ -8,7 +8,7 @@ public interface IUserService
     public Task<ResponseModel> CreateUserAsync(UserCreateDto dto, bool saveAll = true);
 
     public Task<ResponseModel> GetAllUser();
-
+    public Task<ResponseModel> CheckUserRole(string userId, string roleId);
     public Task<ResponseModel> GetUserByIdAsync(string id);
     public Task<ResponseModel> GetUserByEmailAsync(string email);
 

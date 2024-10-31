@@ -28,16 +28,28 @@ public class UserService : IUserService
     public async Task<ResponseModel> CreateUserAsync(UserCreateDto dto, bool saveAll)
     {
         IValidator<User?> validator = _validatorFactory.GetValidator<User>();
-        var newUser = _mapper.Map<User>(dto);
+        User? newUser = _mapper.Map<User>(dto);
         var validationResult = validator.Validate(newUser);
-        if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+        if (!validationResult.IsValid)
+        {
+            return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
+        }
         newUser.CreateDate = DateTime.UtcNow;
         await _unitOfWork.UserRepository.CreateAsync(newUser);
         if (saveAll)
             await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully created user: {dto.Username}");
     }
+    public async Task<ResponseModel> CheckUserRole(string userId, string roleId)
+    {
+        bool hasRole = await _unitOfWork.UserRepository.HasRoleAsync(userId, roleId);
+        if (hasRole)
+        {
+            ResponseModel.Success("User has role!", hasRole);
+        }
 
+        return ResponseModel.NotFound("User dont have role", hasRole);
+    }
     public async Task<ResponseModel> GetAllUser()
     {
         var user = await _unitOfWork.UserRepository.GetAllAsync();

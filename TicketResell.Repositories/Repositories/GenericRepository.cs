@@ -30,17 +30,18 @@ public class GenericRepository<T> : IRepository<T> where T : class
             await _dbSet.AddAsync(entity);
     }
 
-    public void Update(T? entity)
-    {
-        if (entity != null)
-            _dbSet.Update(entity);
-    }
+        public void Update(T? entity)
+        {
+            if (entity != null) 
+                _dbSet.Update(entity);
+        }
+        
 
-    public void Delete(T? entity)
-    {
-        if (entity != null)
-            _dbSet.Remove(entity);
-    }
+        public void Delete(T? entity)
+        {
+            if (entity != null) 
+                _dbSet.Remove(entity);
+        }
 
     public async Task DeleteByIdAsync(string id)
     {

@@ -15,36 +15,46 @@ using TicketResell.Repositories.Core.Dtos.Order;
 using TicketResell.Repositories.Core.Dtos.Rating;
 using TicketResell.Repositories.Core.Dtos.Ticket;
 using Category = Repositories.Core.Entities.Category;
+using TicketResell.Repositories.Core.Dtos.Ticket;
+using TicketResell.Repositories.Core.Dtos.Rating;
+using TicketResell.Repositories.Core.Dtos.Chatbox;
 
-namespace Repositories.Core.AutoMapperConfig;
-
-public class AutoMapperConfigProfile : Profile
+namespace Repositories.Core.AutoMapperConfig
 {
-    public AutoMapperConfigProfile()
+    public class AutoMapperConfigProfile : Profile
     {
-        CreateMap<UserCreateDto, User>();
-        CreateMap<UserUpdateDto, User>();
-        CreateMap<UserUpdateByAdminDto, User>().ReverseMap();
-        CreateMap<User, UserReadDto>();
-        CreateMap<User, SellerTicketReadDto>()
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
-            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
-            .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.Fullname));
-        CreateMap<SellerRegisterDto, User>()
-            .ForMember(dest => dest.Username, opt => opt.Ignore())
-            .ForMember(dest => dest.Password, opt => opt.Ignore());
-        CreateMap<User, BuyerOrderReadDto>();
+        public AutoMapperConfigProfile()
+        {
+            CreateMap<UserCreateDto, User>();
+            CreateMap<UserUpdateDto, User>();
+            CreateMap<UserUpdateByAdminDto, User>().ReverseMap();
+            CreateMap<User, UserReadDto>();
+            CreateMap<User, SellerTicketReadDto>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.Fullname));
+            CreateMap<SellerRegisterDto, User>()
+                .ForMember(dest => dest.Username, opt => opt.Ignore())
+                .ForMember(dest => dest.Password, opt => opt.Ignore());
+            CreateMap<User, BuyerOrderReadDto>();
+            
+
+            //Rating
+            CreateMap<Rating, RatingReadDto>();
+            CreateMap<RatingCreateDto, Rating>();
+            CreateMap<RatingUpdateDto, Rating>();
+
+            //Chatbox
+            CreateMap<Chatbox, ChatboxReadDto>();
+            CreateMap<ChatboxReadDto, Chatbox>();
+            CreateMap<ChatboxCreateDto, Chatbox>();
+            CreateMap<ChatboxUpdateStatusDto, Chatbox>();
 
 
-        //Rating
-        CreateMap<Rating, RatingReadDto>();
-        CreateMap<RatingCreateDto, Rating>();
-        CreateMap<RatingUpdateDto, Rating>();
-
-        //Revenue
-        CreateMap<RevenueCreateDto, Revenue>();
-        CreateMap<Revenue, RevenueReadDto>();
-        CreateMap<RevenueUpdateDto, Revenue>();
+            //Revenue
+            CreateMap<RevenueCreateDto, Revenue>();
+            CreateMap<Revenue, RevenueReadDto>();
+            CreateMap<RevenueUpdateDto, Revenue>();
 
         //SQL
         CreateMap<Order, OrderDto>();
@@ -76,6 +86,14 @@ public class AutoMapperConfigProfile : Profile
 
         //Cart
         CreateMap<Order, CartDto>();
+            //Chat
+            CreateMap<Chat, ChatReadDto>();
+            CreateMap<ChatReadDto, Chat>();
+            CreateMap<ChatboxReadDto, Chatbox>();
+            CreateMap<Chatbox, ChatboxReadDto>();
+            
+            //Cart
+            CreateMap<Order, CartDto>();
 
         CreateMap<SellConfigCreateDto, SellConfig>();
         CreateMap<SellConfig, SellConfigReadDto>();

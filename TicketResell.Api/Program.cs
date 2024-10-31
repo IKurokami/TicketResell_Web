@@ -20,6 +20,7 @@ using TicketResell.Services.Services.Revenues;
 using TicketResell.Services.Services.Tickets;
 using IValidatorFactory = Repositories.Core.Validators.IValidatorFactory;
 
+using TicketResell.Services.Services.Chatbox;
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +84,7 @@ builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IChatboxService, ChatboxService>();
 
 builder.Services.AddHttpClient<IMomoService, MomoService>();
 builder.Services.AddHttpClient<IVnpayService, VnpayService>();

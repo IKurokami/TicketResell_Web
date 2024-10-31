@@ -17,11 +17,19 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         _logger = logger;
     }
 
-    public new async Task CreateAsync(User? user)
-    {
-        var roleId = RoleConstant.roleBuyer;
-        var role = await _context.Roles.FindAsync(roleId);
-        if (role != null) user?.Roles.Add(role);
+        public async Task<bool> HasRoleAsync(string userId, string roleId)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.UserId == userId && u.Roles.Any(r => r.RoleId == roleId));
+        }
+        public new async Task CreateAsync(User? user)
+        {
+            var roleId = RoleConstant.roleBuyer;
+            var role = await _context.Roles.FindAsync(roleId);
+            if (role != null)
+            {
+                user?.Roles.Add(role);
+            }
 
         if (user != null)
             await _context.Users.AddAsync(user);
@@ -32,14 +40,14 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         return await _context.Users.Include(x => x.Roles).ToListAsync();
     }
 
-    public new async Task<User?> GetByIdAsync(string id)
-    {
-        return await _context.Users
-            .Where(u => u.UserId == id)
-            .Include(x => x.Roles)
-            .Include(x => x.Orders)
-            .FirstOrDefaultAsync();
-    }
+        public new async Task<User?> GetByIdAsync(string id)
+        {
+            return await _context.Users
+                .Where(u => u.UserId == id)
+                .Include(x => x.Roles)
+                .Include(x => x.Orders)
+                .FirstOrDefaultAsync();
+        }
 
     public async Task<User?> GetUserByEmailAsync(string email)
     {
@@ -70,13 +78,19 @@ public class UserRepository : GenericRepository<User>, IUserRepository
             _context.Users.Update(user);
     }
 
-    public async Task RemoveSeller(User? user)
-    {
-        var roleId = RoleConstant.roleSeller;
-        var role = await _context.Roles.FindAsync(roleId);
-        if (role != null) user?.Roles.Remove(role);
-        if (user != null) _context.Users.Update(user);
-    }
+        public async Task RemoveSeller(User? user)
+        {
+            var roleId = RoleConstant.roleSeller;
+            var role = await _context.Roles.FindAsync(roleId);
+            if (role != null)
+            {
+                user?.Roles.Remove(role);
+            }
+            if (user != null)
+            {
+                _context.Users.Update(user);
+            }
+        }
 
     public async Task UpdateRole(User user, List<Role> roles)
     {
