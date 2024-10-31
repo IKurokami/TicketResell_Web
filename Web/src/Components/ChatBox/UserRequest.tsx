@@ -10,21 +10,17 @@ interface Role {
   rolename: string;
   description: string;
 }
-
 interface UserData {
   userId: string;
-  sellConfigId: string | null;
   username: string;
-  status: number;
-  createDate: string;
-  gmail: string;
   fullname: string;
-  sex: string;
+  gmail: string;
   phone: string;
   address: string;
-  avatar: string | null;
+  sex: string;
+  status: number;
   birthday: string;
-  bio: string | null;
+  bio: string;
   roles: Role[];
 }
 interface UserRequestProps {
@@ -45,29 +41,34 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData }) => {
   const fetchChatboxData = async () => {
     try {
       const id = Cookies.get("id");
+      console.log("Fetching data for ID:", id);
+      
       const response = await fetch(
         `http://localhost:5296/api/Chatbox/getall/${id}`, 
         { credentials: "include" }
       );
+
       if (!response.ok) {
         throw new Error('Failed to fetch chatbox data');
       }
       const data = await response.json();
-
-      if(data.status == 200 && data.data.length != 0){
+      
+      if(Array.isArray(data.data)){
         setChatboxData(data.data);
-        console.log(chatboxData);
+      } else {
+        console.warn("Received data is not an array:", data);
       }
     } catch (error) {
       console.error('Error fetching chatbox data:', error);
-      // Handle error appropriately
     }
   };
+
   useEffect(() => {
-      fetchChatboxData();
-  },[]);
+    fetchChatboxData();
+  }, []);
 
   const hasRO3Role = userData?.roles?.some((role) => role.roleId === "RO3");
+  console.log(userData);
   return (
     <div className="bg-white py-12 px-10 rounded-xl ">
       <div className="container mx-auto px-5 flex flex-col pt-20 justify-between  sm:flex-row items-center">
@@ -102,7 +103,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData }) => {
           </div>
         )}
         <div></div>
-        {!hasRO3Role && <RequestDialog />}
+        {!hasRO3Role && <RequestDialog setChatboxData={setChatboxData} />}
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">

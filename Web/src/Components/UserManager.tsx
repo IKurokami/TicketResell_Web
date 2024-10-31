@@ -253,13 +253,13 @@ const UserManager: React.FC<UserManagerProps> = ({
   );
 
   return (
-    <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-32">
+    <div className="flex-1 flex flex-col px-4 lg:px-16 ">
       {/* Search Bar */}
       <div className="p-4">
         <div className="relative">
           <input
             type="text"
-            placeholder="Search by name, account email, or payment email"
+            placeholder="Tìm kiếm theo tên, email tài khoản hoặc email thanh toán"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="h-12 w-full pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
@@ -278,7 +278,7 @@ const UserManager: React.FC<UserManagerProps> = ({
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("fullname")}
                 >
-                  Name
+                  Tên
                   {getSortIcon("fullname")}
                 </div>
               </th>
@@ -287,7 +287,7 @@ const UserManager: React.FC<UserManagerProps> = ({
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("userId")}
                 >
-                  Account Email
+                  Email Tài Khoản
                   {getSortIcon("userId")}
                 </div>
               </th>
@@ -296,27 +296,27 @@ const UserManager: React.FC<UserManagerProps> = ({
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("gmail")}
                 >
-                  Payment Email
+                  Email Thanh Toán
                   {getSortIcon("gmail")}
                 </div>
               </th>
               <th scope="col" className="px-6 py-3">
-                Roles
+                Vai Trò
               </th>
               <th scope="col" className="px-6 py-3">
-                Status
+                Trạng Thái
               </th>
               <th scope="col" className="px-6 py-3">
                 <div
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("createDate")}
                 >
-                  Joined
+                  Ngày Tham Gia
                   {getSortIcon("createDate")}
                 </div>
               </th>
             </tr>
-          </thead>{" "}
+          </thead>
           <tbody>
             {paginatedUsers.map((user) => (
               <tr
@@ -348,14 +348,14 @@ const UserManager: React.FC<UserManagerProps> = ({
                     ))}
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 text-nowrap py-4">
                   {user.status === 1 ? (
                     <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                      Active
+                      Hoạt Động
                     </span>
                   ) : (
                     <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                      Inactive
+                      Không Hoạt Động
                     </span>
                   )}
                 </td>
@@ -376,24 +376,24 @@ const UserManager: React.FC<UserManagerProps> = ({
           onClose={() => setContextMenu(null)}
           options={[
             {
-              label: "Edit User",
+              label: "Chỉnh Sửa Người Dùng",
               icon: <FaEdit className="w-4 h-4" />,
               onClick: () => onEdit?.(contextMenu.userId),
             },
             {
-              label: contextMenu.isSeller ? "Disable Seller" : "",
+              label: contextMenu.isSeller ? "Vô Hiệu Hóa Người Bán" : "",
               icon: <FaUserSlash className="w-4 h-4" />,
               onClick: () => {
                 if (contextMenu.isSeller) {
-                  onDisableSeller?.(contextMenu.userId); // Only disable if isSeller is true
+                  onDisableSeller?.(contextMenu.userId);
                 }
               },
               className: contextMenu.isSeller ? "text-orange-600" : "hidden",
             },
             {
               label: contextMenu.isActive
-                ? "Disable Account"
-                : "Enable Account",
+                ? "Vô Hiệu Hóa Tài Khoản"
+                : "Kích Hoạt Tài Khoản",
               icon: <FaUserSlash className="w-4 h-4" />,
               onClick: () =>
                 contextMenu.isActive
@@ -404,7 +404,7 @@ const UserManager: React.FC<UserManagerProps> = ({
                 : "text-green-600",
             },
             {
-              label: "Reset Password",
+              label: "Đặt Lại Mật Khẩu",
               icon: <FaKey className="w-4 h-4" />,
               onClick: () => onResetPassword?.(contextMenu.userId),
             },

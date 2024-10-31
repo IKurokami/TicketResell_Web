@@ -160,7 +160,7 @@ const SellProfile: React.FC<props> = ({
               passHref
             >
               <p className="text-2xl font-medium">
-                {fullname ? fullname : "Unknown"}
+                {fullname ? fullname : "Không xác định"}
               </p>
             </Link>
           </div>
@@ -186,7 +186,7 @@ const SellProfile: React.FC<props> = ({
             <span>
               <FaPhoneAlt className="text-sm mr-2 text-gray-400" />
             </span>
-            {phoneNumber ? phoneNumber : "No Phone Provided"}
+            {phoneNumber ? phoneNumber : "Chưa cung cấp số điện thoại"}
           </p>
         </div>
         <div className="mt-3">
@@ -194,7 +194,7 @@ const SellProfile: React.FC<props> = ({
             <span>
               <FaEnvelope className="text-sm mr-2 text-gray-400" />
             </span>
-            {gmail ? gmail : "No gmail Provided"}
+            {gmail ? gmail : "Chưa cung cấp email"}
           </p>
         </div>
       </div>

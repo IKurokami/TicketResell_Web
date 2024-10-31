@@ -418,14 +418,14 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2 text-slate-600">
               <ShoppingCart className="w-4 h-4" />
-              Transactions
+              Giao dịch
             </span>
             <span className="font-medium text-slate-900">{totalOrders}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2 text-slate-600">
               <Users className="w-4 h-4" />
-               Buyers
+              Người mua
             </span>
             <span className="font-medium text-slate-900">{totalBuyers}</span>
           </div>
@@ -588,14 +588,14 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
                 {percentageChange.toFixed(2)}%
               </span>
             </div>
-            <p className="text-sm text-slate-500">Total Revenue</p>
+            <p className="text-sm text-slate-500">Tổng doanh thu</p>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <div className="flex items-center gap-1">
                 <Check size={16} className="text-green-500" />
-                <span className="text-green-500">On track</span>
+                <span className="text-green-500">Đang tăng</span>
               </div>
               <span className="px-2 py-1 text-sm font-medium text-blue-500 bg-blue-50 rounded-lg whitespace-nowrap">
-                ADR:{" "}
+                Doanh thu trung bình:{" "}
                 {calculateAverageDailyRateForToday(
                   sortedRevenueData
                 ).toLocaleString(undefined, {
@@ -613,9 +613,9 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
               className="w-full sm:w-auto appearance-none bg-slate-50 text-sm rounded-xl px-4 py-2 pr-8 text-slate-600 focus:outline-none duration-200"
             >
               {[
-                { label: "This day", value: "day" },
-                { label: "This month", value: "month" },
-                { label: "This year", value: "year" },
+                { label: "Hôm nay", value: "day" },
+                { label: "Tháng này", value: "month" },
+                { label: "Năm nay", value: "year" },
               ].map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -681,30 +681,30 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
       {/* Stats Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <StatCard
-          title="Daily "
+          title="Hôm nay"
           value={formatCurrency(calculateDayRevenue(today, sortedRevenueData))}
           change={dailyChangeFormatted}
-          subtitle={`${today.getDate()}/${today.getMonth() + 1}`}
+          subtitle={`Ngày ${today.getDate()}/${today.getMonth() + 1}`}
           changeClass={dailyChangeClass}
           totalBuyers={uniqueBuyersToday}
           totalOrders={transactionsToday}
           icon={DollarSign}
         />
         <StatCard
-          title="Monthly"
+          title="Tháng này"
           value={formatCurrency(calculateMonthRevenue(today.getMonth(), today.getFullYear(), sortedRevenueData))}
           change={monthlyChangeFormatted}
-          subtitle={`From ${today.getMonth() + 1}`}
+          subtitle={`Từ tháng ${today.getMonth() + 1}`}
           changeClass={monthlyChangeClass}
           totalOrders={transactionsThisMonth}
           totalBuyers={uniqueBuyersThisMonth}
           icon={Calendar}
         />
         <StatCard
-          title="Yearly"
+          title="Năm nay"
           value={formatCurrency(calculateYearRevenue(today.getFullYear(), sortedRevenueData))}
           change={yearlyChangeFormatted}
-          subtitle={`From ${today.getFullYear()}`}
+          subtitle={`Từ năm ${today.getFullYear()}`}
           changeClass={yearlyChangeClass}
           totalOrders={transactionsThisYear}
           totalBuyers={uniqueBuyersThisYear}

@@ -21,7 +21,7 @@ export interface Role {
   description: string;
 }
 
-interface User {
+interface UserData {
   userId: string;
   username: string;
   fullname: string;
@@ -46,12 +46,12 @@ interface BlockStatus {
   [userId: string]: boolean;
 }
 const UserManagement = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState<Record<string, boolean>>({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [formData, setFormData] = useState<Partial<User>>({});
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [formData, setFormData] = useState<Partial<UserData>>({});
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [chatMessages, setChatMessages] = useState<
     Record<string, ChatMessage[]>
   >({});
@@ -523,13 +523,13 @@ const UserManagement = () => {
           </form>
         </DialogContent>
       </Dialog>
-      {showRequestPopup && (
+      {/* {showRequestPopup && (
         <div className=" z-50 fixed inset-0 bg-black/50 flex items-center justify-center">
           <div ref={popupRef}>
-            <UserRequest />
+            <UserRequest userData={}  />
           </div>
         </div>
-      )}
+      )} */}
     </Card>
   );
 };

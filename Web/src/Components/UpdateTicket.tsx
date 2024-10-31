@@ -679,23 +679,22 @@ const UpdateTicketModal: React.FC = () => {
       <Box className="modal-style">
         <div className="modal-contentt">
           <ScrollToTopButton />
-          <h2>Add Ticket</h2>
+          <h2>Cập Nhật Vé</h2>
           <TextField
             className="custom-text-field"
             fullWidth
-            label="Quantity"
+            label="Số Lượng"
             value={quantity}
             onChange={(e) => {
               const newQuantity = Number(e.target.value);
               if (newQuantity <= initialquantity) {
-                handleQuantityChange(newQuantity); // Allow decrease only
+                handleQuantityChange(newQuantity);
               }
             }}
             type="number"
             margin="normal"
-            inputProps={{ min: 1, max: initialquantity }} // Disable if the quantity reaches the minimum
+            inputProps={{ min: 1, max: initialquantity }}
           />
-          {/* File input for image */}
 
           <div className="upload-container">
             <Typography
@@ -703,9 +702,9 @@ const UpdateTicketModal: React.FC = () => {
               margin="normal"
               style={{ fontSize: "20px" }}
             >
-              Upload Image:
+              Tải Lên Hình Ảnh:
             </Typography>
-
+            
             <div className="row p-3 justify-between">
               <div
                 className="col-md-5 p-0  mb-4  upload-box large-box "
@@ -797,7 +796,7 @@ const UpdateTicketModal: React.FC = () => {
           <TextField
             className="custom-text-field"
             fullWidth
-            label="Name"
+            label="Tên"
             name="name"
             value={formData.name}
             onChange={handleChange}
@@ -809,7 +808,7 @@ const UpdateTicketModal: React.FC = () => {
           <TextField
             className="custom-text-field"
             fullWidth
-            label="Cost"
+            label="Giá"
             name="cost"
             value={formData.cost}
             onChange={handleChange}
@@ -818,12 +817,11 @@ const UpdateTicketModal: React.FC = () => {
             inputProps={{ min: 1 }}
             required
           />
-          {/* Location (Province, District, Ward) */}
 
           <div className="address-fields-container">
             <TextField
               className="address-field"
-              label="House Number/Street"
+              label="Số Nhà/Đường"
               value={houseNumber}
               onChange={(e) => setHouseNumber(e.target.value)}
               margin="normal"
@@ -834,11 +832,7 @@ const UpdateTicketModal: React.FC = () => {
             <Autocomplete
               options={provinces}
               getOptionLabel={(option: Province) => option.Name}
-              value={
-                provinces.find(
-                  (province) => province.Id === selectedProvince
-                ) || null
-              }
+              value={provinces.find((province) => province.Id === selectedProvince) || null}
               onChange={(event, newValue: Province | null) => {
                 handleProvinceChange(newValue ? newValue.Id : null);
               }}
@@ -846,7 +840,7 @@ const UpdateTicketModal: React.FC = () => {
                 <TextField
                   {...params}
                   className="address-field"
-                  label="Province"
+                  label="Tỉnh/Thành Phố"
                   margin="normal"
                   fullWidth
                   required
@@ -857,26 +851,18 @@ const UpdateTicketModal: React.FC = () => {
             <Autocomplete
               options={districts}
               getOptionLabel={(option: District) => option.Name}
-              value={
-                districts.find(
-                  (district) => district.Id === selectedDistrict
-                ) || null
-              }
+              value={districts.find((district) => district.Id === selectedDistrict) || null}
               onChange={(event, newValue: District | null) => {
-                handleDistrictChange(newValue ? newValue.Id : null); // Pass Id, not Name
+                handleDistrictChange(newValue ? newValue.Id : null);
               }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   className="address-field"
-                  label="District"
+                  label="Quận/Huyện"
                   margin="normal"
                   fullWidth
-                  value={
-                    districts.find(
-                      (district) => district.Id === selectedDistrict
-                    ) || null
-                  }
+                  value={districts.find((district) => district.Id === selectedDistrict) || null}
                   required
                   disabled={!selectedProvince}
                 />
@@ -888,13 +874,13 @@ const UpdateTicketModal: React.FC = () => {
               getOptionLabel={(option: Ward) => option.Name}
               value={wards.find((ward) => ward.Id === selectedWard) || null}
               onChange={(event, newValue: Ward | null) => {
-                handleWardChange(newValue ? newValue.Id : null); // Pass Id, not Name
+                handleWardChange(newValue ? newValue.Id : null);
               }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   className="address-field"
-                  label="Ward"
+                  label="Phường/Xã"
                   margin="normal"
                   fullWidth
                   value={wards.find((ward) => ward.Id === selectedWard) || null}
@@ -904,19 +890,21 @@ const UpdateTicketModal: React.FC = () => {
               )}
             />
           </div>
+
           <TextField
             className="custom-text-field"
-            label="Please select address "
+            label="Địa Chỉ Đã Chọn"
             value={formData.location}
             margin="normal"
             fullWidth
             required
             disabled={true}
           />
+
           <TextField
             className="custom-text-field"
             fullWidth
-            label="Date and Time"
+            label="Ngày và Giờ"
             name="date"
             value={formData.date}
             onChange={handleChange}
@@ -930,7 +918,7 @@ const UpdateTicketModal: React.FC = () => {
               min: minDateTime,
             }}
           />
-          {/* Autocomplete for selecting multiple categories */}
+
           <Autocomplete
             multiple
             options={categories}
@@ -941,7 +929,7 @@ const UpdateTicketModal: React.FC = () => {
               <TextField
                 className="custom-text-field"
                 {...params}
-                label="Categories"
+                label="Danh Mục"
                 margin="normal"
               />
             )}
@@ -950,7 +938,8 @@ const UpdateTicketModal: React.FC = () => {
               option.categoryId === value.categoryId
             }
           />
-          <div className="border rounded-md mb-4 ">
+
+          <div className="border rounded-md mb-4">
             <div className="custom-text-field">
               <RichTextEditor
                 name="description"
@@ -962,10 +951,10 @@ const UpdateTicketModal: React.FC = () => {
 
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
             <Button variant="outlined" onClick={handleCancel}>
-              Cancel
+              Hủy
             </Button>
             <Button variant="contained" onClick={handleSave}>
-              Save
+              Lưu
             </Button>
           </Box>
         </div>

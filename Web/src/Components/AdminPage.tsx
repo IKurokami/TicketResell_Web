@@ -47,12 +47,12 @@ const AdminPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sidebarTabs = [
-    { name: "Users", icon: <UsersIcon /> },
-    { name: "Roles", icon: <RolesIcon /> },
-    { name: "Tickets", icon: <TicketsIcon /> },
-    { name: "Categories", icon: <CategoriesIcon /> },
-    { name: "Orders", icon: <OrdersIcon /> },
-    { name: "Revenues", icon: <ShoppingBasket /> },
+    { name: "Người dùng", icon: <UsersIcon /> },
+    { name: "Vai trò", icon: <RolesIcon /> },
+    { name: "Vé", icon: <TicketsIcon /> },
+    { name: "Danh mục", icon: <CategoriesIcon /> },
+    { name: "Đơn hàng", icon: <OrdersIcon /> },
+    { name: "Doanh thu", icon: <ShoppingBasket /> },
   ];
 
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
@@ -727,7 +727,7 @@ const AdminPage = () => {
         type="button"
         className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
       >
-        <span className="sr-only">Open sidebar</span>
+        <span className="sr-only">Mở thanh bên</span>
         <svg
           className="w-6 h-6"
           aria-hidden="true"
@@ -813,7 +813,7 @@ const AdminPage = () => {
               className="flex items-center p-2 w-full text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 dark:text-red-400 dark:hover:bg-gray-700"
             >
               <LogOut className="w-5 h-5" />
-              <span className="ms-3 font-medium">Logout</span>
+              <span className="ms-3 font-medium">Đăng xuất</span>
             </button>
           </div>
         </div>
@@ -869,22 +869,22 @@ const AdminPage = () => {
                 onClick={() => setIsRoleModalOpen(false)}
                 className="text-blue-500 font-semibold"
               >
-                Cancel
+                Hủy
               </button>
               <h3 className="text-lg font-medium text-gray-900">
-                {currentRole ? "Edit Role" : "Add New Role"}
+                {currentRole ? "Chỉnh sửa vai trò" : "Thêm vai trò mới"}
               </h3>
               <button
                 type="submit"
-                form="roleForm" // Link the button with the form submission
+                form="roleForm"
                 className="text-blue-500 font-semibold"
               >
-                {currentRole ? "Update" : "Add"}
+                {currentRole ? "Cập nhật" : "Thêm"}
               </button>
             </div>
             <div className="p-4 space-y-4">
               <form
-                id="roleForm" // Add an ID to associate the submit button
+                id="roleForm"
                 onSubmit={(e) => {
                   e.preventDefault();
                   const formData = new FormData(e.target);
@@ -899,21 +899,21 @@ const AdminPage = () => {
                 <input
                   type="text"
                   name="roleId"
-                  placeholder="Role ID"
+                  placeholder="Mã vai trò"
                   defaultValue={currentRole?.roleId || ""}
                   className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
                 />
                 <input
                   type="text"
                   name="rolename"
-                  placeholder="Role Name"
+                  placeholder="Tên vai trò"
                   defaultValue={currentRole?.rolename || ""}
                   className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
                 />
                 <input
                   type="text"
                   name="description"
-                  placeholder="Description"
+                  placeholder="Mô tả"
                   defaultValue={currentRole?.description || ""}
                   className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
                 />
@@ -931,20 +931,20 @@ const AdminPage = () => {
                 onClick={() => setIsDeleteConfirmOpen(false)}
                 className="text-blue-500 font-semibold"
               >
-                Cancel
+                Hủy
               </button>
               <h3 className="text-lg font-medium text-gray-900">
-                Confirm Deletion
+                Xác nhận xóa
               </h3>
               <button
                 onClick={handleConfirmDelete}
                 className="text-red-500 font-semibold"
               >
-                Delete
+                Xóa
               </button>
             </div>
             <div className="p-4">
-              <p>Are you sure you want to delete this role?</p>
+              <p>Bạn có chắc chắn muốn xóa vai trò này?</p>
             </div>
           </div>
         </div>
@@ -958,17 +958,17 @@ const AdminPage = () => {
                 onClick={() => setIsCategoryModalOpen(false)}
                 className="text-blue-500 font-semibold"
               >
-                Cancel
+                Hủy
               </button>
               <h3 className="text-lg font-medium text-gray-900">
-                {currentCategory ? "Edit Category" : "Add New Category"}
+                {currentCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
               </h3>
               <button
                 type="submit"
                 form="categoryForm"
                 className="text-blue-500 font-semibold"
               >
-                {currentCategory ? "Update" : "Add"}
+                {currentCategory ? "Cập nhật" : "Thêm"}
               </button>
             </div>
             <div className="p-4 space-y-4">
@@ -988,21 +988,21 @@ const AdminPage = () => {
                 <input
                   type="text"
                   name="categoryId"
-                  placeholder="Category ID"
+                  placeholder="Mã danh mục"
                   defaultValue={currentCategory?.categoryId || ""}
                   className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
                 />
                 <input
                   type="text"
                   name="name"
-                  placeholder="Category Name"
+                  placeholder="Tên danh mục"
                   defaultValue={currentCategory?.name || ""}
                   className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
                 />
                 <input
                   type="text"
                   name="description"
-                  placeholder="Description"
+                  placeholder="Mô tả"
                   defaultValue={currentCategory?.description || ""}
                   className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
                 />
@@ -1020,20 +1020,20 @@ const AdminPage = () => {
                 onClick={() => setIsCategoryDeleteConfirmOpen(false)}
                 className="text-blue-500 font-semibold"
               >
-                Cancel
+                Hủy
               </button>
               <h3 className="text-lg font-medium text-gray-900">
-                Confirm Deletion
+                Xác nhận xóa
               </h3>
               <button
                 onClick={handleConfirmCategoryDelete}
                 className="text-red-500 font-semibold"
               >
-                Delete
+                Xóa
               </button>
             </div>
             <div className="p-4">
-              <p>Are you sure you want to delete this category?</p>
+              <p>Bạn có chắc chắn muốn xóa danh mục này?</p>
             </div>
           </div>
         </div>

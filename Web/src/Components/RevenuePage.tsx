@@ -58,7 +58,7 @@ const RevenueCard = () => {
 
   const fetchTransactions = async () => {
     if (!sellerId) {
-      setError("User ID not found in cookies.");
+      setError("Không tìm thấy ID người dùng trong cookies.");
       setLoading(false);
       return;
     }
@@ -71,12 +71,12 @@ const RevenueCard = () => {
         }
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch transactions");
+        throw new Error("Không thể tải giao dịch");
       }
       const result = await response.json();
       setTransactions(result.data);
     } catch (error) {
-      console.error("Error fetching transactions:", error);
+      console.error("Lỗi khi tải giao dịch:", error);
       setTransactions([]);
     } finally {
       setLoading(false);
@@ -93,13 +93,12 @@ const RevenueCard = () => {
           }
         );
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error("Phản hồi mạng không thành công");
         }
         const result = await response.json();
-
         setRevenueData(result.data);
       } catch (error) {
-        console.error("Error fetching revenue data:", error);
+        console.error("Lỗi khi tải dữ liệu doanh thu:", error);
         setRevenueData([]);
       }
     }
@@ -120,16 +119,14 @@ const RevenueCard = () => {
           }
         );
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error("Phản hồi mạng không thành công");
         }
         const result = await response.json();
-        console.log("topbuyer:", result.data);
-
+        console.log("người mua hàng đầu:", result.data);
         setTopBuyers(result.data);
       } catch (error:any) {
         setTopBuyers([]);
-        console.log("error",error);
-        
+        console.log("lỗi", error);
       }
     };
 
@@ -137,11 +134,11 @@ const RevenueCard = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>Lỗi: {error}</div>;
   }
 
   return (

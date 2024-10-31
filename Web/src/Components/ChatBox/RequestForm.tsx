@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { FaCheck, FaClock } from "react-icons/fa";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ChatComponent from "./ChatComponent";
 import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
@@ -23,7 +23,10 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
   const [selectedChatbox, setSelectedChatbox] = useState<Chatbox | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [chatboxes, setChatboxes] = useState<Chatbox[]>(chatboxData);
-
+  useEffect(() => {
+    setChatboxes(chatboxData);
+  }, [chatboxData]);
+  
   const initialMessages = [
     {
       senderId: "123",

@@ -74,7 +74,7 @@ const SellerShop = () => {
 
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortOption, setSortOption] = useState("Price low to high");
+  const [sortOption, setSortOption] = useState("Giá thấp đến cao");
   // const [statusOption, setStatusOption] = useState("Sắp diễn ra");
   const itemsPerPage = 4;
   const [uniqueCities, setUniqueCities] = useState<string[]>([]);
@@ -122,9 +122,9 @@ const SellerShop = () => {
   };
 
   const sortOptions = [
-    { text: "Price low to high", icon: faSortAmountUp },
-    { text: "Price high to low", icon: faSortAmountDown },
-    { text: "Recently listed", icon: faClock },
+    { text: "Giá thấp đến cao", icon: faSortAmountUp },
+    { text: "Giá cao đến thấp", icon: faSortAmountDown },
+    { text: "Mới nhất", icon: faClock },
   ];
 
   // const statusOptions = [
@@ -497,7 +497,7 @@ const SellerShop = () => {
               <div className="h-full flex flex-col p-6">
                 {/* Sidebar Header */}
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-black">Filters</h2>
+                  <h2 className="text-xl font-semibold text-black">Bộ lọc</h2>
                   <button
                     onClick={() => setIsSidebarOpen(false)}
                     className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -509,7 +509,7 @@ const SellerShop = () => {
                 {/* Sidebar Content */}
                 <div className="flex-grow overflow-auto">
                   {/* Genre Filter */}
-                  <h3 className="font-semibold text-lg mb-2">Genres</h3>
+                  <h3 className="font-semibold text-lg mb-2">Thể loại</h3>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {categories.map((genre) => (
                       <button
@@ -529,7 +529,7 @@ const SellerShop = () => {
                   {/* Price Filter */}
                   <div className="mt-6">
                     <h3 className="text-lg font-semibold mb-2">
-                      Price Range: {priceRange.toLocaleString()} VND
+                      Khoảng giá: {priceRange.toLocaleString()} VND
                     </h3>
                     <input
                       type="range"
@@ -543,13 +543,13 @@ const SellerShop = () => {
 
                   {/* Location Filter */}
                   <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-2">Location</h3>
+                    <h3 className="text-lg font-semibold mb-2">Địa điểm</h3>
                     <select
                       value={selectedLocation}
                       onChange={(e) => setSelectedLocation(e.target.value)}
                       className="w-full border-gray-300 rounded-lg shadow-sm p-2"
                     >
-                      <option value="">All Locations</option>
+                      <option value="">Tất cả địa điểm</option>
                       {uniqueCities.map((city) => (
                         <option key={city} value={city} className="truncate">
                           {city}
@@ -561,7 +561,7 @@ const SellerShop = () => {
                   {/* Date Range Filter */}
 
                   <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-2">Date Range</h3>
+                    <h3 className="text-lg font-semibold mb-2">Khoảng thời gian</h3>
 
                     <DatePicker
                       selectsRange={true}
@@ -569,13 +569,13 @@ const SellerShop = () => {
                       endDate={endDate as Date}
                       onChange={handleDateChange}
                       className="w-full border-gray-300 rounded-lg shadow-sm p-2"
-                      placeholderText="Select date range"
+                      placeholderText="Chọn khoảng thời gian"
                     />
                   </div>
                   {/* Time Range Filter */}
 
                   <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-2">Time Range</h3>
+                    <h3 className="text-lg font-semibold mb-2">Thời gian</h3>
 
                     <div className="flex flex-col space-y-2">
                       <input
@@ -597,7 +597,7 @@ const SellerShop = () => {
                       onClick={clearTimeFilter}
                       className="mt-2 w-full bg-gray-200 text-gray-700 rounded-md py-1 px-2 hover:bg-gray-300 transition duration-200 text-sm"
                     >
-                      Clear Time Filter
+                      Xóa bộ lọc thời gian
                     </button>
                   </div>
                   {/* Clear Filters Button */}
@@ -607,7 +607,7 @@ const SellerShop = () => {
                       onClick={clearFilters}
                       className="w-full bg-red-500 text-white rounded-md py-2 px-4 hover:bg-red-600 transition duration-200"
                     >
-                      Clear Filters
+                      Xóa tất cả bộ lọc
                     </button>
                   </div>
                 </div>
@@ -618,7 +618,7 @@ const SellerShop = () => {
                     onClick={() => setIsSidebarOpen(false)}
                     className="w-full bg-blue-500 text-white rounded-md py-2 px-4 hover:bg-blue-600 transition duration-200"
                   >
-                    Apply Filters
+                    Áp dụng bộ lọc
                   </button>
                 </div>
               </div>
@@ -661,7 +661,7 @@ const SellerShop = () => {
                 <div className="relative flex-grow mx-2 max-w-xl md:mb-0 w-full md:w-auto">
                   <input
                     type="text"
-                    placeholder="Search by name"
+                    placeholder="Tìm kiếm theo tên"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="h-12 w-full pl-10 pr-40- rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200"

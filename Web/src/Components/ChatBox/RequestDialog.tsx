@@ -8,6 +8,7 @@ interface DialogProps {
   setTitle: (value: string) => void;
   description: string;
   setDescription: (value: string) => void;
+  setChatboxData: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 const Dialog: React.FC<DialogProps> = ({
@@ -18,6 +19,7 @@ const Dialog: React.FC<DialogProps> = ({
   setTitle,
   description,
   setDescription,
+  setChatboxData,
 }) => {
   return (
     <div
@@ -74,7 +76,7 @@ const Dialog: React.FC<DialogProps> = ({
   );
 };
 
-const DialogComponent: React.FC = () => {
+const DialogComponent: React.FC<{ setChatboxData: React.Dispatch<React.SetStateAction<any[]>> }> = ({ setChatboxData }) => {
   // Define state variables with TypeScript type annotations
   const [open, setOpen] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
@@ -90,6 +92,7 @@ const DialogComponent: React.FC = () => {
     setDescription("");
   };
 
+  
   const handleSend = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -112,6 +115,7 @@ const DialogComponent: React.FC = () => {
       }
 
       const data = await response.json();
+      setChatboxData(prevData => [...prevData, data.data]);
       console.log('Success:', data);
       handleClose();
     } catch (error) {
@@ -135,6 +139,7 @@ const DialogComponent: React.FC = () => {
         setTitle={setTitle}
         description={description}
         setDescription={setDescription}
+        setChatboxData={setChatboxData}
       />
     </>
   );

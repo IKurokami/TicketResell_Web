@@ -3,6 +3,8 @@ import { Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import "@/Css/Chatbox.css";
+import * as signalR from "@microsoft/signalr";
+import Cookies from "js-cookie";
 
 interface ChatMessage {
   senderId: string;
@@ -40,6 +42,8 @@ const Chat: React.FC<ChatProps> = ({
 }) => {
   const [newMessage, setNewMessage] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState("Disconnected");
 
   const isInputDisabled = chatbox?.status === 2;
 
@@ -50,10 +54,67 @@ const Chat: React.FC<ChatProps> = ({
     }
   }, [chatMessages]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      onSendMessage(newMessage, user.userId);
-      setNewMessage("");
+  useEffect(() => {
+    setupSignalRConnection();
+    return () => {
+      if (hubConnectionRef.current) {
+        hubConnectionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const setupSignalRConnection = async () => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5296/chat-hub", {
+        withCredentials: true,
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    hubConnectionRef.current = connection;
+
+    connection.on("ReceiveMessage", (senderId: string, message: string) => {
+      const newMessage = {
+        senderId,
+        receiverId: user.userId,
+        message,
+        chatId: Date.now().toString(),
+        date: new Date().toISOString(),
+        chatboxId: chatbox?.chatboxId.toString() || "",
+      };
+      onSendMessage(newMessage.message, newMessage.senderId);
+    });
+
+    try {
+      await connection.start();
+      const userId = Cookies.get("id");
+      const accessKey = Cookies.get("accessKey");
+
+      if (userId && accessKey) {
+        await connection.invoke("LoginAsync", userId, accessKey);
+        setConnectionStatus("Connected");
+      }
+    } catch (err) {
+      console.error("Error establishing connection:", err);
+      setConnectionStatus("Connection Failed");
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (newMessage.trim() && hubConnectionRef.current) {
+      try {
+        await hubConnectionRef.current.invoke(
+          "SendMessageAsync",
+          user.userId,
+          newMessage,
+          chatbox?.chatboxId.toString() || ""
+        );
+        
+        onSendMessage(newMessage, user.userId);
+        setNewMessage("");
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
   };
 

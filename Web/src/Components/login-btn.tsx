@@ -5,14 +5,14 @@ export default function LoginButton() {
   if (session) {
     return (
       <>
-        Signed in as {session.user?.email as string} <br />
-        <button onClick={() => signOut()}>Sign out</button>
+        Đã đăng nhập với {session.user?.email as string} <br />
+        <button onClick={() => signOut()}>Đăng xuất</button>
       </>
     );
   }
   return (
     <>
-      <button onClick={() => signIn()}>Login with Google</button>
+      <button onClick={() => signIn()}>Đăng nhập với Google</button>
     </>
   );
 }

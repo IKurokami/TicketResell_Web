@@ -179,12 +179,12 @@ const MyCart: React.FC = () => {
     const productsForCheckout = items.filter((item) => item.isSelected);
 
     if (productsForCheckout.length === 0) {
-      alert("Please select at least one product to checkout.");
+      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
       return;
     }
 
     if (!selectedPayment) {
-      alert("Please select a payment method.");
+      alert("Vui lòng chọn phương thức thanh toán.");
       return;
     }
 
@@ -248,7 +248,7 @@ const MyCart: React.FC = () => {
     } catch (error) {
       console.error(`Error processing ${selectedPayment} payment:`, error);
       alert(
-        `There was an error processing your ${selectedPayment} order. Please try again.`
+        `Đã xảy ra lỗi khi xử lý thanh toán ${selectedPayment}. Vui lòng thử lại.`
       );
     }
   };
@@ -283,11 +283,11 @@ const MyCart: React.FC = () => {
               Giỏ hàng
             </h2>
             <div className="hidden sm:grid sm:grid-cols-7 gap-4 mb-4 min-w-full text-sm font-medium text-gray-500 sticky top-16 bg-white z-10 py-2">
-              <div className="col-span-3">Product</div>
-              <div>Price</div>
-              <div>Quantity</div>
-              <div>Total</div>
-              <div>Actions</div>
+              <div className="col-span-3">Sản phẩm</div>
+              <div>Giá</div>
+              <div>Số lượng</div>
+              <div>Tổng</div>
+              <div>Thao tác</div>
             </div>
             {items.map((item) => (
               <div
@@ -308,16 +308,16 @@ const MyCart: React.FC = () => {
                       {formatDateTime(item.ticket.startDate)}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Seller: {item.sellerName}
+                      Người bán: {item.sellerName}
                     </p>
                   </div>
                 </div>
                 <div className="mb-2">
-                  <span className="sm:hidden font-medium mr-2">Price:</span>
+                  <span className="sm:hidden font-medium mr-2">Giá:</span>
                   {formatPriceVND(item.price)}
                 </div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="sm:hidden font-medium">Quantity:</span>
+                  <span className="sm:hidden font-medium">Số lượng:</span>
                   <div className="flex items-center">
                     <button
                       type="button"
@@ -371,7 +371,7 @@ const MyCart: React.FC = () => {
                   </div>
                 </div>
                 <div className="mb-2">
-                  <span className="sm:hidden font-medium mr-2">Total:</span>
+                  <span className="sm:hidden font-medium mr-2">Tổng cộng:</span>
                   {formatPriceVND(item.price * item.quantity)}
                 </div>
                 <div className="flex items-center justify-center space-x-4">

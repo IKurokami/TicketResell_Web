@@ -116,7 +116,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 laptop-lg:grid-cols-4 gap-4 md:gap-4 laptop:grid-cols-3">
                 {displayedItems.map((item, index) =>
                   item && item.id ? (
-                    <Link key={item.id} href={`/ticket/${item.id}`} passHref>
+                    <Link key={item.id} href={`/ticket/${item.id}`} className="no-underline" passHref>
                       <div className="group h-full">
                         <div className="bg-white rounded-2xl overflow-hidden h-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                           <div className="relative pt-[60%]">

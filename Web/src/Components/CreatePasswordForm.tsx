@@ -207,8 +207,8 @@ const CreatePasswordForm: React.FC = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Change Password</h1>
-          <p className="text-gray-600 mt-2">Please enter your new password</p>
+          <h1 className="text-2xl font-bold text-gray-900">Đổi Mật Khẩu</h1>
+          <p className="text-gray-600 mt-2">Vui lòng nhập mật khẩu mới</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -222,7 +222,7 @@ const CreatePasswordForm: React.FC = () => {
               )
             }
             type={showPassword.new ? "text" : "password"}
-            placeholder="New Password"
+            placeholder="Mật khẩu mới"
             name="newPassword"
             value={formData.newPassword}
             onChange={handleChange}
@@ -242,7 +242,7 @@ const CreatePasswordForm: React.FC = () => {
               )
             }
             type={showPassword.confirm ? "text" : "password"}
-            placeholder="Confirm Password"
+            placeholder="Xác nhận mật khẩu"
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
@@ -259,11 +259,26 @@ const CreatePasswordForm: React.FC = () => {
           )}
 
           <ActionButton type="submit" isLoading={isLoading}>
-            Change Password
+            {isLoading ? "Đang xử lý..." : "Đổi Mật Khẩu"}
           </ActionButton>
 
           <div className="mt-4 space-y-2">
-            {PASSWORD_REQUIREMENTS.map((req, index) => (
+            {[
+              { label: "Ít nhất 8 ký tự", test: (pwd: string) => pwd.length >= 8 },
+              {
+                label: "Chứa chữ in hoa",
+                test: (pwd: string) => /[A-Z]/.test(pwd),
+              },
+              {
+                label: "Chứa chữ thường",
+                test: (pwd: string) => /[a-z]/.test(pwd),
+              },
+              { label: "Chứa số", test: (pwd: string) => /\d/.test(pwd) },
+              {
+                label: "Chứa ký tự đặc biệt",
+                test: (pwd: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd),
+              },
+            ].map((req, index) => (
               <div
                 key={index}
                 className={`flex items-center text-sm ${

@@ -135,37 +135,37 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
       case -1:
         return (
           <span className="bg-purple-200 text-purple-900 py-1 px-2 text-xs font-bold rounded">
-            Processing
+            Đang xử lý
           </span>
         );
       case 0:
         return (
           <span className="bg-green-200 text-green-900 py-1 px-2 text-xs font-bold rounded">
-            Completed
+            Hoàn thành
           </span>
         );
       case 1:
         return (
           <span className="bg-orange-200 text-orange-900 py-1 px-2 text-xs font-bold rounded">
-            Carting
+            Giỏ hàng
           </span>
         );
       case 2:
         return (
           <span className="bg-blue-200 text-blue-900 py-1 px-2 text-xs font-bold rounded">
-            Refund
+            Hoàn trả
           </span>
         );
       case 3:
         return (
           <span className="bg-red-200 text-red-900 py-1 px-2 text-xs font-bold rounded">
-            Cancel
+            Hủy bỏ
           </span>
         );
       default:
         return (
           <span className="bg-gray-200 text-gray-900 py-1 px-2 text-xs font-bold rounded">
-            Unknown
+            Không xác định
           </span>
         );
     }
@@ -209,7 +209,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
           <div className="relative flex-grow mx-2 w-full mb-4 md:mb-0">
             <input
               type="text"
-              placeholder="Search by order ID or buyer ID"
+              placeholder="Tìm kiếm theo mã đơn hàng hoặc mã người mua"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-12 w-full pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
@@ -229,7 +229,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("orderId")}
                 >
-                  Order ID
+                  Mã đơn hàng
                   {getSortIcon("orderId")}
                 </div>
               </th>
@@ -238,7 +238,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("buyerId")}
                 >
-                  Buyer ID
+                  Mã người mua
                   {getSortIcon("buyerId")}
                 </div>
               </th>
@@ -247,7 +247,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("status")}
                 >
-                  Status
+                  Trạng thái
                   {getSortIcon("status")}
                 </div>
               </th>
@@ -256,7 +256,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("total")}
                 >
-                  Total
+                  Tổng tiền
                   {getSortIcon("total")}
                 </div>
               </th>
@@ -265,12 +265,12 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("items")}
                 >
-                  Items
+                  Số lượng
                   {getSortIcon("items")}
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 w-16">
-                <span>Actions</span>
+                <span>Thao tác</span>
               </th>
             </tr>
           </thead>
@@ -316,7 +316,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({ orders, onRefresh }) => {
             ) : (
               <tr>
                 <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                  No orders found.
+                  Không tìm thấy đơn hàng.
                 </td>
               </tr>
             )}

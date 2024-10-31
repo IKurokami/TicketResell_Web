@@ -46,18 +46,18 @@ const Popup: React.FC<PopupProps> = ({ isVisible, onClose, ticketId }) => {
     <div className="dialog-background" onClick={onClose}>
       <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
         <div className="dialog-header">
-          <h2>Notification</h2>
+          <h2>Thông báo</h2>
           <button className="close-button" onClick={onClose}>
             ×
           </button>
         </div>
-        <div className="dialog-body">Do you want to delete this ticket?</div>
+        <div className="dialog-body">Bạn có muốn xóa vé này không?</div>
         <div className="dialog-footer">
           <button className="button secondary" onClick={onClose}>
-            Cancel
+            Hủy
           </button>
           <button className="button primary" onClick={handleClick}>
-            Ok
+            Đồng ý
           </button>
         </div>
       </div>
