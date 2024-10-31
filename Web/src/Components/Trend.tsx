@@ -273,7 +273,7 @@ const Trend = () => {
           <CategoryCarousel key={category.categoryId} category={category} />
         ))
       ) : (
-        <p>Loading categories...</p>
+        <p>Đang tải danh mục...</p>
       )}
     </div>
     </div>

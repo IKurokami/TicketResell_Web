@@ -8,6 +8,7 @@ namespace TicketResell.Services.Services.Chatbox
 {
     public interface IChatboxService
     {
+        Task<ResponseModel> CreateReportAsync(ChatboxCreateDto dto, string userId, bool saveAll = true);
         Task<ResponseModel> CreateChatboxAsync(ChatboxCreateDto dto, string userId, bool saveAll = true);
         Task<ResponseModel> GetChatboxesAsync();
         Task<ResponseModel> GetChatboxByIdAsync(string id);

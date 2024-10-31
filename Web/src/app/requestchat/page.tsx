@@ -1,10 +1,11 @@
 import React from "react";
 import Background from "@/Components/Background";
-import UserRequest from "@/Components/ChatBox/UserRequest";
+import Chatpage from "@/Components/ChatBox/Chatpage";
+
 
 const requestchat = () => {
   return (
-    <Background test={<UserRequest  />} />
+    <Background test={<Chatpage />} />
   );
 };
 export default requestchat;

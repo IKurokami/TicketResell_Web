@@ -66,11 +66,11 @@ interface BlockStatus {
   [userId: string]: boolean;
 }
 const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState<Record<string, boolean>>({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [formData, setFormData] = useState<Partial<User>>({});
+  const [formData, setFormData] = useState<Partial<UserData>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [chatMessages, setChatMessages] = useState<
     Record<string, ChatMessage[]>
@@ -82,11 +82,13 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
     { id: 1, title: "Request 1", message: "Sample request message 1" },
     { id: 2, title: "Request 2", message: "Sample request message 2" },
   ];
-  const handleRequestClick = () => {
+  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
+    undefined
+  );
+
+  const handleRequestClick = (userId: string) => {
+    setSelectedUserId(userId);
     setShowRequestPopup(true);
-  };
-  const handleRequestSelect = (request: any) => {
-    setSelectedRequest(request);
   };
 
   const [newMessages, setNewMessages] = useState<Record<string, string>>({});
@@ -245,7 +247,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
       ...formData,
       userId: `USER${(users.length + 1).toString().padStart(3, "0")}`,
       status: 1,
-    } as User;
+    } as UserData;
     setUsers([...users, newUser]);
     setIsOpen(false);
     setFormData({});
@@ -356,7 +358,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className=" border rounded-xl overflow-x-auto bg-white">
+        <div className="border rounded-xl overflow-x-auto bg-white">
           <table className="w-full">
             <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
               <tr className="border-b">
@@ -406,7 +408,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
                           (role) =>
                             role.roleId === "RO1" || role.roleId === "RO2"
                         )
-                          ? handleRequestClick()
+                          ? handleRequestClick(user.userId)
                           : handleChat(user);
                       }}
                       className="group relative flex items-center gap-2 px-4 py-2  text-white rounded-full  transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -556,10 +558,13 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
           </form>
         </DialogContent>
       </Dialog>
-      {showRequestPopup && (
-        <div className=" z-50 fixed inset-0 bg-black/50 flex items-center justify-center">
+      {showRequestPopup && selectedUserId && (
+        <div className="z-50 fixed inset-0 bg-black/50 flex items-center justify-center">
           <div ref={popupRef}>
-            <UserRequest />
+            <UserRequest
+              userData={userDetails}
+              userId={selectedUserId || undefined}
+            />
           </div>
         </div>
       )}

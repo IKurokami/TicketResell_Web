@@ -130,7 +130,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
   }, [categoriesId]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (
@@ -176,7 +176,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                     {ticket.location}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {new Date(ticket.startDate).toLocaleDateString("en-US", {
+                    {new Date(ticket.startDate).toLocaleDateString("vi-VN", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",

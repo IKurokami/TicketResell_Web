@@ -90,7 +90,7 @@ const ProfileForm: React.FC = () => {
     if (finalAge < 18) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        birthday: "You must be at least 18 years old.",
+        birthday: "Bạn phải từ 18 tuổi trở lên.",
       }));
     } else {
       setErrors((prevErrors) => ({
@@ -123,7 +123,7 @@ const ProfileForm: React.FC = () => {
       !profileData.location ||
       !isChecked
     ) {
-      setNotification("Please fill in all required fields.");
+      setNotification("Vui lòng điền đầy đủ thông tin.");
       return; // Prevent form submission
     }
 
@@ -183,12 +183,12 @@ const ProfileForm: React.FC = () => {
             <div className="text-center">
               <h1 className="text-4xl font-bold">
                 <span className="text-green-600">Ticket</span>
-                <span className="bg-gradient-to-r text-black bg-clip-text ">
+                <span className="bg-gradient-to-r text-black bg-clip-text">
                   Resell
                 </span>
               </h1>
               <p className="text-sm text-gray-500 mt-2">
-                Complete your seller profile
+                Hoàn thành hồ sơ người bán
               </p>
             </div>
           </CardHeader>
@@ -197,10 +197,10 @@ const ProfileForm: React.FC = () => {
             <CardContent className="space-y-6">
               <TextField
                 fullWidth
-                label="Full Name"
+                label="Họ và tên"
                 name="fullname"
                 variant="outlined"
-                placeholder="Enter your full name"
+                placeholder="Nhập họ và tên của bạn"
                 onChange={handleChange}
                 sx={textFieldStyle}
               />
@@ -211,7 +211,7 @@ const ProfileForm: React.FC = () => {
                 name="gmail"
                 type="email"
                 variant="outlined"
-                placeholder="Enter your email address"
+                placeholder="Nhập địa chỉ email của bạn"
                 onChange={handleChange}
                 sx={textFieldStyle}
                 InputProps={{
@@ -226,12 +226,12 @@ const ProfileForm: React.FC = () => {
                   ),
                 }}
               />    
-              <p className="text-red-600 text-sm ">* Email is your PayPal account  </p>
+              <p className="text-red-600 text-sm">* Email là tài khoản PayPal của bạn</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextField
                   fullWidth
-                  label="Birthday"
+                  label="Ngày sinh"
                   name="birthday"
                   type="date"
                   variant="outlined"
@@ -245,6 +245,7 @@ const ProfileForm: React.FC = () => {
                 <TextField
                   fullWidth
                   select
+                  label=""
                   name="sex"
                   value={profileData.sex || ""}
                   onChange={handleChange}
@@ -255,21 +256,21 @@ const ProfileForm: React.FC = () => {
                   }}
                 >
                   <option value="" disabled>
-                    Select gender
+                    Chọn giới tính
                   </option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                  <option value="other">Khác</option>
                 </TextField>
               </div>
 
               <TextField
                 fullWidth
-                label="Phone Number"
+                label="Số điện thoại"
                 name="phone"
                 type="tel"
                 variant="outlined"
-                placeholder="Enter your phone number"
+                placeholder="Nhập số điện thoại của bạn"
                 onChange={handleChange}
                 sx={textFieldStyle}
               />
@@ -283,7 +284,7 @@ const ProfileForm: React.FC = () => {
               </div>
 
               <TextField
-                label="Please select address "
+                label="Vui lòng chọn địa chỉ"
                 value={profileData.location || ""}
                 margin="normal"
                 fullWidth
@@ -324,7 +325,7 @@ const ProfileForm: React.FC = () => {
                 type="submit"
                 className="w-full h-12 bg-green-800 text-white hover:bg-green-500 font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
               >
-                Complete Profile
+                Hoàn thành hồ sơ
               </Button>
             </CardFooter>
           </form>

@@ -23,18 +23,18 @@ const Popup: React.FC<PopupProps> = ({isVisible, onClose }) => {
     <div className="dialog-background" onClick={onClose}>
       <div className="dialog-content" onClick={e => e.stopPropagation()}>
         <div className="dialog-header">
-          <h2>Notification</h2>
+          <h2>Thông báo</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
         <div className="dialog-body">
-          You are not a seller!! Please regigter seller!!
+          Bạn chưa đăng ký làm người bán!! Vui lòng đăng ký làm người bán!!
         </div>
         <div className="dialog-footer">
-          <button className="button primary" onClick={handleClick} >
-            Sign up
+          <button className="button primary" onClick={handleClick}>
+            Đăng ký
           </button>
           <button className="button secondary" onClick={onClose}>
-            Cancel
+            Hủy bỏ
           </button>
         </div>
       </div>

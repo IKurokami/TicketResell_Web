@@ -8,6 +8,7 @@ interface DialogProps {
   setTitle: (value: string) => void;
   description: string;
   setDescription: (value: string) => void;
+  setChatboxData: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 const Dialog: React.FC<DialogProps> = ({
@@ -18,6 +19,7 @@ const Dialog: React.FC<DialogProps> = ({
   setTitle,
   description,
   setDescription,
+  setChatboxData,
 }) => {
   return (
     <div
@@ -74,7 +76,7 @@ const Dialog: React.FC<DialogProps> = ({
   );
 };
 
-const DialogComponent: React.FC = () => {
+const DialogComponent: React.FC<{ setChatboxData: React.Dispatch<React.SetStateAction<any[]>> }> = ({ setChatboxData }) => {
   // Define state variables with TypeScript type annotations
   const [open, setOpen] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
@@ -90,12 +92,35 @@ const DialogComponent: React.FC = () => {
     setDescription("");
   };
 
-  const handleSend = (e: React.FormEvent<HTMLFormElement>) => {
+  
+  const handleSend = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Add your logic to handle the "send" action here
-    console.log("Title:", title);
-    console.log("Description:", description);
-    handleClose();
+    try {
+      const response = await fetch('http://localhost:5296/api/Chatbox/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          chatboxId: "string",
+          title,
+          status: 0,
+          description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create chatbox');
+      }
+
+      const data = await response.json();
+      setChatboxData(prevData => [...prevData, data.data]);
+      console.log('Success:', data);
+      handleClose();
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (
@@ -114,6 +139,7 @@ const DialogComponent: React.FC = () => {
         setTitle={setTitle}
         description={description}
         setDescription={setDescription}
+        setChatboxData={setChatboxData}
       />
     </>
   );

@@ -21,12 +21,12 @@ const Profile = () => {
         setIsLoading(true);
         const id = Cookies.get("id");
         if (!id) {
-          throw new Error("User ID not found in cookies");
+          throw new Error("Không tìm thấy ID người dùng trong cookies");
         }
         const profile = await fetchUserProfile(id);
         setUserProfile(profile);
       } catch (err) {
-        setError("Failed to load user profile. Please try again later.");
+        setError("Không thể tải hồ sơ người dùng. Vui lòng thử lại sau.");
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -36,8 +36,8 @@ const Profile = () => {
     loadUserProfile();
   }, []);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (!userProfile) return <div>No user profile found.</div>;
+  if (isLoading) return <div>Đang tải...</div>;
+  if (!userProfile) return <div>Không tìm thấy hồ sơ người dùng.</div>;
 
   return (
     <UserProfilePage

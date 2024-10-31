@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
+import "@/Css/Chatbox.css";
+import * as signalR from "@microsoft/signalr";
+import Cookies from "js-cookie";
 
 interface ChatMessage {
   senderId: string;
@@ -13,11 +16,11 @@ interface ChatMessage {
 }
 
 interface Chatbox {
-  ChatboxId: number;
-  Status: number;
-  CreateDate: string;
-  Title: string;
-  Description: string;
+  chatboxId: number;
+  status: number;
+  createDate: string;
+  title: string;
+  description: string;
 }
 
 interface ChatProps {
@@ -39,8 +42,10 @@ const Chat: React.FC<ChatProps> = ({
 }) => {
   const [newMessage, setNewMessage] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState("Disconnected");
 
-  const isInputDisabled = chatbox?.Status === 2;
+  const isInputDisabled = chatbox?.status === 2;
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -49,17 +54,85 @@ const Chat: React.FC<ChatProps> = ({
     }
   }, [chatMessages]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      onSendMessage(newMessage, user.userId);
-      setNewMessage("");
+  useEffect(() => {
+    setupSignalRConnection();
+    return () => {
+      if (hubConnectionRef.current) {
+        hubConnectionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const setupSignalRConnection = async () => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5296/chat-hub", {
+        withCredentials: true,
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    hubConnectionRef.current = connection;
+
+    connection.on("ReceiveMessage", (senderId: string, message: string) => {
+      const newMessage = {
+        senderId,
+        receiverId: user.userId,
+        message,
+        chatId: Date.now().toString(),
+        date: new Date().toISOString(),
+        chatboxId: chatbox?.chatboxId.toString() || "",
+      };
+      onSendMessage(newMessage.message, newMessage.senderId);
+    });
+
+    try {
+      await connection.start();
+      const userId = Cookies.get("id");
+      const accessKey = Cookies.get("accessKey");
+
+      if (userId && accessKey) {
+        await connection.invoke("LoginAsync", userId, accessKey);
+        setConnectionStatus("Connected");
+      }
+    } catch (err) {
+      console.error("Error establishing connection:", err);
+      setConnectionStatus("Connection Failed");
     }
   };
 
-  const containerClassName =
-    mode === "popup"
-      ? "fixed bottom-0 right-0 w-full max-w-md h-[70vh] bg-white shadow-lg border-t border-l border-gray-200"
-      : "w-full h-full bg-white";
+  const handleSendMessage = async () => {
+    if (newMessage.trim() && hubConnectionRef.current) {
+      try {
+        await hubConnectionRef.current.invoke(
+          "SendMessageAsync",
+          user.userId,
+          newMessage,
+          chatbox?.chatboxId.toString() || ""
+        );
+        
+        onSendMessage(newMessage, user.userId);
+        setNewMessage("");
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    }
+  };
+
+  const containerClassName = mode === "popup"
+    ? "fixed bottom-0 right-0 w-full max-w-md h-[70vh] bg-white shadow-lg border-t border-l border-gray-200"
+    : "fixed inset-0 w-full h-screen bg-white z-[9999]";
+
+  useEffect(() => {
+    if (mode === "fullpage") {
+      document.body.style.overflow = "hidden";
+      document.body.classList.add("chat-fullpage-mode");
+    }
+    
+    return () => {
+      document.body.style.overflow = "";
+      document.body.classList.remove("chat-fullpage-mode");
+    };
+  }, [mode]);
 
   return (
     <div className={containerClassName}>
@@ -82,7 +155,7 @@ const Chat: React.FC<ChatProps> = ({
           </svg>
         </div>
         <div className="ml-2 font-bold text-lg">
-          {chatbox ? chatbox.Title : "Chat"}
+          {chatbox ? chatbox.title : "Chat"}
         </div>
         {mode === "popup" ? (
           <button

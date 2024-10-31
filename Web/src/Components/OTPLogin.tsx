@@ -33,12 +33,11 @@ const OtpLogin = () => {
       confirmationResult
         .confirm(otp)
         .then((result) => {
-          setSuccess("OTP verified successfully!");
-          // User signed in successfully, navigate to the desired page
+          setSuccess("Xác thực OTP thành công!");
           router.push("/dashboard");
         })
         .catch((error) => {
-          setError("Invalid OTP, please try again.");
+          setError("OTP không hợp lệ, vui lòng thử lại.");
           console.error("OTP verification error:", error);
         });
     }
@@ -63,15 +62,15 @@ const OtpLogin = () => {
           recaptchaVerifier
         );
         setConfirmationResult(confirmationResult);
-        setSuccess("OTP sent successfully.");
+        setSuccess("Đã gửi OTP thành công.");
       } catch (err: any) {
         setResendCountdown(0);
         if (err.code === "auth/invalid-phone-number") {
-          setError("Invalid phone number. Please check the number.");
+          setError("Số điện thoại không hợp lệ. Vui lòng kiểm tra lại.");
         } else if (err.code === "auth/too-many-requests") {
-          setError("Too many requests. Please try again later.");
+          setError("Quá nhiều yêu cầu. Vui lòng thử lại sau.");
         } else {
-          setError("Failed to send OTP. Please try again later.");
+          setError("Không thể gửi OTP. Vui lòng thử lại sau.");
         }
       }
     });
@@ -116,12 +115,12 @@ const OtpLogin = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">
-          Enter Your Phone Number
+          Nhập Số Điện Thoại Của Bạn
         </h2>
         {!confirmationResult && (
           <form onSubmit={requestOtp}>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone Number
+              Số Điện Thoại
             </label>
             <input
               id="phone"
@@ -140,10 +139,10 @@ const OtpLogin = () => {
           className="mt-6 w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition duration-300"
         >
           {resendCountdown > 0
-            ? `Resend OTP in ${resendCountdown}`
+            ? `Gửi lại OTP sau ${resendCountdown}s`
             : isPending
-            ? "Sending OTP"
-            : "Send OTP"}
+            ? "Đang gửi OTP"
+            : "Gửi OTP"}
         </button>
         <div className="p-10 text-center">
           {error && <p className="text-red-500">{error}</p>}
@@ -152,13 +151,13 @@ const OtpLogin = () => {
         <div id="recaptcha-container" />
         {isPending && loadingIndicator}
 
-        <h2 className="text-2xl font-bold mb-6 text-center">Enter the OTP</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Nhập Mã OTP</h2>
         <form onSubmit={handleOtpSubmit}>
           <label
             htmlFor="otp"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            OTP
+            Mã OTP
           </label>
           <input
             id="otp"
@@ -172,7 +171,7 @@ const OtpLogin = () => {
             type="submit"
             className="mt-6 w-full bg-green-500 text-white font-semibold py-2 rounded-md hover:bg-green-600 transition duration-300"
           >
-            Verify OTP
+            Xác Thực OTP
           </button>
         </form>
       </div>

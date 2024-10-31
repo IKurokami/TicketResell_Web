@@ -89,19 +89,6 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    // if (isNaN(date.getTime())) {
-    //   throw new Error("Invalid date string");
-    // }
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-
-    return `${day}/${month}/${year}, ${hours}:${minutes}`;
-  };
 
   return (
     <section className="w-full px-4 sm:px-0 py-6 md:py-8 lg:py-10 bg-gray-50">
@@ -129,7 +116,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 laptop-lg:grid-cols-4 gap-4 md:gap-4 laptop:grid-cols-3">
                 {displayedItems.map((item, index) =>
                   item && item.id ? (
-                    <Link key={item.id} href={`/ticket/${item.id}`} passHref>
+                    <Link key={item.id} href={`/ticket/${item.id}`} className="no-underline" passHref>
                       <div className="group h-full">
                         <div className="bg-white rounded-2xl overflow-hidden h-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                           <div className="relative pt-[60%]">
@@ -155,7 +142,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
                             </p>
                             <div className="mt-auto">
                               <span className="inline-block bg-gray-100 rounded-full px-3 py-1.5 text-sm text-gray-600">
-                                {formatDate(item.date)}
+                                {item.date}
                               </span>
                             </div>
                           </div>

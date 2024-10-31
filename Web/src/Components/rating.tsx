@@ -159,7 +159,7 @@ const RatingsList = ({ ratings }: any) => {
       <div className="bg-white rounded-lg ">
         <h2 className="text-2xl font-bold mb-6 text-center">Đánh giá</h2>
 
-        {/* Individual Reviews */}
+        {/* Các đánh giá */}
         <div className="space-y-4">
           {paginatedRatings.map((rating: any, index: number) => (
             <Card key={rating.ratingId}>
@@ -168,13 +168,13 @@ const RatingsList = ({ ratings }: any) => {
                   <div className="flex items-center gap-3 pr-3">
                     <img
                       src={userImages[index] || DEFAULT_IMAGE}
-                      alt={`User ${rating.userId}`}
+                      alt={`Người dùng ${rating.userId}`}
                       className="w-7 h-7 rounded-full"
                     />
                   </div>
                   <p className="text-md text-gray-500">{rating.userId}</p>
                 </div>
-                <p className="text-sm text-gray-500">To {rating.sellerId}</p>
+                <p className="text-sm text-gray-500">Đến {rating.sellerId}</p>
 
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -192,7 +192,7 @@ const RatingsList = ({ ratings }: any) => {
           ))}
         </div>
       </div>
-      {/* Pagination */}
+      {/* Phân trang */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-8">
           <button

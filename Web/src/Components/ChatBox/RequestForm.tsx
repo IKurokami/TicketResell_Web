@@ -1,29 +1,38 @@
 import { MessageCircle } from "lucide-react";
-import { FaCheck, FaClock, FaLock } from "react-icons/fa";
-import React, { useState } from "react";
+import { FaCheck, FaClock } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
 import ChatComponent from "./ChatComponent";
 import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
 import { IoMdClose } from "react-icons/io";
 import { FaUnlockKeyhole } from "react-icons/fa6";
+import { UserData } from "./UserRequest";
 
 interface Chatbox {
-  ChatboxId: number;
-  Status: number;
-  CreateDate: string;
-  Title: string;
-  Description: string;
+  chatboxId: number;
+  status: number;
+  createDate: string;
+  title: string;
+  description: string;
 }
 
 interface ChatboxTableProps {
+  userData: UserData | null;
+
   chatboxData: Chatbox[];
 }
 
-const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
+const ChatboxTable: React.FC<ChatboxTableProps> = ({
+  userData,
+  chatboxData,
+}) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChatbox, setSelectedChatbox] = useState<Chatbox | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [chatboxes, setChatboxes] = useState<Chatbox[]>(chatboxData);
+  useEffect(() => {
+    setChatboxes(chatboxData);
+  }, [chatboxData]);
 
   const initialMessages = [
     {
@@ -69,10 +78,14 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
 
   const openChat = (chatbox: Chatbox) => {
     const accessKey = Cookies.get("confirm");
-    if (chatbox.Status === 1 && !accessKey && sampleUser.userole === "RO1") {
+    if (
+      chatbox.status === 1 &&
+      !accessKey &&
+      userData?.roles.some((role) => role.roleId === "RO1")
+    ) {
       setSelectedChatbox(chatbox);
       setIsModalOpen(true);
-    } else if (chatbox.Status === 1 && accessKey) {
+    } else if (chatbox.status === 1 && accessKey) {
       setSelectedChatbox(chatbox);
       setIsChatOpen(true);
     } else {
@@ -90,7 +103,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
   const handleProcessingUpdate = (chatboxId: number) => {
     setChatboxes((prevChatboxes) =>
       prevChatboxes.map((chatbox) =>
-        chatbox.ChatboxId === chatboxId ? { ...chatbox, Status: 2 } : chatbox
+        chatbox.chatboxId === chatboxId ? { ...chatbox, Status: 2 } : chatbox
       )
     );
   };
@@ -110,7 +123,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
       if (response.ok) {
         setChatboxes((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
-            chatbox.ChatboxId === chatboxId
+            chatbox.chatboxId === chatboxId
               ? { ...chatbox, Status: 8 }
               : chatbox
           )
@@ -138,7 +151,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
       if (response.ok) {
         setChatboxes((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
-            chatbox.ChatboxId === chatboxId
+            chatbox.chatboxId === chatboxId
               ? { ...chatbox, Status: 0 }
               : chatbox
           )
@@ -193,15 +206,15 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
         </thead>
         <tbody>
           {chatboxes.map((chatbox) => {
-            const { text, color } = getStatusLabel(chatbox.Status);
+            const { text, color } = getStatusLabel(chatbox.status);
             return (
               <tr
-                key={chatbox.ChatboxId}
+                key={chatbox.chatboxId}
                 className="border-b hover:bg-gray-50 transition-colors duration-300"
               >
-                <td className="py-3 px-4 text-gray-700">{chatbox.Title}</td>
+                <td className="py-3 px-4 text-gray-700">{chatbox.title}</td>
                 <td className="py-3 px-4 text-gray-700">
-                  {chatbox.Description}
+                  {chatbox.description}
                 </td>
                 <td className="py-3 px-4 text-center">
                   <div
@@ -211,13 +224,13 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                   </div>
                 </td>
                 <td className="py-3 px-4 text-gray-700 text-center">
-                  {new Date(chatbox.CreateDate).toLocaleDateString()}
+                  {new Date(chatbox.createDate).toLocaleDateString()}
                 </td>
                 <td className="items-center py-3 px-4 text-gray-700 text-center">
-                  {chatbox.Status === 2 ? (
+                  {chatbox.status === 2 ? (
                     <div className="flex justify-center gap-2">
-                      {sampleUser.userole === "RO2" ||
-                      sampleUser.userole === "RO1" ? (
+                      {userData?.roles.some((role) => role.roleId === "RO2") ||
+                      userData?.roles.some((role) => role.roleId === "RO1") ? (
                         <button
                           onClick={() => openChat(chatbox)}
                           className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -237,7 +250,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
 
                           <button
                             onClick={() =>
-                              handleCompletesUpdate(chatbox.ChatboxId)
+                              handleCompletesUpdate(chatbox.chatboxId)
                             }
                             className="group relative flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                           >
@@ -246,10 +259,10 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                         </div>
                       )}
                     </div>
-                  ) : chatbox.Status === 1 ? (
+                  ) : chatbox.status === 1 ? (
                     <div className="flex items-center justify-center gap-2">
-                      {sampleUser.userole === "RO2" ||
-                      sampleUser.userole === "RO1" ? (
+                      {userData?.roles.some((role) => role.roleId === "RO2") ||
+                      userData?.roles.some((role) => role.roleId === "RO1") ? (
                         <div className="flex justify-center">
                           <FaClock className=" text-yellow-500 " />
                         </div>
@@ -257,7 +270,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                         <div className="flex justify-center gap-2">
                           <button
                             onClick={() =>
-                              handleProcessingUpdate(chatbox.ChatboxId)
+                              handleProcessingUpdate(chatbox.chatboxId)
                             }
                             className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                           >
@@ -265,7 +278,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                           </button>
                           <button
                             onClick={() =>
-                              handleRejectsUpdate(chatbox.ChatboxId)
+                              handleRejectsUpdate(chatbox.chatboxId)
                             }
                             className="group relative flex items-center gap-2 pl-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                           >
@@ -274,11 +287,11 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                         </div>
                       )}
                     </div>
-                  ) : chatbox.Status === 8 ? (
+                  ) : chatbox.status === 8 ? (
                     <div className="flex justify-center">
                       <IoMdClose className="fa-solid fa-x text-red-600 text-xl" />
                     </div>
-                  ) : chatbox.Status === 0 ? (
+                  ) : chatbox.status === 0 ? (
                     <div className="flex justify-center items-center gap-2">
                       <button
                         onClick={() => openChat(chatbox)}
@@ -290,11 +303,11 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                         <FaCheck className="text-green-500" />
                       </div>
                     </div>
-                  ) : chatbox.Status === 3 ? (
+                  ) : chatbox.status === 3 ? (
                     <div className="flex justify-center items-center gap-2">
                       <button
                         onClick={() =>
-                          handleProcessingUpdate(chatbox.ChatboxId)
+                          handleProcessingUpdate(chatbox.chatboxId)
                         }
                         className="group relative flex items-center gap-2  py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                       >
@@ -303,14 +316,14 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-2">
-                      {sampleUser.userole === "RO2" ||
-                      sampleUser.userole === "RO1" ? (
+                      {userData?.roles.some((role) => role.roleId === "RO2") ||
+                      userData?.roles.some((role) => role.roleId === "RO1") ? (
                         <FaClock className=" text-yellow-500" />
                       ) : (
                         <div className="flex justify-center gap-2">
                           <button
                             onClick={() =>
-                              handleProcessingUpdate(chatbox.ChatboxId)
+                              handleProcessingUpdate(chatbox.chatboxId)
                             }
                             className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                           >
@@ -318,7 +331,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                           </button>
                           <button
                             onClick={() =>
-                              handleRejectsUpdate(chatbox.ChatboxId)
+                              handleRejectsUpdate(chatbox.chatboxId)
                             }
                             className="group relative flex items-center gap-2 pl-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                           >

@@ -237,9 +237,9 @@ const TicketDetail = () => {
         <div className="container mx-auto px-4 h-full flex items-end pb-16">
           <nav className="text-white/90 text-sm">
             <ol className="flex items-center space-x-2">
-              <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+              <li><Link href="/" className="hover:text-white transition-colors">Trang chủ</Link></li>
               <li>/</li>
-              <li><Link href="/tickets" className="hover:text-white transition-colors">Tickets</Link></li>
+              <li><Link href="/tickets" className="hover:text-white transition-colors">Vé</Link></li>
               <li>/</li>
               <li className="font-medium truncate max-w-[200px]">{ticketresult?.name}</li>
             </ol>
@@ -352,7 +352,7 @@ const TicketDetail = () => {
                     <FontAwesomeIcon icon={faUser} className="text-white text-2xl" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Verified Seller</p>
+                    <p className="text-sm text-gray-600 mb-1">Người bán đã xác thực</p>
                     <Link
                       href={`/sellshop/${ticketresult?.author.userId}`}
                       className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors"
@@ -363,7 +363,7 @@ const TicketDetail = () => {
                 </div>
                 <div className="flex items-center text-green-600">
                   <FontAwesomeIcon icon={faShieldHalved} className="mr-2" />
-                  <span className="text-sm font-medium">100% Authentic</span>
+                  <span className="text-sm font-medium">Đảm bảo chính hãng</span>
                 </div>
               </div>
 
@@ -458,7 +458,7 @@ const TicketDetail = () => {
             {/* Reviews Section */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <Dropdown
-                title="Customer Reviews & Ratings"
+                title="Đánh giá & Xếp hạng"
                 content={ticketresult?.description}
                 dropdownStatus={true}
                 iconDropdown="faShop"
@@ -536,7 +536,7 @@ const TicketDetail = () => {
               </div>
               <div className="flex items-center space-x-6">
                 <div className="text-right">
-                  <p className="text-sm text-gray-600">Price</p>
+                  <p className="text-sm text-gray-600">Giá</p>
                   <p className="font-semibold text-gray-900">{formatVND(ticketresult?.cost)}</p>
                 </div>
                 {!checkOwner && (

@@ -89,9 +89,10 @@ namespace Api.Controllers
             ChatboxCreateDto dto = new ChatboxCreateDto(){
                 ChatboxId = "CB"+ Guid.NewGuid(),
                 Title="Report",
-                Description= ReportHelper.GetStatusString(status)
+                Description= ReportHelper.GetStatusString(status),
+                Status = status
             };
-            var response = await _chatboxService.CreateChatboxAsync(dto, userId);
+            var response = await _chatboxService.CreateReportAsync(dto, userId);
             Chat newChat = new Chat
                 {
                     SenderId = userId,
@@ -117,7 +118,7 @@ namespace Api.Controllers
             return ResponseParser.Result(await _chatboxService.GetChatboxesAsync());
         }
 
-        [HttpPost("getall/{userId}")]
+        [HttpGet("getall/{userId}")]
         public async Task<IActionResult> GetChatboxsByUserId(string userId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))

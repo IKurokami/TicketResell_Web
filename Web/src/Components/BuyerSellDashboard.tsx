@@ -109,7 +109,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Total Revenue
+                Tổng Doanh Thu
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
                 {formatCurrency(calculateTotalRevenue(revenue))}
@@ -126,7 +126,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Total Transaction
+                Tổng Giao Dịch
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900">
                 {transactions.length}
@@ -143,7 +143,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Total Buyers
+                Tổng Người Mua
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900">
                 {topBuyers.length}
@@ -160,7 +160,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Avg. Order Value
+                Giá Trị Trung Bình
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
                 {formatCurrency(calculateTotalRevenue(revenue) / transactions.length)}
@@ -175,11 +175,11 @@ const OrderDetailsDashboard = ({
         {/* Recent Transactions */}
         <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow overflow-hidden">
           <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl font-semibold text-slate-900">
-              Recent Transactions
+            <h2 className="text-lg md:text-xl text-left font-semibold text-slate-900">
+              Giao Dịch Gần Đây
             </h2>
             <span className="text-xs md:text-sm pr-5 text-slate-500">
-              Price
+              Giá
             </span>
           </div>
 
@@ -212,7 +212,7 @@ const OrderDetailsDashboard = ({
                   </p>
                   <p className="text-xs md:text-sm text-slate-500">
                     {transaction.quantity}{" "}
-                    {transaction.quantity > 1 ? "items" : "item"}
+                    {transaction.quantity > 1 ? "sản phẩm" : "sản phẩm"}
                   </p>
                 </div>
               </div>
@@ -223,11 +223,11 @@ const OrderDetailsDashboard = ({
         {/* Top Buyers */}
         <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow overflow-hidden">
           <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl font-semibold text-slate-900">
-              Top Buyers
+            <h2 className="text-lg text-left md:text-xl font-semibold text-slate-900">
+              Khách Hàng Hàng Đầu
             </h2>
             <span className="text-xs md:text-sm text-slate-500">
-              Total Spent
+              Tổng Chi Tiêu
             </span>
           </div>
 
