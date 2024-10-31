@@ -7,8 +7,9 @@ namespace TicketResell.Services.Services;
 
 public class ChatService : IChatService
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IUnitOfWork _unitOfWork;
+
     public ChatService(IUnitOfWork unitOfWork, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
@@ -26,11 +27,8 @@ public class ChatService : IChatService
 
     public async Task<ResponseModel> GetChatsBySenderIdToReceiverIdAsync(string senderId, string receiverId)
     {
-        if (senderId == receiverId)
-        {
-            return ResponseModel.Success("You cant send message to yourseft", null);
-        }
-        
+        if (senderId == receiverId) return ResponseModel.Success("You cant send message to yourseft");
+
         var chatReadDtos = _mapper.Map<IEnumerable<ChatReadDto>>(
             await _unitOfWork.ChatRepository.GetChatsBySenderIdToReceiverIdAsync(senderId, receiverId));
         return ResponseModel.Success("Get chat lists successfully", chatReadDtos);
