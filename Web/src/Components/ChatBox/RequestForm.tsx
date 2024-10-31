@@ -1,10 +1,11 @@
 import { MessageCircle } from "lucide-react";
-import { FaCheck, FaClock } from "react-icons/fa";
+import { FaCheck, FaClock, FaLock } from "react-icons/fa";
 import React, { useState } from "react";
 import ChatComponent from "./ChatComponent";
 import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
 import { IoMdClose } from "react-icons/io";
+import { FaUnlockKeyhole } from "react-icons/fa6";
 
 interface Chatbox {
   ChatboxId: number;
@@ -89,41 +90,84 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
   const handleProcessingUpdate = (chatboxId: number) => {
     setChatboxes((prevChatboxes) =>
       prevChatboxes.map((chatbox) =>
-        chatbox.ChatboxId === chatboxId ? { ...chatbox, Status: 1 } : chatbox
-      )
-    );
-  };
-
-  const handleRejectsUpdate = (chatboxId: number) => {
-    setChatboxes((prevChatboxes) =>
-      prevChatboxes.map((chatbox) =>
-        chatbox.ChatboxId === chatboxId ? { ...chatbox, Status: -1 } : chatbox
-      )
-    );
-  };
-
-  const handleCompletesUpdate = (chatboxId: number) => {
-    setChatboxes((prevChatboxes) =>
-      prevChatboxes.map((chatbox) =>
         chatbox.ChatboxId === chatboxId ? { ...chatbox, Status: 2 } : chatbox
       )
     );
   };
 
+  const handleRejectsUpdate = async (chatboxId: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5296/api/Chatbox/rejectchat/${chatboxId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setChatboxes((prevChatboxes) =>
+          prevChatboxes.map((chatbox) =>
+            chatbox.ChatboxId === chatboxId
+              ? { ...chatbox, Status: 8 }
+              : chatbox
+          )
+        );
+      } else {
+        console.error("Failed to reject chatbox");
+      }
+    } catch (error) {
+      console.error("Error rejecting chatbox:", error);
+    }
+  };
+
+  const handleCompletesUpdate = async (chatboxId: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5296/api/Chatbox/closeboxchat/${chatboxId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setChatboxes((prevChatboxes) =>
+          prevChatboxes.map((chatbox) =>
+            chatbox.ChatboxId === chatboxId
+              ? { ...chatbox, Status: 0 }
+              : chatbox
+          )
+        );
+      } else {
+        console.error("Failed to update chatbox status");
+      }
+    } catch (error) {
+      console.error("Error updating chatbox status:", error);
+    }
+  };
+
   const getStatusLabel = (status: number) => {
     switch (status) {
-      case 0:
-        return { text: "Pending", color: "bg-yellow-100 text-yellow-800" };
       case 1:
-        return { text: "Processing", color: "bg-blue-100 text-blue-800" };
+        return { text: "Pending", color: "bg-yellow-100 text-yellow-800" };
       case 2:
+        return { text: "Processing", color: "bg-blue-100 text-blue-800" };
+      case 0:
         return { text: "Complete", color: "bg-green-100 text-green-800" };
       case 3:
-        return { text: "Report", color: "bg-red-500 text-white font-bold" };
-      case -1:
+        return {
+          text: "Blocking",
+          color: "bg-gray-300 text-gray-500 font-bold",
+        };
+      case 8:
         return { text: "Rejected", color: "bg-red-100 text-red-800" };
       default:
-        return { text: "Unknown", color: "bg-gray-400 text-white" };
+        return { text: "Report", color: "bg-red-500 text-white font-bold" };
     }
   };
 
@@ -170,7 +214,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                   {new Date(chatbox.CreateDate).toLocaleDateString()}
                 </td>
                 <td className="items-center py-3 px-4 text-gray-700 text-center">
-                  {chatbox.Status === 1 ? (
+                  {chatbox.Status === 2 ? (
                     <div className="flex justify-center gap-2">
                       {sampleUser.userole === "RO2" ||
                       sampleUser.userole === "RO1" ? (
@@ -202,7 +246,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                         </div>
                       )}
                     </div>
-                  ) : chatbox.Status === 0 ? (
+                  ) : chatbox.Status === 1 ? (
                     <div className="flex items-center justify-center gap-2">
                       {sampleUser.userole === "RO2" ||
                       sampleUser.userole === "RO1" ? (
@@ -230,11 +274,34 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                         </div>
                       )}
                     </div>
-                  ) : chatbox.Status === -1 ? (
+                  ) : chatbox.Status === 8 ? (
                     <div className="flex justify-center">
                       <IoMdClose className="fa-solid fa-x text-red-600 text-xl" />
                     </div>
+                  ) : chatbox.Status === 0 ? (
+                    <div className="flex justify-center items-center gap-2">
+                      <button
+                        onClick={() => openChat(chatbox)}
+                        className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                      >
+                        <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
+                      </button>
+                      <div className="pl-4">
+                        <FaCheck className="text-green-500" />
+                      </div>
+                    </div>
                   ) : chatbox.Status === 3 ? (
+                    <div className="flex justify-center items-center gap-2">
+                      <button
+                        onClick={() =>
+                          handleProcessingUpdate(chatbox.ChatboxId)
+                        }
+                        className="group relative flex items-center gap-2  py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                      >
+                        <FaUnlockKeyhole className="text-gray-500 hover:text-blue-500" />
+                      </button>
+                    </div>
+                  ) : (
                     <div className="flex items-center justify-center gap-2">
                       {sampleUser.userole === "RO2" ||
                       sampleUser.userole === "RO1" ? (
@@ -259,18 +326,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({ chatboxData }) => {
                           </button>
                         </div>
                       )}
-                    </div>
-                  ) : (
-                    <div className="flex justify-center items-center gap-2">
-                      <button
-                        onClick={() => openChat(chatbox)}
-                        className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                      >
-                        <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
-                      </button>
-                      <div className="pl-4">
-                        <FaCheck className="text-green-500" />
-                      </div>
                     </div>
                   )}
                 </td>

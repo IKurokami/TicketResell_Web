@@ -15,5 +15,6 @@ namespace TicketResell.Repositories.Constants
         ViolenceReport = 5,
         OverpriceReport = 6,
         FakeTicketReport = 7,
+        Rejected = 8,
     }
 }

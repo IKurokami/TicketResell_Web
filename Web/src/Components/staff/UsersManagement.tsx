@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { PlusCircle, Search, Send, X, MessageCircle, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,26 @@ interface User {
   bio: string;
   roles: Role[];
 }
+interface UserData {
+  userId: string;
+  sellConfigId: string | null;
+  username: string;
+  status: number;
+  createDate: string;
+  gmail: string;
+  fullname: string;
+  sex: string;
+  phone: string;
+  address: string;
+  avatar: string | null;
+  birthday: string;
+  bio: string;
+  roles: Role[];
+}
+
+interface UsersManagementProps {
+  userDetails: UserData | null;
+}
 
 interface ChatMessage {
   senderId: string;
@@ -45,7 +65,7 @@ interface ChatMessage {
 interface BlockStatus {
   [userId: string]: boolean;
 }
-const UserManagement = () => {
+const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState<Record<string, boolean>>({});
@@ -158,24 +178,26 @@ const UserManagement = () => {
       console.log(`Block event received for ${senderId}: ${message}`);
       setBlockStatus((prev) => ({
         ...prev,
-        [senderId]: true
+        [senderId]: true,
       }));
     });
-  
+
     connection.on("Unblock", (senderId: string, message: string) => {
       console.log(`Unblock event received for ${senderId}: ${message}`);
       setBlockStatus((prev) => ({
         ...prev,
-        [senderId]: false
+        [senderId]: false,
       }));
     });
 
     connection.on("UnblockEvent", (senderId: string, message: string) => {
-      console.log(`moi lan staff bam unlock, ham nay se hoat dong ${senderId}: ${message}`);
-      
+      console.log(
+        `moi lan staff bam unlock, ham nay se hoat dong ${senderId}: ${message}`
+      );
+
       setBlockStatus((prev) => ({
         ...prev,
-        [senderId]: false
+        [senderId]: false,
       }));
     });
 
@@ -244,7 +266,8 @@ const UserManagement = () => {
       await hubConnectionRef.current.invoke(
         "SendMessageAsync",
         receiverId,
-        newMessages[receiverId], "CB318b7ea9-ac94-46a9-a40c-807085f384ed" // Nút này chỉnh boxchatId tương ứng
+        newMessages[receiverId],
+        "CB318b7ea9-ac94-46a9-a40c-807085f384ed" // Nút này chỉnh boxchatId tương ứng
       );
       await hubConnectionRef.current.invoke(
         "UnblockChatbox",
@@ -274,7 +297,7 @@ const UserManagement = () => {
   const handleOrder = (userEmail: any) => {
     // Mở một trang mới với đường dẫn hiển thị đơn hàng
     const orderPageUrl = `/order?email=${encodeURIComponent(userEmail)}`;
-    window.open(orderPageUrl, '_blank'); // Mở trang mới
+    window.open(orderPageUrl, "_blank"); // Mở trang mới
   };
 
   const filteredUsers = users.filter(
@@ -335,15 +358,25 @@ const UserManagement = () => {
       <CardContent>
         <div className=" border rounded-xl overflow-x-auto bg-white">
           <table className="w-full">
-          <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
-          <tr className="border-b">
-                <th className="py-3 px-4  text-left whitespace-nowrap">Tên người dùng</th>
-                <th className="py-3 px-4  text-left whitespace-nowrap">Email</th>
-                <th className="py-3 px-4  text-left whitespace-nowrap">Số điện thoại</th>
+            <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
+              <tr className="border-b">
+                <th className="py-3 px-4  text-left whitespace-nowrap">
+                  Tên người dùng
+                </th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">
+                  Email
+                </th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">
+                  Số điện thoại
+                </th>
                 <th className="py-3 px-4 text-left">Địa chỉ</th>
                 <th className="px-3 py-4 text-left">Vai trò</th>
-                <th className="py-3 px-4 text-left whitespace-nowrap">Liên hệ</th>
-                <th className="py-3 px-4  text-left whitespace-nowrap">Lịch sử đơn hàng</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">
+                  Liên hệ
+                </th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">
+                  Lịch sử đơn hàng
+                </th>
               </tr>
             </thead>
 
@@ -390,8 +423,8 @@ const UserManagement = () => {
                         </>
                       )}
                     </button>
-                    </td>
-                    <td className="py-3 px-4 text-center">
+                  </td>
+                  <td className="py-3 px-4 text-center">
                     <Button
                       onClick={() => handleOrder(user.gmail)}
                       variant="default"

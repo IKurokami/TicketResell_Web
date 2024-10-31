@@ -138,6 +138,27 @@ namespace Api.Controllers
             
             return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 0));
         }
+        
+        
+        [HttpPost("rejectchat/{chatboxId}")]
+        public async Task<IActionResult> RejectChat(string chatboxId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
+            
+            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 8));
+        }
+        [HttpPost("processing/{chatboxId}")]
+        public async Task<IActionResult> Processing(string chatboxId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
+            
+            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 2));
+        }
+
 
 
     }

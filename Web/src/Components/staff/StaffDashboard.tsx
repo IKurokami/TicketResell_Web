@@ -11,7 +11,8 @@ import { LogOut } from "lucide-react";
 const StaffDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("Người dùng");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const [userId, setUserId] = useState<string | null>(null); // Set type to string | null
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userDetails, setUserDetails] = useState<any>(null);
 
   const sidebarTabs = [
     {
@@ -56,11 +57,11 @@ const StaffDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "Người dùng":
-        return <UserManagement />;
+        return <UserManagement userDetails={userDetails} />;
       case "Danh mục":
         return <CategoryManagement />;
       default:
-        return <UserManagement />;
+        return <UserManagement userDetails={userDetails} />;
     }
   };
 
@@ -86,7 +87,27 @@ const StaffDashboard = () => {
   // Use useEffect to set userId on client mount
   useEffect(() => {
     const idFromCookies = Cookies.get("id");
-    setUserId(idFromCookies || null); // Set userId to string or null
+    setUserId(idFromCookies || null);
+
+    const fetchUserDetails = async () => {
+      if (idFromCookies) {
+        try {
+          const response = await fetch(
+            `http://localhost:5296/api/User/read/${idFromCookies}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setUserDetails(data.data);
+          } else {
+            console.error("Failed to fetch user details");
+          }
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        }
+      }
+    };
+
+    fetchUserDetails();
   }, []);
 
   return (
@@ -124,7 +145,9 @@ const StaffDashboard = () => {
           {/* Sidebar Header */}
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-xl font-semibold">
-              <span className="text-emerald-500 text-2xl font-bold">Ticket </span>
+              <span className="text-emerald-500 text-2xl font-bold">
+                Ticket{" "}
+              </span>
               <span className="text-black text-2xl font-bold">Resell </span>
               <span className="text-gray-500 text-lg">Staff</span>
             </h2>
@@ -186,7 +209,15 @@ const StaffDashboard = () => {
           <div className="mt-auto pt-4 border-t border-gray-200">
             <div className="flex items-center p-2 text-gray-600">
               <span className="ms-3 font-medium text-sm overflow-hidden max-w-64 text-nowrap">
-                ID: {userId || "Đang tải..."} {/* Display loading while userId is being fetched */}
+                {userDetails ? (
+                  <>
+                    {userDetails.email}
+                    <br />
+                    <span className="text-xs text-gray-500">ID: {userId}</span>
+                  </>
+                ) : (
+                  "Đang tải..."
+                )}
               </span>
             </div>
             <button
