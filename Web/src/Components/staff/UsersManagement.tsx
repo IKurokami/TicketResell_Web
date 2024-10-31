@@ -382,35 +382,58 @@ const UserManagement = () => {
           })}
       </CardContent>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add User</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
+      <DialogContent className="sm:max-w-[425px] bg-white rounded-lg shadow-lg">
+        <DialogHeader className="space-y-4 pb-4 border-b">
+          <DialogTitle className="text-2xl font-bold text-gray-900">Add User</DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Tên người dùng</label>
             <Input
-              placeholder="Full Name"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Họ & Tên"
               value={formData.fullname || ""}
               onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Email</label>
             <Input
-              placeholder="Email"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              type="email"
+              placeholder="Nhập email "
               value={formData.gmail || ""}
               onChange={(e) => setFormData({ ...formData, gmail: e.target.value })}
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Số điện thoại</label>
             <Input
-              placeholder="Phone"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              type="tel"
+              placeholder="Nhập số điện thoại"
               value={formData.phone || ""}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
-            <Input
-              placeholder="Address"
-              value={formData.address || ""}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            />
-            <Button type="submit">Add</Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+
+    
+
+          <div className="pt-4 border-t">
+            <Button 
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Thêm người dùng
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+      
     </Card>
   );
 };

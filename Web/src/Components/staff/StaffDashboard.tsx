@@ -185,8 +185,8 @@ const StaffDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 sm:ml-64">
-        <div className="max-w mx-auto bg-white rounded-lg shadow-sm">
+      <main className="flex-1 sm:ml-64 ">
+        <div className="max-w mx-auto bg-white rounded-lg shadow-sm h-full">
           <div className="px-8 py-6 border-b border-gray-200">
             <h1 className="text-2xl font-semibold text-gray-800">{activeTab}</h1>
             <p className="text-base text-gray-500">Quản lý {activeTab.toLowerCase()} trong hệ thống</p>
