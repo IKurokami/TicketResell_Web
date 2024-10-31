@@ -71,6 +71,35 @@ namespace TicketResell.Services.Services.Chatbox
             }
         }
 
+        public async Task<ResponseModel> CreateReportAsync(ChatboxCreateDto dto, string userId, bool saveAll = true)
+        {
+            try
+            {   
+                bool canCreateRequest = await _unitOfWork.ChatboxRepository.CheckChatboxHasValidReportAsync(userId);
+                if(canCreateRequest == true){
+                    // Attempt to create or get existing chatbox
+                    var chatbox = await _unitOfWork.ChatboxRepository.CreateReportAsync(
+                        dto.ChatboxId,
+                        dto.Title,
+                        dto.Description,
+                        dto.Status
+                    );
+
+                    if (saveAll) await _unitOfWork.CompleteAsync();
+
+                    var chatboxDto = _mapper.Map<ChatboxReadDto>(chatbox);
+                    return ResponseModel.Success("Successfully created/retrieved chatbox", chatboxDto);
+                }else{
+                    return ResponseModel.Error("Request already created");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error creating chatbox: {ex.Message}");
+                return ResponseModel.Error($"Failed to create chatbox: {ex.Message}");
+            }
+        }
+
         public async Task<ResponseModel> GetChatboxesAsync()
         {
             try

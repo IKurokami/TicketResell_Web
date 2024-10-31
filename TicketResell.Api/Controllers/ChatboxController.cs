@@ -89,9 +89,10 @@ namespace Api.Controllers
             ChatboxCreateDto dto = new ChatboxCreateDto(){
                 ChatboxId = "CB"+ Guid.NewGuid(),
                 Title="Report",
-                Description= ReportHelper.GetStatusString(status)
+                Description= ReportHelper.GetStatusString(status),
+                Status = status
             };
-            var response = await _chatboxService.CreateChatboxAsync(dto, userId);
+            var response = await _chatboxService.CreateReportAsync(dto, userId);
             Chat newChat = new Chat
                 {
                     SenderId = userId,
