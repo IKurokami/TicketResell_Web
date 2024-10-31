@@ -132,7 +132,7 @@ const TicketCard = ({ ticket, onCardClick }) => {
           comment: comment,
         }),
       });
-  
+      console.log(ticket.sellerId);
       // Parse response
       const result = await response.json();
       
