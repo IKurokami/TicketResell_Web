@@ -146,15 +146,15 @@ VALUES
 
     ('TICKET025', 'vinhseller@personal.example.com', N'Cuộc Thi Nấu Ăn', 200000, N'Số 22 Đường Huỳnh Thúc Kháng, TP. Pleiku', '2025-03-15 11:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET025', N'Cuộc thi nấu ăn với sự tham gia của các đầu bếp nổi tiếng', NULL),
 
-    ('TICKET026', 'khangseller@personal.example.com', N'Giải Đua Xe Địa Hình', 400000, N'67 Le Van Sy, District 3, Ho Chi Minh City', '2025-03-20 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET026', N'Giải đua xe địa hình với các tay đua chuyên nghiệp', NULL),
+    ('TICKET026', 'khangseller@personal.example.com', N'Giải Đua Xe Địa Hình', 400000, N'67 Lê Văn Sỹ, Quận 3, Thành phố Hồ Chí Minh', '2025-03-20 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET026', N'Giải đua xe địa hình với các tay đua chuyên nghiệp', NULL),
 
-    ('TICKET027', 'vinhseller@personal.example.com', N'Lễ Hội Tóc Mây', 180000, N'34 Nguyen Van Troi, Tan Binh District, Ho Chi Minh City', '2025-03-25 14:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET027', N'Lễ hội văn hóa tóc mây của người dân tộc thiểu số', NULL),
+    ('TICKET027', 'vinhseller@personal.example.com', N'Lễ Hội Tóc Mây', 180000, N'34 Nguyễn Văn Trỗi, Quận Tân Bình, Thành phố Hồ Chí Minh', '2025-03-25 14:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET027', N'Lễ hội văn hóa tóc mây của người dân tộc thiểu số', NULL),
 
-    ('TICKET028', 'khangseller@personal.example.com', N'Hội Thảo Khởi Nghiệp Bắt Đầu', 250000, N'30 Tran Dinh Xu, District 5, Ho Chi Minh City', '2025-03-30 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET028', N'Hội thảo dành cho những ai muốn khởi nghiệp', NULL),
+    ('TICKET028', 'khangseller@personal.example.com', N'Hội Thảo Khởi Nghiệp Bắt Đầu', 250000, N'30 Trần Đình Xu, Quận 5, Thành phố Hồ Chí Minh', '2025-03-30 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET028', N'Hội thảo dành cho những ai muốn khởi nghiệp', NULL),
 
-    ('TICKET029', 'vinhseller@personal.example.com', N'Triển Lãm Sách', 300000, N'16 Hang Bac Street, Hoan Kiem District, Hanoi', '2025-04-05 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET029', N'Triển lãm các đầu sách hay và mới', NULL),
+    ('TICKET029', 'vinhseller@personal.example.com', N'Triển Lãm Sách', 300000, N'16 Hàng Bạc, Quận Hoàn Kiếm, Hà Nội', '2025-04-05 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET029', N'Triển lãm các đầu sách hay và mới', NULL),
 
-    ('TICKET030', 'khangseller@personal.example.com', N'Cuộc Thi Thể Dục Thể Hình', 400000, N'82 Nguyen Dinh Chieu, Da Lat City', '2025-04-10 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET030', N'Cuộc thi thể dục thể hình với sự tham gia của các vận động viên chuyên nghiệp', NULL);
+    ('TICKET030', 'khangseller@personal.example.com', N'Cuộc Thi Thể Dục Thể Hình', 400000, N'82 Nguyễn Đình Chiểu, Thành phố Đà Lạt', '2025-04-10 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET030', N'Cuộc thi thể dục thể hình với sự tham gia của các vận động viên chuyên nghiệp', NULL);
 
 
 -- Sample data for Order table
