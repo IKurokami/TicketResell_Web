@@ -29,11 +29,11 @@ INSERT INTO [User] (
 [Cccd]
 )
 VALUES
-    ('cuongdola@personal.example.com', 'cuong', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'cuongdola@personal.example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    ('giap@personal.example.com', 'giap', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'giap@personal.example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    ('khangseller@personal.example.com', 'khang seller', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'khangseller@personal.example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    ('khongphaiquang@personal.example.com', 'quang', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'khongphaiquang@personal.example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    ('vinhseller@personal.example.com', 'vinh seller', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'vinhseller@personal.example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    ('cuongdola@personal.example.com', 'cuong', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'cuongdola@personal.example.com', 'cuong', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('giap@personal.example.com', 'giap', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'giap@personal.example.com', 'giap', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('khangseller@personal.example.com', 'khang seller', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'khangseller@personal.example.com', 'khang seller', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('khongphaiquang@personal.example.com', 'quang', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'khongphaiquang@personal.example.com', 'quang', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('vinhseller@personal.example.com', 'vinh seller', '$2a$11$lpQIMMrn83p0gJD.ffa/ueyBT4W4yZ7aSThowNWZCFlBF9eUfRyze', 1, '2024-10-31 03:32:16.7381148', 'vinhseller@personal.example.com', 'vinh seller', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 --testpassword123456
 
 INSERT INTO [UserRole] ([UserId], [RoleId])
@@ -89,57 +89,62 @@ VALUES
     (14, 'vinhseller@personal.example.com', '2022-01-01', '2023-01-01', 48000.75, 'Year');
 
 
+ I'll help you convert the location addresses to Vietnamese. Here's the SQL with Vietnamese locations:
+
+
+
+```sql
 INSERT INTO [Ticket] ([TicketId], [SellerId], [Name], [Cost], [Location], [StartDate], [CreateDate], [ModifyDate], [Status], [Image], [Description], [Qr])
 VALUES
-    ('TICKET001', 'vinhseller@personal.example.com', N'Đêm Nhạc Trịnh Công Sơn', 500000, N'76 Nguyen Chi Thanh Street, Dong Da District, Hanoi', '2024-11-15 19:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET001', N'Đêm nhạc tưởng nhớ nhạc sĩ Trịnh Công Sơn với các ca sĩ hàng đầu Việt Nam', NULL),
+    ('TICKET001', 'vinhseller@personal.example.com', N'Đêm Nhạc Trịnh Công Sơn', 500000, N'Số 76 Đường Nguyễn Chí Thanh, Quận Đống Đa, Hà Nội', '2024-11-15 19:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET001', N'Đêm nhạc tưởng nhớ nhạc sĩ Trịnh Công Sơn với các ca sĩ hàng đầu Việt Nam', NULL),
 
-    ('TICKET002', 'khangseller@personal.example.com', N'Lễ Hội Ẩm Thực Hà Nội', 200000, N'28 Hoan Kiem Lake, Hoan Kiem District, Hanoi', '2024-11-20 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET002', N'Trải nghiệm văn hóa ẩm thực Hà Nội với hơn 100 gian hàng đặc sản', NULL),
+    ('TICKET002', 'khangseller@personal.example.com', N'Lễ Hội Ẩm Thực Hà Nội', 200000, N'Số 28 Hồ Hoàn Kiếm, Quận Hoàn Kiếm, Hà Nội', '2024-11-20 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET002', N'Trải nghiệm văn hóa ẩm thực Hà Nội với hơn 100 gian hàng đặc sản', NULL),
 
-    ('TICKET003', 'vinhseller@personal.example.com', N'Giải Bóng Đá Cộng Đồng', 150000, N'Thanh Tri Ward, Hoang Mai Dist., Hanoi', '2024-11-25 08:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET003', N'Giải đấu bóng đá amateur với sự tham gia của 16 đội bóng', NULL),
+    ('TICKET003', 'vinhseller@personal.example.com', N'Giải Bóng Đá Cộng Đồng', 150000, N'Phường Thanh Trì, Quận Hoàng Mai, Hà Nội', '2024-11-25 08:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET003', N'Giải đấu bóng đá amateur với sự tham gia của 16 đội bóng', NULL),
 
-    ('TICKET004', 'khangseller@personal.example.com', N'Triển Lãm Nghệ Thuật Đương Đại', 300000, N'8th Flr., 37 Ton Duc Thang, Dist.1, Ho Chi Minh City', '2024-12-01 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET004', N'Triển lãm các tác phẩm nghệ thuật đương đại của các nghệ sĩ trẻ Việt Nam', NULL),
+    ('TICKET004', 'khangseller@personal.example.com', N'Triển Lãm Nghệ Thuật Đương Đại', 300000, N'Tầng 8, Số 37 Đường Tôn Đức Thắng, Quận 1, TP. Hồ Chí Minh', '2024-12-01 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET004', N'Triển lãm các tác phẩm nghệ thuật đương đại của các nghệ sĩ trẻ Việt Nam', NULL),
 
-    ('TICKET005', 'vinhseller@personal.example.com', N'Hòa Nhạc Dàn Nhạc Giao Hưởng', 800000, N'27B Nguyen Dinh Chieu Street, Da Cao Ward, District 1, Ho Chi Minh City', '2024-12-05 20:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET005', N'Đêm nhạc cổ điển với dàn nhạc giao hưởng thành phố', NULL),
+    ('TICKET005', 'vinhseller@personal.example.com', N'Hòa Nhạc Dàn Nhạc Giao Hưởng', 800000, N'Số 27B Đường Nguyễn Đình Chiểu, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh', '2024-12-05 20:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET005', N'Đêm nhạc cổ điển với dàn nhạc giao hưởng thành phố', NULL),
 
-    ('TICKET006', 'khangseller@personal.example.com', N'Giải Võ Thuật Truyền Thống', 250000, N'17 Phan Chu Trinh, Thanh Hoa City', '2024-12-10 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET006', N'Giải đấu võ thuật với các môn phái truyền thống Việt Nam', NULL),
+    ('TICKET006', 'khangseller@personal.example.com', N'Giải Võ Thuật Truyền Thống', 250000, N'Số 17 Đường Phan Chu Trinh, TP. Thanh Hóa', '2024-12-10 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET006', N'Giải đấu võ thuật với các môn phái truyền thống Việt Nam', NULL),
 
-    ('TICKET007', 'vinhseller@personal.example.com', N'Lễ Hội Ánh Sáng', 400000, N'218 Road 30-4, Can Tho City', '2024-12-15 18:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET007', N'Lễ hội ánh sáng với các tiết mục biểu diễn nghệ thuật đương đại', NULL),
+    ('TICKET007', 'vinhseller@personal.example.com', N'Lễ Hội Ánh Sáng', 400000, N'Số 218 Đường 30/4, TP. Cần Thơ', '2024-12-15 18:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET007', N'Lễ hội ánh sáng với các tiết mục biểu diễn nghệ thuật đương đại', NULL),
 
-    ('TICKET008', 'khangseller@personal.example.com', N'Live Show Nhạc Trẻ', 600000, N'53 Nguyen Sy Sach Street, Hung Binh Ward, Nghe An', '2024-12-20 19:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET008', N'Đêm nhạc với sự góp mặt của các ca sĩ trẻ nổi tiếng', NULL),
+    ('TICKET008', 'khangseller@personal.example.com', N'Live Show Nhạc Trẻ', 600000, N'Số 53 Đường Nguyễn Sỹ Sách, Phường Hưng Bình, Nghệ An', '2024-12-20 19:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET008', N'Đêm nhạc với sự góp mặt của các ca sĩ trẻ nổi tiếng', NULL),
 
-    ('TICKET009', 'vinhseller@personal.example.com', N'Hội Thảo Khởi Nghiệp', 350000, N'40 Hang Manh Street, Hoan Kiem District, Hanoi', '2024-12-25 08:30:00', '2024-10-31', '2024-10-31', 1, 'TICKET009', N'Hội thảo chia sẻ kinh nghiệm khởi nghiệp từ các doanh nhân thành công', NULL),
+    ('TICKET009', 'vinhseller@personal.example.com', N'Hội Thảo Khởi Nghiệp', 350000, N'Số 40 Phố Hàng Mành, Quận Hoàn Kiếm, Hà Nội', '2024-12-25 08:30:00', '2024-10-31', '2024-10-31', 1, 'TICKET009', N'Hội thảo chia sẻ kinh nghiệm khởi nghiệp từ các doanh nhân thành công', NULL),
 
-    ('TICKET010', 'khangseller@personal.example.com', N'Triển Lãm Ảnh Di Sản', 200000, N'Cua Dai Street, Cam Chau Ward, Quang Nam', '2024-12-30 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET010', N'Triển lãm ảnh về di sản văn hóa Việt Nam', NULL),
+    ('TICKET010', 'khangseller@personal.example.com', N'Triển Lãm Ảnh Di Sản', 200000, N'Đường Cửa Đại, Phường Cẩm Châu, Quảng Nam', '2024-12-30 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET010', N'Triển lãm ảnh về di sản văn hóa Việt Nam', NULL),
 
-    ('TICKET011', 'vinhseller@personal.example.com', N'Đêm Diễn Kịch', 450000, N'Lot B8, Hiep Phuoc Industrial Zone, Nha Be District, Ho Chi Minh City', '2025-01-05 19:30:00', '2024-10-31', '2024-10-31', 1, 'TICKET011', N'Vở kịch hiện đại với dàn diễn viên trẻ tài năng', NULL),
+    ('TICKET011', 'vinhseller@personal.example.com', N'Đêm Diễn Kịch', 450000, N'Lô B8, Khu Công Nghiệp Hiệp Phước, Huyện Nhà Bè, TP. Hồ Chí Minh', '2025-01-05 19:30:00', '2024-10-31', '2024-10-31', 1, 'TICKET011', N'Vở kịch hiện đại với dàn diễn viên trẻ tài năng', NULL),
 
-    ('TICKET012', 'khangseller@personal.example.com', N'Giải Marathon Thành Phố', 300000, N'158 Le Thanh Tong, Ha Long, Quang Ninh', '2025-01-10 05:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET012', N'Giải chạy marathon với nhiều cự ly phù hợp mọi đối tượng', NULL),
+    ('TICKET012', 'khangseller@personal.example.com', N'Giải Marathon Thành Phố', 300000, N'Số 158 Đường Lê Thánh Tông, TP. Hạ Long, Quảng Ninh', '2025-01-10 05:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET012', N'Giải chạy marathon với nhiều cự ly phù hợp mọi đối tượng', NULL),
 
-    ('TICKET013', 'vinhseller@personal.example.com', N'Festival Âm Nhạc Dân Tộc', 250000, N'202 Lake View Hotel, D10 Giang Vo, Hanoi', '2025-01-15 18:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET013', N'Đêm nhạc với các nhạc cụ dân tộc truyền thống', NULL),
+    ('TICKET013', 'vinhseller@personal.example.com', N'Festival Âm Nhạc Dân Tộc', 250000, N'Số 202 Khách sạn Lake View, D10 Giảng Võ, Hà Nội', '2025-01-15 18:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET013', N'Đêm nhạc với các nhạc cụ dân tộc truyền thống', NULL),
 
-    ('TICKET014', 'khangseller@personal.example.com', N'Hội Chợ Công Nghệ', 150000, N'29 - 31 Nguyen Van Troi, Ward 12, District Phu Nhuan, Ho Chi Minh City', '2025-01-20 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET014', N'Triển lãm công nghệ với các sản phẩm mới nhất', NULL),
+    ('TICKET014', 'khangseller@personal.example.com', N'Hội Chợ Công Nghệ', 150000, N'Số 29-31 Đường Nguyễn Văn Trỗi, Phường 12, Quận Phú Nhuận, TP. Hồ Chí Minh', '2025-01-20 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET014', N'Triển lãm công nghệ với các sản phẩm mới nhất', NULL),
 
-    ('TICKET015', 'vinhseller@personal.example.com', N'Đêm Nhạc Jazz', 700000, N'112 Tran Nao Street, Binh An Ward, District 2, Ho Chi Minh City', '2025-01-25 20:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET015', N'Đêm nhạc jazz với các nghệ sĩ quốc tế', NULL),
+    ('TICKET015', 'vinhseller@personal.example.com', N'Đêm Nhạc Jazz', 700000, N'Số 112 Đường Trần Não, Phường Bình An, Quận 2, TP. Hồ Chí Minh', '2025-01-25 20:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET015', N'Đêm nhạc jazz với các nghệ sĩ quốc tế', NULL),
 
-    ('TICKET016', 'khangseller@personal.example.com', N'Lễ Hội Văn Hóa Trà', 180000, N'44 Nguyen Du, Hanoi', '2025-02-01 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET016', N'Trải nghiệm văn hóa trà đạo các vùng miền', NULL),
+    ('TICKET016', 'khangseller@personal.example.com', N'Lễ Hội Văn Hóa Trà', 180000, N'Số 44 Phố Nguyễn Du, Hà Nội', '2025-02-01 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET016', N'Trải nghiệm văn hóa trà đạo các vùng miền', NULL),
 
-    ('TICKET017', 'vinhseller@personal.example.com', N'Hội Thảo Digital Marketing', 400000, N'34/81 Block 12, Ho Nai Ward, Bien Hoa City, Dong Nai', '2025-02-05 08:30:00', '2024-10-31', '2024-10-31', 1, 'TICKET017', N'Hội thảo về xu hướng digital marketing mới nhất', NULL),
+    ('TICKET017', 'vinhseller@personal.example.com', N'Hội Thảo Digital Marketing', 400000, N'Số 34/81 Khu phố 12, Phường Hố Nai, TP. Biên Hòa, Đồng Nai', '2025-02-05 08:30:00', '2024-10-31', '2024-10-31', 1, 'TICKET017', N'Hội thảo về xu hướng digital marketing mới nhất', NULL),
 
-    ('TICKET018', 'khangseller@personal.example.com', N'Biểu Diễn Xiếc', 200000, N'149X/A11 To Hien Thanh, Dist.10, Ho Chi Minh City', '2025-02-10 15:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET018', N'Show xiếc đặc sắc với các nghệ sĩ xiếc hàng đầu', NULL),
+    ('TICKET018', 'khangseller@personal.example.com', N'Biểu Diễn Xiếc', 200000, N'Số 149X/A11 Đường Tô Hiến Thành, Quận 10, TP. Hồ Chí Minh', '2025-02-10 15:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET018', N'Show xiếc đặc sắc với các nghệ sĩ xiếc hàng đầu', NULL),
 
-    ('TICKET019', 'vinhseller@personal.example.com', N'Festival Ẩm Thực Đường Phố', 250000, N'76 Nguyen Chi Thanh Street, Dong Da District, Hanoi', '2025-02-15 11:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET019', N'Hội ẩm thực đường phố với nhiều món ăn độc đáo', NULL),
+    ('TICKET019', 'vinhseller@personal.example.com', N'Festival Ẩm Thực Đường Phố', 250000, N'Số 76 Đường Nguyễn Chí Thanh, Quận Đống Đa, Hà Nội', '2025-02-15 11:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET019', N'Hội ẩm thực đường phố với nhiều món ăn độc đáo', NULL),
 
-    ('TICKET020', 'khangseller@personal.example.com', N'Cuộc Thi Tìm Kiếm Tài Năng', 500000, N'43 Hoa Binh Street, Phu Hoa Ward, Thu Dau Mot City', '2025-02-20 14:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET020', N'Cuộc thi tìm kiếm tài năng nghệ thuật dành cho giới trẻ', NULL),
+    ('TICKET020', 'khangseller@personal.example.com', N'Cuộc Thi Tìm Kiếm Tài Năng', 500000, N'Số 43 Đường Hòa Bình, Phường Phú Hòa, TP. Thủ Dầu Một', '2025-02-20 14:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET020', N'Cuộc thi tìm kiếm tài năng nghệ thuật dành cho giới trẻ', NULL),
 
-    ('TICKET021', 'vinhseller@personal.example.com', N'Hội Thảo Hướng Nghiệp', 150000, N'45 Nguyen Thi Minh Khai, Da Lat City', '2025-02-25 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET021', N'Hội thảo chia sẻ kinh nghiệm từ các chuyên gia', NULL),
+    ('TICKET021', 'vinhseller@personal.example.com', N'Hội Thảo Hướng Nghiệp', 150000, N'Số 45 Đường Nguyễn Thị Minh Khai, TP. Đà Lạt', '2025-02-25 09:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET021', N'Hội thảo chia sẻ kinh nghiệm từ các chuyên gia', NULL),
 
-    ('TICKET022', 'khangseller@personal.example.com', N'Triển Lãm Thiết Kế Thời Trang', 300000, N'9 Le Loi Street, District 1, Ho Chi Minh City', '2025-03-01 18:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET022', N'Triển lãm các tác phẩm thời trang từ các nhà thiết kế trẻ', NULL),
+    ('TICKET022', 'khangseller@personal.example.com', N'Triển Lãm Thiết Kế Thời Trang', 300000, N'Số 9 Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh', '2025-03-01 18:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET022', N'Triển lãm các tác phẩm thời trang từ các nhà thiết kế trẻ', NULL),
 
-    ('TICKET023', 'vinhseller@personal.example.com', N'Đêm Nhạc Phim', 500000, N'123 Tran Phu, Nha Trang City', '2025-03-05 20:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET023', N'Đêm nhạc phim với sự tham gia của dàn nhạc giao hưởng', NULL),
+    ('TICKET023', 'vinhseller@personal.example.com', N'Đêm Nhạc Phim', 500000, N'Số 123 Đường Trần Phú, TP. Nha Trang', '2025-03-05 20:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET023', N'Đêm nhạc phim với sự tham gia của dàn nhạc giao hưởng', NULL),
 
-    ('TICKET024', 'khangseller@personal.example.com', N'Hội Thảo Công Nghệ Thông Tin', 250000, N'47 Le Duan, District 3, Ho Chi Minh City', '2025-03-10 08:30:00', '2024-10-31', '2024-10-31', 1, 'TICKET024', N'Hội thảo về công nghệ thông tin và các xu hướng mới', NULL),
+    ('TICKET024', 'khangseller@personal.example.com', N'Hội Thảo Công Nghệ Thông Tin', 250000, N'Số 47 Đường Lê Duẩn, Quận 3, TP. Hồ Chí Minh', '2025-03-10 08:30:00', '2024-10-31', '2024-10-31', 1, 'TICKET024', N'Hội thảo về công nghệ thông tin và các xu hướng mới', NULL),
 
-    ('TICKET025', 'vinhseller@personal.example.com', N'Cuộc Thi Nấu Ăn', 200000, N'22 Huynh Thuc Khang, Pleiku City', '2025-03-15 11:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET025', N'Cuộc thi nấu ăn với sự tham gia của các đầu bếp nổi tiếng', NULL),
+    ('TICKET025', 'vinhseller@personal.example.com', N'Cuộc Thi Nấu Ăn', 200000, N'Số 22 Đường Huỳnh Thúc Kháng, TP. Pleiku', '2025-03-15 11:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET025', N'Cuộc thi nấu ăn với sự tham gia của các đầu bếp nổi tiếng', NULL),
 
     ('TICKET026', 'khangseller@personal.example.com', N'Giải Đua Xe Địa Hình', 400000, N'67 Le Van Sy, District 3, Ho Chi Minh City', '2025-03-20 10:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET026', N'Giải đua xe địa hình với các tay đua chuyên nghiệp', NULL),
 
