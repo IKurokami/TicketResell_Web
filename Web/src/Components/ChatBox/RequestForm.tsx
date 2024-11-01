@@ -85,16 +85,20 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         });
 
         connection.on("ReceiveMessage", (senderId: string, message: string) => {
-          console.log("New message received:", message);
-          console.log(senderId);
+          
           const newMessage: ChatMessage = {
             senderId,
-            receiverId: userCookie?.userId,
+            receiverId: Cookies.get("id"),
             message,
-            chatId: 1 ,
+            chatId: selectedChatbox?.chatboxId ?? 1,
             date: new Date().toISOString(),
           };
-          setChatMessages(prev => [...prev, newMessage]);
+          
+          console.log("New message object:", newMessage);
+          setChatMessages(prev => {
+            const updated = [...prev, newMessage];
+            return updated;
+          });
         });
 
         connection.on("Block", (senderId: string, message: string) => {
@@ -137,7 +141,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
             `http://localhost:5296/api/Chat/getValidChats/${userData.userId}`
           );
           const result = await response.json();
-          console.log(result.data);
 
           if (result.statusCode === 200) {
             setChatMessages(result.data);
@@ -172,18 +175,12 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         message,
         selectedChatbox.chatboxId
       );
-      console.log("test");
-      console.log(receiveId);
-      console.log(message);
-      console.log(userId);
       
       setChatMessages((prevMessages) => [...prevMessages, newMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
-  const isRO3 = userData?.roles.some((role) => role.roleId === "RO3");
-  console.log(isRO3);
 
   const openChat = async (chatbox: Chatbox) => {
     // Fetch chat messages for this specific chatbox

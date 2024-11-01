@@ -47,7 +47,6 @@ const Chat: React.FC<ChatProps> = ({
   const isRO3 = user?.roles.some(role => role.roleId === "RO3");
   const isRO4 = user?.roles.some(role => role.roleId === "RO4");
   const isInputDisabled = !isRO3 && !isRO4 && chatbox?.status === 4 || chatbox?.status === 3;
-console.log("user",user);
 
   useEffect(() => {
     if (chatContainerRef.current) {
