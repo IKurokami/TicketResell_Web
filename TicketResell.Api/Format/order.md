@@ -91,7 +91,7 @@
 ### **Get Orders by Date Range (`api/order/daterange`)**
 
 - **Method:** `POST`
-- **Input:**   
+- **Input:**
   ```json
   {
     "StartDate": "2024-09-20T00:00:00",
@@ -123,7 +123,7 @@
 ### **Get Orders by Total Price Range (`api/order/pricerange`)**
 
 - **Method:** `POST`
-- **Input:**   
+- **Input:**
   ```json
   {
     "Min": 50.00,

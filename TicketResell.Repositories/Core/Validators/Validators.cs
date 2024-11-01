@@ -22,7 +22,7 @@ public class Validators<T> : AbstractValidator<T>
     {
         return AddRequired(expression).EmailAddress().WithMessage(message);
     }
-    
+
     public IRuleBuilderOptions<T, string> AddMinimumLength(Expression<Func<T, string?>> expression,
         int minLength, string? message = null)
     {

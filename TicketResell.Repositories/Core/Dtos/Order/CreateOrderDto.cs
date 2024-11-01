@@ -1,5 +1,3 @@
-using Repositories.Core.Dtos.OrderDetail;
-
 namespace Repositories.Core.Dtos.Order;
 
 public class CreateOrderDto

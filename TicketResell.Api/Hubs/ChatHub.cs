@@ -24,7 +24,8 @@ public class ChatHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        await Clients.Client(Context.ConnectionId).SendAsync("Welcome", $"Welcome to ChatHub. Please login first to send messages.");
+        await Clients.Client(Context.ConnectionId)
+            .SendAsync("Welcome", "Welcome to ChatHub. Please login first to send messages.");
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -37,13 +38,9 @@ public class ChatHub : Hub
         }
 
         if (exception != null)
-        {
             Console.WriteLine($"Connection {Context.ConnectionId} disconnected with error: {exception.Message}");
-        }
         else
-        {
             Console.WriteLine($"Connection {Context.ConnectionId} disconnected gracefully.");
-        }
 
         await base.OnDisconnectedAsync(exception);
     }
@@ -77,7 +74,7 @@ public class ChatHub : Hub
         }
         else
         {
-            await Clients.Client(Context.ConnectionId).SendAsync("LoginFail", $"You are not logged in.");
+            await Clients.Client(Context.ConnectionId).SendAsync("LoginFail", "You are not logged in.");
         }
     }
 
@@ -85,7 +82,8 @@ public class ChatHub : Hub
     {
         if (string.IsNullOrWhiteSpace(message) || message.Length > 500)
         {
-            await Clients.Client(Context.ConnectionId).SendAsync("InvalidMessage", "Message cannot be empty or too long.");
+            await Clients.Client(Context.ConnectionId)
+                .SendAsync("InvalidMessage", "Message cannot be empty or too long.");
             return;
         }
 

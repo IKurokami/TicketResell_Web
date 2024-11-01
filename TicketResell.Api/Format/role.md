@@ -78,11 +78,14 @@
     ]
 }
 ```
+
 ---
+
 ### **Update Role (`api/Role/update/"id"`)**
-												
+
 - **Method:**`PUT`
 - **Input:**
+
 ```json
 {
 	"Rolename"	  : "staff",
@@ -92,7 +95,6 @@
 ```
 
 - **Output:**
-
 
 ```json
 {
@@ -107,6 +109,7 @@
     }
 }
 ```
+
 ---
 
 ### **Delete Role (`api/Role/delete/"id"`)**

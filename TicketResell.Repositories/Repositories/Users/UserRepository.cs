@@ -4,17 +4,18 @@ using Repositories.Core.Context;
 using Repositories.Core.Entities;
 using TicketResell.Repositories.Logger;
 
-namespace Repositories.Repositories
+namespace Repositories.Repositories;
+
+public class UserRepository : GenericRepository<User>, IUserRepository
 {
-    public class UserRepository : GenericRepository<User>, IUserRepository
+    private readonly TicketResellManagementContext _context;
+    public readonly IAppLogger _logger;
+
+    public UserRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
     {
-        private readonly TicketResellManagementContext _context;
-        public readonly IAppLogger _logger;
-        public UserRepository(IAppLogger logger, TicketResellManagementContext context) : base(context)
-        {
-            _context = context;
-            _logger = logger;
-        }
+        _context = context;
+        _logger = logger;
+    }
 
         public async Task<bool> HasRoleAsync(string userId, string roleId)
         {
@@ -30,14 +31,14 @@ namespace Repositories.Repositories
                 user?.Roles.Add(role);
             }
 
-            if (user != null)
-                await _context.Users.AddAsync(user);
-        }
+        if (user != null)
+            await _context.Users.AddAsync(user);
+    }
 
-        public new async Task<List<User>> GetAllAsync()
-        {
-            return await _context.Users.Include(x => x.Roles).ToListAsync();
-        }
+    public new async Task<List<User>> GetAllAsync()
+    {
+        return await _context.Users.Include(x => x.Roles).ToListAsync();
+    }
 
         public new async Task<User?> GetByIdAsync(string id)
         {
@@ -48,40 +49,34 @@ namespace Repositories.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<User?> GetUserByEmailAsync(string email)
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Gmail == email);
-        }
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.Gmail == email);
+    }
 
-        public async Task<bool> CheckRoleSell(string id)
-        {
-            var roleId = RoleConstant.roleSeller;
+    public async Task<bool> CheckRoleSell(string id)
+    {
+        var roleId = RoleConstant.roleSeller;
 
-            var user = await _context.Users
-                .Include(u => u.Roles)
-                .ThenInclude(x => x.Users)
-                .FirstOrDefaultAsync(u => u.UserId == id);
+        var user = await _context.Users
+            .Include(u => u.Roles)
+            .ThenInclude(x => x.Users)
+            .FirstOrDefaultAsync(u => u.UserId == id);
 
-            if (user != null && user.Roles.Any(ur => ur.RoleId == roleId))
-            {
-                return true;
-            }
+        if (user != null && user.Roles.Any(ur => ur.RoleId == roleId)) return true;
 
-            return false;
-        }
+        return false;
+    }
 
-        public async Task RegisterSeller(User? user)
-        {
-            var roleId = RoleConstant.roleSeller;
-            var role = await _context.Roles.FindAsync(roleId);
-            if (role != null)
-            {
-                user?.Roles.Add(role);
-            }
+    public async Task RegisterSeller(User? user)
+    {
+        var roleId = RoleConstant.roleSeller;
+        var role = await _context.Roles.FindAsync(roleId);
+        if (role != null) user?.Roles.Add(role);
 
-            if (user != null)
-                _context.Users.Update(user);
-        }
+        if (user != null)
+            _context.Users.Update(user);
+    }
 
         public async Task RemoveSeller(User? user)
         {
@@ -97,38 +92,26 @@ namespace Repositories.Repositories
             }
         }
 
-        public async Task UpdateRole(User user, List<Role> roles)
+    public async Task UpdateRole(User user, List<Role> roles)
+    {
+        if (user == null) throw new ArgumentNullException(nameof(user), "User cannot be null.");
+
+        if (roles != null) user.Roles = roles; // Assuming Roles is a List<Role>
+
+        _context.Users.Update(user); // Mark the user entity as modified
+
+        // Save changes to the database
+    }
+
+    public async Task ChangeStatus(User user)
+    {
+        if (user != null)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user), "User cannot be null.");
-            }
-
-            if (roles != null)
-            {
-                user.Roles = roles; // Assuming Roles is a List<Role>
-            }
-
-            _context.Users.Update(user); // Mark the user entity as modified
-
-            // Save changes to the database
-        }
-
-        public async Task ChangeStatus(User user)
-        {
-            if (user != null)
-            {
-                if (user.Status == 1)
-                {
-                    user.Status = 0;
-                }
-                else
-                {
-                    user.Status = 1;
-                }
-                _context.Users.Update(user);
-
-            }
+            if (user.Status == 1)
+                user.Status = 0;
+            else
+                user.Status = 1;
+            _context.Users.Update(user);
         }
     }
 }

@@ -1,5 +1,3 @@
-using Repositories.Constants;
-using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Helper;
 
 namespace Api.Middlewares;
@@ -16,7 +14,7 @@ public class ValidatorMiddleware
     public async Task InvokeAsync(HttpContext context, IServiceProvider serviceProvider)
     {
         await context.CheckAuthenTicatedDataAsync(serviceProvider);
-        
+
         await _next(context);
     }
 }

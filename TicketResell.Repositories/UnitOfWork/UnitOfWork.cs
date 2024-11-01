@@ -1,7 +1,4 @@
-using System;
-using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Context;
 using Repositories.Repositories;
 using Repositories.Repositories.Carts;

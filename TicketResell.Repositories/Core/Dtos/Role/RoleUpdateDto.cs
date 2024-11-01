@@ -1,9 +1,8 @@
-﻿namespace Repositories.Core.Dtos.Role
-{
-    public class RoleUpdateDto
-    {
-        public string? Rolename { get; set; }
+﻿namespace Repositories.Core.Dtos.Role;
 
-        public string? Description { get; set; }
-    }
+public class RoleUpdateDto
+{
+    public string? Rolename { get; set; }
+
+    public string? Description { get; set; }
 }

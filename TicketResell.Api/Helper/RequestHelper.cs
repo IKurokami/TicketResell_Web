@@ -10,16 +10,49 @@ public static class RequestHelper
     private const string AccessKeyKey = "accessKey";
     private const string RoleKey = "roleKey";
 
+    #region UserId
+
+    public static string GetUserId(this HttpContext? context)
+    {
+        if (context is not null)
+        {
+            var userId = context.Session.GetString(UserIdKey);
+
+            if (!string.IsNullOrEmpty(userId)) return userId;
+        }
+
+        return string.Empty;
+    }
+
+    #endregion
+
+    #region AccessKey
+
+    public static string GetAccessKey(this HttpContext? context)
+    {
+        if (context is not null)
+        {
+            var accessKey = context.Session.GetString(AccessKeyKey);
+
+            if (!string.IsNullOrEmpty(accessKey)) return accessKey;
+        }
+
+        return string.Empty;
+    }
+
+    #endregion
+
     #region AuthenTicated
 
-    public static async Task<RequestAuthenData> CheckAuthenTicatedDataAsync(this HttpContext? context, IServiceProvider serviceProvider)
-    {        
+    public static async Task<RequestAuthenData> CheckAuthenTicatedDataAsync(this HttpContext? context,
+        IServiceProvider serviceProvider)
+    {
         var result = new RequestAuthenData();
 
-        if(context == null)
+        if (context == null)
             return result;
-        
-        UserRole highestRole = UserRole.Buyer;
+
+        var highestRole = UserRole.Buyer;
 
         result.UserId = context.Session.GetString("userId") ?? string.Empty;
         result.AccessKey = context.Session.GetString("accessKey") ?? string.Empty;
@@ -31,29 +64,24 @@ public static class RequestHelper
             if (tryLogin.StatusCode == 200)
             {
                 if (tryLogin.Data != null && tryLogin.Data is LoginInfoDto { User: not null } loginInfo)
-                {
                     foreach (var role in loginInfo.User.Roles)
                     {
                         var userRole = RoleHelper.GetUserRole(role.RoleId);
-                        if (userRole > highestRole)
-                        {
-                            highestRole = userRole;
-                        }
+                        if (userRole > highestRole) highestRole = userRole;
                     }
-                }
-                
+
                 result.IsAuthenticated = true;
             }
         }
 
         result.Role = highestRole.ToString();
-        
+
         context.SetIsAuthenticated(result.IsAuthenticated);
         context.SetRole(result.Role);
-        
+
         return result;
     }
-    
+
     public static RequestAuthenData GetAuthenData(this HttpContext? context)
     {
         var result = new RequestAuthenData();
@@ -61,10 +89,7 @@ public static class RequestHelper
         {
             var isAuthenticated = context.Session.GetString(IsAuthenticatedKey);
 
-            if (!string.IsNullOrEmpty(isAuthenticated))
-            {
-                result.IsAuthenticated = bool.Parse(isAuthenticated);
-            }
+            if (!string.IsNullOrEmpty(isAuthenticated)) result.IsAuthenticated = bool.Parse(isAuthenticated);
 
             result.UserId = context.Session.GetString(UserIdKey) ?? string.Empty;
             result.AccessKey = context.Session.GetString(AccessKeyKey) ?? string.Empty;
@@ -80,10 +105,7 @@ public static class RequestHelper
         {
             var isAuthenticated = context.Session.GetString(IsAuthenticatedKey);
 
-            if (!string.IsNullOrEmpty(isAuthenticated))
-            {
-                return bool.Parse(isAuthenticated);
-            }
+            if (!string.IsNullOrEmpty(isAuthenticated)) return bool.Parse(isAuthenticated);
         }
 
         return false;
@@ -105,44 +127,6 @@ public static class RequestHelper
 
     #endregion
 
-    #region UserId
-
-    public static string GetUserId(this HttpContext? context)
-    {
-        if (context is not null)
-        {
-            var userId = context.Session.GetString(UserIdKey);
-
-            if (!string.IsNullOrEmpty(userId))
-            {
-                return userId;
-            }
-        }
-
-        return string.Empty;
-    }
-
-    #endregion
-
-    #region AccessKey
-
-    public static string GetAccessKey(this HttpContext? context)
-    {
-        if (context is not null)
-        {
-            var accessKey = context.Session.GetString(AccessKeyKey);
-
-            if (!string.IsNullOrEmpty(accessKey))
-            {
-                return accessKey;
-            }
-        }
-
-        return string.Empty;
-    }
-
-    #endregion
-
     #region Role
 
     public static string GetRole(this HttpContext? context)
@@ -151,15 +135,12 @@ public static class RequestHelper
         {
             var role = context.Session.GetString(RoleKey);
 
-            if (!string.IsNullOrEmpty(role))
-            {
-                return role;
-            }
+            if (!string.IsNullOrEmpty(role)) return role;
         }
 
         return string.Empty;
     }
-    
+
     public static bool HasEnoughtRoleLevel(this HttpContext? context, UserRole roleNeed = UserRole.Buyer)
     {
         return RoleHelper.HasEnoughRoleLevel(RoleHelper.ConvertToRole(context.GetRole()), roleNeed);
@@ -176,10 +157,7 @@ public static class RequestHelper
 
     public static void SetIsAuthenticated(this HttpContext? context, bool value = false)
     {
-        if (context is not null)
-        {
-            context.Session.SetString(IsAuthenticatedKey, value.ToString());
-        }
+        if (context is not null) context.Session.SetString(IsAuthenticatedKey, value.ToString());
     }
 
     public static void SetUserId(this HttpContext? context, string value = "")
@@ -187,13 +165,9 @@ public static class RequestHelper
         if (context is not null)
         {
             if (value != string.Empty)
-            {
                 context.Session.SetString(UserIdKey, value);
-            }
             else
-            {
                 context.Session.Remove(UserIdKey);
-            }
         }
     }
 
@@ -202,13 +176,9 @@ public static class RequestHelper
         if (context is not null)
         {
             if (value != string.Empty)
-            {
                 context.Session.SetString(AccessKeyKey, value ?? "");
-            }
             else
-            {
                 context.Session.Remove(AccessKeyKey);
-            }
         }
     }
 
@@ -217,13 +187,9 @@ public static class RequestHelper
         if (context is not null)
         {
             if (value != string.Empty)
-            {
                 context.Session.SetString(RoleKey, value ?? "");
-            }
             else
-            {
                 context.Session.Remove(RoleKey);
-            }
         }
     }
 
@@ -232,7 +198,7 @@ public static class RequestHelper
 
 public class RequestAuthenData
 {
-    public bool IsAuthenticated { get; set; } = false;
+    public bool IsAuthenticated { get; set; }
     public string UserId { get; set; } = string.Empty;
     public string AccessKey { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;

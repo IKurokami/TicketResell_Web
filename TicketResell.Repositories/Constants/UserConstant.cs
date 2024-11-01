@@ -1,7 +1,6 @@
-namespace Repositories.Constants
+namespace Repositories.Constants;
+
+public static class UserConstant
 {
-    public static class UserConstant
-    {
-        public static readonly string username = "ASVBASD";
-    }
+    public static readonly string username = "ASVBASD";
 }

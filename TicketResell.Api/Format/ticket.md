@@ -1,4 +1,3 @@
-
 ### **Create Ticket (`api/Ticket/create`)**
 
 - **Method:** `POST`
@@ -27,6 +26,7 @@
       "data": null
   }
     ```
+
 ### **Get All Ticket (`api/Ticket/read`)**
 
 - **Method:** `GET`
@@ -60,6 +60,7 @@
    
     ]
     ```
+
 ### **Get Ticket By Id, Name, Date**
 
 **`api/Ticket/readbyid/{id}`**
@@ -93,9 +94,8 @@
     
     ```  
 
-
-
 ### **Update Ticket By Id**
+
 (`api/Ticket/update/{id}`)
 
 - **Method:** `PUT`
@@ -135,4 +135,5 @@
       "data": null
     }
     ```
+
 ---

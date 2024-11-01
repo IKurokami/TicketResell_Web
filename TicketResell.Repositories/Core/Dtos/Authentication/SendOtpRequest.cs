@@ -1,7 +1,6 @@
-namespace Api.Controllers.Models
+namespace Api.Controllers.Models;
+
+public class SendOtpRequest
 {
-    public class SendOtpRequest
-    {
-        public string EncryptedData { get; set; }
-    }
+    public string EncryptedData { get; set; }
 }

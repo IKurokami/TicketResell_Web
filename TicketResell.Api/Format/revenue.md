@@ -80,7 +80,8 @@
   ]
   ```
 
-### **Update Revenue By SellerId** 
+### **Update Revenue By SellerId**
+
 (`api/Revenue/update/{id}`)
 
 - **Method:** `PUT`
