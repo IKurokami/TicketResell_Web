@@ -447,32 +447,4 @@ public class MailService : IMailService
             return ResponseModel.BadRequest("Failed to send email with attachment", ex.Message);
         }
     }
-
-    private async Task CacheAccessKeyAsync(string cacheName, string userId, string cacheKey, TimeSpan timeSpan)
-    {
-        var db = _redis.GetDatabase();
-        await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
-    }
-
-    private string GenerateAccessKey()
-    {
-        var key = new byte[32];
-        using (var generator = RandomNumberGenerator.Create())
-        {
-            generator.GetBytes(key);
-        }
-
-        return Convert.ToBase64String(key);
-    }
-
-
-    public static string GenerateNumericOTP(int length)
-    {
-        var random = new Random();
-        var otp = new StringBuilder(length);
-
-        for (var i = 0; i < length; i++) otp.Append(random.Next(0, 10)); // Add a random digit (0-9)
-
-        return otp.ToString();
-    }
 }
