@@ -89,11 +89,6 @@ VALUES
     (14, 'vinhseller@personal.example.com', '2022-01-01', '2023-01-01', 48000.75, 'Year');
 
 
- I'll help you convert the location addresses to Vietnamese. Here's the SQL with Vietnamese locations:
-
-
-
-```sql
 INSERT INTO [Ticket] ([TicketId], [SellerId], [Name], [Cost], [Location], [StartDate], [CreateDate], [ModifyDate], [Status], [Image], [Description], [Qr])
 VALUES
     ('TICKET001', 'vinhseller@personal.example.com', N'Đêm Nhạc Trịnh Công Sơn', 500000, N'Số 76 Đường Nguyễn Chí Thanh, Quận Đống Đa, Hà Nội', '2024-11-15 19:00:00', '2024-10-31', '2024-10-31', 1, 'TICKET001', N'Đêm nhạc tưởng nhớ nhạc sĩ Trịnh Công Sơn với các ca sĩ hàng đầu Việt Nam', NULL),
