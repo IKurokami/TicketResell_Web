@@ -3,7 +3,6 @@ import { Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import "@/Css/Chatbox.css";
-import * as signalR from "@microsoft/signalr";
 import { UserData } from "./UserRequest";
 
 interface ChatMessage {
@@ -30,6 +29,7 @@ interface ChatProps {
   onCloseChat: () => void;
   chatbox: Chatbox | null;
   mode?: "popup" | "fullpage";
+  disableInput: boolean;
 }
 
 const formatDate = (dateString: string | null): string => {
@@ -51,6 +51,7 @@ const Chat: React.FC<ChatProps> = ({
   onCloseChat,
   chatbox,
   mode,
+  disableInput,
 }) => {
   const [newMessage, setNewMessage] = useState("");
   const [localChatMessages, setLocalChatMessages] =
@@ -209,13 +210,7 @@ const Chat: React.FC<ChatProps> = ({
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type a message..."
               className="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
-              disabled={isInputDisabled}
-              onKeyPress={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
+              disabled={isInputDisabled || disableInput}
             />
           </div>
         </div>
@@ -226,7 +221,7 @@ const Chat: React.FC<ChatProps> = ({
               ? "bg-gray-300"
               : "bg-indigo-500 hover:bg-indigo-600"
           } rounded-xl text-white px-4 py-1 flex-shrink-0`}
-          disabled={isInputDisabled}
+          disabled={isInputDisabled || disableInput}
         >
           <span>Send</span>
           <Send className="ml-2 w-4 h-4 transform rotate-45 -mt-px" />
