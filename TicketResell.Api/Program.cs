@@ -21,6 +21,7 @@ using TicketResell.Services.Services.Revenues;
 using TicketResell.Services.Services.Mail;
 using TicketResell.Services.Services.Ratings;
 using TicketResell.Services.Services.Chatbox;
+using Microsoft.EntityFrameworkCore;
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,11 +57,12 @@ JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", Env
 
 // Dbcontext configuration
 builder.Services.AddDbContext<TicketResellManagementContext>();
+var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"));
+    ConnectionMultiplexer.Connect(redisConnectionString));
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "localhost:6379";
+    options.Configuration = redisConnectionString;
     options.InstanceName = "TicketResellCacheInstance";
 });
 
@@ -126,6 +128,11 @@ builder.Services.AddSession(options =>
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<TicketResellManagementContext>();
+    dbContext.Database.Migrate();
+}
 app.UseCors("AllowSpecificOrigin");
 app.UseSession();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
