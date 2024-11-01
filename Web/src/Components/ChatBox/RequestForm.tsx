@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 import { IoMdClose } from "react-icons/io";
 import { FaUnlockKeyhole } from "react-icons/fa6";
 import { UserData } from "./UserRequest";
-import { log } from "console";
+import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
 interface Chatbox {
   chatboxId: number;
@@ -24,6 +24,15 @@ interface ChatboxTableProps {
   chatboxData: Chatbox[];
 }
 
+interface ChatMessage {
+  senderId: string | undefined;
+  receiverId: string | undefined;
+  message: string;
+  chatId: number;
+  chatBoxId: number;
+  date: string;
+}
+
 const ChatboxTable: React.FC<ChatboxTableProps> = ({
   userData,
   chatboxData,
@@ -36,57 +45,186 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChatbox, setSelectedChatbox] = useState<Chatbox | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [chatboxes, setChatboxes] = useState<Chatbox[]>(chatboxData);
+  const [chatboxes, setChatboxes] = useState<Chatbox[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [hubConnection, setHubConnection] = useState<HubConnection | null>(
+    null
+  );
+
   useEffect(() => {
     setChatboxes(chatboxData);
   }, [chatboxData]);
-  const initialMessages = [
-    {
-      senderId: "123",
-      receiverId: "456",
-      message: "Hello! Is this item still available?",
-      chatId: "1",
-      date: new Date().toLocaleTimeString(),
-      chatboxId: "1",
-    },
-    {
-      senderId: "456",
-      receiverId: "123",
-      message: "Yes, it's available. Are you interested?",
-      chatId: "1",
-      date: new Date().toLocaleTimeString(),
-      chatboxId: "1",
-    },
-  ];
 
-  const [chatMessages, setChatMessages] = useState(initialMessages);
+  useEffect(() => {
+    setChatMessages(chatMessages);
+  }, [chatMessages]);
 
-  const handleSendMessage = (message: string, userId: string) => {
-    const newMessage = {
-      senderId: userId,
-      receiverId: "456",
-      message,
-      chatId: "1",
-      date: new Date().toLocaleTimeString(),
-      chatboxId: "1",
+  useEffect(() => {
+    const createHubConnection = async () => {
+      const connection = new HubConnectionBuilder()
+        .withUrl("http://localhost:5296/chat-hub", {
+          withCredentials: true,
+        })
+        .withAutomaticReconnect()
+        .build();
+
+      try {
+        await connection.start();
+        console.log("SignalR Connected!");
+
+        const userId = Cookies.get("id");
+        const accessKey = Cookies.get("accessKey");
+
+        if (userId && accessKey) {
+          await connection.invoke("LoginAsync", userId, accessKey);
+        }
+
+        // Set up event handlers
+        connection.on("Welcome", (message) => {
+          console.log("Welcome:", message);
+        });
+
+        connection.on("Logged", (message) => {
+          console.log("Authenticated:", message);
+        });
+
+        connection.on("LoginFail", (message) => {
+          console.error("Authentication Failed:", message);
+        });
+
+        connection.on(
+          "ReceiveMessage",
+          (senderId: string, message: string, chatBoxId: number) => {
+            const newMessage: ChatMessage = {
+              senderId,
+              receiverId: userCookie?.userId || "",
+              message,
+              chatId: chatBoxId,
+              chatBoxId: chatBoxId,
+              date: new Date().toISOString(),
+            };
+
+            setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+            console.log("New message received:", newMessage);
+          }
+        );
+
+        connection.on("Blocked", (senderId: string, message: string) => {
+          console.log(`Block event received for ${senderId}: ${message}`);
+          // Handle blocking logic if needed
+        });
+
+        connection.on("UnblockEvent", (senderId: string, message: string) => {
+          console.log(`Unblock event received for ${senderId}: ${message}`);
+          // Handle unblocking logic if needed
+        });
+
+        setHubConnection(connection);
+      } catch (err) {
+        console.error("SignalR Connection Error: ", err);
+      }
     };
 
-    setChatMessages((prevMessages) => [...prevMessages, newMessage]);
-  };
+    createHubConnection();
 
-  const openChat = (chatbox: Chatbox) => {
+    return () => {
+      hubConnection?.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchChatMessages = async () => {
+      if (userData?.userId) {
+        try {
+          const response = await fetch(
+            `http://localhost:5296/api/Chat/getValidChats/${userData.userId}`,
+            {
+              method: "GET", // Specify the method if needed
+              credentials: "include", // Include credentials
+            }
+          );
+          const result = await response.json();
+          console.log(result.data);
+
+          if (result.statusCode === 200 && Array.isArray(result.data)) {
+            setChatMessages(result.data);
+          } else {
+            console.error("Fetched data is not an array:", result.data);
+          }
+        } catch (error) {
+          console.error("Error fetching chat messages:", error);
+        }
+      }
+    };
+
+    fetchChatMessages();
+  }, [userData]);
+
+  const handleSendMessage = async (
+    message: string,
+    userId: string | undefined
+  ) => {
+    if (!selectedChatbox || !userData || !hubConnection) return;
+
+    try {
+      const receiveId =
+        userCookie?.userId === chatMessages[0].senderId
+          ? chatMessages[0].receiverId
+          : chatMessages[0].senderId;
+
+      const newMessage: ChatMessage = {
+        senderId: userId,
+        receiverId: receiveId,
+        message: message,
+        chatId: selectedChatbox.chatboxId,
+        chatBoxId: selectedChatbox.chatboxId,
+        date: new Date().toISOString(),
+      };
+
+      await hubConnection.invoke(
+        "SendMessageAsync",
+        receiveId,
+        message,
+        selectedChatbox.chatboxId
+      );
+
+      setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+      console.log("New message sent:", newMessage);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+  const isRO3 =
+    userData?.roles.some((role) => role.roleId === "RO3") &&
+    userData?.roles.some((role) => role.roleId === "RO4");
+  console.log(isRO3);
+
+  const openChat = async (chatbox: Chatbox) => {
+    // Fetch chat messages for this specific chatbox
+    if (userCookie?.userId) {
+      try {
+        const response = await fetch(
+          `http://localhost:5296/api/Chat/getChatsByBoxchatId/${chatbox.chatboxId}`,
+          { credentials: "include" }
+        );
+        const result = await response.json();
+
+        if (result.statusCode === 200) {
+          setChatMessages(result.data);
+        }
+      } catch (error) {
+        console.error("Error fetching chat messages:", error);
+      }
+    }
+
     const accessKey = Cookies.get("confirm");
-    if (
-      (chatbox.status === 2 &&
-        !accessKey &&
-        userCookie?.roles.some((role) => role.roleId === "RO1")) ||
-      userCookie?.roles.some((role) => role.roleId === "RO2")
-    ) {
+    const isRO1 = userCookie?.roles.some((role) => role.roleId === "RO1");
+    const isRO2 = userCookie?.roles.some((role) => role.roleId === "RO2");
+
+    // Determine if modal should be shown
+    if (chatbox.status === 2 && !accessKey && (isRO1 || isRO2)) {
       setSelectedChatbox(chatbox);
       setIsModalOpen(true);
-    } else if (chatbox.status === 2 && accessKey) {
-      setSelectedChatbox(chatbox);
-      setIsChatOpen(true);
     } else {
       setSelectedChatbox(chatbox);
       setIsChatOpen(true);
@@ -99,34 +237,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleUnlockUpdate = async (chatboxId: number) => {
-    try {
-      // Call the map request API
-      const mapResponse = await fetch(
-        `http://localhost:5296/api/Chat/processing/${chatboxId}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!mapResponse.ok) {
-        throw new Error("Failed to map request");
-      }
-
-      // Update the local state
-      setChatboxes((prevChatboxes) =>
-        prevChatboxes.map((chatbox) =>
-          chatbox.chatboxId === chatboxId ? { ...chatbox, status: 2 } : chatbox
-        )
-      );
-    } catch (error) {
-      console.error("Error updating chatbox status:", error);
-    }
-  };
   const handleProcessingUpdate = async (chatboxId: number) => {
     try {
       // Call the map request API
@@ -213,6 +323,34 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       console.error("Error updating chatbox status:", error);
     }
   };
+  const handleUnlockUpdate = async (chatboxId: number) => {
+    try {
+      // Call the map request API
+      const mapResponse = await fetch(
+        `http://localhost:5296/api/Chat/processing/${chatboxId}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!mapResponse.ok) {
+        throw new Error("Failed to map request");
+      }
+
+      // Update the local state
+      setChatboxes((prevChatboxes) =>
+        prevChatboxes.map((chatbox) =>
+          chatbox.chatboxId === chatboxId ? { ...chatbox, status: 2 } : chatbox
+        )
+      );
+    } catch (error) {
+      console.error("Error updating chatbox status:", error);
+    }
+  };
 
   const getStatusLabel = (status: number) => {
     switch (status) {
@@ -245,7 +383,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       const response = await fetch(
         `http://localhost:5296/api/Chat/get/${userCookie.userId}/${userData.userId}`,
         {
-          method: "GET",
+          method: "POST",
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -255,7 +393,11 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
 
       if (response.ok) {
         const latestData = await response.json();
-        setChatboxes(latestData);
+        if (Array.isArray(latestData)) {
+          setChatboxes(latestData);
+        } else {
+          console.error("Fetched chatbox data is not an array:", latestData);
+        }
       } else {
         console.error("Failed to fetch chatbox data:", response.statusText);
       }
@@ -413,7 +555,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       userCookie?.roles.some(
                         (role) => role.roleId === "RO1"
                       ) ? (
-                        <div>
+                        <div className="flex justify-center items-center gap-2">
                           <button
                             onClick={() => openChat(chatbox)}
                             className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -425,7 +567,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                           </div>
                         </div>
                       ) : (
-                        <div>
+                        <div className="flex justify-center items-center gap-2">
                           <button
                             onClick={() => openChat(chatbox)}
                             className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -485,11 +627,17 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           onCloseChat={() => {
             setIsChatOpen(false);
           }}
-          user={userData}
+          user={userCookie}
           chatMessages={chatMessages}
           chatbox={selectedChatbox}
           onSendMessage={handleSendMessage}
-          mode="popup"
+          mode={
+            userCookie?.roles.some(
+              (roles) => roles.roleId === "RO3" || roles.roleId === "RO4"
+            )
+              ? "popup"
+              : "fullpage"
+          }
         />
       )}
 

@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import RequestDialog from "./RequestDialog";
 import ChatboxTable from "./RequestForm";
-import Cookies from "js-cookie";
 interface Role {
   roleId: string;
   rolename: string;

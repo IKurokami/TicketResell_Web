@@ -272,6 +272,9 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
         {
           method: "POST",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
       const data = await response.json();
