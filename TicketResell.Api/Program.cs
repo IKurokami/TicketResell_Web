@@ -130,7 +130,31 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<TicketResellManagementContext>();
-    dbContext.Database.Migrate();
+    var pendingMigrations = dbContext.Database.GetPendingMigrations();
+
+    // Check if there are pending migrations
+    if (pendingMigrations.Any())
+    {
+        dbContext.Database.Migrate();
+
+        var sqlFilePath = Path.Combine(AppContext.BaseDirectory,"..","..", "..", "..", "TicketResell.Repositories", "Database", "SampleData.sql");
+
+        // Ensure the path is normalized and exists
+        sqlFilePath = Path.GetFullPath(sqlFilePath);
+        if (File.Exists(sqlFilePath))
+        {
+            var sql = File.ReadAllText(sqlFilePath);
+            dbContext.Database.ExecuteSqlRaw(sql);
+        }
+        else
+        {
+            Console.WriteLine($"Sample data file not found at: {sqlFilePath}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("No pending migrations found. Skipping sample data insertion.");
+    }
 }
 app.UseCors("AllowSpecificOrigin");
 app.UseSession();
