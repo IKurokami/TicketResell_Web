@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { BannerItemCard } from "@/models/CategoryCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

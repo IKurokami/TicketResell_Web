@@ -89,7 +89,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
           result.push(...remainingTickets.slice(0, 4 - result.length));
         }
-        let updatedTickets = await Promise.all(
+        const updatedTickets = await Promise.all(
           result.map(async (ticket: any) => {
             let imageUrl = DEFAULT_IMAGE; // Default image
 
@@ -130,7 +130,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
   }, [categoriesId]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (
@@ -151,11 +151,12 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
       <div className="mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw]">
         {tickets.map((ticket) => (
-          <Link className="no-underline" href={`/ticket/${ticket.ticketId}`}>
-            <div
-              key={ticket.ticketId}
-              className="movie-card-wrapper cursor-pointer no-underline visited:no-underline transform transition-transform duration-300 hover:scale-105"
-            >
+          <Link
+            className="no-underline"
+            href={`/ticket/${ticket.ticketId}`}
+            key={ticket.ticketId}
+          >
+            <div className="movie-card-wrapper cursor-pointer no-underline visited:no-underline transform transition-transform duration-300 hover:scale-105">
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
                 <div className="relative">
                   <img
@@ -171,9 +172,11 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                   <h3 className="text-lg font-semibold mb-1 text-gray-900">
                     {ticket.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-1">{ticket.location}</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {ticket.location}
+                  </p>
                   <p className="text-sm text-gray-600">
-                    {new Date(ticket.startDate).toLocaleDateString("en-US", {
+                    {new Date(ticket.startDate).toLocaleDateString("vi-VN", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -213,7 +216,6 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
         ))}
       </div>
     </div>
-
   );
 };
 

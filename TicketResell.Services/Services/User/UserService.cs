@@ -55,7 +55,29 @@ public class UserService : IUserService
         var user = await _unitOfWork.UserRepository.GetAllAsync();
 
         var users = _mapper.Map<IEnumerable<UserReadDto>>(user);
-        return ResponseModel.Success("Successfully get all user", users);
+        return ResponseModel.Success($"Successfully get all user", users);
+    }
+
+    public async Task<ResponseModel> GetAllBuyer()
+    {
+        var userIds = await _unitOfWork.TransactionRepository.GetAllBuyer();
+        if (userIds.IsNullOrEmpty())
+        {
+            return ResponseModel.BadRequest("Not found");
+        }
+
+        var userDtos = new List<BuyerOrderReadDto>();
+
+        foreach (var userId in userIds)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+            if (user != null)
+            {
+                var userDto = _mapper.Map<BuyerOrderReadDto>(user);
+                userDtos.Add(userDto);
+            }
+        }
+        return ResponseModel.Success($"Successfully retrieved users", userDtos);
     }
 
     public async Task<ResponseModel> GetUserByIdAsync(string id)

@@ -49,26 +49,26 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address, id, api }) => {
     <div className="flex flex-col md:flex-row gap-4 px-4">
       {/* Left Sidebar */}
       <div className="w-full h-fit md:w-1/4 p-4 bg-white rounded-lg shadow-md flex-shrink-0">
-        <h2 className="font-bold text-xl mb-4">About</h2>
+        <h2 className="font-bold text-xl mb-4">Thông tin</h2>
         <div className="flex mb-1">
           <span>
             <MdCake />
           </span>
           <p className="ml-2">
-            Sinh ngày {}
+            Sinh ngày{" "}
             {birthday
               ? new Date(birthday).toLocaleDateString("en-GB")
-              : "No birthday provided"}
-          </p>{" "}
+              : "Chưa cập nhật"}
+          </p>
         </div>
         <div className="flex mb-1">
           <span>
             <MdLocationOn />
           </span>
-          <p className="ml-2">{address ? address : "No address provided"}</p>
+          <p className="ml-2">{address ? address : "Chưa cập nhật địa chỉ"}</p>
         </div>
         <div className="flex mb-2">
-          <p className="ml-2 text-gray-500">{bio ? bio : "No bio provided"}</p>
+          <p className="ml-2 text-gray-500">{bio ? bio : "Chưa cập nhật tiểu sử"}</p>
         </div>
       </div>
       <RatingsList ratings={ratingsData} />;{/* Main Content */}

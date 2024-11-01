@@ -343,11 +343,11 @@ const AddTicketModal: React.FC = () => {
       <Box className="modal-style">
         <div className="modal-contentt">
           <ScrollToTopButton />
-          <h2>Add Ticket</h2>
+          <h2>Thêm Vé</h2>
           <TextField
             className="custom-text-field"
             fullWidth
-            label="Quantity"
+            label="Số lượng"
             value={quantity}
             onChange={(e) => handleQuantityChange(Number(e.target.value))}
             type="number"
@@ -363,7 +363,7 @@ const AddTicketModal: React.FC = () => {
               margin="normal"
               style={{ fontSize: "20px" }}
             >
-              Upload Image:
+              Tải lên hình ảnh:
             </Typography>
 
             <div className="row p-3 justify-between">
@@ -385,7 +385,7 @@ const AddTicketModal: React.FC = () => {
                   />
                   {!imagePreview && (
                     <div className="text-center mt-3">
-                      <span>Ticket image</span>
+                      <span>Hình ảnh vé</span>
                     </div>
                   )}
 
@@ -414,7 +414,7 @@ const AddTicketModal: React.FC = () => {
                       required
                     />
                     <div className="text-center qr-text">
-                      <span>QR image {index + 1}</span>
+                      <span>Hình ảnh QR {index + 1}</span>
                     </div>
 
                     {!qrFiles[index] && (
@@ -453,7 +453,7 @@ const AddTicketModal: React.FC = () => {
           <TextField
             className="custom-text-field"
             fullWidth
-            label="Name"
+            label="Tên"
             name="name"
             value={formData.name}
             onChange={handleChange}
@@ -465,7 +465,7 @@ const AddTicketModal: React.FC = () => {
             <TextField
               className="custom-text-field"
               fullWidth
-              label="Cost"
+              label="Giá"
               name="cost"
               value={formData.cost}
               onChange={handleChange}
@@ -478,7 +478,7 @@ const AddTicketModal: React.FC = () => {
           <AddressFields  houseNumber={houseNumber} setHouseNumber={setHouseNumber} setFormData={setFormData} />
           <TextField
             className="custom-text-field"
-            label="Please select address "
+            label="Vui lòng chọn địa chỉ"
             value={formData.location}
             margin="normal"
             fullWidth
@@ -488,7 +488,7 @@ const AddTicketModal: React.FC = () => {
           <TextField
             className="custom-text-field"
             fullWidth
-            label="Date and Time"
+            label="Ngày và giờ"
             name="date"
             value={formData.date}
             onChange={handleChange}
@@ -513,7 +513,7 @@ const AddTicketModal: React.FC = () => {
               <TextField
                 className="custom-text-field"
                 {...params}
-                label="Categories"
+                label="Danh mục"
                 margin="normal"
               />
             )}
@@ -534,10 +534,10 @@ const AddTicketModal: React.FC = () => {
 
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
             <Button variant="outlined" onClick={handleCancel}>
-              Cancel
+              Hủy
             </Button>
             <Button variant="contained" onClick={handleSave}>
-              Save
+              Lưu
             </Button>
           </Box>
         </div>

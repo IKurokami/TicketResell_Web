@@ -39,6 +39,16 @@ public class TransactionController : ControllerBase
             return ResponseParser.Result(
                 ResponseModel.Unauthorized("You need to be authenticated to get buyer information."));
 
-        return ResponseParser.Result(await _transactionService.GetTicketOrderDetailsBySeller(sellerId));
+            return ResponseParser.Result(await _transactionService.GetTicketOrderDetailsBySeller(sellerId));
+        }
+        
+        [HttpGet("allBuyers")]
+        public async Task<IActionResult> GetAllBuyer()
+        {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to get buyer information."));
+
+            return ResponseParser.Result(await _transactionService.GetAllTransaction());
+        }
     }
 }

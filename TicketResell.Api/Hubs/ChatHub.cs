@@ -133,6 +133,7 @@ public class ChatHub : Hub
                     await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", senderID, message);
                     await Clients.Client(Context.ConnectionId).SendAsync("MessageSent", receiverID, sentChat);
                     await Clients.Client(Context.ConnectionId).SendAsync("Unblock", senderID, "Chat is unblock");
+                    await Clients.Client(receiverConnectionId).SendAsync("Blocked", chatbox.ChatboxId);
                 }
                 else
                 {
@@ -141,6 +142,7 @@ public class ChatHub : Hub
                 if (!(httpContext.HasEnoughtRoleLevel(UserRole.Admin) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)))
                 {
                     await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
+                   
                 }
             }
             else

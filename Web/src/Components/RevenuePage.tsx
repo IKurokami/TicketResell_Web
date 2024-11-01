@@ -35,18 +35,30 @@ interface Transaction {
   order: Order;
   ticket: Ticket;
 }
+interface Orders {
+  orderId: string;
+  buyerId: string;
+  total: number;
+}
+
+
+interface TopBuyer {
+  userId: string;
+  username: string;
+  orders: Orders[];
+}
 
 const RevenueCard = () => {
   const [revenueData, setRevenueData] = useState<RevenueItem[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [topBuyers, setTopBuyers] = useState<TopBuyer[]>([]);
   const sellerId = Cookies.get("id");
 
   const fetchTransactions = async () => {
     if (!sellerId) {
-      setError("User ID not found in cookies.");
+      setError("Không tìm thấy ID người dùng trong cookies.");
       setLoading(false);
       return;
     }
@@ -59,16 +71,15 @@ const RevenueCard = () => {
         }
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch transactions");
+        throw new Error("Không thể tải giao dịch");
       }
       const result = await response.json();
       setTransactions(result.data);
     } catch (error) {
-      console.error("Error fetching transactions:", error);
+      console.error("Lỗi khi tải giao dịch:", error);
       setTransactions([]);
     } finally {
       setLoading(false);
-      
     }
   };
 
@@ -82,13 +93,12 @@ const RevenueCard = () => {
           }
         );
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error("Phản hồi mạng không thành công");
         }
         const result = await response.json();
-        
         setRevenueData(result.data);
       } catch (error) {
-        console.error("Error fetching revenue data:", error);
+        console.error("Lỗi khi tải dữ liệu doanh thu:", error);
         setRevenueData([]);
       }
     }
@@ -98,23 +108,46 @@ const RevenueCard = () => {
     fetchTransactions();
   }, []);
 
+  useEffect(() => {
+    const fetchTopBuyers = async () => {
+      const sellerId = Cookies.get("id");
+      try {
+        const response = await fetch(
+          `http://localhost:5296/api/User/topbuyer/${sellerId}`,
+          {
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Phản hồi mạng không thành công");
+        }
+        const result = await response.json();
+        console.log("người mua hàng đầu:", result.data);
+        setTopBuyers(result.data);
+      } catch (error:any) {
+        setTopBuyers([]);
+        console.log("lỗi", error);
+      }
+    };
 
+    fetchTopBuyers();
+  }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>Lỗi: {error}</div>;
   }
 
-  
   return (
     <div className="p-6">
       <RevenueManager revenueData={revenueData} transactions={transactions} />
       <div>
         <OrderDetailsDashboard
-        revenue={revenueData}
+        topBuyers={topBuyers}
+          revenue={revenueData}
           transactions={transactions}
         />
       </div>

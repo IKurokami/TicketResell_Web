@@ -91,12 +91,22 @@ public class AuthenticationController : ControllerBase
         return ResponseParser.Result(result);
     }
 
-    [HttpPost("islogged")]
-    public async Task<IActionResult> IsLogged()
-    {
-        return ResponseParser.Result(ResponseModel.Success(HttpContext.GetIsAuthenticated().ToString()));
-    }
-
+        [HttpPost("islogged")]
+        public async Task<IActionResult> IsLogged()
+        {
+            return ResponseParser.Result(ResponseModel.Success(HttpContext.GetIsAuthenticated().ToString()));
+        }
+        
+        [HttpPost("isRolelogged")]
+        public async Task<IActionResult> IsRoleLogged(string roleId)
+        {
+            if (!HttpContext.GetIsAuthenticated())
+            {
+                return ResponseParser.Result(ResponseModel.Unauthorized("False"));
+            }
+            return ResponseParser.Result(ResponseModel.Success(HttpContext.HasEnoughtRoleLevel(RoleHelper.GetUserRole(roleId)).ToString()));
+        }
+        
 
     [HttpPost("logout/{userId}")]
     public async Task<IActionResult> Logout(string userId)
@@ -113,22 +123,17 @@ public class AuthenticationController : ControllerBase
         return ResponseParser.Result(result);
     }
 
-    [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
-    {
-        if (!HttpContext.IsUserIdAuthenticated(changePasswordDto.UserId))
-            return ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to change this password"));
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            var result = await _authService.ChangePasswordAsync(changePasswordDto.UserId, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            return ResponseParser.Result(result);
+        }
 
-        var result = await _authService.ChangePasswordAsync(changePasswordDto.UserId, changePasswordDto.CurrentPassword,
-            changePasswordDto.NewPassword);
-        return ResponseParser.Result(result);
-    }
+        [HttpPost("change-passwordKey")]
+        public async Task<IActionResult> ChangePasswordByKey([FromBody] ChangePasswordKeyDto changePasswordDto)
+        {
 
-    [HttpPost("change-passwordKey")]
-    public async Task<IActionResult> ChangePasswordByKey([FromBody] ChangePasswordKeyDto changePasswordDto)
-    {
-        if (!HttpContext.IsUserIdAuthenticated(changePasswordDto.UserId))
-            return ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to change this password"));
 
         var result = await _authService.CheckPassswordKeyAsync(changePasswordDto.PasswordKey, changePasswordDto.UserId,
             changePasswordDto.NewPassword);

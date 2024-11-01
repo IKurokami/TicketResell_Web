@@ -27,11 +27,13 @@ public class MailService : IMailService
     private readonly IUserService _userService;
 
 
-    public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis)
-    {
-        _config = config.Value;
-        _logger = logger;
-        _redis = redis;
+        public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis, IUnitOfWork unitOfWork)
+        {
+            
+            _config = config.Value;
+            _logger = logger;
+            _redis = redis;
+            _unitOfWork = unitOfWork;
 
         // Load email configuration from appsettings.json
         _smtpHost = _config.SmtpHost;
@@ -42,10 +44,16 @@ public class MailService : IMailService
         _fromDisplayName = _config.FromDisplayName;
     }
 
-    public async Task<ResponseModel> SendPasswordKeyAsync(string to)
-    {
-        var key = GenerateAccessKey();
-        var hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
+        public async Task<ResponseModel> SendPasswordKeyAsync(string to)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(to);
+            if (user == null)
+            {
+                return ResponseModel.Error("Email not exist");
+
+            }
+            string key = GenerateAccessKey();
+            string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
 
         var body = $@"
 <!DOCTYPE html>
@@ -158,11 +166,13 @@ public class MailService : IMailService
             <h2>Xin chào</h2>
             <p>Chúng tôi nhận được yêu cầu khôi phục mật khẩu cho tài khoản TicketResell của bạn. Để tạo mật khẩu mới, vui lòng nhấp vào nút bên dưới:</p>
             
-            <a href='http://localhost:5296/api/Mail/sendPasswordKey?key={key}' class='reset-button'>Đặt lại mật khẩu</a>
+            <a href='http://localhost:3000/createpassword?key={hashedKey}&to={to}
+' class='reset-button'>Đặt lại mật khẩu</a>
             
             <p>Hoặc sao chép đường dẫn sau vào trình duyệt:</p>
             <div class='reset-link'>
-                http://localhost:5296/api/Mail/sendPasswordKey?key={key}
+                http://localhost:3000/createpassword?key={hashedKey}&to={to}
+
             </div>
 
             <div class='info-box'>
@@ -184,13 +194,12 @@ public class MailService : IMailService
         </div>
     </div>
 </body>
-</html>";
-        var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
-        if (response != null && response.StatusCode == 200)
-        {
-            await CacheAccessKeyAsync("forgot_password", to, key, TimeSpan.FromHours(2));
-            return ResponseModel.Success("Sucess");
-        }
+</html>"; var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
+            if (response != null && response.StatusCode == 200)
+            {
+                await CacheAccessKeyAsync("forgot_password", to, hashedKey, TimeSpan.FromHours(2));
+                return ResponseModel.Success("Sucess");
+            }
 
         return ResponseModel.Error(response.Message ?? "Error");
     }
@@ -326,15 +335,48 @@ public class MailService : IMailService
         </div> 
     </body>
     </html>";
-        var response = await SendEmailAsync(to, "TicketResell: Here is your OTP code", body);
-        if (response.StatusCode == 200)
-        {
-            await CacheAccessKeyAsync("email_verification", to, otp, TimeSpan.FromMinutes(5));
-            return ResponseModel.Success("Sucess");
+            var response = await SendEmailAsync(to, "TicketResell: Here is your OTP code", body);
+            if (response.StatusCode == 200)
+            {
+                await CacheAccessKeyAsync("email_verification", to, otp, TimeSpan.FromMinutes(5));
+                return ResponseModel.Success("Sucess");
+            }
+            else
+            {
+                return ResponseModel.Error(response.Message ?? "Error");
+            }
         }
 
-        return ResponseModel.Error(response.Message ?? "Error");
-    }
+        private async Task CacheAccessKeyAsync(string cacheName, string userId, string cacheKey, TimeSpan timeSpan)
+        {
+            var db = _redis.GetDatabase();
+            await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
+        }
+
+        private string GenerateAccessKey()
+        {
+            var key = new byte[32];
+            using (var generator = RandomNumberGenerator.Create())
+            {
+                generator.GetBytes(key);
+            }
+
+            return Convert.ToBase64String(key);
+        }
+
+
+        public static string GenerateNumericOTP(int length)
+        {
+            var random = new Random();
+            var otp = new StringBuilder(length);
+
+            for (int i = 0; i < length; i++)
+            {
+                otp.Append(random.Next(0, 10)); // Add a random digit (0-9)
+            }
+
+            return otp.ToString();
+        }
 
     public async Task<ResponseModel> SendEmailAsync(string to, string subject, string body)
     {

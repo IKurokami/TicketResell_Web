@@ -192,7 +192,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
                       </div>
                       <div className="card-content mt-auto">
                         <p className="text-xs sm:text-sm text-gray-700 line-clamp-2">
-                          An exciting event you won't want to miss!
+                          Một sự kiện thú vị mà bạn không nên bỏ lỡ!
                         </p>
                       </div>
                     </div>
@@ -203,7 +203,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
           })
         ) : (
           <p className="col-span-full text-center text-gray-600">
-            No results match your search criteria.
+            Không tìm thấy kết quả phù hợp.
           </p>
         )}
       </div>

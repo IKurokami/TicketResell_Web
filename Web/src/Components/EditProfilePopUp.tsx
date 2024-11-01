@@ -113,14 +113,14 @@ const validatePassword = (password: string) => {
 
   const errors = [];
   if (password.length < minLength)
-    errors.push(`Password must be at least ${minLength} characters long`);
+    errors.push(`Mật khẩu phải có ít nhất ${minLength} ký tự`);
   if (!hasUpperCase)
-    errors.push("Password must contain at least one uppercase letter");
+    errors.push("Mật khẩu phải chứa ít nhất một chữ cái viết hoa");
   if (!hasLowerCase)
-    errors.push("Password must contain at least one lowercase letter");
-  if (!hasNumbers) errors.push("Password must contain at least one number");
+    errors.push("Mật khẩu phải chứa ít nhất một chữ cái viết thường");
+  if (!hasNumbers) errors.push("Mật khẩu phải chứa ít nhất một số");
   if (!hasSpecialChar)
-    errors.push("Password must contain at least one special character");
+    errors.push("Mật khẩu phải chứa ít nhất một ký tự đặc biệt");
 
   return errors;
 };
@@ -129,13 +129,13 @@ const validatePassword = (password: string) => {
 const validateForm = (formData: FormData) => {
   const errors: { [key: string]: string } = {};
 
-  if (!formData.fullName?.trim()) errors.fullName = "Full name is required";
-  if (!formData.sex) errors.sex = "Sex is required";
-  if (!formData.phone?.trim()) errors.phone = "Phone number is required";
+  if (!formData.fullName?.trim()) errors.fullName = "Họ tên không được để trống";
+  if (!formData.sex) errors.sex = "Vui lòng chọn giới tính";
+  if (!formData.phone?.trim()) errors.phone = "Số điện thoại không được để trống";
   else if (!/^\+?\d{10,}$/.test(formData.phone?.trim()))
-    errors.phone = "Invalid phone number format";
-  if (!formData.address?.trim()) errors.address = "Address is required";
-  if (!formData.birthday) errors.birthday = "Birthday is required";
+    errors.phone = "Số điện thoại không hợp lệ";
+  if (!formData.address?.trim()) errors.address = "Địa chỉ không được để trống";
+  if (!formData.birthday) errors.birthday = "Ngày sinh không được để trống";
 
   return errors;
 };
@@ -154,7 +154,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
   });
   const handleChangePassword = async (userId: string, data: any) => {
     if (passwords.new !== passwords.confirm) {
-      alert("New passwords do not match!");
+      alert("Mật khẩu mới không khớp!");
       return;
     }
 
@@ -259,7 +259,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
         <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
+          <DialogTitle>Đổi Mật Khẩu</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
@@ -267,7 +267,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
               <Input
                 type={showPassword ? "text" : "password"}
                 name="current"
-                placeholder="Current Password"
+                placeholder="Mật khẩu hiện tại"
                 value={passwords.current}
                 onChange={handlePasswordChange}
                 className={`pr-10 ${errors.current ? "border-red-500" : ""}`}
@@ -289,7 +289,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
             <Input
               type="password"
               name="new"
-              placeholder="New Password"
+              placeholder="Mật khẩu mới"
               value={passwords.new}
               onChange={handlePasswordChange}
               className={errors.new ? "border-red-500" : ""}
@@ -302,7 +302,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
             <Input
               type="password"
               name="confirm"
-              placeholder="Confirm New Password"
+              placeholder="Xác nhận mật khẩu mới"
               value={passwords.confirm}
               onChange={handlePasswordChange}
               className={errors.confirm ? "border-red-500" : ""}
@@ -320,7 +320,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
               onClick={() => setIsOpen(false)}
               disabled={isLoading}
             >
-              Cancel
+              Hủy
             </Button>
             <Button
               className="bg-green-500 text-white hover:bg-green-400 rounded"
@@ -330,10 +330,10 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating
+                  Đang cập nhật
                 </>
               ) : (
-                "Update Password"
+                "Cập nhật mật khẩu"
               )}
             </Button>
           </div>
@@ -363,7 +363,6 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
     await updateUserProfile(userId, formData);
     onSave(formData);
     onClose();
-    onClose();
   };
   const [formData, setFormData] = useState<FormData>(
     initialData || {
@@ -376,16 +375,27 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
       bio: "",
     }
   );
+  const handleBirthdayChange = (e: any) => {
+    const { value } = e.target;
 
-  // Function to validate if the age is 18 or over
-  const validateBirthday = (birthday: string) => {
+    // Update the form data
+    setFormData((prevData) => ({
+      ...prevData,
+      birthday: value,
+    }));
+
+    // Validate the birthday
+    validateBirthday(value);
+  };
+
+  // Validation function
+  const validateBirthday = (birthday: any) => {
     const selectedDate = new Date(birthday);
     const today = new Date();
 
-    // Calculate age by subtracting birth year from current year
     const age = today.getFullYear() - selectedDate.getFullYear();
 
-    // Adjust age if the birthday hasn't occurred yet this year
+    // Check if birthday has already happened this year
     const hasHadBirthdayThisYear =
       today.getMonth() > selectedDate.getMonth() ||
       (today.getMonth() === selectedDate.getMonth() &&
@@ -403,38 +413,6 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
         ...prevErrors,
         birthday: "",
       }));
-    }
-  };
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-    // Clear errors when user types
-    if (errors[name as keyof Errors]) {
-      setErrors({
-        ...errors,
-        [name]: "",
-      });
-    }
-    // Check if the input name is birthday to perform age validation
-    if (name === "birthday") {
-      validateBirthday(value); // Call validation function
-    }
-  };
-
-  const handleSexChange = (value: string) => {
-    setFormData({
-      ...formData,
-      sex: value,
-    });
-    if (errors.sex) {
-      setErrors({
-        ...errors,
-        sex: "",
-      });
     }
   };
 
@@ -475,16 +453,16 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
     <div className="fixed top-12 inset-0 bg-black/50 flex items-center justify-center overflow-y-auto p-4 shadow-none">
       <Card className="w-full max-w-4xl bg-white">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Edit Profile</CardTitle>
+          <CardTitle className="text-2xl font-bold">Chỉnh Sửa Hồ Sơ</CardTitle>
           <CardDescription>
-            Make changes to your profile information
+            Thay đổi thông tin cá nhân của bạn
           </CardDescription>
         </CardHeader>
 
         <Tabs defaultValue="personal" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="personal">Personal Information</TabsTrigger>
-            <TabsTrigger value="additional">Additional Details</TabsTrigger>
+            <TabsTrigger value="personal">Thông Tin Cá Nhân</TabsTrigger>
+            <TabsTrigger value="additional">Thông Tin Thêm</TabsTrigger>
           </TabsList>
 
           <form onSubmit={handleSubmit}>
@@ -494,7 +472,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="fullname" className="text-sm font-medium">
-                        Full Name
+                        Họ và tên
                       </Label>
                       <Input
                         id="fullname"
@@ -508,7 +486,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="phone" className="text-sm font-medium">
-                        Phone
+                        Số điện thoại
                       </Label>
                       <Input
                         id="phone"
@@ -523,7 +501,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="sex" className="text-sm font-medium">
-                        Gender
+                        Giới tính
                       </Label>
                       <Select
                         value={formData.sex}
@@ -532,19 +510,19 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                         }
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Gender" />
+                          <SelectValue placeholder="Chọn giới tính" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value="male">Nam</SelectItem>
+                          <SelectItem value="female">Nữ</SelectItem>
+                          <SelectItem value="other">Khác</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="birthday" className="text-sm font-medium">
-                        Birthday
+                        Ngày sinh
                       </Label>
                       <Input
                         id="birthday"
@@ -557,16 +535,17 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                                 .split("T")[0]
                             : ""
                         }
-                        onChange={(e) =>
-                          setFormData({ ...formData, birthday: e.target.value })
-                        }
+                        onChange={handleBirthdayChange}
                         className="w-full"
                       />
+                      {errors.birthday && (
+                        <p style={{ color: "red" }}>{errors.birthday}</p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="bio" className="text-sm font-medium">
-                      Bio
+                      Tiểu sử
                     </Label>
                     <Input
                       id="bio"
@@ -587,7 +566,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="address" className="text-sm font-medium">
-                        Current Address
+                        Địa chỉ hiện tại
                       </Label>
                       <Input
                         id="address"
@@ -596,12 +575,13 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                           setFormData({ ...formData, address: e.target.value })
                         }
                         className="w-full"
+                        disabled
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">
-                        Update Address
+                        Cập nhật địa chỉ
                       </Label>
                       <InputAddressFields
                         houseNumber={houseNumber}
@@ -622,17 +602,17 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                 onClick={() => setShowPasswordDialog(true)}
                 disabled={isLoading}
               >
-                Change Password
+                Đổi mật khẩu
               </Button>
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                Hủy
               </Button>
               <Button
                 type="submit"
                 className="bg-green-500 text-white hover:bg-green-600"
                 onClick={HandleSubmitClick}
               >
-                Save Changes
+                Lưu thay đổi
               </Button>
             </CardFooter>
           </form>
