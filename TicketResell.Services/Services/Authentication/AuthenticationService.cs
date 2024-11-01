@@ -58,6 +58,7 @@ public class AuthenticationService : IAuthenticationService
 
         var user = _mapper.Map<User>(registerDto);
         user.UserId = registerDto.UserId;
+        user.Fullname = registerDto.Username;
         var validator = _validatorFactory.GetValidator<User>();
         var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
