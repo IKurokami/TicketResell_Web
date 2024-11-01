@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { FaCheck, FaClock, FaLock } from "react-icons/fa";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ChatComponent from "./ChatComponent";
 import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
@@ -10,7 +10,7 @@ import { UserData } from "./UserRequest";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
 interface Chatbox {
-  chatboxId: number;
+  chatboxId: string;
   status: number;
   createDate: string;
   title: string;
@@ -29,7 +29,7 @@ interface ChatMessage {
   senderId: string | undefined;
   receiverId: string | undefined;
   message: string;
-  chatId: number;
+  chatId: string;
   date: string;
 }
 
@@ -46,10 +46,18 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   const [hubConnection, setHubConnection] = useState<HubConnection | null>(
     null
   );
+  const selectedChatboxRef = useRef<Chatbox | null>(null);
 
   useEffect(() => {
     setChatboxes(chatboxData);
   }, [chatboxData]);
+
+  useEffect(() => {
+    selectedChatboxRef.current = selectedChatbox;
+    setIsChatOpen(false);
+  }, [selectedChatbox]);
+
+
 
   useEffect(() => {
     const createHubConnection = async () => {
@@ -90,29 +98,53 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
             senderId,
             receiverId: Cookies.get("id"),
             message,
-            chatId: selectedChatbox?.chatboxId ?? 1,
+            chatId: "",
             date: new Date().toISOString(),
           };
-          
+
           console.log("New message object:", newMessage);
           setChatMessages(prev => {
             const updated = [...prev, newMessage];
             return updated;
           });
+          
         });
 
         connection.on("Block", (senderId: string, message: string) => {
           console.log(`Block event received for ${senderId}: ${message}`);
-          // Update UI to show blocked status
+          
+          // Update the chatboxes state
           setChatboxes(prev => prev.map(chatbox => 
             chatbox.chatboxId === selectedChatbox?.chatboxId 
               ? { ...chatbox, status: 3 } 
               : chatbox
           ));
+          
+          // Also update the selectedChatbox if it's the one being blocked
+          if (selectedChatbox) {
+            setSelectedChatbox(prev => prev 
+              ? { ...prev, status: 3 } 
+              : prev
+            );
+          }
         });
 
-        connection.on("UnblockEvent", (senderId: string, message: string) => {
-          console.log(`Unblock event received for ${senderId}: ${message}`);
+        connection.on("UnblockEvent", (receiverId: string, message: string) => {
+          console.log(`Unblock ${receiverId}: ${message}`);
+          
+          setChatboxes(prev => prev.map(chatbox => 
+            chatbox.chatboxId === selectedChatboxRef.current?.chatboxId 
+              ? { ...chatbox, status: 2 } 
+              : chatbox
+          ));
+          
+          if (selectedChatboxRef.current) {
+            setSelectedChatbox(prev => prev 
+              ? { ...prev, status: 2 } 
+              : prev
+            );
+          }
+          
         });
 
         setHubConnection(connection);
@@ -159,7 +191,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
 
     try {
       const  receiveId= userCookie?.userId == chatMessages[0].senderId?chatMessages[0].receiverId:chatMessages[0].senderId;
-      console.log("receiverId",receiveId);
       
       const newMessage: ChatMessage = {
         senderId: userId,
@@ -175,8 +206,31 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         message,
         selectedChatbox.chatboxId
       );
-      
+
       setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+
+      // Check if the user does NOT have roles RO3 or RO4
+      const hasRestrictedRole = userCookie?.roles.some(
+        (role) => role.roleId === "RO3" || role.roleId === "RO4"
+      );
+
+      if (!hasRestrictedRole) {
+        // Update the status of the selected chatbox to 3
+        const updatedChatbox: Chatbox = {
+          ...selectedChatbox,
+          status: 3,
+        };
+        setSelectedChatbox(updatedChatbox);
+
+        // Update the chatboxes array with the updated chatbox
+        setChatboxes((prevChatboxes) =>
+          prevChatboxes.map((chatbox) =>
+            chatbox.chatboxId === updatedChatbox.chatboxId
+              ? updatedChatbox
+              : chatbox
+          )
+        );
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -191,7 +245,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           { credentials: "include" }
         );
         const result = await response.json();
-        console.log("cc ngu", result.data);
 
         if (result.statusCode === 200) {
           setChatMessages(result.data);
@@ -221,7 +274,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleProcessingUpdate = async (chatboxId: number) => {
+  const handleProcessingUpdate = async (chatboxId: string) => {
     try {
       // Call the map request API
       const mapResponse = await fetch(
@@ -250,7 +303,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     }
   };
 
-  const handleRejectsUpdate = async (chatboxId: number) => {
+  const handleRejectsUpdate = async (chatboxId: string) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Chatbox/rejectchat/${chatboxId}`,
@@ -266,7 +319,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         setChatboxes((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
             chatbox.chatboxId === chatboxId
-              ? { ...chatbox, Status: 8 }
+              ? { ...chatbox, status: 8 }
               : chatbox
           )
         );
@@ -278,7 +331,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     }
   };
 
-  const handleCompletesUpdate = async (chatboxId: number) => {
+  const handleCompletesUpdate = async (chatboxId: string) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Chatbox/closeboxchat/${chatboxId}`,
@@ -294,7 +347,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         setChatboxes((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
             chatbox.chatboxId === chatboxId
-              ? { ...chatbox, Status: 0 }
+              ? { ...chatbox, status: 0 }
               : chatbox
           )
         );
@@ -305,23 +358,16 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       console.error("Error updating chatbox status:", error);
     }
   };
-  const handleUnlockUpdate = async (chatboxId: number) => {
+  const handleUnlockUpdate = async (chatboxId: string) => {
     try {
-      // Call the map request API
-      const mapResponse = await fetch(
-        `http://localhost:5296/api/Chat/processing/${chatboxId}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!mapResponse.ok) {
-        throw new Error("Failed to map request");
+      const receiverID = userData?.userId; 
+      console.log("receiverID",receiverID);
+      if (hubConnection ) {
+        await hubConnection.invoke("UnblockChatbox", chatboxId, receiverID);
+      } else {
+        console.error("Hub connection is not established.");
       }
+    
 
       // Update the local state
       setChatboxes((prevChatboxes) =>
@@ -569,6 +615,10 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
             userCookie?.roles.some((roles) => roles.roleId === "RO3" || roles.roleId === "RO4")
               ? "popup"
               : "fullpage"
+          }
+          disableInput={
+            selectedChatbox?.status === 3 &&
+            !userCookie?.roles.some((role) => role.roleId === "RO3" || role.roleId === "RO4")
           }
         />
       )}
