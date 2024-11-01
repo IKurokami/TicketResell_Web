@@ -37,7 +37,6 @@ interface ChatboxItem {
 const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [chatboxData, setChatboxData] = useState<ChatboxItem[]>([]);
-  console.log("alo alo", userData);
   console.log("Fetching data for ID:", userCookie);
 
   const fetchChatboxData = async () => {

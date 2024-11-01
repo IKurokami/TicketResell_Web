@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { FaCheck, FaClock, FaLock } from "react-icons/fa";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ChatComponent from "./ChatComponent";
 import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
@@ -10,7 +10,7 @@ import { UserData } from "./UserRequest";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
 interface Chatbox {
-  chatboxId: number;
+  chatboxId: string;
   status: number;
   createDate: string;
   title: string;
@@ -28,8 +28,7 @@ interface ChatMessage {
   senderId: string | undefined;
   receiverId: string | undefined;
   message: string;
-  chatId: number;
-  chatBoxId: number;
+  chatId: string;
   date: string;
 }
 
@@ -55,6 +54,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     setChatboxes(chatboxData);
   }, [chatboxData]);
 
+  useEffect(() => {
+    setSelectedChatbox(selectedChatbox);
+  }, [selectedChatbox]);
   useEffect(() => {
     setChatMessages(chatMessages);
   }, [chatMessages]);
@@ -92,31 +94,55 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           console.error("Authentication Failed:", message);
         });
 
-        connection.on(
-          "ReceiveMessage",
-          (senderId: string, message: string, chatBoxId: number) => {
-            const newMessage: ChatMessage = {
-              senderId,
-              receiverId: userCookie?.userId || "",
-              message,
-              chatId: chatBoxId,
-              chatBoxId: chatBoxId,
-              date: new Date().toISOString(),
-            };
+        connection.on("ReceiveMessage", (senderId: string, message: string) => {
+          const newMessage: ChatMessage = {
+            senderId,
+            receiverId: Cookies.get("id"),
+            message,
+            chatId: selectedChatbox?.chatboxId ?? "",
+            date: new Date().toISOString(),
+          };
 
-            setChatMessages((prevMessages) => [...prevMessages, newMessage]);
-            console.log("New message received:", newMessage);
-          }
-        );
+          console.log("New message object:", newMessage);
+          setChatMessages((prev) => {
+            const updated = [...prev, newMessage];
+            return updated;
+          });
+          setChatboxes((prev) =>
+            prev.map((chatbox) =>
+              chatbox.chatboxId === selectedChatbox?.chatboxId
+                ? { ...chatbox, status: 3 }
+                : chatbox
+            )
+          );
+          setSelectedChatbox(selectedChatbox);
+        });
 
-        connection.on("Blocked", (senderId: string, message: string) => {
+        connection.on("Block", (senderId: string, message: string) => {
           console.log(`Block event received for ${senderId}: ${message}`);
-          // Handle blocking logic if needed
+          // Update UI to show blocked status
+          setChatboxes((prev) =>
+            prev.map((chatbox) =>
+              chatbox.chatboxId === selectedChatbox?.chatboxId
+                ? { ...chatbox, status: 3 }
+                : chatbox
+            )
+          );
+          setSelectedChatbox(selectedChatbox);
         });
 
         connection.on("UnblockEvent", (senderId: string, message: string) => {
           console.log(`Unblock event received for ${senderId}: ${message}`);
-          // Handle unblocking logic if needed
+
+          // Update UI to show unblocked status
+          setChatboxes((prev) =>
+            prev.map((chatbox) =>
+              chatbox.chatboxId === selectedChatbox?.chatboxId
+                ? { ...chatbox, status: 2 } // Set status to 2 (Processing)
+                : chatbox
+            )
+          );
+          setSelectedChatbox(selectedChatbox);
         });
 
         setHubConnection(connection);
@@ -125,12 +151,17 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       }
     };
 
-    createHubConnection();
+    // Only create connection if it doesn't exist
+    if (!hubConnection) {
+      createHubConnection();
+    }
 
     return () => {
-      hubConnection?.stop();
+      if (hubConnection) {
+        hubConnection.stop();
+      }
     };
-  }, []);
+  }, []); // Empty dependency array since we only want to create the connection once
 
   useEffect(() => {
     const fetchChatMessages = async () => {
@@ -144,7 +175,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
             }
           );
           const result = await response.json();
-          console.log(result.data);
 
           if (result.statusCode === 200 && Array.isArray(result.data)) {
             setChatMessages(result.data);
@@ -168,16 +198,16 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
 
     try {
       const receiveId =
-        userCookie?.userId === chatMessages[0].senderId
+        userCookie?.userId == chatMessages[0].senderId
           ? chatMessages[0].receiverId
           : chatMessages[0].senderId;
+      console.log("receiverId", receiveId);
 
       const newMessage: ChatMessage = {
         senderId: userId,
         receiverId: receiveId,
         message: message,
         chatId: selectedChatbox.chatboxId,
-        chatBoxId: selectedChatbox.chatboxId,
         date: new Date().toISOString(),
       };
 
@@ -194,10 +224,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       console.error("Error sending message:", error);
     }
   };
-  const isRO3 =
-    userData?.roles.some((role) => role.roleId === "RO3") &&
-    userData?.roles.some((role) => role.roleId === "RO4");
-  console.log(isRO3);
 
   const openChat = async (chatbox: Chatbox) => {
     // Fetch chat messages for this specific chatbox
@@ -237,7 +263,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleProcessingUpdate = async (chatboxId: number) => {
+  const handleProcessingUpdate = async (chatboxId: string) => {
     try {
       // Call the map request API
       const mapResponse = await fetch(
@@ -266,7 +292,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     }
   };
 
-  const handleRejectsUpdate = async (chatboxId: number) => {
+  const handleRejectsUpdate = async (chatboxId: string) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Chatbox/rejectchat/${chatboxId}`,
@@ -295,7 +321,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     }
   };
 
-  const handleCompletesUpdate = async (chatboxId: number) => {
+  const handleCompletesUpdate = async (chatboxId: string) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Chatbox/closeboxchat/${chatboxId}`,
@@ -323,22 +349,14 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       console.error("Error updating chatbox status:", error);
     }
   };
-  const handleUnlockUpdate = async (chatboxId: number) => {
+  const handleUnlockUpdate = async (chatboxId: string) => {
     try {
-      // Call the map request API
-      const mapResponse = await fetch(
-        `http://localhost:5296/api/Chat/processing/${chatboxId}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!mapResponse.ok) {
-        throw new Error("Failed to map request");
+      const receiverID = userData?.userId;
+      console.log("receiverID", receiverID);
+      if (hubConnection) {
+        await hubConnection.invoke("UnblockChatbox", chatboxId, receiverID);
+      } else {
+        console.error("Hub connection is not established.");
       }
 
       // Update the local state
@@ -351,7 +369,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       console.error("Error updating chatbox status:", error);
     }
   };
-
   const getStatusLabel = (status: number) => {
     switch (status) {
       case 1:
@@ -419,6 +436,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     // Cleanup on component unmount
     return () => clearInterval(pollInterval);
   }, [userCookie?.userId, userData?.userId]); // Dependencies include both user IDs
+
 
   return (
     <div className="overflow-x-auto">
