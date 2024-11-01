@@ -24,7 +24,7 @@ using TicketResell.Services.Services.Chatbox;
 using Microsoft.EntityFrameworkCore;
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
-
+Console.WriteLine("SQLServer string: " + Environment.GetEnvironmentVariable("SQLSERVER"));
 builder.Services.Configure<AppConfig>(config =>
 {
     config.SQLServer = Environment.GetEnvironmentVariable("SQLSERVER") ?? "default";
@@ -56,6 +56,7 @@ JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json",
 
 // Dbcontext configuration
 builder.Services.AddDbContext<TicketResellManagementContext>();
+Console.WriteLine("Redis string: "+(Environment.GetEnvironmentVariable("REDIS_CONNECTION")??"localhost:6379"));
 var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     ConnectionMultiplexer.Connect(redisConnectionString));
@@ -136,10 +137,13 @@ using (var scope = app.Services.CreateScope())
     if (pendingMigrations.Any())
     {
         dbContext.Database.Migrate();
+        var isDocker = Environment.GetEnvironmentVariable("IS_DOCKER") == "true";
+        string sqlFilePath;
 
-        var sqlFilePath = Path.Combine(AppContext.BaseDirectory,"..","..", "..", "..", "TicketResell.Repositories", "Database", "SampleData.sql");
-
-        // Ensure the path is normalized and exists
+        if (isDocker)
+            sqlFilePath = Path.Combine(AppContext.BaseDirectory, "Database", "SampleData.sql");
+        else
+            sqlFilePath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "TicketResell.Repositories", "Database", "SampleData.sql");
         sqlFilePath = Path.GetFullPath(sqlFilePath);
         if (File.Exists(sqlFilePath))
         {

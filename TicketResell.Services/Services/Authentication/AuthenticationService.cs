@@ -57,7 +57,7 @@ public class AuthenticationService : IAuthenticationService
         }
 
         var user = _mapper.Map<User>(registerDto);
-        user.UserId = registerDto.Gmail;
+        user.UserId = registerDto.UserId;
         var validator = _validatorFactory.GetValidator<User>();
         var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
