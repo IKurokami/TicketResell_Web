@@ -1,65 +1,42 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import UserRequest from "./UserRequest";
+import UserRequest, { UserData } from "./UserRequest";
 import Cookies from "js-cookie";
-
-interface Role {
-  roleId: string;
-  rolename: string;
-  description: string;
-}
-
-interface UserData {
-  userId: string;
-  sellConfigId: string | null;
-  username: string;
-  status: number;
-  createDate: string;
-  gmail: string;
-  fullname: string;
-  sex: string;
-  phone: string;
-  address: string;
-  avatar: string | null;
-  birthday: string;
-  bio: string;
-  roles: Role[];
-}
 
 const Chatpage = () => {
   const userId = Cookies.get("id");
 
-  const [user, setUser] = useState<UserData | null>(null);
+  const [cookieUser, setCookieUser] = useState<UserData | any>();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        if (!userId) {
-          console.error("User ID not found in cookies");
-          return;
-        }
+  const fetchSpecificUser = async () => {
+    if (!userId) return;
 
-        const response = await fetch(
-          `http://localhost:5296/api/User/read/${userId}`
-        );
-        const data = await response.json();
-
-        if (data.statusCode === 200) {
-          console.log(data.data);
-
-          setUser(data.data);
-        } else {
-          console.error("Failed to fetch user data:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+    try {
+      const userResponse = await fetch(
+        `http://localhost:5296/api/User/read/${userId}`
+      );
+      const response = await userResponse.json();
+      console.log("API Response:", response);
+      if (response.statusCode === 200 && response.data) {
+        const userData: UserData = response.data;
+        setCookieUser(userData);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching specific user:", error);
+    }
+  };
 
-    fetchUserData();
+  // Add this useEffect to see state changes
+  useEffect(() => {
+    console.log("User state updated:", cookieUser);
+  }, [cookieUser]);
+
+  // Call fetchUserData when component mounts
+  useEffect(() => {
+    fetchSpecificUser();
   }, []);
 
-  return <UserRequest userData={user} userId={userId} />;
+  return <UserRequest userData={cookieUser} userCookie={cookieUser} />;
 };
 
 export default Chatpage;

@@ -24,8 +24,8 @@ export interface UserData {
   roles: Role[];
 }
 interface UserRequestProps {
-  userData: UserData | null;
-  userId: string | undefined;
+  userData: UserData | undefined;
+  userCookie: UserData | undefined;
 }
 
 interface ChatboxItem {
@@ -35,17 +35,16 @@ interface ChatboxItem {
   title: string;
   description: string;
 }
-const UserRequest: React.FC<UserRequestProps> = ({ userData, userId }) => {
+const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [chatboxData, setChatboxData] = useState<ChatboxItem[]>([]);
+  console.log("alo alo", userData);
+  console.log("Fetching data for ID:", userCookie);
 
   const fetchChatboxData = async () => {
     try {
-      const id = Cookies.get("id");
-      console.log("Fetching data for ID:", userId);
-
       const response = await fetch(
-        `http://localhost:5296/api/Chatbox/getall/${userId}`,
+        `http://localhost:5296/api/Chatbox/getall/${userData?.userId}`,
         { credentials: "include" }
       );
 
@@ -66,10 +65,12 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userId }) => {
 
   useEffect(() => {
     fetchChatboxData();
-  }, []);
+    console.log("fetch:", chatboxData);
+  }, [userData]);
 
-  const hasRO3Role = userData?.roles?.some((role) => role.roleId === "RO3");
-  console.log(userData);
+  const hasRO3Role =
+    userCookie?.roles?.some((role) => role.roleId === "RO3") ||
+    userCookie?.roles?.some((role) => role.roleId === "RO4");
   return (
     <div className="bg-white py-12 px-10 rounded-xl ">
       <p
@@ -118,7 +119,11 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userId }) => {
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
           {/* Set a max-width for the card container */}
-          <ChatboxTable userData={userData} chatboxData={chatboxData} />
+          <ChatboxTable
+            userData={userData}
+            chatboxData={chatboxData}
+            userCookie={userCookie}
+          />
         </div>
       </div>
     </div>

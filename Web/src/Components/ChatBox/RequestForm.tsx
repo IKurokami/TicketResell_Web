@@ -1,12 +1,13 @@
 import { MessageCircle } from "lucide-react";
-import { FaCheck, FaClock } from "react-icons/fa";
-import React, { useEffect, useState } from "react";
+import { FaCheck, FaClock, FaLock } from "react-icons/fa";
+import React, { use, useEffect, useState } from "react";
 import ChatComponent from "./ChatComponent";
 import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
 import { IoMdClose } from "react-icons/io";
 import { FaUnlockKeyhole } from "react-icons/fa6";
 import { UserData } from "./UserRequest";
+import { log } from "console";
 
 interface Chatbox {
   chatboxId: number;
@@ -17,7 +18,8 @@ interface Chatbox {
 }
 
 interface ChatboxTableProps {
-  userData: UserData | null;
+  userData: UserData | undefined;
+  userCookie: UserData | undefined;
 
   chatboxData: Chatbox[];
 }
@@ -25,7 +27,12 @@ interface ChatboxTableProps {
 const ChatboxTable: React.FC<ChatboxTableProps> = ({
   userData,
   chatboxData,
+  userCookie,
 }) => {
+  console.log("userData", userData);
+  console.log("chatboxData", chatboxData);
+  console.log("userCookie", userCookie);
+
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChatbox, setSelectedChatbox] = useState<Chatbox | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,7 +40,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   useEffect(() => {
     setChatboxes(chatboxData);
   }, [chatboxData]);
-
   const initialMessages = [
     {
       senderId: "123",
@@ -53,14 +59,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     },
   ];
 
-  const sampleUser = {
-    userId: "user123",
-    fullname: "Jane Doe",
-    email: "jane.doe@example.com",
-    avatarUrl: "https://example.com/avatar.jpg",
-    userole: "RO3",
-  };
-
   const [chatMessages, setChatMessages] = useState(initialMessages);
 
   const handleSendMessage = (message: string, userId: string) => {
@@ -79,13 +77,14 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   const openChat = (chatbox: Chatbox) => {
     const accessKey = Cookies.get("confirm");
     if (
-      chatbox.status === 1 &&
-      !accessKey &&
-      userData?.roles.some((role) => role.roleId === "RO1")
+      (chatbox.status === 2 &&
+        !accessKey &&
+        userCookie?.roles.some((role) => role.roleId === "RO1")) ||
+      userCookie?.roles.some((role) => role.roleId === "RO2")
     ) {
       setSelectedChatbox(chatbox);
       setIsModalOpen(true);
-    } else if (chatbox.status === 1 && accessKey) {
+    } else if (chatbox.status === 2 && accessKey) {
       setSelectedChatbox(chatbox);
       setIsChatOpen(true);
     } else {
@@ -100,12 +99,61 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleProcessingUpdate = (chatboxId: number) => {
-    setChatboxes((prevChatboxes) =>
-      prevChatboxes.map((chatbox) =>
-        chatbox.chatboxId === chatboxId ? { ...chatbox, Status: 2 } : chatbox
-      )
-    );
+  const handleUnlockUpdate = async (chatboxId: number) => {
+    try {
+      // Call the map request API
+      const mapResponse = await fetch(
+        `http://localhost:5296/api/Chat/processing/${chatboxId}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!mapResponse.ok) {
+        throw new Error("Failed to map request");
+      }
+
+      // Update the local state
+      setChatboxes((prevChatboxes) =>
+        prevChatboxes.map((chatbox) =>
+          chatbox.chatboxId === chatboxId ? { ...chatbox, status: 2 } : chatbox
+        )
+      );
+    } catch (error) {
+      console.error("Error updating chatbox status:", error);
+    }
+  };
+  const handleProcessingUpdate = async (chatboxId: number) => {
+    try {
+      // Call the map request API
+      const mapResponse = await fetch(
+        `http://localhost:5296/api/Chat/maprequest/${userData?.userId}`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!mapResponse.ok) {
+        throw new Error("Failed to map request");
+      }
+
+      // Update the local state
+      setChatboxes((prevChatboxes) =>
+        prevChatboxes.map((chatbox) =>
+          chatbox.chatboxId === chatboxId ? { ...chatbox, status: 2 } : chatbox
+        )
+      );
+    } catch (error) {
+      console.error("Error updating chatbox status:", error);
+    }
   };
 
   const handleRejectsUpdate = async (chatboxId: number) => {
@@ -114,6 +162,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         `http://localhost:5296/api/Chatbox/rejectchat/${chatboxId}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -124,7 +173,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         setChatboxes((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
             chatbox.chatboxId === chatboxId
-              ? { ...chatbox, Status: 8 }
+              ? { ...chatbox, status: 8 }
               : chatbox
           )
         );
@@ -142,6 +191,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         `http://localhost:5296/api/Chatbox/closeboxchat/${chatboxId}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -152,7 +202,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         setChatboxes((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
             chatbox.chatboxId === chatboxId
-              ? { ...chatbox, Status: 0 }
+              ? { ...chatbox, status: 0 }
               : chatbox
           )
         );
@@ -183,6 +233,50 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         return { text: "Report", color: "bg-red-500 text-white font-bold" };
     }
   };
+
+  // Add this function to fetch chatbox data for specific users
+  const fetchChatboxData = async () => {
+    if (!userCookie?.userId || !userData?.userId) {
+      console.log("Missing user IDs for fetch");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5296/api/Chat/get/${userCookie.userId}/${userData.userId}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const latestData = await response.json();
+        setChatboxes(latestData);
+      } else {
+        console.error("Failed to fetch chatbox data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching chatbox data:", error);
+    }
+  };
+
+  // Add polling effect to check for updates
+  useEffect(() => {
+    // Initial fetch
+    fetchChatboxData();
+
+    // Set up polling interval
+    const pollInterval = setInterval(() => {
+      fetchChatboxData();
+    }, 5000); // Polls every 5 seconds
+
+    // Cleanup on component unmount
+    return () => clearInterval(pollInterval);
+  }, [userCookie?.userId, userData?.userId]); // Dependencies include both user IDs
 
   return (
     <div className="overflow-x-auto">
@@ -229,8 +323,12 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                 <td className="items-center py-3 px-4 text-gray-700 text-center">
                   {chatbox.status === 2 ? (
                     <div className="flex justify-center gap-2">
-                      {userData?.roles.some((role) => role.roleId === "RO2") ||
-                      userData?.roles.some((role) => role.roleId === "RO1") ? (
+                      {userCookie?.roles.some(
+                        (role) => role.roleId === "RO2"
+                      ) ||
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
                         <button
                           onClick={() => openChat(chatbox)}
                           className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -261,8 +359,12 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                     </div>
                   ) : chatbox.status === 1 ? (
                     <div className="flex items-center justify-center gap-2">
-                      {userData?.roles.some((role) => role.roleId === "RO2") ||
-                      userData?.roles.some((role) => role.roleId === "RO1") ? (
+                      {userCookie?.roles.some(
+                        (role) => role.roleId === "RO2"
+                      ) ||
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
                         <div className="flex justify-center">
                           <FaClock className=" text-yellow-500 " />
                         </div>
@@ -305,19 +407,50 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                     </div>
                   ) : chatbox.status === 3 ? (
                     <div className="flex justify-center items-center gap-2">
-                      <button
-                        onClick={() =>
-                          handleProcessingUpdate(chatbox.chatboxId)
-                        }
-                        className="group relative flex items-center gap-2  py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                      >
-                        <FaUnlockKeyhole className="text-gray-500 hover:text-blue-500" />
-                      </button>
+                      {userCookie?.roles.some(
+                        (role) => role.roleId === "RO2"
+                      ) ||
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
+                        <div>
+                          <button
+                            onClick={() => openChat(chatbox)}
+                            className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
+                          </button>
+                          <div className="pl-4">
+                            <FaLock className="text-gray-500 hover: text-blue-500" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <button
+                            onClick={() => openChat(chatbox)}
+                            className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleUnlockUpdate(chatbox.chatboxId)
+                            }
+                            className="group relative flex items-center gap-2  py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <FaUnlockKeyhole className="text-gray-500 hover:text-blue-500" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-2">
-                      {userData?.roles.some((role) => role.roleId === "RO2") ||
-                      userData?.roles.some((role) => role.roleId === "RO1") ? (
+                      {userCookie?.roles.some(
+                        (role) => role.roleId === "RO2"
+                      ) ||
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
                         <FaClock className=" text-yellow-500" />
                       ) : (
                         <div className="flex justify-center gap-2">
@@ -352,11 +485,11 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           onCloseChat={() => {
             setIsChatOpen(false);
           }}
-          user={sampleUser}
+          user={userData}
           chatMessages={chatMessages}
           chatbox={selectedChatbox}
           onSendMessage={handleSendMessage}
-          mode="fullpage"
+          mode="popup"
         />
       )}
 

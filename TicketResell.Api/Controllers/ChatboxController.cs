@@ -130,7 +130,7 @@ namespace Api.Controllers
             return ResponseParser.Result(await _chatboxService.GetChatboxsByUserId(userId));
         }
 
-        [HttpPost("closeboxchat/{chatboxId}")]
+        [HttpPut("closeboxchat/{chatboxId}")]
         public async Task<IActionResult> CloseBoxChat(string chatboxId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
@@ -141,7 +141,7 @@ namespace Api.Controllers
         }
         
         
-        [HttpPost("rejectchat/{chatboxId}")]
+        [HttpPut("rejectchat/{chatboxId}")]
         public async Task<IActionResult> RejectChat(string chatboxId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
@@ -150,7 +150,7 @@ namespace Api.Controllers
             
             return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 8));
         }
-        [HttpPost("processing/{chatboxId}")]
+        [HttpPut("processing/{chatboxId}")]
         public async Task<IActionResult> Processing(string chatboxId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))

@@ -5,6 +5,7 @@ import { Input } from "@/Components/ui/input";
 import "@/Css/Chatbox.css";
 import * as signalR from "@microsoft/signalr";
 import Cookies from "js-cookie";
+import { UserData } from "./UserRequest";
 
 interface ChatMessage {
   senderId: string;
@@ -24,7 +25,7 @@ interface Chatbox {
 }
 
 interface ChatProps {
-  user: { userId: string; fullname: string; userole: string };
+  user: UserData | undefined;
   chatMessages: ChatMessage[];
   onSendMessage: (message: string, userId: string) => void;
   onCloseChat: () => void;
@@ -76,7 +77,7 @@ const Chat: React.FC<ChatProps> = ({
     connection.on("ReceiveMessage", (senderId: string, message: string) => {
       const newMessage = {
         senderId,
-        receiverId: user.userId,
+        receiverId: user?.userId,
         message,
         chatId: Date.now().toString(),
         date: new Date().toISOString(),
@@ -105,29 +106,31 @@ const Chat: React.FC<ChatProps> = ({
       try {
         await hubConnectionRef.current.invoke(
           "SendMessageAsync",
-          user.userId,
+          user?.userId,
           newMessage,
           chatbox?.chatboxId.toString() || ""
         );
-        
-        onSendMessage(newMessage, user.userId);
-        setNewMessage("");
+        if (user?.userId != undefined) {
+          onSendMessage(newMessage, user?.userId);
+          setNewMessage("");
+        }
       } catch (error) {
         console.error("Error sending message:", error);
       }
     }
   };
 
-  const containerClassName = mode === "popup"
-    ? "fixed bottom-0 right-0 w-full max-w-md h-[70vh] bg-white shadow-lg border-t border-l border-gray-200"
-    : "fixed inset-0 w-full h-screen bg-white z-[9999]";
+  const containerClassName =
+    mode === "popup"
+      ? "fixed bottom-0 right-0 w-full max-w-md h-[70vh] bg-white shadow-lg border-t border-l border-gray-200"
+      : "fixed inset-0 w-full h-screen bg-white z-[9999]";
 
   useEffect(() => {
     if (mode === "fullpage") {
       document.body.style.overflow = "hidden";
       document.body.classList.add("chat-fullpage-mode");
     }
-    
+
     return () => {
       document.body.style.overflow = "";
       document.body.classList.remove("chat-fullpage-mode");
@@ -182,32 +185,32 @@ const Chat: React.FC<ChatProps> = ({
               <div
                 key={i}
                 className={`${
-                  msg.senderId === user.userId
+                  msg.senderId === user?.userId
                     ? "col-start-6 col-end-13"
                     : "col-start-1 col-end-10"
                 } p-3 rounded-lg`}
               >
                 <div
                   className={`flex ${
-                    msg.senderId === user.userId
+                    msg.senderId === user?.userId
                       ? "items-center justify-end"
                       : "items-center justify-start"
                   }`}
                 >
                   <div
                     className={`flex items-center justify-center h-8 w-8 rounded-full ${
-                      msg.senderId === user.userId
+                      msg.senderId === user?.userId
                         ? "bg-indigo-500"
                         : "bg-gray-500"
                     } flex-shrink-0 text-white text-sm`}
                   >
-                    {msg.senderId === user.userId
+                    {msg.senderId === user?.userId
                       ? user.fullname.charAt(0)
                       : "U"}
                   </div>
                   <div
                     className={`relative ml-3 text-sm ${
-                      msg.senderId === user.userId
+                      msg.senderId === user?.userId
                         ? "bg-indigo-100"
                         : "bg-white"
                     } py-2 px-4 shadow rounded-xl min-w-[120px] max-w-[100%] overflow-hidden break-words`}
