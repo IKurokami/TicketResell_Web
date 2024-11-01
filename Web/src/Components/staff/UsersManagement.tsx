@@ -242,13 +242,15 @@ const UserManagement = () => {
     window.open(orderPageUrl, '_blank'); // Mở trang mới
   };
 
+  const loggedInUserId = Cookies.get("id"); // Giả định ID người dùng đăng nhập được lưu trong cookie "userId"
+
   const filteredUsers = users.filter(
     (user) =>
-      (user.fullname &&
-        user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.userId &&
-        user.userId.toLowerCase().includes(searchTerm.toLowerCase()))
+      user.userId !== loggedInUserId && // Loại bỏ người dùng có ID trùng với ID người đăng nhập
+      ((user.fullname && user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.userId && user.userId.toLowerCase().includes(searchTerm.toLowerCase())))
   );
+  
 
   const formatMessageDate = (date: string | null) => {
     if (!date) return "";
@@ -331,8 +333,8 @@ const UserManagement = () => {
                       onClick={() => handleOrder(user.gmail)}
                       variant="default"
                       color="success"
-                      className=" font-bold py-2 px-4 rounded"
-                    >
+                      className="font-bold py-2 px-4 rounded bg-transparent border-none shadow-none focus:outline-none"
+                      >
                       <VisibilityIcon />
                     </Button>
                   </td>

@@ -3,6 +3,7 @@ import { fetchImage } from "@/models/FetchImage";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+
 interface Category {
   categoryId: string;
   name: string;
@@ -29,47 +30,49 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
   ticketID,
 }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const DEFAULT_IMAGE =
     "https://media.stubhubstatic.com/stubhub-v2-catalog/d_defaultLogo.jpg/q_auto:low,f_auto/categories/11655/5486517";
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const formatVND = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
   };
+
+  const truncateString = (str: string, maxLength: number) => {
+    if (str.length > maxLength) {
+      return str.slice(0, maxLength) + "...";
+    }
+    return str;
+  };
+
   // Fetch related tickets based on categoriesId
   useEffect(() => {
     const fetchRelatedTickets = async () => {
       try {
-        console.log(ticketID);
-        // Fetch data from both APIs
         const [notByCateResponse, byCateResponse] = await Promise.all([
           fetch(`http://localhost:5296/api/Ticket/getnotbyCate/`, {
-            // POST request with the category IDs as the body
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(categoriesId), // Sending category IDs in the body
-          }), // Assume this is a GET request
+            body: JSON.stringify(categoriesId),
+          }),
           fetch(`http://localhost:5296/api/Ticket/getbyCate/${ticketID}`, {
-            // POST request with the category IDs as the body
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(categoriesId), // Sending category IDs in the body
+            body: JSON.stringify(categoriesId),
           }),
         ]);
 
         const notByCateTickets = await notByCateResponse.json();
         const byCateTickets = await byCateResponse.json();
-        console.log("DG ngu");
-        console.log(byCateTickets);
 
-        // Select at least 2 tickets from each category if possible
         const result = [];
 
         // Add 2 tickets from getbyCate first
@@ -89,6 +92,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
           result.push(...remainingTickets.slice(0, 4 - result.length));
         }
+
         let updatedTickets = await Promise.all(
           result.map(async (ticket: any) => {
             let imageUrl = DEFAULT_IMAGE; // Default image
@@ -115,8 +119,6 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
           })
         );
         setTickets(updatedTickets);
-
-        console.log(result);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching related tickets:", error);
@@ -151,11 +153,8 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
       <div className="mx-auto px-10 py-8 no-underline grid grid-cols-2 lg:grid-cols-4 gap-[1vw]">
         {tickets.map((ticket) => (
-          <Link className="no-underline" href={`/ticket/${ticket.ticketId}`}>
-            <div
-              key={ticket.ticketId}
-              className="movie-card-wrapper cursor-pointer no-underline visited:no-underline transform transition-transform duration-300 hover:scale-105"
-            >
+          <Link key={ticket.ticketId} className="no-underline" href={`/ticket/${ticket.ticketId}`}>
+            <div className="movie-card-wrapper cursor-pointer no-underline visited:no-underline transform transition-transform duration-300 hover:scale-105">
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden movie-card">
                 <div className="relative">
                   <img
@@ -169,9 +168,11 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                 </div>
                 <div className="p-4 space-y-2 flex-grow">
                   <h3 className="text-lg font-semibold mb-1 text-gray-900">
-                    {ticket.name}
+                    {truncateString(ticket.name, 25)} {/* Truncate name */}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-1">{ticket.location}</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {truncateString(ticket.location, 35)} {/* Truncate location */}
+                  </p>
                   <p className="text-sm text-gray-600">
                     {new Date(ticket.startDate).toLocaleDateString("en-US", {
                       year: "numeric",
@@ -184,23 +185,21 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                     })}
                   </p>
                   <ul className="flex flex-wrap gap-2 tag--list overflow-hidden">
-                    {ticket.categories.slice(0, 1).map((category) => (
-                      <li
-                        key={category.categoryId}
-                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold"
-                      >
-                        {category.name}
+                    {ticket.categories.length > 0 ? (
+                      ticket.categories.slice(0, 1).map((category) => (
+                        <li
+                          key={category.categoryId}
+                          className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold"
+                        >
+                          {category.name}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="bg-gray-300 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        Không có danh mục
                       </li>
-                    ))}
-                    {ticket.categories.slice(0, 1).map((category) => (
-                      <li
-                        key={category.categoryId}
-                        className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold hidden xl:block"
-                      >
-                        {category.name}
-                      </li>
-                    ))}
-                    {ticket.categories.length > 2 && (
+                    )}
+                    {ticket.categories.length > 1 && (
                       <li className="bg-gray-300 text-white px-3 rounded-full text-sm font-semibold hidden sm:block">
                         ...
                       </li>
@@ -212,8 +211,8 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
           </Link>
         ))}
       </div>
-    </div>
 
+    </div>
   );
 };
 

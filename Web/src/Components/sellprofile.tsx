@@ -4,7 +4,8 @@ import EditProfilePopup from "./EditProfilePopUp";
 import { fetchImage } from "@/models/FetchImage";
 import uploadImageForTicket from "@/models/UpdateImage";
 import Link from "next/link";
-
+import { AlertCircle, X } from 'lucide-react';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
 const DEFAULT_IMAGE = "https://images7.alphacoders.com/129/1297416.png";
 
 interface FormData {
@@ -33,59 +34,97 @@ interface Props {
 
 const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [showAlert, setShowAlert] = useState(false);
+  const [selectedReason, setSelectedReason] = useState<string | null>(null);
+
   const reportReasons = [
-    "Bán vé giả hoặc không hợp lệ",
-    "Giá vé quá cao so với thị trường",
-    "Gian lận trong giao dịch",
-    "Chính sách hoàn tiền không rõ ràng",
-    "Dịch vụ khách hàng kém",
+    "Báo cáo vé không phù hợp",
+    "Báo cáo bạo lực",
+    "Báo cáo giá cao",
+    "Báo cáo vé giả",
   ];
 
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-      onClose();
-    }, 3000);
+    if (selectedReason) {
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+        onClose();
+      }, 3000);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out" style={{ zIndex: 500 }}>
-      <div className="bg-white p-8 rounded-xl shadow-2xl transform transition-transform duration-300 ease-out scale-95 sm:scale-100 w-full max-w-lg mx-4">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Báo cáo người dùng</h2>
-        <ul>
-          {reportReasons.map((reason, index) => (
-            <li key={index} className="mb-3">
-              <label className="flex items-center text-gray-700 hover:text-gray-900 transition-colors">
-                <input
-                  type="checkbox"
-                  className="mr-3 text-blue-500 border-gray-300 focus:ring-blue-400 focus:ring-2 rounded transition-all"
-                />
-                {reason}
-              </label>
-            </li>
-          ))}
-        </ul>
-        <div className="flex justify-end mt-6">
-          <button
-            onClick={onClose}
-            className="bg-red-500 text-white py-2 px-5 rounded-lg mr-3 hover:bg-red-600 transition-colors duration-200"
-          >
-            Hủy
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          >
-            Gửi báo cáo
-          </button>
-        </div>
-        {showAlert && (
-          <div className="mt-6 p-3 rounded-lg bg-green-100 border border-green-300 text-green-800 text-center animate-fade-in">
-            Bạn đã gửi báo cáo
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 mt-10" style={{ zIndex: 500 }}>
+      <div className="w-full max-w-md mx-4 animate-in slide-in-from-bottom duration-300 mt-10"> {/* Changed max-w-lg to max-w-md */}
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden mt-10">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800"> {/* Reduced padding */}
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Báo cáo người dùng</h2> {/* Changed text size */}
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
+
+          {/* Content */}
+          <div className="p-4"> {/* Reduced padding */}
+            <ul className="space-y-3"> {/* Reduced space */}
+              {reportReasons.map((reason, index) => (
+                <li key={index} className="group">
+                  <label className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"> {/* Reduced padding */}
+                    <div className="relative">
+                      <input
+                        type="radio"
+                        name="reportReason"
+                        value={reason}
+                        checked={selectedReason === reason}
+                        onChange={() => setSelectedReason(reason)}
+                        className="w-4 h-4 text-blue-600 border-2 border-gray-300 focus:ring-blue-500 focus:ring-offset-2"
+                      />
+                      {selectedReason === reason && (
+                        <div className="absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-75"></div>
+                      )}
+                    </div>
+                    <span className="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
+                      {reason}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-end gap-2 p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"> {/* Reduced padding */}
+            <button
+              onClick={onClose}
+              className="px-4 py-1 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-1 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+            >
+              Gửi báo cáo
+            </button>
+          </div>
+        </div>
+
+        {/* Alert */}
+        {showAlert && (
+          <Alert className="mt-4 bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-900 animate-in fade-in slide-in-from-top duration-300">
+            <AlertDescription className="text-green-800 dark:text-green-200">
+              Bạn đã gửi báo cáo thành công
+            </AlertDescription>
+          </Alert>
         )}
       </div>
     </div>

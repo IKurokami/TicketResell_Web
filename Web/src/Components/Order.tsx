@@ -130,11 +130,10 @@ const Order: React.FC<OrderProps> = ({ email }) => {
                   <td className="px-6 py-4">{order.buyerId}</td>
                   <td className="px-6 py-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        order.status === 1
-                          ? "bg-green-100 text-green-600"
-                          : "bg-purple-100 text-purple-600"
-                      }`}
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${order.status === 1
+                        ? "bg-green-100 text-green-600"
+                        : "bg-purple-100 text-purple-600"
+                        }`}
                     >
                       {order.status === 1 ? "Hoàn Thành" : "Đang Xử Lý"}
                     </span>
@@ -149,13 +148,17 @@ const Order: React.FC<OrderProps> = ({ email }) => {
                   </td>
                   <td className="px-6 py-4 ">{order.orderDetails.length}</td>
                   <td className="px-6 py-4 flex items-center space-x-2">
-                    <button
-                      onClick={() => handleRefresh(order.orderId)}
-                      className="text-blue-600 hover:text-blue-800 font-medium ml-8"
-                    >
-                      <RefreshCw className="w-5 h-5" />
-                    </button>
+                    {(order.status === -1 || order.status === 0 || order.status === 2) && (
+                      <button
+                        onClick={() => handleRefresh(order.orderId)}
+                        className="text-blue-600 hover:text-blue-800 font-medium ml-8"
+                      >
+                        <RefreshCw className="w-5 h-5" />
+                      </button>
+                    )}
                   </td>
+
+
                 </tr>
               ))}
             </tbody>
