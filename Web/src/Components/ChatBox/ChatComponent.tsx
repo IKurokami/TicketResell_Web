@@ -43,11 +43,10 @@ const Chat: React.FC<ChatProps> = ({
   const [newMessage, setNewMessage] = useState("");
   const [localChatMessages, setLocalChatMessages] = useState<ChatMessage[]>(chatMessages);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const [hubConnection, setHubConnection] = useState<signalR.HubConnection | null>(null);
 
   const isRO3 = user?.roles.some(role => role.roleId === "RO3");
-  const isInputDisabled = !isRO3 && chatbox?.status === 4;
-console.log("user",user);
+  const isRO4 = user?.roles.some(role => role.roleId === "RO4");
+  const isInputDisabled = !isRO3 && !isRO4 && chatbox?.status === 4 || chatbox?.status === 3;
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -59,41 +58,6 @@ console.log("user",user);
   useEffect(() => {
     setLocalChatMessages(chatMessages);
   }, [chatMessages]);
-
-  useEffect(() => {
-    const createHubConnection = async () => {
-      const connection = new signalR.HubConnectionBuilder()
-        .withUrl("http://localhost:5296/chat-hub", {
-          withCredentials: true,
-        })
-        .withAutomaticReconnect()
-        .build();
-
-      try {
-        await connection.start();
-        console.log("SignalR Connected!");
-
-        connection.on("ReceiveMessage", (message: ChatMessage) => {
-          if (message.chatBoxId === chatbox?.chatboxId) {
-            setLocalChatMessages(prev => [...prev, message]);
-            onSendMessage(message.message, message.senderId);
-          }
-        });
-
-        setHubConnection(connection);
-      } catch (err) {
-        console.error("SignalR Connection Error: ", err);
-      }
-    };
-
-    createHubConnection();
-
-    return () => {
-      if (hubConnection) {
-        hubConnection.stop();
-      }
-    };
-  }, [chatbox?.chatboxId, onSendMessage]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim() && user?.userId && chatbox) {
