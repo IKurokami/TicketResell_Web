@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import "@/Css/Chatbox.css";
 import * as signalR from "@microsoft/signalr";
-import Cookies from "js-cookie";
+import { UserData } from "./UserRequest";
 
 interface ChatMessage {
   senderId: string;
   receiverId: string;
   message: string;
-  chatId: string;
+  chatId: number;
   date: string | null;
-  chatboxId: string;
+  chatBoxId: number;
 }
 
 interface Chatbox {
@@ -24,8 +24,8 @@ interface Chatbox {
 }
 
 interface ChatProps {
-  user: { userId: string; fullname: string; userole: string };
-  chatMessages: ChatMessage[];
+  user: UserData|undefined;
+  chatMessages: any[];
   onSendMessage: (message: string, userId: string) => void;
   onCloseChat: () => void;
   chatbox: Chatbox | null;
@@ -41,11 +41,13 @@ const Chat: React.FC<ChatProps> = ({
   mode,
 }) => {
   const [newMessage, setNewMessage] = useState("");
+  const [localChatMessages, setLocalChatMessages] = useState<ChatMessage[]>(chatMessages);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState("Disconnected");
+  const [hubConnection, setHubConnection] = useState<signalR.HubConnection | null>(null);
 
-  const isInputDisabled = chatbox?.status === 2;
+  const isRO3 = user?.roles.some(role => role.roleId === "RO3");
+  const isInputDisabled = !isRO3 && chatbox?.status === 4;
+console.log("user",user);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -55,61 +57,47 @@ const Chat: React.FC<ChatProps> = ({
   }, [chatMessages]);
 
   useEffect(() => {
-    setupSignalRConnection();
-    return () => {
-      if (hubConnectionRef.current) {
-        hubConnectionRef.current.stop();
+    setLocalChatMessages(chatMessages);
+  }, [chatMessages]);
+
+  useEffect(() => {
+    const createHubConnection = async () => {
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl("http://localhost:5296/chat-hub", {
+          withCredentials: true,
+        })
+        .withAutomaticReconnect()
+        .build();
+
+      try {
+        await connection.start();
+        console.log("SignalR Connected!");
+
+        connection.on("ReceiveMessage", (message: ChatMessage) => {
+          if (message.chatBoxId === chatbox?.chatboxId) {
+            setLocalChatMessages(prev => [...prev, message]);
+            onSendMessage(message.message, message.senderId);
+          }
+        });
+
+        setHubConnection(connection);
+      } catch (err) {
+        console.error("SignalR Connection Error: ", err);
       }
     };
-  }, []);
 
-  const setupSignalRConnection = async () => {
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5296/chat-hub", {
-        withCredentials: true,
-      })
-      .withAutomaticReconnect()
-      .build();
+    createHubConnection();
 
-    hubConnectionRef.current = connection;
-
-    connection.on("ReceiveMessage", (senderId: string, message: string) => {
-      const newMessage = {
-        senderId,
-        receiverId: user.userId,
-        message,
-        chatId: Date.now().toString(),
-        date: new Date().toISOString(),
-        chatboxId: chatbox?.chatboxId.toString() || "",
-      };
-      onSendMessage(newMessage.message, newMessage.senderId);
-    });
-
-    try {
-      await connection.start();
-      const userId = Cookies.get("id");
-      const accessKey = Cookies.get("accessKey");
-
-      if (userId && accessKey) {
-        await connection.invoke("LoginAsync", userId, accessKey);
-        setConnectionStatus("Connected");
+    return () => {
+      if (hubConnection) {
+        hubConnection.stop();
       }
-    } catch (err) {
-      console.error("Error establishing connection:", err);
-      setConnectionStatus("Connection Failed");
-    }
-  };
+    };
+  }, [chatbox?.chatboxId, onSendMessage]);
 
   const handleSendMessage = async () => {
-    if (newMessage.trim() && hubConnectionRef.current) {
+    if (newMessage.trim() && user?.userId && chatbox) {
       try {
-        await hubConnectionRef.current.invoke(
-          "SendMessageAsync",
-          user.userId,
-          newMessage,
-          chatbox?.chatboxId.toString() || ""
-        );
-        
         onSendMessage(newMessage, user.userId);
         setNewMessage("");
       } catch (error) {
@@ -119,7 +107,7 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const containerClassName = mode === "popup"
-    ? "fixed bottom-0 right-0 w-full max-w-md h-[70vh] bg-white shadow-lg border-t border-l border-gray-200"
+    ? "fixed bottom-0 right-0 w-full max-w-md h-[70vh] bg-white shadow-lg border-t border-l border-gray-200 z-[999]"
     : "fixed inset-0 w-full h-screen bg-white z-[9999]";
 
   useEffect(() => {
@@ -157,67 +145,62 @@ const Chat: React.FC<ChatProps> = ({
         <div className="ml-2 font-bold text-lg">
           {chatbox ? chatbox.title : "Chat"}
         </div>
-        {mode === "popup" ? (
-          <button
-            onClick={onCloseChat}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        ) : (
-          <button
-            onClick={onCloseChat}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
+        <button
+          onClick={onCloseChat}
+          className="text-gray-400 hover:text-gray-600"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Chat Container */}
       <div className="absolute top-12 bottom-16 left-0 right-0 bg-gray-50 overflow-hidden">
         <div ref={chatContainerRef} className="h-full overflow-y-auto p-4">
           <div className="grid grid-cols-12 gap-y-2">
-            {chatMessages.map((msg, i) => (
+            {localChatMessages.map((msg, i) => (
               <div
                 key={i}
                 className={`${
-                  msg.senderId === user.userId
-                    ? "col-start-6 col-end-13"
-                    : "col-start-1 col-end-10"
+                  msg.senderId === user?.userId
+                    ? "col-start-6 col-end-13"  // User's messages -> right side
+                    : "col-start-1 col-end-10"  // Other's messages -> left side
                 } p-3 rounded-lg`}
               >
                 <div
-                  className={`flex ${
-                    msg.senderId === user.userId
-                      ? "items-center justify-end"
-                      : "items-center justify-start"
+                  className={`flex flex-col ${
+                    msg.senderId === user?.userId ? "items-end" : "items-start"
                   }`}
                 >
-                  <div
-                    className={`flex items-center justify-center h-8 w-8 rounded-full ${
-                      msg.senderId === user.userId
-                        ? "bg-indigo-500"
-                        : "bg-gray-500"
-                    } flex-shrink-0 text-white text-sm`}
-                  >
-                    {msg.senderId === user.userId
-                      ? user.fullname.charAt(0)
-                      : "U"}
-                  </div>
-                  <div
-                    className={`relative ml-3 text-sm ${
-                      msg.senderId === user.userId
-                        ? "bg-indigo-100"
-                        : "bg-white"
-                    } py-2 px-4 shadow rounded-xl min-w-[120px] max-w-[100%] overflow-hidden break-words`}
-                  >
-                    <div>{msg.message}</div>
-                    {msg.date && (
-                      <div className="absolute text-xs bottom-0 right-0 -mb-5 mr-2 text-gray-500">
-                        {msg.date}
-                      </div>
-                    )}
+                  {/* Username */}
+                  <span className="text-xs text-gray-500 mb-1">
+                    {msg.senderId === user?.userId ? user.fullname : msg.senderId}
+                  </span>
+                  
+                  <div className={`flex ${
+                    msg.senderId === user?.userId ? "flex-row-reverse" : "flex-row"
+                  }`}>
+                    {/* Avatar */}
+                    <div className={`flex items-center justify-center h-8 w-8 rounded-full 
+                      ${msg.senderId === user?.userId ? "ml-3" : "mr-3"}
+                      ${msg.senderId === user?.userId ? "bg-indigo-500" : "bg-gray-500"}
+                      flex-shrink-0 text-white text-sm`}
+                    >
+                      {msg.senderId === user?.userId ? user.fullname.charAt(0) : "U"}
+                    </div>
+
+                    {/* Message Content */}
+                    <div className={`relative text-sm
+                      ${msg.senderId === user?.userId ? "bg-indigo-100" : "bg-white"}
+                      py-2 px-4 shadow rounded-xl min-w-[120px] max-w-[80%]
+                      break-words`}
+                    >
+                      <div>{msg.message}</div>
+                      {msg.date && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {msg.date}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -67,7 +67,7 @@ namespace TicketResell.API.Controllers
             return ResponseParser.Result(ResponseModel.Success("Success", latestChat));
         }
 
-        [HttpPost("getValidChats/{userId}")]
+        [HttpGet("getValidChats/{userId}")]
         public async Task<IActionResult> GetValidChatByUserId(string userId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
@@ -79,7 +79,7 @@ namespace TicketResell.API.Controllers
             var chats = await _chatService.GetValidChatByUserId(userId);
             return ResponseParser.Result(chats);
         }
-        [HttpPost("getChatsByBoxchatId/{boxchatId}")]
+        [HttpGet("getChatsByBoxchatId/{boxchatId}")]
         public async Task<IActionResult> GetChatsByBoxchatId(string boxchatId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
@@ -91,6 +91,16 @@ namespace TicketResell.API.Controllers
             }
             var chats = await _chatService.GetChatsByChatboxIdAsync(boxchatId);
             return ResponseParser.Result(chats);
+        }
+
+        [HttpPut("processing/{chatboxId}")]
+        public async Task<IActionResult> Processing(string chatboxId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
+
+            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 2));
         }
     }
 }

@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { PlusCircle, Search, Send, X, MessageCircle, Mail } from "lucide-react";
+import {
+  PlusCircle,
+  Search,
+  Send,
+  X,
+  MessageCircle,
+  Mail,
+  Cookie,
+  User,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
@@ -77,17 +86,12 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   >({});
   const popupRef = useRef<any>(null);
   const [showRequestPopup, setShowRequestPopup] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState(null);
-  const requests = [
-    { id: 1, title: "Request 1", message: "Sample request message 1" },
-    { id: 2, title: "Request 2", message: "Sample request message 2" },
-  ];
-  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
-    undefined
-  );
 
-  const handleRequestClick = (userId: string) => {
-    setSelectedUserId(userId);
+  const [cookieUser, setCookieUser] = useState<UserData | undefined>(undefined);
+  const userId = Cookies.get("id");
+
+  const handleRequestClick = (user: UserData) => {
+    setSelectedUser(user);
     setShowRequestPopup(true);
   };
 
@@ -96,20 +100,59 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [blockStatus, setBlockStatus] = useState<BlockStatus>({});
-  useEffect(() => {
-    fetch("http://localhost:5296/api/User/read")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.statusCode === 200) {
-          setUsers(data.data);
-        } else {
-          console.error("Failed to fetch users:", data.message);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
 
+  const fetchAllUsers = async () => {
+    try {
+      const usersResponse = await fetch("http://localhost:5296/api/User/read");
+
+      if (!usersResponse.ok) {
+        throw new Error(`HTTP error! status: ${usersResponse.status}`);
+      }
+
+      const usersData = await usersResponse.json();
+      console.log("API Response:", usersData); // Debug log
+
+      if (usersData.statusCode === 200 && Array.isArray(usersData.data)) {
+        const userData: UserData[] = usersData.data;
+        setUsers(userData);
+        console.log("Users data set successfully:", userData); // Debug log
+      } else {
+        console.error("Invalid data format or status code:", usersData);
+        setUsers([]); // Set empty array if data is invalid
+      }
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      setUsers([]); // Set empty array on error
+    }
+  };
+
+  const fetchSpecificUser = async () => {
+    if (!userId) return;
+
+    try {
+      const userResponse = await fetch(
+        `http://localhost:5296/api/User/read/${userId}`
+      );
+      const userCookie = await userResponse.json();
+      console.log("API Response:", userCookie);
+      if (userCookie.statusCode === 200 && userCookie.data) {
+        const userData: UserData = userCookie.data;
+        setCookieUser(userData);
+        console.log("Setting cookieUser:", userData);
+      }
+    } catch (error) {
+      console.error("Error fetching specific user:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Initial data fetch
+    fetchAllUsers();
+    console.log("Fetching all users", users);
+    fetchSpecificUser();
+    console.log("Fetching  users", cookieUser);
+
+    // Setup SignalR
     setupSignalRConnection();
 
     return () => {
@@ -117,7 +160,12 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
         hubConnectionRef.current.stop();
       }
     };
-  }, []);
+  }, []); // Empty dependency array for initial load only
+
+  // Add a separate effect to monitor cookieUser changes if needed
+  useEffect(() => {
+    console.log("cookieUser state updated:", cookieUser);
+  }, [cookieUser]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -205,7 +253,6 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
 
     try {
       await connection.start();
-      const userId = Cookies.get("id");
       const accessKey = Cookies.get("accessKey");
 
       if (userId && accessKey) {
@@ -318,6 +365,11 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
     });
   };
 
+  // Add an effect to monitor users state changes
+  useEffect(() => {
+    console.log("Users state updated:", users);
+  }, [users]);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -408,7 +460,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
                           (role) =>
                             role.roleId === "RO1" || role.roleId === "RO2"
                         )
-                          ? handleRequestClick(user.userId)
+                          ? handleRequestClick(user)
                           : handleChat(user);
                       }}
                       className="group relative flex items-center gap-2 px-4 py-2  text-white rounded-full  transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -558,13 +610,10 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
           </form>
         </DialogContent>
       </Dialog>
-      {showRequestPopup && selectedUserId && (
+      {showRequestPopup && selectedUser && (
         <div className="z-50 fixed inset-0 bg-black/50 flex items-center justify-center">
           <div ref={popupRef}>
-            <UserRequest
-              userData={userDetails}
-              userId={selectedUserId || undefined}
-            />
+            <UserRequest userData={selectedUser} userCookie={cookieUser} />
           </div>
         </div>
       )}
