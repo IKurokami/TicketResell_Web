@@ -86,6 +86,7 @@ const AdminPage = () => {
     const getUsers = async () => {
       try {
         const fetchedUsers = await UserService.fetchUsers();
+        console.log("fetchUser", fetchedUsers);
         setUsers(fetchedUsers);
       } catch (error) {
         console.error("Failed to load users:", error);
@@ -160,7 +161,7 @@ const AdminPage = () => {
         }
         setRevenues(data.data);
       } catch (error) {
-        setRevenues([])
+        setRevenues([]);
         console.error("Error fetching Revenues:", error);
       }
     };
@@ -210,7 +211,11 @@ const AdminPage = () => {
     getCategories();
     getOrders();
     getRevenues();
+    console.log("alo alo", users);
   }, []);
+  useEffect(() => {
+    console.log("User updated", users);
+  }, [users]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -644,15 +649,12 @@ const AdminPage = () => {
 
   const revenuesWithPercentage = revenues.map((item) => ({
     ...item,
-    revenue1: item.revenue1 * 0.05
+    revenue1: item.revenue1 * 0.05,
   }));
-
-
-  
 
   const renderContent = () => {
     switch (activeTab) {
-      case "Tickets":
+      case "Vé":
         return (
           <TicketManager
             tickets={tickets}
@@ -660,7 +662,7 @@ const AdminPage = () => {
             onDelete={handleTicketDelete}
           />
         );
-      case "Users":
+      case "Người dùng":
         return (
           <UserManager
             users={users}
@@ -671,7 +673,7 @@ const AdminPage = () => {
             onResetPassword={handleUserOnResetPassword}
           />
         );
-      case "Roles":
+      case "Vai trò":
         return (
           <RoleManager
             roles={roles}
@@ -680,7 +682,7 @@ const AdminPage = () => {
             onAdd={handleRoleAdd}
           />
         );
-      case "Categories":
+      case "Danh mục":
         return (
           <CategoryManager
             categories={categories}
@@ -689,17 +691,17 @@ const AdminPage = () => {
             onAdd={handleCategoryAdd}
           />
         );
-      case "Orders":
+      case "Đơn hàng":
         return <OrderManager orders={orders} onRefresh={handleOrderRefresh} />;
-      case "Revenues":
+      case "Doanh thu":
         return (
           <>
             <RevenueManager
               transactions={transactions}
-              revenueData={ revenuesWithPercentage}
+              revenueData={revenuesWithPercentage}
             />
             <OrderDetailsDashboard
-            topBuyers={topBuyers}
+              topBuyers={topBuyers}
               revenue={revenuesWithPercentage}
               transactions={transactions}
             />
@@ -717,7 +719,7 @@ const AdminPage = () => {
 
     await signOut();
     removeAllCookies();
-    window.location.href= ('/login');
+    window.location.href = "/login";
   };
 
   return (

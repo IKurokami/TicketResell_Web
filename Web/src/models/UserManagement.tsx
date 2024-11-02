@@ -1,5 +1,4 @@
 import axios from "axios";
-import { fetchImage } from "./FetchImage";
 
 export interface Role {
   roleId: string;
@@ -54,7 +53,7 @@ const convertToUser = async (data: any): Promise<User> => {
         description: role?.description ?? "",
       })) ?? [],
     bank: data?.bank ?? "",
-    bankType: data?.bankType?? "",
+    bankType: data?.bankType ?? "",
   };
 };
 
@@ -64,6 +63,8 @@ export const UserService = {
       const response = await axios.get<ApiResponse<any[]>>(
         "http://localhost:5296/api/User/read"
       );
+      console.log("response", response);
+      console.log("data:", response.data);
       const users = await Promise.all(response.data.data.map(convertToUser));
       return users;
     } catch (error) {

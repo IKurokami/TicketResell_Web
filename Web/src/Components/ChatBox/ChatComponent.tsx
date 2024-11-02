@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import "@/Css/Chatbox.css";
 import { UserData } from "./UserRequest";
 
-interface ChatMessage {
+export interface ChatMessage {
   senderId: string;
   receiverId: string;
   message: string;
@@ -14,7 +14,7 @@ interface ChatMessage {
   chatBoxId: string;
 }
 
-interface Chatbox {
+export  interface Chatbox {
   chatboxId: string;
   status: number;
   createDate: string;
@@ -35,12 +35,12 @@ interface ChatProps {
 const formatDate = (dateString: string | null): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
   const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
   return `${day}/${month}/${year} : ${hours}:${minutes}`;
 };
 
@@ -136,8 +136,8 @@ const Chat: React.FC<ChatProps> = ({
 
       {/* Chat Container */}
       <div className="flex-grow overflow-hidden bg-gray-50">
-        <div ref={chatContainerRef} className="h-full overflow-y-auto p-4">
-          <div className="grid grid-cols-12 gap-y-2">
+        <div ref={chatContainerRef} className="h-full overflow-y-auto ">
+          <div className="grid grid-cols-12 ">
             {localChatMessages.map((msg, i) => (
               <div
                 key={i}
@@ -145,48 +145,51 @@ const Chat: React.FC<ChatProps> = ({
                   msg.senderId === user?.userId
                     ? "col-start-1 col-end-13 text-right"
                     : "col-start-1 col-end-13"
-                } p-3 rounded-lg`}
+                } px-2`}
               >
                 <div
                   className={`flex flex-col ${
-                    msg.senderId === user?.userId ? "items-stretch	" : "items-stretch	"
+                    msg.senderId === user?.userId
+                      ? "items-stretch"
+                      : "items-stretch"
                   }`}
                 >
-                  <span className="text-xs text-gray-500 mb-1">
-                    {msg.senderId === user?.userId
-                      ? user.fullname
-                      : msg.senderId}
-                  </span>
-
                   <div
-                    className={`flex ${
+                    className={`flex items-center ${
                       msg.senderId === user?.userId
-                        ? "flex-row-reverse"
+                        ? "flex-row-reverse "
                         : "flex-row"
                     }`}
                   >
                     <div
-                      className={`flex items-center justify-center h-8 w-8 rounded-full 
-                      ${msg.senderId === user?.userId ? "ml-3" : "mr-3"}
-                      ${
-                        msg.senderId === user?.userId
-                          ? "bg-indigo-500"
-                          : "bg-gray-500"
-                      }
-                      flex-shrink-0 text-white text-sm`}
-                    >
-                      {msg.senderId === user?.userId
-                        ? user.fullname.charAt(0)
-                        : "U"}
-                    </div>
-
-                    <div
                       className={`relative text-sm
-  ${msg.senderId === user?.userId ? "bg-indigo-100" : "bg-white"}
-  py-2 px-4 shadow rounded-xl w-full flex-wrap
+  ${msg.senderId === user?.userId ? "   bg-indigo-100" : "  bg-white"}
+  py-2 px-4  w-full flex-wrap border-solid border-b-2 border-gray-300
   break-all`}
                     >
-                      <div className="w-full">{msg.message}</div>
+                      <div
+                        className={`flex items-center ${
+                          msg.senderId === user?.userId
+                            ? "flex-row-reverse"
+                            : "flex-row"
+                        } gap-2`}
+                      >
+                        <div
+                          className={`flex items-center justify-center h-8 w-8 rounded-full 
+          ${msg.senderId === user?.userId ? "bg-indigo-500" : "bg-gray-500"}
+          flex-shrink-0 text-white text-sm`}
+                        >
+                          {msg.senderId === user?.userId
+                            ? user.fullname.charAt(0).toUpperCase()
+                            : msg.senderId.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {msg.senderId === user?.userId
+                            ? user.userId
+                            : msg.senderId}
+                        </div>
+                      </div>
+                      <div className="w-full text-md">{msg.message}</div>
                       {msg.date && (
                         <div className="text-xs text-gray-500 mt-1 w-full">
                           {formatDate(msg.date)}
@@ -232,3 +235,4 @@ const Chat: React.FC<ChatProps> = ({
 };
 
 export default Chat;
+ 
