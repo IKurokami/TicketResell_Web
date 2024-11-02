@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/Components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 
 import { Input } from "@/Components/ui/input";
 import Cookies from "js-cookie";
@@ -43,7 +43,7 @@ interface User {
   bio: string;
   roles: Role[];
 }
-interface UserData {
+export interface UserData {
   userId: string;
   sellConfigId: string | null;
   username: string;
@@ -64,14 +64,14 @@ interface UsersManagementProps {
   userDetails: UserData | null;
 }
 
-interface ChatMessage {
+export interface ChatMessage {
   senderId: string;
   receiverId: string;
   message: string;
   chatId: string;
   date: string | null;
 }
-interface BlockStatus {
+export interface BlockStatus {
   [userId: string]: boolean;
 }
 const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
@@ -81,6 +81,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Partial<UserData>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  
   const [chatMessages, setChatMessages] = useState<
     Record<string, ChatMessage[]>
   >({});
@@ -506,15 +507,33 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
             return (
               <div
                 key={userId}
-                className="fixed bottom-4 w-80 bg-white shadow-xl rounded-lg overflow-hidden transition-all duration-200 ease-in-out"
+                className={`fixed bottom-4 h-[70vh] bg-white w-full max-w-md shadow-xl rounded-lg overflow-hidden transition-all duration-200 ease-in-out`}
                 style={{
                   right: `${index * 330 + 30}px`,
                 }}
               >
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500 to-blue-600">
-                  <h4 className="text-white">{user.fullname}</h4>
+                <div className="h-12 flex justify-between items-center px-4 border-b bg-white shrink-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center justify-center rounded-2xl text-indigo-700 bg-indigo-100 h-8 w-8">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <div className="font-bold text-lg">{user.fullname}</div>
+                  </div>
                   <button
-                    className="text-white"
+                    className="text-gray-400 hover:text-gray-600"
                     onClick={() =>
                       setIsChatOpen((prev) => ({ ...prev, [userId]: false }))
                     }
@@ -524,33 +543,83 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
                 </div>
                 <div
                   ref={chatContainerRef}
-                  className="p-4 h-80 overflow-y-auto bg-gray-50"
+                  className="flex-grow overflow-hidden bg-gray-50"
                 >
-                  {chatMessages[userId]?.map((msg, i) => (
-                    <div
-                      key={i}
-                      className={`flex flex-col ${
-                        msg.senderId === Cookies.get("id")
-                          ? "items-end"
-                          : "items-start"
-                      } mb-4`}
-                    >
-                      <div
-                        className={`max-w-[80%] p-3 rounded-2xl ${
-                          msg.senderId === Cookies.get("id")
-                            ? "bg-blue-500 text-white rounded-br-none"
-                            : "bg-white text-gray-800 shadow-sm rounded-bl-none"
-                        }`}
-                      >
-                        <p className="text-sm">{msg.message}</p>
-                      </div>
-                      <span className="text-xs text-gray-500 mt-1">
-                        {formatMessageDate(msg.date)}
-                      </span>
+                  <div className="h-96 overflow-y-auto p-4">
+                    {" "}
+                    {/* Adjusted height to match ChatComponent */}
+                    <div className="grid grid-cols-12">
+                      {chatMessages[userId]?.map((msg, i) => (
+                        <div
+                          key={i}
+                          className={`${
+                            msg.senderId === Cookies.get("id")
+                              ? "col-start-1 col-end-13 text-right"
+                              : "col-start-1 col-end-13"
+                          } px-2`}
+                        >
+                          <div
+                            className={`flex flex-col ${
+                              msg.senderId === Cookies.get("id")
+                                ? "items-stretch"
+                                : "items-stretch"
+                            }`}
+                          >
+                            <div
+                              className={`flex items-center ${
+                                msg.senderId === Cookies.get("id")
+                                  ? "flex-row-reverse"
+                                  : "flex-row"
+                              }`}
+                            >
+                              <div
+                                className={`relative text-sm ${
+                                  msg.senderId === Cookies.get("id")
+                                    ? "bg-indigo-100"
+                                    : "bg-white"
+                                } py-2 px-4 w-full flex-wrap border-solid border-b-2 border-gray-300 break-all`}
+                              >
+                                <div
+                                  className={`flex items-center ${
+                                    msg.senderId === Cookies.get("id")
+                                      ? "flex-row-reverse"
+                                      : "flex-row"
+                                  } gap-2`}
+                                >
+                                  <div
+                                    className={`flex items-center justify-center h-8 w-8 rounded-full ${
+                                      msg.senderId === Cookies.get("id")
+                                        ? "bg-indigo-500"
+                                        : "bg-gray-500"
+                                    } flex-shrink-0 text-white text-sm`}
+                                  >
+                                    {msg.senderId === Cookies.get("id")
+                                      ? user.fullname.charAt(0).toUpperCase()
+                                      : msg.senderId.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {msg.senderId === Cookies.get("id")
+                                      ? msg.senderId
+                                      : user.userId}
+                                  </div>
+                                </div>
+                                <div className="w-full text-md">
+                                  {msg.message}
+                                </div>
+                                {msg.date && (
+                                  <div className="text-xs text-gray-500 mt-1 w-full">
+                                    {formatMessageDate(msg.date)}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 border-t p-3 bg-white">
+                <div className="h-16 bg-white border-t px-4 flex items-center shrink-0">
                   <Input
                     value={newMessages[userId] || ""}
                     onChange={(e) =>
@@ -560,10 +629,14 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
                       }))
                     }
                     placeholder="Type a message..."
-                    className="flex-grow"
+                    className="flex-grow border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
                   />
-                  <Button onClick={() => handleSendMessage(userId)}>
-                    <Send className="h-4 w-4" />
+                  <Button
+                    onClick={() => handleSendMessage(userId)}
+                    className={`flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0`}
+                  >
+                    <span>Send</span>
+                    <Send className="ml-2 w-4 h-4 transform rotate-45 -mt-px" />
                   </Button>
                 </div>
               </div>
