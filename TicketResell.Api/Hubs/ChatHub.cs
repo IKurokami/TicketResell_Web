@@ -35,6 +35,7 @@ public class ChatHub : Hub
         if (!string.IsNullOrEmpty(user.Key))
         {
             Users.Remove(user.Key);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, user.Key); // Remove connection from group
         }
 
         if (exception != null)
@@ -48,7 +49,7 @@ public class ChatHub : Hub
     public async Task UnblockChatbox(string chatboxId, string receiverID)
     {
         var httpContext = Context.GetHttpContext();
-        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff) && !httpContext.HasEnoughtRoleLevel(UserRole.Admin))
+        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff))
             return;
         var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
         if (Users.TryGetValue(receiverID, out var receiverConnectionId))
@@ -57,24 +58,36 @@ public class ChatHub : Hub
             await chatboxService.UpdateChatboxStatusAsync(chatboxId, 2);
         }
     }
-
+    
     public async Task LoginAsync(string userId, string accessKey)
     {
         var httpContext = Context.GetHttpContext();
         httpContext.SetAccessKey(accessKey);
         httpContext.SetUserId(userId);
 
-        await Clients.Client(Context.ConnectionId).SendAsync("Authenticating", $"We are doing some authentication for user {userId}.");
+        await Clients.Client(Context.ConnectionId).SendAsync("Authenticating", $"Authenticating user {userId}.");
         var authenticate = await httpContext.CheckAuthenTicatedDataAsync(_serviceProvider);
 
         if (authenticate.IsAuthenticated)
         {
-            Users.TryAdd(authenticate.UserId, Context.ConnectionId);
+            if (Users.ContainsKey(userId))
+            {
+                // Remove the old connection if the user reconnects
+                var oldConnectionId = Users[userId];
+                await Groups.RemoveFromGroupAsync(oldConnectionId, userId);
+                Users[userId] = Context.ConnectionId;
+            }
+            else
+            {
+                Users.Add(userId, Context.ConnectionId);
+            }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, userId); // Add to group after checking
             await Clients.Client(Context.ConnectionId).SendAsync("Logged", $"You are logged in as {userId}.");
         }
         else
         {
-            await Clients.Client(Context.ConnectionId).SendAsync("LoginFail", "You are not logged in.");
+            await Clients.Client(Context.ConnectionId).SendAsync("LoginFail", "Login failed.");
         }
     }
 
@@ -141,6 +154,7 @@ public class ChatHub : Hub
                 if (!(httpContext.HasEnoughtRoleLevel(UserRole.Admin) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)))
                 {
                     await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
+                   
                 }
             }
             else

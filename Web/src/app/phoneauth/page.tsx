@@ -1,5 +1,5 @@
 import OtpLogin from "@/Components/OTPLogin";
-
+import React from "react";
 export default function PhoneAuth() {
   return (
     <main className="text-center">

@@ -38,7 +38,7 @@ const Search: React.FC = () => {
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortOption, setSortOption] = useState("Price low to high");
+  const [sortOption, setSortOption] = useState("Giá thấp đến cao");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -47,9 +47,9 @@ const Search: React.FC = () => {
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
 
   const sortOptions = [
-    { text: "Price low to high", icon: faSortAmountUp },
-    { text: "Price high to low", icon: faSortAmountDown },
-    { text: "Recently listed", icon: faClock },
+    { text: "Giá thấp đến cao", icon: faSortAmountUp },
+    { text: "Giá cao đến thấp", icon: faSortAmountDown },
+    { text: "Mới nhất", icon: faClock },
   ];
   const extractCity = (location: string): string => {
     const parts = location.split(",");
@@ -102,11 +102,11 @@ const Search: React.FC = () => {
 
   const sortTickets = (tickets: any[]) => {
     switch (sortOption) {
-      case "Price low to high":
+      case "Giá thấp đến cao":
         return tickets.sort((a, b) => a.cost - b.cost);
-      case "Price high to low":
+      case "Giá cao đến thấp":
         return tickets.sort((a, b) => b.cost - a.cost);
-      case "Recently listed":
+      case "Mới nhất":
         return tickets.sort(
           (a, b) =>
             new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
@@ -356,7 +356,7 @@ const Search: React.FC = () => {
           <div className="h-full flex flex-col p-6">
             {/* Sidebar Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-black">Filters</h2>
+              <h2 className="text-xl font-semibold text-black">Bộ lọc</h2>
               <button
                 onClick={() => setIsSidebarOpen(false)}
                 className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -368,7 +368,7 @@ const Search: React.FC = () => {
             {/* Sidebar Content */}
             <div className="flex-grow overflow-auto">
               {/* Genre Filter */}
-              <h3 className="font-semibold text-lg mb-2">Genres</h3>
+              <h3 className="font-semibold text-lg mb-2">Thể loại</h3>
               <div className="mt-4 flex flex-wrap gap-2">
                 {categories.map((genre) => (
                   <button
@@ -388,7 +388,7 @@ const Search: React.FC = () => {
               {/* Price Filter */}
               <div className="mt-6">
                 <h3 className="text-lg font-semibold mb-2">
-                  Price Range: {priceRange.toLocaleString()} VND
+                  Khoảng giá: {priceRange.toLocaleString()} VND
                 </h3>
                 <input
                   type="range"
@@ -402,13 +402,13 @@ const Search: React.FC = () => {
 
               {/* Location Filter */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Location</h3>
+                <h3 className="text-lg font-semibold mb-2">Địa điểm</h3>
                 <select
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
                   className="w-full border-gray-300 rounded-lg shadow-sm p-2"
                 >
-                  <option value="">All Locations</option>
+                  <option value="">Tất cả địa điểm</option>
                   {uniqueCities.map((city) => (
                     <option key={city} value={city} className="truncate">
                       {city}
@@ -419,20 +419,20 @@ const Search: React.FC = () => {
 
               {/* Date Range Filter */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Date Range</h3>
+                <h3 className="text-lg font-semibold mb-2">Khoảng thời gian</h3>
                 <DatePicker
                   selectsRange={true}
                   startDate={startDate as Date}
                   endDate={endDate as Date}
                   onChange={handleDateChange}
                   className="w-full border-gray-300 rounded-lg shadow-sm p-2"
-                  placeholderText="Select date range"
+                  placeholderText="Chọn khoảng thời gian"
                 />
               </div>
 
               {/* Time Range Filter */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Time Range</h3>
+                <h3 className="text-lg font-semibold mb-2">Khung giờ</h3>
                 <div className="flex flex-col space-y-2">
                   <input
                     type="time"
@@ -451,7 +451,7 @@ const Search: React.FC = () => {
                   onClick={clearTimeFilter}
                   className="mt-2 w-full bg-gray-200 text-gray-700 rounded-md py-1 px-2 hover:bg-gray-300 transition duration-200 text-sm"
                 >
-                  Clear Time Filter
+                  Xóa bộ lọc giờ
                 </button>
               </div>
 
@@ -461,18 +461,18 @@ const Search: React.FC = () => {
                   onClick={clearFilters}
                   className="w-full bg-red-500 text-white rounded-md py-2 px-4 hover:bg-red-600 transition duration-200"
                 >
-                  Clear Filters
+                  Xóa tất cả bộ lọc
                 </button>
               </div>
             </div>
 
-            {/* Apply Filters Button (visible only on mobile) */}
+            {/* Apply Filters Button (mobile only) */}
             <div className="mt-6 lg:hidden">
               <button
                 onClick={() => setIsSidebarOpen(false)}
                 className="w-full bg-blue-500 text-white rounded-md py-2 px-4 hover:bg-blue-600 transition duration-200"
               >
-                Apply Filters
+                Áp dụng bộ lọc
               </button>
             </div>
           </div>
@@ -503,9 +503,9 @@ const Search: React.FC = () => {
 
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-md leading-md font-semibold">Live</span>
+                <span className="text-md leading-md font-semibold">Trực tiếp</span>
                 <span className="text-md leading-md text-gray-600 text-nowrap">
-                  {filteredTickets?.length || 0} results
+                  {filteredTickets?.length || 0} kết quả
                 </span>
               </div>
             </div>
@@ -514,7 +514,7 @@ const Search: React.FC = () => {
             <div className="relative flex-grow mx-2 max-w-xl md:mb-0 w-full md:w-auto">
               <input
                 type="text"
-                placeholder="Search by name"
+                placeholder="Tìm kiếm theo tên"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-12 w-full pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"

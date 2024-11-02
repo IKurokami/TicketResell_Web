@@ -88,7 +88,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
           <div className="relative flex-grow mx-2 w-full mb-4 md:mb-0">
             <input
               type="text"
-              placeholder="Search by category name or description"
+              placeholder="Tìm kiếm theo tên hoặc mô tả danh mục"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-12 w-full pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200"
@@ -99,7 +99,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
             onClick={onAdd}
             className="flex items-center h-12 px-6 bg-blue-500 text-white text-nowrap shadow-sm font-semibold rounded-xl hover:bg-blue-600 transition duration-200"
           >
-            <FaPlus className="mr-2" /> Add Category
+            <FaPlus className="mr-2" /> Thêm Danh Mục
           </button>
         </div>
       </div>
@@ -114,7 +114,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("name")}
                 >
-                  Name
+                  Tên
                   {getSortIcon("name")}
                 </div>
               </th>
@@ -123,12 +123,12 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("description")}
                 >
-                  Description
+                  Mô Tả
                   {getSortIcon("description")}
                 </div>
               </th>
               <th scope="col" className="px-6 py-3">
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Thao tác</span>
               </th>
             </tr>
           </thead>
@@ -171,7 +171,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
             ) : (
               <tr>
                 <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
-                  No categories found.
+                  Không tìm thấy danh mục nào.
                 </td>
               </tr>
             )}

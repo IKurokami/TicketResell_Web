@@ -269,9 +269,15 @@ const SellProfile: React.FC<Props> = ({
       </div>
       <div className="px-[3vw] mt-[8vh] mb[5vh]">
         <div className="flex justify-between">
-          <div className="seller-desc flex items-center space-x-2">
-            <Link href={`/profile/${userId}`} className="no-underline text-black" passHref>
-              <p className="text-2xl font-medium">{fullname ? fullname : "Unknown"}</p>
+          <div className="seller-desc">
+            <Link
+              href={`/profile/${userId}`}
+              className="no-underline text-black"
+              passHref
+            >
+              <p className="text-2xl font-medium">
+                {fullname ? fullname : "Không xác định"}
+              </p>
             </Link>
             <button onClick={handleReportClick} className="text-red-500 p-2 rounded-full hover:bg-gray-100 flex items-center justify-center mb-2" aria-label="Report">
               <FaFlag />
@@ -291,14 +297,18 @@ const SellProfile: React.FC<Props> = ({
         </div>
         <div className="mt-3">
           <p className="flex items-center text-md text-gray-500">
-            <FaPhoneAlt className="text-sm mr-2 text-gray-400" />
-            {phoneNumber ? phoneNumber : "No Phone Provided"}
+            <span>
+              <FaPhoneAlt className="text-sm mr-2 text-gray-400" />
+            </span>
+            {phoneNumber ? phoneNumber : "Chưa cung cấp số điện thoại"}
           </p>
         </div>
         <div className="mt-3">
           <p className="flex items-center text-md text-gray-500">
-            <FaEnvelope className="text-sm mr-2 text-gray-400" />
-            {gmail ? gmail : "No gmail Provided"}
+            <span>
+              <FaEnvelope className="text-sm mr-2 text-gray-400" />
+            </span>
+            {gmail ? gmail : "Chưa cung cấp email"}
           </p>
         </div>
       </div>

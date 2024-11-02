@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-
+import React from "react";
 const PaymentStatus = () => {
   const [countdown, setCountdown] = useState(3);
   const [success, setSuccess] = useState(false);
@@ -94,7 +94,7 @@ const PaymentStatus = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        Verifying payment...
+        Đang xác thực thanh toán...
       </div>
     );
   }
@@ -105,18 +105,18 @@ const PaymentStatus = () => {
         <div className="flex items-center space-x-3">
           <FaCheckCircle className="text-green-500" size={50} />
           <p className="text-xl font-semibold text-green-500">
-            Payment Successful!
+            Thanh toán thành công!
           </p>
         </div>
       ) : (
         <div className="flex items-center space-x-3">
           <FaTimesCircle className="text-red-500" size={50} />
-          <p className="text-xl font-semibold text-red-500">Payment Failed!</p>
+          <p className="text-xl font-semibold text-red-500">Thanh toán thất bại!</p>
         </div>
       )}
 
       <p className="mt-4 text-gray-500">
-        Redirecting in {countdown} second{countdown !== 1 ? "s" : ""}...
+        Chuyển hướng trong {countdown} giây...
       </p>
     </div>
   );

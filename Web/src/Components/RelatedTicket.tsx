@@ -72,6 +72,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
         const notByCateTickets = await notByCateResponse.json();
         const byCateTickets = await byCateResponse.json();
+        console.log(byCateTickets);
 
         const result = [];
 
@@ -132,7 +133,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
   }, [categoriesId]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (
@@ -174,7 +175,7 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
                     {truncateString(ticket.location, 35)} {/* Truncate location */}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {new Date(ticket.startDate).toLocaleDateString("en-US", {
+                    {new Date(ticket.startDate).toLocaleDateString("vi-VN", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",

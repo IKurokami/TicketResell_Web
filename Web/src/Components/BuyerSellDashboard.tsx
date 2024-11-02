@@ -58,13 +58,14 @@ interface TopBuyer {
 interface OrderDetailsDashboardProps {
   transactions: Transaction[];
   revenue: RevenueItem[];
+  topBuyers:TopBuyer[];
 }
 
 const OrderDetailsDashboard = ({
   transactions,
-  revenue
+  revenue,  topBuyers
 }: OrderDetailsDashboardProps) => {
-  const [topBuyers, setTopBuyers] = useState<TopBuyer[]>([]);
+
   const formatCurrency = (amount: number) => {
     return `${new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
@@ -94,30 +95,7 @@ const OrderDetailsDashboard = ({
     return orders.reduce((acc, order) => acc + order.total, 0);
   };
 
-  useEffect(() => {
-    const fetchTopBuyers = async () => {
-      const sellerId = Cookies.get("id");
-      try {
-        const response = await fetch(
-          `http://localhost:5296/api/User/topbuyer/${sellerId}`,
-          {
-            credentials: "include",
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const result = await response.json();
-        console.log("topbuyr:", result.data);
-
-        setTopBuyers(result.data);
-      } catch (error) {
-        setTopBuyers([]);
-      }
-    };
-
-    fetchTopBuyers();
-  }, []);
+ 
 
   return (
     <div className="p-3 sm:p-4 md:p-6 bg-slate-50 ">
@@ -131,7 +109,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Total Revenue
+                Tổng Doanh Thu
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
                 {formatCurrency(calculateTotalRevenue(revenue))}
@@ -148,7 +126,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Total Transaction
+                Tổng Giao Dịch
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900">
                 {transactions.length}
@@ -165,7 +143,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Total Buyers
+                Tổng Người Mua
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900">
                 {topBuyers.length}
@@ -182,7 +160,7 @@ const OrderDetailsDashboard = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-slate-600 truncate">
-                Avg. Order Value
+                Giá Trị Trung Bình
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
                 {formatCurrency(calculateTotalRevenue(revenue) / transactions.length)}
@@ -197,11 +175,11 @@ const OrderDetailsDashboard = ({
         {/* Recent Transactions */}
         <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow overflow-hidden">
           <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl font-semibold text-slate-900">
-              Recent Transactions
+            <h2 className="text-lg md:text-xl text-left font-semibold text-slate-900">
+              Giao Dịch Gần Đây
             </h2>
             <span className="text-xs md:text-sm pr-5 text-slate-500">
-              Price
+              Giá
             </span>
           </div>
 
@@ -234,7 +212,7 @@ const OrderDetailsDashboard = ({
                   </p>
                   <p className="text-xs md:text-sm text-slate-500">
                     {transaction.quantity}{" "}
-                    {transaction.quantity > 1 ? "items" : "item"}
+                    {transaction.quantity > 1 ? "sản phẩm" : "sản phẩm"}
                   </p>
                 </div>
               </div>
@@ -245,23 +223,23 @@ const OrderDetailsDashboard = ({
         {/* Top Buyers */}
         <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow overflow-hidden">
           <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl font-semibold text-slate-900">
-              Top Buyers
+            <h2 className="text-lg text-left md:text-xl font-semibold text-slate-900">
+              Khách Hàng Hàng Đầu
             </h2>
             <span className="text-xs md:text-sm text-slate-500">
-              Total Spent
+              Tổng Chi Tiêu
             </span>
           </div>
 
-          <div className="space-y-3 md:space-y-4 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-            {topBuyers.map((buyer, index) => (
+          <div className="space-y-3  md:space-y-4 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            {topBuyers.slice(0,3).map((buyer, index) => (
               <div
                 key={buyer.userId}
                 className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 hover:bg-slate-50 rounded-lg transition-colors gap-3 sm:gap-4"
               >
                 <div className="flex items-center space-x-3 md:space-x-4 w-full sm:w-auto">
                   <div
-                    className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-white font-semibold shrink-0
+                    className={`w-6 h-6  md:w-8 md:h-8 rounded-full flex items-center justify-center text-white font-semibold shrink-0
                   ${
                     index === 0
                       ? "bg-yellow-500"

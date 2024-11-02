@@ -1,18 +1,18 @@
 import { useSession, signIn, signOut } from "next-auth/react";
-
+import React from "react";
 export default function LoginButton() {
   const { data: session } = useSession();
   if (session) {
     return (
       <>
-        Signed in as {session.user?.email as string} <br />
-        <button onClick={() => signOut()}>Sign out</button>
+        Đã đăng nhập với {session.user?.email as string} <br />
+        <button onClick={() => signOut()}>Đăng xuất</button>
       </>
     );
   }
   return (
     <>
-      <button onClick={() => signIn()}>Login with Google</button>
+      <button onClick={() => signIn()}>Đăng nhập với Google</button>
     </>
   );
 }

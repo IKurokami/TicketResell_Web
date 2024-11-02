@@ -167,6 +167,12 @@ const TopProducts: React.FC = () => {
     "day" | "in week" | "in month"
   >("day");
 
+  const categoryLabels = {
+    "day": "Ngày",
+    "in week": "Trong tuần",
+    "in month": "Trong tháng"
+  };
+
   return (
     <div className="top-products">
       <div className="top-products__categories">
@@ -180,7 +186,7 @@ const TopProducts: React.FC = () => {
               selectedCategory === category ? "active" : ""
             }`}
           >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
+            {categoryLabels[category]}
           </button>
         ))}
       </div>
@@ -194,7 +200,7 @@ const TopProducts: React.FC = () => {
               className="top-products__image"
             />
             <span className="top-products__title">{product.title}</span>
-            <span className="top-products__floorPrice">{product.Price}</span>
+            <span className="top-products__floorPrice">Giá: {product.Price}</span>
           </div>
         ))}
       </div>

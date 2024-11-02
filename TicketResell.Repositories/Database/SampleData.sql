@@ -3,10 +3,10 @@ INSERT INTO [Role] ([RoleId],
     [Rolename],
 [Description])
 VALUES
-    ('RO1', 'Buyer', 'Administrator with full system access and permissions'), 
-    ('RO2', 'Staff', 'Staff member responsible for managing operations'), 
-    ('RO3', 'Seller', 'User with permissions to browse and purchase products'), 
-    ('RO4', 'Admin', 'User with permissions to list and sell products');
+    ('RO1', 'Buyer', 'User with permissions to list and sell products'), 
+    ('RO2', 'Seller', 'User with permissions to browse and purchase products'), 
+    ('RO3', 'Staff', 'Staff member responsible for managing operations'), 
+    ('RO4', 'Admin', 'Administrator with full system access and permissions');
 
 INSERT INTO [User] (
     [UserId],

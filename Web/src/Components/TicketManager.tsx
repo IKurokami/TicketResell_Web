@@ -180,13 +180,13 @@ const TicketManager: React.FC<TicketListProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-32">
+    <div className="flex-1 flex flex-col px-4 lg:px-16 ">
       {/* Search Bar */}
       <div className="p-4 mx-auto w-full">
         <div className="relative">
           <input
             type="text"
-            placeholder="Search by name, category, or location"
+            placeholder="Tìm kiếm theo tên, danh mục hoặc địa điểm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="h-12 w-full pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
@@ -205,19 +205,19 @@ const TicketManager: React.FC<TicketListProps> = ({
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("name")}
                 >
-                  Name
+                  Tên
                   {getSortIcon("name")}
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 w-1/6">
-                Categories
+                Danh mục
               </th>
               <th scope="col" className="px-6 py-3 w-1/6">
                 <div
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("location")}
                 >
-                  Location
+                  Địa điểm
                   {getSortIcon("location")}
                 </div>
               </th>
@@ -226,7 +226,7 @@ const TicketManager: React.FC<TicketListProps> = ({
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("cost")}
                 >
-                  Price
+                  Giá
                   {getSortIcon("cost")}
                 </div>
               </th>
@@ -235,15 +235,15 @@ const TicketManager: React.FC<TicketListProps> = ({
                   className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("startDate")}
                 >
-                  Date
+                  Ngày
                   {getSortIcon("startDate")}
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 w-1/8">
-                Status
+                Trạng thái
               </th>
               <th scope="col" className="px-6 py-3 w-16">
-                Action
+                Thao tác
               </th>
             </tr>
           </thead>
@@ -295,14 +295,14 @@ const TicketManager: React.FC<TicketListProps> = ({
                     {formatDate(ticket.startDate)}
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 text-nowrap py-4">
                   {ticket.status === 1 ? (
                     <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                      Active
+                      Hoạt động
                     </span>
                   ) : (
                     <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                      Inactive
+                      Không hoạt động
                     </span>
                   )}
                 </td>
@@ -311,7 +311,7 @@ const TicketManager: React.FC<TicketListProps> = ({
                     <button
                       onClick={() => onDelete(ticket.ticketId)}
                       className="text-red-600 hover:text-red-800 transition-colors duration-150"
-                      title="Delete"
+                      title="Xóa"
                     >
                       <FaTrash size={16} />
                     </button>
@@ -319,7 +319,7 @@ const TicketManager: React.FC<TicketListProps> = ({
                     <button
                       onClick={() => onActive(ticket.ticketId)}
                       className="text-green-600 hover:text-green-800 transition-colors duration-150"
-                      title="Activate"
+                      title="Kích hoạt"
                     >
                       <FaCheck size={16} />
                     </button>

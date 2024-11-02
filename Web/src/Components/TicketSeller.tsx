@@ -74,7 +74,7 @@ const TicketsPage = () => {
           <div className="relative flex items-center bg-white rounded-full p-1 h-[7vh] px-3 border border-gray-300 w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Search ticket"
+              placeholder="Tìm kiếm vé"
               className="border-none outline-none p-1 bg-transparent w-full"
               value={searchTerm} // Bind the input to the searchTerm state
               onChange={(e) => setSearchTerm(e.target.value)} // Update search term on change
@@ -139,7 +139,7 @@ const TicketsPage = () => {
                             {ticketItem.date}
                           </p>
                           <p className="text-xs sm:text-sm text-gray-600">
-                            Quantity: {ticketItem.quantity}
+                            Số lượng: {ticketItem.quantity}
                           </p>
                           <div className="tokenize-wrapper mt-2 overflow-hidden">
                             <div className="flex flex-wrap">
@@ -198,7 +198,7 @@ const TicketsPage = () => {
               ))
             ) : (
               <p className="col-span-full text-center text-gray-600">
-                Not found
+                Không tìm thấy
               </p>
             )}
           </div>

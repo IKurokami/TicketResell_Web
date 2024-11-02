@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { PlusCircle, Search, Send, X, MessageCircle } from "lucide-react";
+import {
+  PlusCircle,
+  Search,
+  Send,
+  X,
+  MessageCircle,
+  Mail,
+  Cookie,
+  User,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +22,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/Components/ui/input";
 import Cookies from "js-cookie";
 import * as signalR from "@microsoft/signalr";
+import UserRequest from "../ChatBox/UserRequest";
+
+export interface Role {
+  roleId: string;
+  rolename: string;
+  description: string;
+}
 
 interface User {
   userId: string;
@@ -25,6 +41,27 @@ interface User {
   status: number;
   birthday: string;
   bio: string;
+  roles: Role[];
+}
+interface UserData {
+  userId: string;
+  sellConfigId: string | null;
+  username: string;
+  status: number;
+  createDate: string;
+  gmail: string;
+  fullname: string;
+  sex: string;
+  phone: string;
+  address: string;
+  avatar: string | null;
+  birthday: string;
+  bio: string;
+  roles: Role[];
+}
+
+interface UsersManagementProps {
+  userDetails: UserData | null;
 }
 
 interface ChatMessage {
@@ -37,33 +74,85 @@ interface ChatMessage {
 interface BlockStatus {
   [userId: string]: boolean;
 }
-const UserManagement = () => {
-  const [users, setUsers] = useState<User[]>([]);
+const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
+  const [users, setUsers] = useState<UserData[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState<Record<string, boolean>>({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [formData, setFormData] = useState<Partial<User>>({});
+  const [formData, setFormData] = useState<Partial<UserData>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>({});
+  const [chatMessages, setChatMessages] = useState<
+    Record<string, ChatMessage[]>
+  >({});
+  const popupRef = useRef<any>(null);
+  const [showRequestPopup, setShowRequestPopup] = useState(false);
+
+  const [cookieUser, setCookieUser] = useState<UserData | undefined>(undefined);
+  const userId = Cookies.get("id");
+
+  const handleRequestClick = (user: UserData) => {
+    setSelectedUser(user);
+    setShowRequestPopup(true);
+  };
+
   const [newMessages, setNewMessages] = useState<Record<string, string>>({});
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
   const hubConnectionRef = useRef<signalR.HubConnection | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [blockStatus, setBlockStatus] = useState<BlockStatus>({});
-  useEffect(() => {
-    fetch("http://localhost:5296/api/User/read")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.statusCode === 200) {
-          setUsers(data.data);
-        } else {
-          console.error("Failed to fetch users:", data.message);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
 
+  const fetchAllUsers = async () => {
+    try {
+      const usersResponse = await fetch("http://localhost:5296/api/User/read");
+
+      if (!usersResponse.ok) {
+        throw new Error(`HTTP error! status: ${usersResponse.status}`);
+      }
+
+      const usersData = await usersResponse.json();
+      console.log("API Response:", usersData); // Debug log
+
+      if (usersData.statusCode === 200 && Array.isArray(usersData.data)) {
+        const userData: UserData[] = usersData.data;
+        setUsers(userData);
+        console.log("Users data set successfully:", userData); // Debug log
+      } else {
+        console.error("Invalid data format or status code:", usersData);
+        setUsers([]); // Set empty array if data is invalid
+      }
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      setUsers([]); // Set empty array on error
+    }
+  };
+
+  const fetchSpecificUser = async () => {
+    if (!userId) return;
+
+    try {
+      const userResponse = await fetch(
+        `http://localhost:5296/api/User/read/${userId}`
+      );
+      const userCookie = await userResponse.json();
+      console.log("API Response:", userCookie);
+      if (userCookie.statusCode === 200 && userCookie.data) {
+        const userData: UserData = userCookie.data;
+        setCookieUser(userData);
+        console.log("Setting cookieUser:", userData);
+      }
+    } catch (error) {
+      console.error("Error fetching specific user:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Initial data fetch
+    fetchAllUsers();
+    console.log("Fetching all users", users);
+    fetchSpecificUser();
+    console.log("Fetching  users", cookieUser);
+
+    // Setup SignalR
     setupSignalRConnection();
 
     return () => {
@@ -71,7 +160,12 @@ const UserManagement = () => {
         hubConnectionRef.current.stop();
       }
     };
-  }, []);
+  }, []); // Empty dependency array for initial load only
+
+  // Add a separate effect to monitor cookieUser changes if needed
+  useEffect(() => {
+    console.log("cookieUser state updated:", cookieUser);
+  }, [cookieUser]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -79,7 +173,18 @@ const UserManagement = () => {
         chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages]);
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setShowRequestPopup(false);
+      }
+    };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const setupSignalRConnection = async () => {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("http://localhost:5296/chat-hub", {
@@ -123,30 +228,31 @@ const UserManagement = () => {
       console.log(`Block event received for ${senderId}: ${message}`);
       setBlockStatus((prev) => ({
         ...prev,
-        [senderId]: true
+        [senderId]: true,
       }));
     });
-  
+
     connection.on("Unblock", (senderId: string, message: string) => {
       console.log(`Unblock event received for ${senderId}: ${message}`);
       setBlockStatus((prev) => ({
         ...prev,
-        [senderId]: false
+        [senderId]: false,
       }));
     });
 
     connection.on("UnblockEvent", (senderId: string, message: string) => {
-      console.log(`moi lan staff bam unlock, ham nay se hoat dong ${senderId}: ${message}`);
-      
+      console.log(
+        `moi lan staff bam unlock, ham nay se hoat dong ${senderId}: ${message}`
+      );
+
       setBlockStatus((prev) => ({
         ...prev,
-        [senderId]: false
+        [senderId]: false,
       }));
     });
 
     try {
       await connection.start();
-      const userId = Cookies.get("id");
       const accessKey = Cookies.get("accessKey");
 
       if (userId && accessKey) {
@@ -166,6 +272,9 @@ const UserManagement = () => {
         {
           method: "POST",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
       const data = await response.json();
@@ -188,7 +297,7 @@ const UserManagement = () => {
       ...formData,
       userId: `USER${(users.length + 1).toString().padStart(3, "0")}`,
       status: 1,
-    } as User;
+    } as UserData;
     setUsers([...users, newUser]);
     setIsOpen(false);
     setFormData({});
@@ -209,7 +318,8 @@ const UserManagement = () => {
       await hubConnectionRef.current.invoke(
         "SendMessageAsync",
         receiverId,
-        newMessages[receiverId], "CB318b7ea9-ac94-46a9-a40c-807085f384ed" // Nút này chỉnh boxchatId tương ứng
+        newMessages[receiverId],
+        "CB318b7ea9-ac94-46a9-a40c-807085f384ed" // Nút này chỉnh boxchatId tương ứng
       );
       await hubConnectionRef.current.invoke(
         "UnblockChatbox",
@@ -239,7 +349,7 @@ const UserManagement = () => {
   const handleOrder = (userEmail: any) => {
     // Mở một trang mới với đường dẫn hiển thị đơn hàng
     const orderPageUrl = `/order?email=${encodeURIComponent(userEmail)}`;
-    window.open(orderPageUrl, '_blank'); // Mở trang mới
+    window.open(orderPageUrl, "_blank"); // Mở trang mới
   };
 
   const loggedInUserId = Cookies.get("id"); // Giả định ID người dùng đăng nhập được lưu trong cookie "userId"
@@ -260,18 +370,24 @@ const UserManagement = () => {
     });
   };
 
+  // Add an effect to monitor users state changes
+  useEffect(() => {
+    console.log("Users state updated:", users);
+  }, [users]);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-4">
           <CardTitle>Trạng thái:</CardTitle>
           <span
-            className={`text-sm ${connectionStatus === "Authenticated"
-              ? "text-green-500"
-              : connectionStatus === "Connected"
+            className={`text-sm ${
+              connectionStatus === "Authenticated"
+                ? "text-green-500"
+                : connectionStatus === "Connected"
                 ? "text-yellow-500"
                 : "text-red-500"
-              }`}
+            }`}
           >
             {connectionStatus}
           </span>
@@ -297,18 +413,29 @@ const UserManagement = () => {
             Thêm người dùng
           </Button>
         </div>
-
       </CardHeader>
       <CardContent>
-        <div className=" border rounded-xl overflow-x-auto bg-white">
+        <div className="border rounded-xl overflow-x-auto bg-white">
           <table className="w-full">
-          <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
-          <tr className="border-b">
-                <th className="py-3 px-4  text-left whitespace-nowrap">Tên người dùng</th>
-                <th className="py-3 px-4  text-left whitespace-nowrap">Email</th>
-                <th className="py-3 px-4  text-left whitespace-nowrap">Số điện thoại</th>
-                <th className="py-3 px-4 text-left whitespace-nowrap">Liên hệ</th>
-                <th className="py-3 px-4  text-left whitespace-nowrap">Lịch sử đơn hàng</th>
+            <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider border-b">
+              <tr className="border-b">
+                <th className="py-3 px-4  text-left whitespace-nowrap">
+                  Tên người dùng
+                </th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">
+                  Email
+                </th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">
+                  Số điện thoại
+                </th>
+                <th className="py-3 px-4 text-left">Địa chỉ</th>
+                <th className="px-3 py-4 text-left">Vai trò</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">
+                  Liên hệ
+                </th>
+                <th className="py-3 px-4  text-left whitespace-nowrap">
+                  Lịch sử đơn hàng
+                </th>
               </tr>
             </thead>
 
@@ -318,14 +445,42 @@ const UserManagement = () => {
                   <td className="py-3 px-4">{user.fullname}</td>
                   <td className="py-3 px-4">{user.userId}</td>
                   <td className="py-3 px-4">{user.phone}</td>
-                  <td className="py-3 px-4 text-center">
+                  <td className="py-3 px-4">{user.address}</td>
+                  <td className="py-3 px-4">
+                    <div className="flex flex-wrap gap-1">
+                      {user.roles.map((role, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                        >
+                          {role.rolename}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
                     <button
-                      onClick={() => handleChat(user)}
-                      className="group relative flex items-center gap-2 px-4 py-2  rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                      onClick={() => {
+                        user.roles.some(
+                          (role) =>
+                            role.roleId === "RO1" || role.roleId === "RO2"
+                        )
+                          ? handleRequestClick(user)
+                          : handleChat(user);
+                      }}
+                      className="group relative flex items-center gap-2 px-4 py-2  text-white rounded-full  transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                     >
-                      <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110 " />
-                      
-                      <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                      {user.roles.some(
+                        (role) => role.roleId === "RO1" || role.roleId === "RO2"
+                      ) ? (
+                        <>
+                          <Mail className="h-5 w-5 text-green-500 transition-transform group-hover:scale-110" />
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircle className="h-5 w-5 text-green-500 transition-transform group-hover:scale-110" />
+                        </>
+                      )}
                     </button>
                   </td>
                   <td className="py-3 px-4 text-center">
@@ -355,7 +510,7 @@ const UserManagement = () => {
                 key={userId}
                 className="fixed bottom-4 w-80 bg-white shadow-xl rounded-lg overflow-hidden transition-all duration-200 ease-in-out"
                 style={{
-                  right: `${index * 330 + 30}px`
+                  right: `${index * 330 + 30}px`,
                 }}
               >
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500 to-blue-600">
@@ -376,16 +531,18 @@ const UserManagement = () => {
                   {chatMessages[userId]?.map((msg, i) => (
                     <div
                       key={i}
-                      className={`flex flex-col ${msg.senderId === Cookies.get("id")
-                        ? "items-end"
-                        : "items-start"
-                        } mb-4`}
+                      className={`flex flex-col ${
+                        msg.senderId === Cookies.get("id")
+                          ? "items-end"
+                          : "items-start"
+                      } mb-4`}
                     >
                       <div
-                        className={`max-w-[80%] p-3 rounded-2xl ${msg.senderId === Cookies.get("id")
-                          ? "bg-blue-500 text-white rounded-br-none"
-                          : "bg-white text-gray-800 shadow-sm rounded-bl-none"
-                          }`}
+                        className={`max-w-[80%] p-3 rounded-2xl ${
+                          msg.senderId === Cookies.get("id")
+                            ? "bg-blue-500 text-white rounded-br-none"
+                            : "bg-white text-gray-800 shadow-sm rounded-bl-none"
+                        }`}
                       >
                         <p className="text-sm">{msg.message}</p>
                       </div>
@@ -428,7 +585,9 @@ const UserManagement = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Họ & Tên"
               value={formData.fullname || ""}
-              onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, fullname: e.target.value })
+              }
             />
           </div>
 
@@ -439,7 +598,9 @@ const UserManagement = () => {
               type="email"
               placeholder="Nhập email "
               value={formData.gmail || ""}
-              onChange={(e) => setFormData({ ...formData, gmail: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, gmail: e.target.value })
+              }
             />
           </div>
 
@@ -450,7 +611,9 @@ const UserManagement = () => {
               type="tel"
               placeholder="Nhập số điện thoại"
               value={formData.phone || ""}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
             />
           </div>
 

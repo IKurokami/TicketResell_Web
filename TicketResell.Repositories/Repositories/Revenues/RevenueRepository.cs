@@ -40,6 +40,20 @@ public class RevenueRepository : GenericRepository<Revenue>, IRevenueRepository
         return revenues;
     }
 
+    public async Task<List<Revenue>> GetAllRevenues()
+    {
+        var revenues = await _context.Revenues
+            .Include(x=>x.Seller)
+            .OrderByDescending(x => x.StartDate)
+            .ToListAsync();
+        if (revenues == null)
+        {
+            throw new KeyNotFoundException("id is not existed");
+        }
+
+        return revenues;
+    }
+    
     public async Task AddRevenueByDateAsync(DateTime date, double amount, string sellerId)
     {
         // Normalize the input date to the start of the day (12 AM) and end of the day (11:59 PM)
