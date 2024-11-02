@@ -352,15 +352,13 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
     window.open(orderPageUrl, "_blank"); // Mở trang mới
   };
 
-  const loggedInUserId = Cookies.get("id"); // Giả định ID người dùng đăng nhập được lưu trong cookie "userId"
-
   const filteredUsers = users.filter(
     (user) =>
-      user.userId !== loggedInUserId && // Loại bỏ người dùng có ID trùng với ID người đăng nhập
-      ((user.fullname && user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.userId && user.userId.toLowerCase().includes(searchTerm.toLowerCase())))
+      (user.fullname &&
+        user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.userId &&
+        user.userId.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-  
 
   const formatMessageDate = (date: string | null) => {
     if (!date) return "";
@@ -488,8 +486,8 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
                       onClick={() => handleOrder(user.gmail)}
                       variant="default"
                       color="success"
-                      className="font-bold py-2 px-4 rounded bg-transparent border-none shadow-none focus:outline-none"
-                      >
+                      className=" font-bold py-2 px-4 rounded shadow-none"
+                    >
                       <VisibilityIcon />
                     </Button>
                   </td>
@@ -573,64 +571,55 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
           })}
       </CardContent>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[425px] bg-white rounded-lg shadow-lg">
-        <DialogHeader className="space-y-4 pb-4 border-b">
-          <DialogTitle className="text-2xl font-bold text-gray-900">Add User</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Tên người dùng</label>
+        <DialogContent className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
+          <DialogHeader className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+            <Button variant="ghost" onClick={() => setIsOpen(false)}>
+              Cancel
+            </Button>
+            <DialogTitle>Add New User</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Họ & Tên"
+              placeholder="Full Name"
               value={formData.fullname || ""}
               onChange={(e) =>
                 setFormData({ ...formData, fullname: e.target.value })
               }
             />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Email</label>
             <Input
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              type="email"
-              placeholder="Nhập email "
+              placeholder="Email"
               value={formData.gmail || ""}
               onChange={(e) =>
                 setFormData({ ...formData, gmail: e.target.value })
               }
             />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Số điện thoại</label>
             <Input
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              type="tel"
-              placeholder="Nhập số điện thoại"
+              placeholder="Phone"
               value={formData.phone || ""}
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
             />
+            <Input
+              placeholder="Address"
+              value={formData.address || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, address: e.target.value })
+              }
+            />
+            <div className="flex justify-end">
+              <Button type="submit">Add</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      {showRequestPopup && selectedUser && (
+        <div className="z-50 fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div ref={popupRef}>
+            <UserRequest userData={selectedUser} userCookie={cookieUser} />
           </div>
-
-    
-
-          <div className="pt-4 border-t">
-            <Button 
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Thêm người dùng
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-      
+        </div>
+      )}
     </Card>
   );
 };

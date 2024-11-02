@@ -148,7 +148,7 @@ const Order: React.FC<OrderProps> = ({ email }) => {
                   </td>
                   <td className="px-6 py-4 ">{order.orderDetails.length}</td>
                   <td className="px-6 py-4 flex items-center space-x-2">
-                    {(order.status === -1 || order.status === 0 || order.status === 2) && (
+                    {(order.status === -1 || order.status === 0 || order.status === 2 || order.status === 3) && (
                       <button
                         onClick={() => handleRefresh(order.orderId)}
                         className="text-blue-600 hover:text-blue-800 font-medium ml-8"

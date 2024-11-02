@@ -489,10 +489,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
           style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
           aria-label="Notifications"
         >
-          <i
-            className="fas fa-bell"
-            style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
-          ></i>
+      
         </a>
       </div>
     </header>

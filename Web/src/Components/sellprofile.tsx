@@ -267,9 +267,9 @@ const SellProfile: React.FC<Props> = ({
           </>
         )}
       </div>
-      <div className="px-[3vw] mt-[8vh] mb[5vh]">
-        <div className="flex justify-between">
-          <div className="seller-desc">
+      <div className="px-[3vw] mt-[8vh] mb-[5vh]">
+        <div className="flex justify-between items-center">
+          <div className="seller-desc flex items-center space-x-2">
             <Link
               href={`/profile/${userId}`}
               className="no-underline text-black"
@@ -279,7 +279,12 @@ const SellProfile: React.FC<Props> = ({
                 {fullname ? fullname : "Không xác định"}
               </p>
             </Link>
-            <button onClick={handleReportClick} className="text-red-500 p-2 rounded-full hover:bg-gray-100 flex items-center justify-center mb-2" aria-label="Report">
+            <button
+              onClick={handleReportClick}
+              className="text-red-500 p-1 rounded-full hover:bg-gray-100 flex items-center justify-center mb-2"
+              aria-label="Report"
+              style={{ fontSize: "0.9em" }} // Giảm kích thước biểu tượng
+            >
               <FaFlag />
             </button>
           </div>
