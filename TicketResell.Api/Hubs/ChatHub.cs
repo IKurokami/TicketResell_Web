@@ -151,10 +151,14 @@ public class ChatHub : Hub
                 {
                     await Clients.Client(Context.ConnectionId).SendAsync("UserNotFound", $"User {receiverID} is not connected.");
                 }
+                
                 if (!(httpContext.HasEnoughtRoleLevel(UserRole.Admin) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)))
                 {
+                    if (!string.IsNullOrEmpty(receiverConnectionId))
+                    {
+                        await Clients.Client(receiverConnectionId).SendAsync("BlockedChatEvent", chatbox.ChatboxId);
+                    }
                     await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
-                   
                 }
             }
             else
