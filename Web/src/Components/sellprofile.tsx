@@ -37,33 +37,66 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
 
   const reportReasons = [
-    "Báo cáo vé không phù hợp",
-    "Báo cáo bạo lực",
-    "Báo cáo giá cao",
-    "Báo cáo vé giả",
+    { label: "Báo cáo vé không phù hợp", status: 4 },
+    { label: "Báo cáo bạo lực", status: 5 },
+    { label: "Báo cáo giá cao", status: 6 },
+    { label: "Báo cáo vé giả", status: 7 },
   ];
 
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (selectedReason) {
-      setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false);
-        onClose();
-      }, 3000);
+      const statusMap = {
+        "Báo cáo vé không phù hợp": 4,
+        "Báo cáo bạo lực": 5,
+        "Báo cáo giá cao": 6,
+        "Báo cáo vé giả": 7,
+      } as const; // use 'as const' to fix types
+
+      const statusCode = statusMap[selectedReason as keyof typeof statusMap]; // type assertion here
+      const url = `http://localhost:5296/api/Chatbox/createreport/${statusCode}`;
+
+      const requestBody = {
+        title: "Report",
+        description: selectedReason,
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (response.ok) {
+          setShowAlert(true);
+          setTimeout(() => {
+            setShowAlert(false);
+            onClose();
+          }, 3000);
+        } else {
+          console.error("Failed to submit report:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error submitting report:", error);
+      }
     }
   };
 
+
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 mt-10" style={{ zIndex: 500 }}>
-      <div className="w-full max-w-md mx-4 animate-in slide-in-from-bottom duration-300 mt-10"> {/* Changed max-w-lg to max-w-md */}
+      <div className="w-full max-w-md mx-4 animate-in slide-in-from-bottom duration-300 mt-10">
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden mt-10">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800"> {/* Reduced padding */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-red-500" />
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Báo cáo người dùng</h2> {/* Changed text size */}
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Báo cáo người dùng</h2>
             </div>
             <button
               onClick={onClose}
@@ -73,27 +106,26 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
             </button>
           </div>
 
-          {/* Content */}
-          <div className="p-4"> {/* Reduced padding */}
-            <ul className="space-y-3"> {/* Reduced space */}
-              {reportReasons.map((reason, index) => (
-                <li key={index} className="group">
-                  <label className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"> {/* Reduced padding */}
+          <div className="p-4">
+            <ul className="space-y-3">
+              {reportReasons.map((reason) => (
+                <li key={reason.status} className="group">
+                  <label className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
                     <div className="relative">
                       <input
                         type="radio"
                         name="reportReason"
-                        value={reason}
-                        checked={selectedReason === reason}
-                        onChange={() => setSelectedReason(reason)}
+                        value={reason.label}
+                        checked={selectedReason === reason.label}
+                        onChange={() => setSelectedReason(reason.label)}
                         className="w-4 h-4 text-blue-600 border-2 border-gray-300 focus:ring-blue-500 focus:ring-offset-2"
                       />
-                      {selectedReason === reason && (
+                      {selectedReason === reason.label && (
                         <div className="absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-75"></div>
                       )}
                     </div>
                     <span className="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
-                      {reason}
+                      {reason.label}
                     </span>
                   </label>
                 </li>
@@ -101,8 +133,7 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
             </ul>
           </div>
 
-          {/* Footer */}
-          <div className="flex justify-end gap-2 p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"> {/* Reduced padding */}
+          <div className="flex justify-end gap-2 p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
             <button
               onClick={onClose}
               className="px-4 py-1 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
@@ -118,7 +149,6 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
           </div>
         </div>
 
-        {/* Alert */}
         {showAlert && (
           <Alert className="mt-4 bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-900 animate-in fade-in slide-in-from-top duration-300">
             <AlertDescription className="text-green-800 dark:text-green-200">
@@ -130,7 +160,6 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
     </div>
   );
 };
-
 const SellProfile: React.FC<Props> = ({
   birthday,
   address,
