@@ -49,7 +49,7 @@ public class ChatHub : Hub
     public async Task UnblockChatbox(string chatboxId, string receiverID)
     {
         var httpContext = Context.GetHttpContext();
-        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff) && !httpContext.HasEnoughtRoleLevel(UserRole.Admin))
+        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff))
             return;
         var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
         if (Users.TryGetValue(receiverID, out var receiverConnectionId))

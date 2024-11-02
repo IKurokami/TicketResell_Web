@@ -247,13 +247,13 @@ const Login: React.FC = () => {
     }
 
     try {
-      console.log("TESTTTT");
       const response = await fetch("/api/getOTP", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          name:name,
           username: username,
           password: password,
           email: "default@gmail.com",
@@ -261,9 +261,7 @@ const Login: React.FC = () => {
         }),
       });
 
-      console.log("TESTTTT2");
       const data = await response.json();
-      console.log("TESTTTT3");
       console.log(data);
       if (response.ok) {
         notifySuccess("Xác minh OTP thành công! Đăng ký hoàn tất.");

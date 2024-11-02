@@ -10,7 +10,7 @@ public interface IRevenueService
     // public Task<ResponseModel> GetRevenueFromOrder(string orderId, bool saveAll = true);
 
     public Task<ResponseModel> GetAllRevenues();
-
+    
     public Task<ResponseModel> GetRevenuesAsync();
 
     public Task<ResponseModel> GetRevenuesByIdAsync(string id);

@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { FaCheck, FaClock, FaLock } from "react-icons/fa";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ChatComponent from "./ChatComponent";
 import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
@@ -10,7 +10,7 @@ import { UserData } from "./UserRequest";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
 interface Chatbox {
-  chatboxId: number;
+  chatboxId: string;
   status: number;
   createDate: string;
   title: string;
@@ -19,7 +19,6 @@ interface Chatbox {
 
 interface ChatboxTableProps {
   userData: UserData | undefined;
-
   userCookie: UserData | undefined;
 
   chatboxData: Chatbox[];
@@ -29,7 +28,7 @@ interface ChatMessage {
   senderId: string | undefined;
   receiverId: string | undefined;
   message: string;
-  chatId: number;
+  chatId: string;
   date: string;
 }
 
@@ -38,18 +37,30 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   chatboxData,
   userCookie,
 }) => {
+  console.log("userData", userData);
+  console.log("chatboxData", chatboxData);
+  console.log("userCookie", userCookie);
+
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChatbox, setSelectedChatbox] = useState<Chatbox | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [chatboxes, setChatboxes] = useState<Chatbox[]>(chatboxData);
+  const [chatboxes, setChatboxes] = useState<Chatbox[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [hubConnection, setHubConnection] = useState<HubConnection | null>(
     null
   );
+  const selectedChatboxRef = useRef<Chatbox | null>(null);
 
   useEffect(() => {
     setChatboxes(chatboxData);
   }, [chatboxData]);
+
+  useEffect(() => {
+    selectedChatboxRef.current = selectedChatbox;
+    setIsChatOpen(false);
+  }, [selectedChatbox]);
+
+
 
   useEffect(() => {
     const createHubConnection = async () => {
@@ -85,34 +96,57 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         });
 
         connection.on("ReceiveMessage", (senderId: string, message: string) => {
-          
           const newMessage: ChatMessage = {
             senderId,
             receiverId: Cookies.get("id"),
             message,
-            chatId: selectedChatbox?.chatboxId ?? 1,
+            chatId: "",
             date: new Date().toISOString(),
           };
-          
+
           console.log("New message object:", newMessage);
-          setChatMessages(prev => {
+          setChatMessages((prev) => {
             const updated = [...prev, newMessage];
             return updated;
           });
+          
         });
 
         connection.on("Block", (senderId: string, message: string) => {
           console.log(`Block event received for ${senderId}: ${message}`);
-          // Update UI to show blocked status
+          
+          // Update the chatboxes state
           setChatboxes(prev => prev.map(chatbox => 
             chatbox.chatboxId === selectedChatbox?.chatboxId 
               ? { ...chatbox, status: 3 } 
               : chatbox
           ));
+          
+          // Also update the selectedChatbox if it's the one being blocked
+          if (selectedChatbox) {
+            setSelectedChatbox(prev => prev 
+              ? { ...prev, status: 3 } 
+              : prev
+            );
+          }
         });
 
-        connection.on("UnblockEvent", (senderId: string, message: string) => {
-          console.log(`Unblock event received for ${senderId}: ${message}`);
+        connection.on("UnblockEvent", (receiverId: string, message: string) => {
+          console.log(`Unblock ${receiverId}: ${message}`);
+          
+          setChatboxes(prev => prev.map(chatbox => 
+            chatbox.chatboxId === selectedChatboxRef.current?.chatboxId 
+              ? { ...chatbox, status: 2 } 
+              : chatbox
+          ));
+          
+          if (selectedChatboxRef.current) {
+            setSelectedChatbox(prev => prev 
+              ? { ...prev, status: 2 } 
+              : prev
+            );
+          }
+          
         });
 
         setHubConnection(connection);
@@ -138,12 +172,18 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       if (userData?.userId) {
         try {
           const response = await fetch(
-            `http://localhost:5296/api/Chat/getValidChats/${userData.userId}`
+            `http://localhost:5296/api/Chat/getValidChats/${userData.userId}`,
+            {
+              method: "GET", // Specify the method if needed
+              credentials: "include", // Include credentials
+            }
           );
           const result = await response.json();
 
-          if (result.statusCode === 200) {
+          if (result.statusCode === 200 && Array.isArray(result.data)) {
             setChatMessages(result.data);
+          } else {
+            console.error("Fetched data is not an array:", result.data);
           }
         } catch (error) {
           console.error("Error fetching chat messages:", error);
@@ -154,12 +194,14 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     fetchChatMessages();
   }, [userData]);
 
-  const handleSendMessage = async (message: string, userId: string | undefined) => {
+  const handleSendMessage = async (
+    message: string,
+    userId: string | undefined
+  ) => {
     if (!selectedChatbox || !userData || !hubConnection) return;
 
     try {
       const  receiveId= userCookie?.userId == chatMessages[0].senderId?chatMessages[0].receiverId:chatMessages[0].senderId;
-      console.log("receiverId",receiveId);
       
       const newMessage: ChatMessage = {
         senderId: userId,
@@ -175,8 +217,31 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         message,
         selectedChatbox.chatboxId
       );
-      
+
       setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+
+      // Check if the user does NOT have roles RO3 or RO4
+      const hasRestrictedRole = userCookie?.roles.some(
+        (role) => role.roleId === "RO3" || role.roleId === "RO4"
+      );
+
+      if (!hasRestrictedRole) {
+        // Update the status of the selected chatbox to 3
+        const updatedChatbox: Chatbox = {
+          ...selectedChatbox,
+          status: 3,
+        };
+        setSelectedChatbox(updatedChatbox);
+
+        // Update the chatboxes array with the updated chatbox
+        setChatboxes((prevChatboxes) =>
+          prevChatboxes.map((chatbox) =>
+            chatbox.chatboxId === updatedChatbox.chatboxId
+              ? updatedChatbox
+              : chatbox
+          )
+        );
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -191,7 +256,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           { credentials: "include" }
         );
         const result = await response.json();
-        console.log("cc ngu", result.data);
 
         if (result.statusCode === 200) {
           setChatMessages(result.data);
@@ -221,7 +285,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleProcessingUpdate = async (chatboxId: number) => {
+  const handleProcessingUpdate = async (chatboxId: string) => {
     try {
       // Call the map request API
       const mapResponse = await fetch(
@@ -250,12 +314,13 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     }
   };
 
-  const handleRejectsUpdate = async (chatboxId: number) => {
+  const handleRejectsUpdate = async (chatboxId: string) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Chatbox/rejectchat/${chatboxId}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -266,7 +331,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         setChatboxes((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
             chatbox.chatboxId === chatboxId
-              ? { ...chatbox, Status: 8 }
+              ? { ...chatbox, status: 8 }
               : chatbox
           )
         );
@@ -278,12 +343,13 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     }
   };
 
-  const handleCompletesUpdate = async (chatboxId: number) => {
+  const handleCompletesUpdate = async (chatboxId: string) => {
     try {
       const response = await fetch(
         `http://localhost:5296/api/Chatbox/closeboxchat/${chatboxId}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -294,7 +360,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         setChatboxes((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
             chatbox.chatboxId === chatboxId
-              ? { ...chatbox, Status: 0 }
+              ? { ...chatbox, status: 0 }
               : chatbox
           )
         );
@@ -305,23 +371,16 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       console.error("Error updating chatbox status:", error);
     }
   };
-  const handleUnlockUpdate = async (chatboxId: number) => {
+  const handleUnlockUpdate = async (chatboxId: string) => {
     try {
-      // Call the map request API
-      const mapResponse = await fetch(
-        `http://localhost:5296/api/Chat/processing/${chatboxId}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!mapResponse.ok) {
-        throw new Error("Failed to map request");
+      const receiverID = userData?.userId; 
+      console.log("receiverID",receiverID);
+      if (hubConnection ) {
+        await hubConnection.invoke("UnblockChatbox", chatboxId, receiverID);
+      } else {
+        console.error("Hub connection is not established.");
       }
+    
 
       // Update the local state
       setChatboxes((prevChatboxes) =>
@@ -333,7 +392,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       console.error("Error updating chatbox status:", error);
     }
   };
-
   const getStatusLabel = (status: number) => {
     switch (status) {
       case 1:
@@ -353,6 +411,55 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         return { text: "Report", color: "bg-red-500 text-white font-bold" };
     }
   };
+
+  // Add this function to fetch chatbox data for specific users
+  const fetchChatboxData = async () => {
+    if (!userCookie?.userId || !userData?.userId) {
+      console.log("Missing user IDs for fetch");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5296/api/Chat/get/${userCookie.userId}/${userData.userId}`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const latestData = await response.json();
+        if (Array.isArray(latestData)) {
+          setChatboxes(latestData);
+        } else {
+          console.error("Fetched chatbox data is not an array:", latestData);
+        }
+      } else {
+        console.error("Failed to fetch chatbox data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching chatbox data:", error);
+    }
+  };
+
+  // Add polling effect to check for updates
+  useEffect(() => {
+    // Initial fetch
+    fetchChatboxData();
+
+    // Set up polling interval
+    const pollInterval = setInterval(() => {
+      fetchChatboxData();
+    }, 5000); // Polls every 5 seconds
+
+    // Cleanup on component unmount
+    return () => clearInterval(pollInterval);
+  }, [userCookie?.userId, userData?.userId]); // Dependencies include both user IDs
+
 
   return (
     <div className="overflow-x-auto">
@@ -483,42 +590,42 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                     </div>
                   ) : chatbox.status === 3 ? (
                     <div className="flex justify-center items-center gap-2">
-                    {userCookie?.roles.some(
-                      (role) => role.roleId === "RO2"
-                    ) ||
-                    userCookie?.roles.some(
-                      (role) => role.roleId === "RO1"
-                    ) ? (
-                      <div className="flex justify-center items-center gap-2">
-                        <button
-                          onClick={() => openChat(chatbox)}
-                          className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                        >
-                          <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
-                        </button>
-                        <div className="pl-4">
-                          <FaLock className="text-blue-500" />
+                      {userCookie?.roles.some(
+                        (role) => role.roleId === "RO2"
+                      ) ||
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
+                        <div className="flex justify-center items-center gap-2">
+                          <button
+                            onClick={() => openChat(chatbox)}
+                            className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
+                          </button>
+                          <div className="pl-4">
+                            <FaLock className="text-gray-500 hover: text-blue-500" />
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex justify-center items-center gap-2">
-                        <button
-                          onClick={() => openChat(chatbox)}
-                          className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                        >
-                          <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleUnlockUpdate(chatbox.chatboxId)
-                          }
-                          className="group relative flex items-center gap-2  py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                        >
-                          <FaUnlockKeyhole className="text-gray-500 hover:text-blue-500" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                      ) : (
+                        <div className="flex justify-center items-center gap-2">
+                          <button
+                            onClick={() => openChat(chatbox)}
+                            className="group relative flex items-center gap-2 pr-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <MessageCircle className="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleUnlockUpdate(chatbox.chatboxId)
+                            }
+                            className="group relative flex items-center gap-2  py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                          >
+                            <FaUnlockKeyhole className="text-gray-500 hover:text-blue-500" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="flex items-center justify-center gap-2">
                       {userCookie?.roles.some(
@@ -566,9 +673,15 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           chatbox={selectedChatbox}
           onSendMessage={handleSendMessage}
           mode={
-            userCookie?.roles.some((roles) => roles.roleId === "RO3" || roles.roleId === "RO4")
+            userCookie?.roles.some(
+              (roles) => roles.roleId === "RO3" || roles.roleId === "RO4"
+            )
               ? "popup"
               : "fullpage"
+          }
+          disableInput={
+            selectedChatbox?.status === 3 &&
+            !userCookie?.roles.some((role) => role.roleId === "RO3" || role.roleId === "RO4")
           }
         />
       )}

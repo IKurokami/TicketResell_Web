@@ -66,7 +66,6 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
 
         const notByCateTickets = await notByCateResponse.json();
         const byCateTickets = await byCateResponse.json();
-        console.log("DG ngu");
         console.log(byCateTickets);
 
         // Select at least 2 tickets from each category if possible

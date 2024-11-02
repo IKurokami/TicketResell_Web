@@ -123,17 +123,21 @@ public class AuthenticationController : ControllerBase
         return ResponseParser.Result(result);
     }
 
-        [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
-        {
-            var result = await _authService.ChangePasswordAsync(changePasswordDto.UserId, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
-            return ResponseParser.Result(result);
-        }
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+    {
+        if (!HttpContext.IsUserIdAuthenticated(changePasswordDto.UserId))
+            return ResponseParser.Result(ResponseModel.Unauthorized("You are not authorized to change this password"));
 
-        [HttpPost("change-passwordKey")]
-        public async Task<IActionResult> ChangePasswordByKey([FromBody] ChangePasswordKeyDto changePasswordDto)
-        {
+        var result = await _authService.ChangePasswordAsync(changePasswordDto.UserId, changePasswordDto.CurrentPassword,
+            changePasswordDto.NewPassword);
+        return ResponseParser.Result(result);
+    }
 
+    [HttpPost("change-passwordKey")]
+    public async Task<IActionResult> ChangePasswordByKey([FromBody] ChangePasswordKeyDto changePasswordDto)
+    {
+        
 
         var result = await _authService.CheckPassswordKeyAsync(changePasswordDto.PasswordKey, changePasswordDto.UserId,
             changePasswordDto.NewPassword);

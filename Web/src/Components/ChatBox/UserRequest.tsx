@@ -37,12 +37,10 @@ interface ChatboxItem {
 const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [chatboxData, setChatboxData] = useState<ChatboxItem[]>([]);
-  console.log("alo alo", userData);
   console.log("Fetching data for ID:", userCookie);
 
   const fetchChatboxData = async () => {
     try {
-
       const response = await fetch(
         `http://localhost:5296/api/Chatbox/getall/${userData?.userId}`,
         { credentials: "include" }
@@ -68,7 +66,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
     console.log("fetch:", chatboxData);
   }, [userData]);
 
-  const hasRO3Role = userCookie?.roles?.some((role) => role.roleId === "RO3");
+  const hasRO3Role =
+    userCookie?.roles?.some((role) => role.roleId === "RO3") ||
+    userCookie?.roles?.some((role) => role.roleId === "RO4");
   return (
     <div className="bg-white py-12 px-10 rounded-xl ">
       <p

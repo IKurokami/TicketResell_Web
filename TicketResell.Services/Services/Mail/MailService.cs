@@ -27,13 +27,13 @@ public class MailService : IMailService
     private readonly IUserService _userService;
 
 
-        public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis, IUnitOfWork unitOfWork)
-        {
-            
-            _config = config.Value;
-            _logger = logger;
-            _redis = redis;
-            _unitOfWork = unitOfWork;
+    public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis, IUnitOfWork unitOfWork)
+    {
+
+        _config = config.Value;
+        _logger = logger;
+        _redis = redis;
+        _unitOfWork = unitOfWork;
 
         // Load email configuration from appsettings.json
         _smtpHost = _config.SmtpHost;
@@ -44,18 +44,18 @@ public class MailService : IMailService
         _fromDisplayName = _config.FromDisplayName;
     }
 
-        public async Task<ResponseModel> SendPasswordKeyAsync(string to)
+    public async Task<ResponseModel> SendPasswordKeyAsync(string to)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(to);
+        if (user == null)
         {
-            var user = await _unitOfWork.UserRepository.GetByIdAsync(to);
-            if (user == null)
-            {
-                return ResponseModel.Error("Email not exist");
+            return ResponseModel.Error("Email not exist");
 
-            }
-            string key = GenerateAccessKey();
-            string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
+        }
+        string key = GenerateAccessKey();
+        string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
 
-        var body = $@"
+        string body = $@"
 <!DOCTYPE html>
 <html lang='vi'>
 <head>
@@ -195,14 +195,17 @@ public class MailService : IMailService
     </div>
 </body>
 </html>"; var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
-            if (response != null && response.StatusCode == 200)
-            {
-                await CacheAccessKeyAsync("forgot_password", to, hashedKey, TimeSpan.FromHours(2));
-                return ResponseModel.Success("Sucess");
-            }
+        if (response != null && response.StatusCode == 200)
+        {
+            await CacheAccessKeyAsync("forgot_password", to, hashedKey, TimeSpan.FromHours(2));
+            return ResponseModel.Success("Sucess");
+        }
 
         return ResponseModel.Error(response.Message ?? "Error");
+
+
     }
+
 
     public async Task<ResponseModel> SendOtpAsync(string to)
     {
@@ -335,48 +338,15 @@ public class MailService : IMailService
         </div> 
     </body>
     </html>";
-            var response = await SendEmailAsync(to, "TicketResell: Here is your OTP code", body);
-            if (response.StatusCode == 200)
-            {
-                await CacheAccessKeyAsync("email_verification", to, otp, TimeSpan.FromMinutes(5));
-                return ResponseModel.Success("Sucess");
-            }
-            else
-            {
-                return ResponseModel.Error(response.Message ?? "Error");
-            }
-        }
-
-        private async Task CacheAccessKeyAsync(string cacheName, string userId, string cacheKey, TimeSpan timeSpan)
+        var response = await SendEmailAsync(to, "TicketResell: Here is your OTP code", body);
+        if (response.StatusCode == 200)
         {
-            var db = _redis.GetDatabase();
-            await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
+            await CacheAccessKeyAsync("email_verification", to, otp, TimeSpan.FromMinutes(5));
+            return ResponseModel.Success("Sucess");
         }
 
-        private string GenerateAccessKey()
-        {
-            var key = new byte[32];
-            using (var generator = RandomNumberGenerator.Create())
-            {
-                generator.GetBytes(key);
-            }
-
-            return Convert.ToBase64String(key);
-        }
-
-
-        public static string GenerateNumericOTP(int length)
-        {
-            var random = new Random();
-            var otp = new StringBuilder(length);
-
-            for (int i = 0; i < length; i++)
-            {
-                otp.Append(random.Next(0, 10)); // Add a random digit (0-9)
-            }
-
-            return otp.ToString();
-        }
+        return ResponseModel.Error(response.Message ?? "Error");
+    }
 
     public async Task<ResponseModel> SendEmailAsync(string to, string subject, string body)
     {
@@ -446,5 +416,33 @@ public class MailService : IMailService
             _logger.LogError($"Error sending email with attachment to {to}: {ex.Message}");
             return ResponseModel.BadRequest("Failed to send email with attachment", ex.Message);
         }
+    }
+
+    private async Task CacheAccessKeyAsync(string cacheName, string userId, string cacheKey, TimeSpan timeSpan)
+    {
+        var db = _redis.GetDatabase();
+        await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
+    }
+
+    private string GenerateAccessKey()
+    {
+        var key = new byte[32];
+        using (var generator = RandomNumberGenerator.Create())
+        {
+            generator.GetBytes(key);
+        }
+
+        return Convert.ToBase64String(key);
+    }
+
+
+    public static string GenerateNumericOTP(int length)
+    {
+        var random = new Random();
+        var otp = new StringBuilder(length);
+
+        for (var i = 0; i < length; i++) otp.Append(random.Next(0, 10)); // Add a random digit (0-9)
+
+        return otp.ToString();
     }
 }
