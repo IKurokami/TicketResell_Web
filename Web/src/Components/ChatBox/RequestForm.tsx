@@ -57,10 +57,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
 
   useEffect(() => {
     selectedChatboxRef.current = selectedChatbox;
-    setIsChatOpen(false);
   }, [selectedChatbox]);
-
-
 
   useEffect(() => {
     const createHubConnection = async () => {
@@ -109,44 +106,62 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
             const updated = [...prev, newMessage];
             return updated;
           });
-          
         });
 
         connection.on("Block", (senderId: string, message: string) => {
           console.log(`Block event received for ${senderId}: ${message}`);
-          
+
           // Update the chatboxes state
-          setChatboxes(prev => prev.map(chatbox => 
-            chatbox.chatboxId === selectedChatbox?.chatboxId 
-              ? { ...chatbox, status: 3 } 
-              : chatbox
-          ));
-          
+          setChatboxes((prev) =>
+            prev.map((chatbox) =>
+              chatbox.chatboxId === selectedChatbox?.chatboxId
+                ? { ...chatbox, status: 3 }
+                : chatbox
+            )
+          );
+
           // Also update the selectedChatbox if it's the one being blocked
           if (selectedChatbox) {
-            setSelectedChatbox(prev => prev 
-              ? { ...prev, status: 3 } 
-              : prev
+            setSelectedChatbox((prev) =>
+              prev ? { ...prev, status: 3 } : prev
             );
           }
         });
 
         connection.on("UnblockEvent", (receiverId: string, message: string) => {
           console.log(`Unblock ${receiverId}: ${message}`);
-          
-          setChatboxes(prev => prev.map(chatbox => 
-            chatbox.chatboxId === selectedChatboxRef.current?.chatboxId 
-              ? { ...chatbox, status: 2 } 
-              : chatbox
-          ));
-          
+
+          setChatboxes((prev) =>
+            prev.map((chatbox) =>
+              chatbox.chatboxId === selectedChatboxRef.current?.chatboxId
+                ? { ...chatbox, status: 2 }
+                : chatbox
+            )
+          );
+
           if (selectedChatboxRef.current) {
-            setSelectedChatbox(prev => prev 
-              ? { ...prev, status: 2 } 
-              : prev
+            setSelectedChatbox((prev) =>
+              prev ? { ...prev, status: 2 } : prev
             );
           }
-          
+        });
+
+        connection.on("BlockedChatEvent", (chatboxId: string) => {
+          console.log(`BlockedChatEvent received for chatboxId: ${chatboxId}`);
+
+          setChatboxes((prev) =>
+            prev.map((chatbox) =>
+              chatbox.chatboxId === chatboxId
+                ? { ...chatbox, status: 3 }
+                : chatbox
+            )
+          );
+
+          if (selectedChatboxRef.current?.chatboxId === chatboxId) {
+            setSelectedChatbox((prev) =>
+              prev ? { ...prev, status: 3 } : prev
+            );
+          }
         });
 
         setHubConnection(connection);
@@ -201,8 +216,11 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     if (!selectedChatbox || !userData || !hubConnection) return;
 
     try {
-      const  receiveId= userCookie?.userId == chatMessages[0].senderId?chatMessages[0].receiverId:chatMessages[0].senderId;
-      
+      const receiveId =
+        userCookie?.userId == chatMessages[0].senderId
+          ? chatMessages[0].receiverId
+          : chatMessages[0].senderId;
+
       const newMessage: ChatMessage = {
         senderId: userId,
         receiverId: receiveId,
@@ -373,14 +391,13 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   };
   const handleUnlockUpdate = async (chatboxId: string) => {
     try {
-      const receiverID = userData?.userId; 
-      console.log("receiverID",receiverID);
-      if (hubConnection ) {
+      const receiverID = userData?.userId;
+      console.log("receiverID", receiverID);
+      if (hubConnection) {
         await hubConnection.invoke("UnblockChatbox", chatboxId, receiverID);
       } else {
         console.error("Hub connection is not established.");
       }
-    
 
       // Update the local state
       setChatboxes((prevChatboxes) =>
@@ -460,7 +477,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     return () => clearInterval(pollInterval);
   }, [userCookie?.userId, userData?.userId]); // Dependencies include both user IDs
 
-
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full rounded-lg shadow-lg">
@@ -509,9 +525,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       {userCookie?.roles.some(
                         (role) => role.roleId === "RO2"
                       ) ||
-                      userCookie?.roles.some(
-                        (role) => role.roleId === "RO1"
-                      ) ? (
+                        userCookie?.roles.some(
+                          (role) => role.roleId === "RO1"
+                        ) ? (
                         <button
                           onClick={() => openChat(chatbox)}
                           className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -545,9 +561,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       {userCookie?.roles.some(
                         (role) => role.roleId === "RO2"
                       ) ||
-                      userCookie?.roles.some(
-                        (role) => role.roleId === "RO1"
-                      ) ? (
+                        userCookie?.roles.some(
+                          (role) => role.roleId === "RO1"
+                        ) ? (
                         <div className="flex justify-center">
                           <FaClock className=" text-yellow-500 " />
                         </div>
@@ -593,9 +609,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       {userCookie?.roles.some(
                         (role) => role.roleId === "RO2"
                       ) ||
-                      userCookie?.roles.some(
-                        (role) => role.roleId === "RO1"
-                      ) ? (
+                        userCookie?.roles.some(
+                          (role) => role.roleId === "RO1"
+                        ) ? (
                         <div className="flex justify-center items-center gap-2">
                           <button
                             onClick={() => openChat(chatbox)}
@@ -631,9 +647,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       {userCookie?.roles.some(
                         (role) => role.roleId === "RO2"
                       ) ||
-                      userCookie?.roles.some(
-                        (role) => role.roleId === "RO1"
-                      ) ? (
+                        userCookie?.roles.some(
+                          (role) => role.roleId === "RO1"
+                        ) ? (
                         <FaClock className=" text-yellow-500" />
                       ) : (
                         <div className="flex justify-center gap-2">
@@ -681,7 +697,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           }
           disableInput={
             selectedChatbox?.status === 3 &&
-            !userCookie?.roles.some((role) => role.roleId === "RO3" || role.roleId === "RO4")
+            !userCookie?.roles.some(
+              (role) => role.roleId === "RO3" || role.roleId === "RO4"
+            )
           }
         />
       )}

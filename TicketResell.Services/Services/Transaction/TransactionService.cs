@@ -61,6 +61,6 @@ public class TransactionService : ITransactionService
             return ResponseModel.NotFound($"No buyers found .");
         }
         var orderDtos = _mapper.Map<List<OrderDetailTransactionDto>>(buyers);
-        return ResponseModel.Success($"Successfully retrieved buyers for page", orderDtos );
+        return ResponseModel.Success($"Successfully retrieved buyers for page", orderDtos);
     }
 }
