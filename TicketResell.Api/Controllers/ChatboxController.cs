@@ -118,7 +118,7 @@ namespace Api.Controllers
             return ResponseParser.Result(await _chatboxService.GetChatboxesAsync());
         }
 
-        [HttpPost("getall/{userId}")]
+        [HttpGet("getall/{userId}")]
         public async Task<IActionResult> GetChatboxsByUserId(string userId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
@@ -130,7 +130,7 @@ namespace Api.Controllers
             return ResponseParser.Result(await _chatboxService.GetChatboxsByUserId(userId));
         }
 
-        [HttpPost("closeboxchat/{chatboxId}")]
+        [HttpPut("closeboxchat/{chatboxId}")]
         public async Task<IActionResult> CloseBoxChat(string chatboxId)
         {
             if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
@@ -139,6 +139,27 @@ namespace Api.Controllers
             
             return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 0));
         }
+        
+        
+        [HttpPut("rejectchat/{chatboxId}")]
+        public async Task<IActionResult> RejectChat(string chatboxId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
+            
+            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 8));
+        }
+        [HttpPut("processing/{chatboxId}")]
+        public async Task<IActionResult> Processing(string chatboxId)
+        {
+            if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff) && !HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+                return ResponseParser.Result(
+                    ResponseModel.Unauthorized("You need to be authenticated to view chatboxes"));
+            
+            return ResponseParser.Result(await _chatboxService.UpdateChatboxStatusAsync(chatboxId, 2));
+        }
+
 
 
     }

@@ -8,18 +8,18 @@ import TransactionTable from "./TransactionPage";
 import RevenueCard from "./RevenuePage";
 
 const Dashboard = () => {
-  const [selectedTab, setSelectedTab] = useState("Dashboard"); // Set default to "Dashboard"
+  const [selectedTab, setSelectedTab] = useState("Trang Chủ"); // Đặt mặc định là "Trang Chủ"
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
 
   const menuItems = [
     {
       id: "dashboard",
-      label: "Dashboard",
+      label: "Trang Chủ",
       icon: LayoutDashboard,
     },
-    { id: "ticket", label: "Ticket", icon: IoTicketOutline },
-    { id: "transactions", label: "Transactions", icon: GrTransaction },
+    { id: "ticket", label: "Vé", icon: IoTicketOutline },
+    { id: "transactions", label: "Giao Dịch", icon: GrTransaction },
   ];
 
   const toggleSidebar = () => {
@@ -41,11 +41,11 @@ const Dashboard = () => {
 
   const renderContent = () => {
     switch (selectedTab) {
-      case "Dashboard":
+      case "Trang Chủ":
         return <RevenueCard />;
-      case "Ticket":
+      case "Vé":
         return <TicketsPage />;
-      case "Transactions":
+      case "Giao Dịch":
         return <TransactionTable />;
       default:
         return <RevenueCard />;
@@ -54,7 +54,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex bg-white pt-10">
-      {/* Sidebar */}
+      {/* Thanh bên */}
       <div
         ref={sidebarRef}
         className={`fixed inset-y-0 left-0 transform bg-white transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 w-64 z-10 ${
@@ -84,7 +84,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Nội dung chính */}
       <div className="flex-1 pt-16">
         <div className="md:p-1">
           <button

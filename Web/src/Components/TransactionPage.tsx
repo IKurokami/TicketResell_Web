@@ -134,7 +134,7 @@ const TransactionTable: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-4 text-center">Loading transactions...</div>;
+    return <div className="p-4 text-center">Đang tải giao dịch...</div>;
   }
 
   const startDate = dateRange.start ? toISODate(dateRange.start) : null;
@@ -183,10 +183,10 @@ const TransactionTable: React.FC = () => {
       <div className="flex justify-between items-center text-sm text-gray-600">
         <div>
           <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
-            {transaction.quantity} tickets
+            {transaction.quantity} vé
           </span>
         </div>
-        <div>From: {transaction.order.user.username}</div>
+        <div>Từ: {transaction.order.user.username}</div>
       </div>
     </div>
   );
@@ -197,8 +197,8 @@ const TransactionTable: React.FC = () => {
         <div className="relative flex items-center bg-white rounded-full h-12 p-1 px-3 border border-gray-300 w-3/5 lg:w-64">
           <input
             type="text"
-            aria-label="Search ticket"
-            placeholder="Search ticket"
+            aria-label="Tìm kiếm vé"
+            placeholder="Tìm kiếm vé"
             className="border-none outline-none p-1 bg-transparent w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -219,7 +219,7 @@ const TransactionTable: React.FC = () => {
         <div className="space-y-4">
           {currentItems.length === 0 ? (
             <div className="text-center text-gray-500 py-4">
-              No transactions available.
+              Không có giao dịch nào.
             </div>
           ) : (
             currentItems.map((transaction) => (
@@ -236,7 +236,7 @@ const TransactionTable: React.FC = () => {
             <table className="w-full divide-y divide-gray-200">
               <thead>
                 <tr className="bg-gray-100">
-                  {["DATE", "TICKET", "PRICE", "QUANTITY", "TOTAL", "FROM"].map(
+                  {["NGÀY", "VÉ", "GIÁ", "SỐ LƯỢNG", "TỔNG CỘNG", "TỪ"].map(
                     (header) => (
                       <th
                         key={header}
@@ -264,7 +264,7 @@ const TransactionTable: React.FC = () => {
                       colSpan={6}
                       className="px-4 lg:px-6 py-4 text-center text-gray-500"
                     >
-                      No transactions available.
+                      Không có giao dịch nào.
                     </td>
                   </tr>
                 ) : (

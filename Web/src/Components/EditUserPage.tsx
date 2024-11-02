@@ -58,6 +58,9 @@ interface EditUserDialogProps {
   onSave: (data: FormData) => void;
 }
 
+interface Errors {
+  [key: string]: string; // Định nghĩa rằng key có thể là bất kỳ chuỗi nào và value là một chuỗi
+}
 // Edit User Dialog
 const EditUserDialog: React.FC<EditUserDialogProps> = ({
   roles,
@@ -87,9 +90,48 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     bank: user?.bank || "",
     bankType: user?.bankType || "",
   });
-  console.log("alo alo");
-  console.log(user);
-  console.log(roles);
+  const [errors, setErrors] = useState<Errors>({});
+  const handleBirthdayChange = (e: any) => {
+    const { value } = e.target;
+
+    // Update the form data
+    setFormData((prevData) => ({
+      ...prevData,
+      birthday: value,
+    }));
+
+    // Validate the birthday
+    validateBirthday(value);
+  };
+
+  // Validation function
+  const validateBirthday = (birthday: any) => {
+    const selectedDate = new Date(birthday);
+    const today = new Date();
+
+    const age = today.getFullYear() - selectedDate.getFullYear();
+
+    // Check if birthday has already happened this year
+    const hasHadBirthdayThisYear =
+      today.getMonth() > selectedDate.getMonth() ||
+      (today.getMonth() === selectedDate.getMonth() &&
+        today.getDate() >= selectedDate.getDate());
+
+    const finalAge = hasHadBirthdayThisYear ? age : age - 1;
+
+    if (finalAge < 18) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        birthday: "Bạn phải đủ 18 tuổi trở lên.",
+      }));
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        birthday: "",
+      }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const userId = user?.userId; // Replace with actual userId
@@ -141,16 +183,16 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center overflow-y-auto p-4">
       <Card className="w-full max-w-4xl bg-white">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Edit Profile</CardTitle>
+          <CardTitle className="text-2xl font-bold">Chỉnh Sửa Hồ Sơ</CardTitle>
           <CardDescription>
-            Make changes to your profile information
+            Thay đổi thông tin hồ sơ của bạn
           </CardDescription>
         </CardHeader>
 
         <Tabs defaultValue="personal" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="personal">Personal Information</TabsTrigger>
-            <TabsTrigger value="additional">Additional Details</TabsTrigger>
+            <TabsTrigger value="personal">Thông Tin Cá Nhân</TabsTrigger>
+            <TabsTrigger value="additional">Thông Tin Bổ Sung</TabsTrigger>
           </TabsList>
 
           <form onSubmit={handleSubmit}>
@@ -160,7 +202,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="username" className="text-sm font-medium">
-                        Username
+                        Tên đăng nhập
                       </Label>
                       <Input
                         id="username"
@@ -191,7 +233,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="fullname" className="text-sm font-medium">
-                        Full Name
+                        Họ và tên
                       </Label>
                       <Input
                         id="fullname"
@@ -205,7 +247,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="phone" className="text-sm font-medium">
-                        Phone
+                        Số điện thoại
                       </Label>
                       <Input
                         id="phone"
@@ -220,7 +262,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="sex" className="text-sm font-medium">
-                        Gender
+                        Giới tính
                       </Label>
                       <Select
                         value={formData.sex}
@@ -229,19 +271,19 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                         }
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Gender" />
+                          <SelectValue placeholder="Chọn giới tính" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value="male">Nam</SelectItem>
+                          <SelectItem value="female">Nữ</SelectItem>
+                          <SelectItem value="other">Khác</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="birthday" className="text-sm font-medium">
-                        Birthday
+                        Ngày sinh
                       </Label>
                       <Input
                         id="birthday"
@@ -253,11 +295,12 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                                 .split("T")[0]
                             : ""
                         }
-                        onChange={(e) =>
-                          setFormData({ ...formData, birthday: e.target.value })
-                        }
+                        onChange={handleBirthdayChange}
                         className="w-full"
                       />
+                      {errors.birthday && (
+                        <p style={{ color: "red" }}>Bạn phải đủ 18 tuổi trở lên.</p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -272,7 +315,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="bank" className="text-sm font-medium">
-                            Bank
+                            Ngân hàng
                           </Label>
                           <Input
                             id="bank"
@@ -290,7 +333,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                             htmlFor="bankType"
                             className="text-sm font-medium"
                           >
-                            Bank Type
+                            Loại tài khoản
                           </Label>
                           <Input
                             id="bankType"
@@ -310,7 +353,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="address" className="text-sm font-medium">
-                        Current Address
+                        Địa chỉ hiện tại
                       </Label>
                       <Input
                         id="address"
@@ -319,12 +362,13 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                           setFormData({ ...formData, address: e.target.value })
                         }
                         className="w-full"
+                        disabled
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">
-                        Update Address
+                        Cập nhật địa chỉ
                       </Label>
                       <InputAddressFields
                         houseNumber={houseNumber}
@@ -335,7 +379,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="bio" className="text-sm font-medium">
-                        Bio
+                        Tiểu sử
                       </Label>
                       <Input
                         id="bio"
@@ -353,13 +397,13 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
             <CardFooter className="mt-6 flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                Hủy
               </Button>
               <Button
                 type="submit"
                 className="bg-green-500 text-white hover:bg-green-600"
               >
-                Save Changes
+                Lưu thay đổi
               </Button>
             </CardFooter>
           </form>
@@ -386,19 +430,15 @@ const RoleStatusDialog: React.FC<RoleStatusDialogProps> = ({
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Disable Seller</AlertDialogTitle>
+          <AlertDialogTitle>Vô hiệu hóa người bán</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to disable this role? The user will no longer
-            be able to access the system.
+            Bạn có chắc chắn muốn vô hiệu hóa vai trò này? Người dùng sẽ không thể truy cập vào hệ thống.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className="bg-orange-600 hover:bg-orange-700"
-          >
-            Disable
+          <AlertDialogCancel>Hủy</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} className="bg-orange-600 hover:bg-orange-700">
+            Vô hiệu hóa
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -426,25 +466,21 @@ const AccountStatusDialog: React.FC<AccountStatusDialogProps> = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {isActive ? "Disable Account" : "Enable Account"}
+            {isActive ? "Vô hiệu hóa tài khoản" : "Kích hoạt tài khoản"}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {isActive
-              ? "Are you sure you want to disable this account? The user will no longer be able to access the system."
-              : "Are you sure you want to enable this account? The user will regain access to the system."}
+              ? "Bạn có chắc chắn muốn vô hiệu hóa tài khoản này? Người dùng sẽ không thể truy cập vào hệ thống."
+              : "Bạn có chắc chắn muốn kích hoạt tài khoản này? Người dùng sẽ có thể truy cập lại hệ thống."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Hủy</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className={
-              isActive
-                ? "bg-orange-600 hover:bg-orange-700"
-                : "bg-green-600 hover:bg-green-700"
-            }
+            className={isActive ? "bg-orange-600 hover:bg-orange-700" : "bg-green-600 hover:bg-green-700"}
           >
-            {isActive ? "Disable" : "Enable"}
+            {isActive ? "Vô hiệu hóa" : "Kích hoạt"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -469,16 +505,15 @@ const ResetPasswordDialog: React.FC<ResetPasswordDialogProps> = ({
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Reset Password</AlertDialogTitle>
+          <AlertDialogTitle>Đặt lại mật khẩu</AlertDialogTitle>
           <AlertDialogDescription>
-            This will generate a new random password for the user. The user will
-            need to change their password upon next login.
+            Hệ thống sẽ tạo một mật khẩu ngẫu nhiên mới cho người dùng. Người dùng sẽ cần thay đổi mật khẩu khi đăng nhập lần sau.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Hủy</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm}>
-            Reset Password
+            Đặt lại mật khẩu
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

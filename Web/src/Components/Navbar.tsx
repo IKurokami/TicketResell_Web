@@ -12,7 +12,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { removeAllCookies } from "./Cookie";
 import { logoutUser } from "./Logout";
 import { LogIn } from "lucide-react";
-
+import { CgMail } from "react-icons/cg";
 import { CheckSeller } from "./CheckSeller";
 import { NumberContext } from "./NumberContext";
 import { checkLogin } from "./checkLogin";
@@ -146,7 +146,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     // Fetch seller status
     const check = await checkLogin();
     if (check == "False") {
-      router.push("/login");
+      window.location.href = "/login";
     } else {
       const status = await CheckSeller();
       console.log("Seller Status: ", status); // Log the status
@@ -164,10 +164,8 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   };
 
   // Handle show icon when login
-
   useEffect(() => {
-    // Function to check if the user is logged in by checking for the 'id' cookie
-    const checkUserLoginStatus = async () => {
+    const fetchAvatar = async () => {
       const id = Cookies.get("id");
       if (id) {
         const { imageUrl: fetchedImageUrl, error } = await fetchImage(id);
@@ -178,7 +176,14 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
           setImage(DEFAULT_IMAGE);
           console.error(`Error fetching image for user ${id}: ${error}`);
         }
-      } // Get the user ID from the cookie
+      }
+    };
+    fetchAvatar();
+  }, []);
+
+  useEffect(() => {
+    // Function to check if the user is logged in by checking for the 'id' cookie
+    const checkUserLoginStatus = async () => {
       if (id) {
         setIsLoggedIn(true); // User is logged in
       } else {
@@ -186,7 +191,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
       }
     };
     const id = Cookies.get("id");
-
     const fetchCart = async () => {
       const response = await fetch(
         `http://localhost:5296/api/cart/items/${id}`,
@@ -242,6 +246,9 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     removeAllCookies();
   };
 
+  const handleEmail = () => {
+    window.location.href = "/requestchat"; // Redirects to the /requestchat page
+  };
   return (
     <header
       className={`${isScrolled ? "navbarr scrolled" : "navbarr"}`}
@@ -451,7 +458,16 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
           )}
         </div>
 
+        <div>
+          <a href="#" onClick={handleEmail} className="icon-link box-chat">
+            <CgMail
+              style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }} // Applies conditional color
+              className="text-4xl"
+            />
+          </a>
+        </div>
         {/* Cart and Notifications */}
+
         <a
           href="#"
           className="icon-link noti-icon"

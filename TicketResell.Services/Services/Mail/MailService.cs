@@ -27,11 +27,13 @@ public class MailService : IMailService
     private readonly IUserService _userService;
 
 
-    public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis)
+    public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis, IUnitOfWork unitOfWork)
     {
+
         _config = config.Value;
         _logger = logger;
         _redis = redis;
+        _unitOfWork = unitOfWork;
 
         // Load email configuration from appsettings.json
         _smtpHost = _config.SmtpHost;
@@ -44,10 +46,16 @@ public class MailService : IMailService
 
     public async Task<ResponseModel> SendPasswordKeyAsync(string to)
     {
-        var key = GenerateAccessKey();
-        var hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(to);
+        if (user == null)
+        {
+            return ResponseModel.Error("Email not exist");
 
-        var body = $@"
+        }
+        string key = GenerateAccessKey();
+        string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
+
+        string body = $@"
 <!DOCTYPE html>
 <html lang='vi'>
 <head>
@@ -158,11 +166,13 @@ public class MailService : IMailService
             <h2>Xin chào</h2>
             <p>Chúng tôi nhận được yêu cầu khôi phục mật khẩu cho tài khoản TicketResell của bạn. Để tạo mật khẩu mới, vui lòng nhấp vào nút bên dưới:</p>
             
-            <a href='http://localhost:5296/api/Mail/sendPasswordKey?key={key}' class='reset-button'>Đặt lại mật khẩu</a>
+            <a href='http://localhost:3000/createpassword?key={hashedKey}&to={to}
+' class='reset-button'>Đặt lại mật khẩu</a>
             
             <p>Hoặc sao chép đường dẫn sau vào trình duyệt:</p>
             <div class='reset-link'>
-                http://localhost:5296/api/Mail/sendPasswordKey?key={key}
+                http://localhost:3000/createpassword?key={hashedKey}&to={to}
+
             </div>
 
             <div class='info-box'>
@@ -184,16 +194,18 @@ public class MailService : IMailService
         </div>
     </div>
 </body>
-</html>";
-        var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
+</html>"; var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
         if (response != null && response.StatusCode == 200)
         {
-            await CacheAccessKeyAsync("forgot_password", to, key, TimeSpan.FromHours(2));
+            await CacheAccessKeyAsync("forgot_password", to, hashedKey, TimeSpan.FromHours(2));
             return ResponseModel.Success("Sucess");
         }
 
         return ResponseModel.Error(response.Message ?? "Error");
+
+
     }
+
 
     public async Task<ResponseModel> SendOtpAsync(string to)
     {

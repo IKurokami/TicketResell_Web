@@ -119,7 +119,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ houseNumber, setHouseNumb
     <div className="grid grid-cols-2 gap-4 w-full">
       <TextField
         className="bg-[#F5F7FC] w-full"
-        label="House Number/Street"
+        label="Số nhà/Đường"
         value={houseNumber}
         onChange={(e) => setHouseNumber(e.target.value)}
         margin="normal"
@@ -137,7 +137,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ houseNumber, setHouseNumb
           <TextField
             {...params}
             className="bg-[#F5F7FC] w-full"
-            label="Province"
+            label="Tỉnh/Thành phố"
             margin="normal"
             fullWidth
           />
@@ -155,7 +155,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ houseNumber, setHouseNumb
           <TextField
             {...params}
             className="bg-[#F5F7FC] w-full"
-            label="District"
+            label="Quận/Huyện"
             margin="normal"
             fullWidth
             disabled={!selectedProvince}
@@ -174,7 +174,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ houseNumber, setHouseNumb
           <TextField
             {...params}
             className="bg-[#F5F7FC] w-full"
-            label="Ward"
+            label="Phường/Xã"
             margin="normal"
             fullWidth
             disabled={!selectedDistrict}

@@ -182,4 +182,13 @@ public class UserController : ControllerBase
 
         return ResponseParser.Result(await _userService.GetBuyerSeller(sellerId));
     }
+
+    [HttpGet("allBuyer")]
+        public async Task<IActionResult> GetAllBuyer()
+        {
+            if (!HttpContext.GetIsAuthenticated())
+                return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to get buyer information."));
+
+            return ResponseParser.Result(await _userService.GetAllBuyer());
+        }
 }

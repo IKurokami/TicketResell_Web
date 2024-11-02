@@ -64,4 +64,27 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
 
         return buyerIds;
     }
+    
+    public async Task<List<string>> GetAllBuyer()
+    {
+        var buyerIds = await _context.OrderDetails
+            .Where(od => od.Order.Status == 0)
+            .Select(od => od.Order.BuyerId)
+            .Distinct()
+            .ToListAsync();
+
+        return buyerIds;
+    }
+    
+    public async Task<List<OrderDetail>> GetAllTransaction()
+    {
+        var result = await _context.OrderDetails
+            .Include(od => od.Ticket)
+            .Include(od => od.Order)
+            .ThenInclude(o => o.Buyer)
+            .Where(od => od.Order.Status == 0)
+            .OrderByDescending(od => od.Order != null ? od.Order.Date : DateTime.MinValue)
+            .ToListAsync();
+        return result;
+    }
 }

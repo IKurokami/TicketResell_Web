@@ -11,11 +11,11 @@ const Notification_Popup: React.FC<SuccessPopupProps> = ({
   show,
   onClose,
 }) => {
-  // Automatically close the popup after 3 seconds
+  // Tự động đóng popup sau 3 giây
   useEffect(() => {
     if (show) {
-      const timer = setTimeout(onClose, 3000); // Close after 3 seconds
-      return () => clearTimeout(timer); // Cleanup the timer
+      const timer = setTimeout(onClose, 3000); // Đóng sau 3 giây
+      return () => clearTimeout(timer); // Dọn dẹp timer
     }
   }, [show, onClose]);
 
@@ -32,7 +32,7 @@ const Notification_Popup: React.FC<SuccessPopupProps> = ({
           className="bg-green-500 text-white px-4 py-2 mt-2 rounded"
           onClick={onClose}
         >
-          Close
+          Đóng
         </button>
       </div>
     </div>

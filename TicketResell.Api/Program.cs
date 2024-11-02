@@ -21,9 +21,10 @@ using TicketResell.Services.Services.Tickets;
 using IValidatorFactory = Repositories.Core.Validators.IValidatorFactory;
 
 using TicketResell.Services.Services.Chatbox;
+using Microsoft.EntityFrameworkCore;
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
-
+Console.WriteLine("SQLServer string: " + Environment.GetEnvironmentVariable("SQLSERVER"));
 builder.Services.Configure<AppConfig>(config =>
 {
     config.SQLServer = Environment.GetEnvironmentVariable("SQLSERVER") ?? "default";
@@ -55,11 +56,13 @@ JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json",
 
 // Dbcontext configuration
 builder.Services.AddDbContext<TicketResellManagementContext>();
+Console.WriteLine("Redis string: "+(Environment.GetEnvironmentVariable("REDIS_CONNECTION")??"localhost:6379"));
+var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"));
+    ConnectionMultiplexer.Connect(redisConnectionString));
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "localhost:6379";
+    options.Configuration = redisConnectionString;
     options.InstanceName = "TicketResellCacheInstance";
 });
 
@@ -125,6 +128,38 @@ builder.Services.AddSession(options =>
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<TicketResellManagementContext>();
+    var pendingMigrations = dbContext.Database.GetPendingMigrations();
+
+    // Check if there are pending migrations
+    if (pendingMigrations.Any())
+    {
+        dbContext.Database.Migrate();
+        var isDocker = Environment.GetEnvironmentVariable("IS_DOCKER") == "true";
+        string sqlFilePath;
+
+        if (isDocker)
+            sqlFilePath = Path.Combine(AppContext.BaseDirectory, "Database", "SampleData.sql");
+        else
+            sqlFilePath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "TicketResell.Repositories", "Database", "SampleData.sql");
+        sqlFilePath = Path.GetFullPath(sqlFilePath);
+        if (File.Exists(sqlFilePath))
+        {
+            var sql = File.ReadAllText(sqlFilePath);
+            dbContext.Database.ExecuteSqlRaw(sql);
+        }
+        else
+        {
+            Console.WriteLine($"Sample data file not found at: {sqlFilePath}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("No pending migrations found. Skipping sample data insertion.");
+    }
+}
 app.UseCors("AllowSpecificOrigin");
 app.UseSession();
 app.UseMiddleware<ExceptionHandlingMiddleware>();

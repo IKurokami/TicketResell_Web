@@ -11,6 +11,7 @@ public interface IUserService
     public Task<ResponseModel> CheckUserRole(string userId, string roleId);
     public Task<ResponseModel> GetUserByIdAsync(string id);
     public Task<ResponseModel> GetUserByEmailAsync(string email);
+    public Task<ResponseModel> GetAllBuyer();
 
     public Task<ResponseModel> GetBuyerSeller(string id);
 
