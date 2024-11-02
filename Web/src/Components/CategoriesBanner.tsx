@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -96,9 +97,9 @@ const HorizontalCards = ({ categoryId, title }) => {
     return visibleCardsArray;
   };
 
-  if (isLoading) return <div className="text-center py-8">Loading...</div>;
+  if (isLoading) return <div className="text-center py-8">Đang tải...</div>;
   if (error)
-    return <div className="text-center py-8 text-red-500">Error: {error}</div>;
+    return <div className="text-center py-8 text-red-500">Lỗi: {error}</div>;
 
   const visibleCardsData = getVisibleCards();
 
@@ -118,7 +119,7 @@ const HorizontalCards = ({ categoryId, title }) => {
               <div className="aspect-[4/3] overflow-hidden">
                 <img
                   src="https://img3.gelbooru.com/images/c6/04/c604a5f863d5ad32cc8afe8affadfee6.jpg"
-                  alt={`${card.name} cover`}
+                  alt={`Ảnh bìa ${card.name}`}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -127,7 +128,7 @@ const HorizontalCards = ({ categoryId, title }) => {
                   {card.name}
                 </h3>
                 <p className="text-xs text-gray-600">
-                  By {card.seller.fullname}
+                  Bởi {card.seller.fullname}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {new Date(card.startDate).toLocaleDateString()}

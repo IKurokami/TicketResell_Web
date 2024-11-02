@@ -11,7 +11,8 @@ import { LogOut } from "lucide-react";
 const StaffDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("Người dùng");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const [userId, setUserId] = useState<string | null>(null); // Set type to string | null
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userDetails, setUserDetails] = useState<any>(null);
 
   const sidebarTabs = [
     {
@@ -56,11 +57,11 @@ const StaffDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "Người dùng":
-        return <UserManagement />;
+        return <UserManagement userDetails={userDetails} />;
       case "Danh mục":
         return <CategoryManagement />;
       default:
-        return <UserManagement />;
+        return <UserManagement userDetails={userDetails} />;
     }
   };
 
@@ -86,7 +87,27 @@ const StaffDashboard = () => {
   // Use useEffect to set userId on client mount
   useEffect(() => {
     const idFromCookies = Cookies.get("id");
-    setUserId(idFromCookies || null); // Set userId to string or null
+    setUserId(idFromCookies || null);
+
+    const fetchUserDetails = async () => {
+      if (idFromCookies) {
+        try {
+          const response = await fetch(
+            `http://localhost:5296/api/User/read/${idFromCookies}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setUserDetails(data.data);
+          } else {
+            console.error("Failed to fetch user details");
+          }
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        }
+      }
+    };
+
+    fetchUserDetails();
   }, []);
 
   return (
@@ -115,16 +136,18 @@ const StaffDashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
+        className={`fixed sm:relative inset-y-0 left-0 w-72 transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } sm:translate-x-0`}
         aria-label="Sidebar"
       >
-        <div className="flex flex-col h-full px-3 py-4 bg-gray-50">
+        <div className="h-full px-6 overflow-y-auto pt-10 bg-white border-r border-gray-200">
           {/* Sidebar Header */}
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-xl font-semibold">
-              <span className="text-emerald-500 text-2xl font-bold">Ticket </span>
+              <span className="text-emerald-500 text-2xl font-bold">
+                Ticket{" "}
+              </span>
               <span className="text-black text-2xl font-bold">Resell </span>
               <span className="text-gray-500 text-lg">Staff</span>
             </h2>
@@ -160,8 +183,24 @@ const StaffDashboard = () => {
                   activeTab === tab.name ? "bg-gray-100" : ""
                 }`}
               >
-                {tab.icon}
-                <span className="ms-3">{tab.name}</span>
+                <span
+                  className={`mr-4 ${
+                    activeTab === tab.name
+                      ? "text-emerald-600"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {tab.icon}
+                </span>
+                <span className="flex-1">{tab.name}</span>
+                {tab.name === "Users" && (
+                  <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
+                    {/* Replace '5' with dynamic badge count if available */}5
+                  </span>
+                )}
+                {activeTab === tab.name && (
+                  <span className="w-1.5 h-10 bg-emerald-500 rounded-full ml-4"></span>
+                )}
               </button>
             ))}
           </nav>
@@ -170,7 +209,15 @@ const StaffDashboard = () => {
           <div className="mt-auto pt-4 border-t border-gray-200">
             <div className="flex items-center p-2 text-gray-600">
               <span className="ms-3 font-medium text-sm overflow-hidden max-w-64 text-nowrap">
-                ID: {userId || "Đang tải..."} {/* Display loading while userId is being fetched */}
+                {userDetails ? (
+                  <>
+                    {userDetails.email}
+                    <br />
+                    <span className="text-xs text-gray-500">ID: {userId}</span>
+                  </>
+                ) : (
+                  "Đang tải..."
+                )}
               </span>
             </div>
             <button
@@ -185,13 +232,24 @@ const StaffDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 sm:ml-64">
-        <div className="max-w mx-auto bg-white rounded-lg shadow-sm">
-          <div className="px-8 py-6 border-b border-gray-200">
-            <h1 className="text-2xl font-semibold text-gray-800">{activeTab}</h1>
-            <p className="text-base text-gray-500">Quản lý {activeTab.toLowerCase()} trong hệ thống</p>
+      <main className="flex-1 min-h-screen overflow-y-auto bg-gray-50 ">
+        <div className="">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-white rounded-2xl pt-4 shadow-sm">
+              {/* Header */}
+              <div className="px-8 py-6 border-b border-gray-200">
+                <h1 className="text-3xl font-semibold text-gray-800">
+                  {activeTab}
+                </h1>
+                <p className="mt-2 text-base text-gray-500">
+                  Quản lí {activeTab.toLowerCase()}
+                </p>
+              </div>
+
+              {/* Content Area */}
+              <div className="p-8">{renderContent()}</div>
+            </div>
           </div>
-          <div className="p-2">{renderContent()}</div>
         </div>
       </main>
     </div>

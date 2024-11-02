@@ -17,6 +17,7 @@
   transition: all 0.3s ease;
 }
 
+
 .navbarr.scrolled {
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
@@ -158,6 +159,12 @@
   font-size: 1.4rem;
   transition: all 0.3s ease;
   position: relative;
+}
+
+.box-chat{
+  font-size: 2.2rem;
+  position: relative;
+  text-decoration: none;
 }
 
 .icon-link:hover {

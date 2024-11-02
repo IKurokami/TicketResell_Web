@@ -110,7 +110,7 @@ const posters2 = [
 const Product = () => {
   return (
     <div className="products">
-      <h2>Popular Products</h2>
+      <h2>Sản Phẩm Phổ Biến</h2>
       <div className="product-list">
         {posters.map((poster, index) => (
           <div key={index} className="product-item">
@@ -122,7 +122,7 @@ const Product = () => {
         ))}
       </div>
 
-      <h2>Suggest For You</h2>
+      <h2>Gợi Ý Cho Bạn</h2>
       <div className="product-list">
         {posters1.map((poster, index) => (
           <div key={index} className="product-item">
@@ -134,20 +134,20 @@ const Product = () => {
         ))}
       </div>
 
-      <h2>Location</h2>
+      <h2>Địa Điểm</h2>
       <div className="product-list product-suggest">
         {posters2.map((poster, index) => (
           <div key={index} className="product-item special-style">
             <a href={poster.eventUrl}>
               <img src={poster.imageUrl} alt={poster.title} />
-              <p>{poster.title}</p> {/* Thay đổi thẻ từ p thành h3 */}
+              <p>{poster.title}</p>
             </a>
           </div>
         ))}
       </div>
       <div className="products">
         {/* Other content */}
-        <button className="see-more-btn">View More</button>
+        <button className="see-more-btn">Xem Thêm</button>
       </div>
     </div>
   );

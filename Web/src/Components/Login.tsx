@@ -9,6 +9,7 @@ import { useSession, signIn } from "next-auth/react";
 import { getOTP } from "@/pages/api/getOTP";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -246,7 +247,6 @@ const Login: React.FC = () => {
     }
 
     try {
-      console.log("TESTTTT");
       const response = await fetch("/api/getOTP", {
         method: "POST",
         headers: {
@@ -261,9 +261,7 @@ const Login: React.FC = () => {
         }),
       });
 
-      console.log("TESTTTT2");
       const data = await response.json();
-      console.log("TESTTTT3");
       console.log(data);
       if (response.ok) {
         notifySuccess("Xác minh OTP thành công! Đăng ký hoàn tất.");
@@ -355,12 +353,15 @@ const Login: React.FC = () => {
                       Ghi nhớ tôi
                     </label>
                   </div>
-                  <label
-                    htmlFor="forgot"
-                    className="text-gray-600 cursor-pointer"
-                  >
-                    Quên mật khẩu?
-                  </label>
+                    <Link
+                      href="/forgotpassword"
+                      passHref
+                      className="no-underline"
+                    >
+                      <span className="text-gray-600 cursor-pointer">
+                        Quên mật khẩu?
+                      </span>
+                    </Link>
                 </div>
 
                 {error && <p className="text-red-500">{error}</p>}
