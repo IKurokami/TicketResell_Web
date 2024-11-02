@@ -351,13 +351,12 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
     const orderPageUrl = `/order?email=${encodeURIComponent(userEmail)}`;
     window.open(orderPageUrl, "_blank"); // Mở trang mới
   };
-
+  const loggedInUserId = Cookies.get("id");
   const filteredUsers = users.filter(
     (user) =>
-      (user.fullname &&
-        user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.userId &&
-        user.userId.toLowerCase().includes(searchTerm.toLowerCase()))
+      user.userId !== loggedInUserId && // Loại bỏ người dùng có ID trùng với ID người đăng nhập
+      ((user.fullname && user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.userId && user.userId.toLowerCase().includes(searchTerm.toLowerCase())))
   );
 
   const formatMessageDate = (date: string | null) => {
