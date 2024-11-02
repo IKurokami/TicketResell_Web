@@ -1,9 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import RequestDialog from "./RequestDialog";
 import ChatboxTable from "./RequestForm";
+import * as signalR from "@microsoft/signalr";
+
 interface Role {
   roleId: string;
   rolename: string;
@@ -37,6 +39,7 @@ interface ChatboxItem {
 const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [chatboxData, setChatboxData] = useState<ChatboxItem[]>([]);
+
   console.log("Fetching data for ID:", userCookie);
 
   const fetchChatboxData = async () => {
