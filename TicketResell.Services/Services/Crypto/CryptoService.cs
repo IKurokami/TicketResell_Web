@@ -9,21 +9,21 @@ public class CryptoService : ICryptoService
 
     public string Decrypt(string cipherText)
     {
-        byte[] iv = new byte[16];
-        byte[] buffer = Convert.FromBase64String(cipherText);
+        var iv = new byte[16];
+        var buffer = Convert.FromBase64String(cipherText);
 
-        using (Aes aes = Aes.Create())
+        using (var aes = Aes.Create())
         {
             aes.Key = Encoding.UTF8.GetBytes(key);
             aes.IV = iv;
 
-            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+            var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-            using (MemoryStream ms = new MemoryStream(buffer))
+            using (var ms = new MemoryStream(buffer))
             {
-                using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
                 {
-                    using (StreamReader sr = new StreamReader(cs))
+                    using (var sr = new StreamReader(cs))
                     {
                         return sr.ReadToEnd();
                     }

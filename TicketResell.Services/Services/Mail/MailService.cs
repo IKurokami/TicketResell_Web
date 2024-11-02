@@ -1,68 +1,61 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Repositories.Config;
-using Repositories.Core.Entities;
 using StackExchange.Redis;
 using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
-using TicketResell.Services.Services.Crypto;
-using static System.Net.WebRequestMethods;
 using File = System.IO.File;
 
-namespace TicketResell.Services.Services.Mail
+namespace TicketResell.Services.Services.Mail;
+
+public class MailService : IMailService
 {
-    public class MailService : IMailService
+    private readonly IAuthenticationService _authenticationService;
+    private readonly AppConfig _config;
+    private readonly string _fromDisplayName;
+    private readonly string _fromEmail;
+    private readonly IAppLogger _logger;
+    private readonly IConnectionMultiplexer _redis;
+    private readonly string _smtpHost;
+    private readonly string _smtpPassword;
+    private readonly int _smtpPort;
+    private readonly string _smtpUsername;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserService _userService;
+
+
+    public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis, IUnitOfWork unitOfWork)
     {
-        private readonly AppConfig _config;
-        private readonly IAppLogger _logger;
-        private readonly string _smtpHost;
-        private readonly int _smtpPort;
-        private readonly string _smtpUsername;
-        private readonly string _smtpPassword;
-        private readonly string _fromEmail;
-        private readonly string _fromDisplayName;
-        private readonly IConnectionMultiplexer _redis;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IAuthenticationService _authenticationService;
-        private readonly IUserService _userService;
 
+        _config = config.Value;
+        _logger = logger;
+        _redis = redis;
+        _unitOfWork = unitOfWork;
 
-        public MailService(IOptions<AppConfig> config, IAppLogger logger, IConnectionMultiplexer redis, IUnitOfWork unitOfWork)
+        // Load email configuration from appsettings.json
+        _smtpHost = _config.SmtpHost;
+        _smtpPort = int.Parse(_config.SmtpPort);
+        _smtpUsername = _config.Username;
+        _smtpPassword = _config.Password;
+        _fromEmail = _config.FromEmail;
+        _fromDisplayName = _config.FromDisplayName;
+    }
+
+    public async Task<ResponseModel> SendPasswordKeyAsync(string to)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(to);
+        if (user == null)
         {
-            
-            _config = config.Value;
-            _logger = logger;
-            _redis = redis;
-            _unitOfWork = unitOfWork;
+            return ResponseModel.Error("Email not exist");
 
-            // Load email configuration from appsettings.json
-            _smtpHost = _config.SmtpHost;
-            _smtpPort = int.Parse(_config.SmtpPort);
-            _smtpUsername = _config.Username;
-            _smtpPassword = _config.Password;
-            _fromEmail = _config.FromEmail;
-            _fromDisplayName = _config.FromDisplayName;
         }
+        string key = GenerateAccessKey();
+        string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
 
-        public async Task<ResponseModel> SendPasswordKeyAsync(string to)
-        {
-            var user = await _unitOfWork.UserRepository.GetByIdAsync(to);
-            if (user == null)
-            {
-                return ResponseModel.Error("Email not exist");
-
-            }
-            string key = GenerateAccessKey();
-            string hashedKey = BCrypt.Net.BCrypt.HashPassword(key);
-
-            string body = $@"
+        string body = $@"
 <!DOCTYPE html>
 <html lang='vi'>
 <head>
@@ -202,21 +195,22 @@ namespace TicketResell.Services.Services.Mail
     </div>
 </body>
 </html>"; var response = await SendEmailAsync(to, "TicketResell: Forgot password link", body);
-            if (response != null && response.StatusCode == 200)
-            {
-                await CacheAccessKeyAsync("forgot_password", to, hashedKey, TimeSpan.FromHours(2));
-                return ResponseModel.Success("Sucess");
-            }
-
-            return ResponseModel.Error(response.Message ?? "Error");
-
-
+        if (response != null && response.StatusCode == 200)
+        {
+            await CacheAccessKeyAsync("forgot_password", to, hashedKey, TimeSpan.FromHours(2));
+            return ResponseModel.Success("Sucess");
         }
 
-        public async Task<ResponseModel> SendOtpAsync(string to)
-        {
-            string otp = GenerateNumericOTP(5);
-            string body = $@"
+        return ResponseModel.Error(response.Message ?? "Error");
+
+
+    }
+
+
+    public async Task<ResponseModel> SendOtpAsync(string to)
+    {
+        var otp = GenerateNumericOTP(5);
+        var body = $@"
     <!DOCTYPE html>
     <html lang='vi'>
     <head>
@@ -344,121 +338,111 @@ namespace TicketResell.Services.Services.Mail
         </div> 
     </body>
     </html>";
-            var response = await SendEmailAsync(to, "TicketResell: Here is your OTP code", body);
-            if (response.StatusCode == 200)
-            {
-                await CacheAccessKeyAsync("email_verification", to, otp, TimeSpan.FromMinutes(5));
-                return ResponseModel.Success("Sucess");
-            }
-            else
-            {
-                return ResponseModel.Error(response.Message ?? "Error");
-            }
+        var response = await SendEmailAsync(to, "TicketResell: Here is your OTP code", body);
+        if (response.StatusCode == 200)
+        {
+            await CacheAccessKeyAsync("email_verification", to, otp, TimeSpan.FromMinutes(5));
+            return ResponseModel.Success("Sucess");
         }
 
-        private async Task CacheAccessKeyAsync(string cacheName, string userId, string cacheKey, TimeSpan timeSpan)
-        {
-            var db = _redis.GetDatabase();
-            await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
-        }
+        return ResponseModel.Error(response.Message ?? "Error");
+    }
 
-        private string GenerateAccessKey()
+    public async Task<ResponseModel> SendEmailAsync(string to, string subject, string body)
+    {
+        try
         {
-            var key = new byte[32];
-            using (var generator = RandomNumberGenerator.Create())
+            using (var message = new MailMessage())
             {
-                generator.GetBytes(key);
-            }
+                message.From = new MailAddress(_fromEmail, _fromDisplayName);
+                message.To.Add(new MailAddress(to));
+                message.Subject = subject;
+                message.Body = body;
+                message.IsBodyHtml = true;
 
-            return Convert.ToBase64String(key);
-        }
-
-
-        public static string GenerateNumericOTP(int length)
-        {
-            var random = new Random();
-            var otp = new StringBuilder(length);
-
-            for (int i = 0; i < length; i++)
-            {
-                otp.Append(random.Next(0, 10)); // Add a random digit (0-9)
-            }
-
-            return otp.ToString();
-        }
-
-        public async Task<ResponseModel> SendEmailAsync(string to, string subject, string body)
-        {
-            try
-            {
-                using (var message = new MailMessage())
+                using (var client = new SmtpClient(_smtpHost, _smtpPort))
                 {
-                    message.From = new MailAddress(_fromEmail, _fromDisplayName);
-                    message.To.Add(new MailAddress(to));
-                    message.Subject = subject;
-                    message.Body = body;
-                    message.IsBodyHtml = true;
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
+                    client.EnableSsl = true;
 
-                    using (var client = new SmtpClient(_smtpHost, _smtpPort))
-                    {
-                        client.UseDefaultCredentials = false;
-                        client.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
-                        client.EnableSsl = true;
-
-                        await client.SendMailAsync(message);
-                    }
+                    await client.SendMailAsync(message);
                 }
+            }
 
-                _logger.LogInformation($"Email sent successfully to {to}");
-                return ResponseModel.Success($"Email sent successfully to {to}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error sending email to {to}: {ex.Message}");
-                return ResponseModel.BadRequest("Failed to send email", ex.Message);
-            }
+            _logger.LogInformation($"Email sent successfully to {to}");
+            return ResponseModel.Success($"Email sent successfully to {to}");
         }
-
-        public async Task<ResponseModel> SendEmailWithAttachmentAsync(string to, string subject, string body,
-            string attachmentPath)
+        catch (Exception ex)
         {
-            try
-            {
-                using (var message = new MailMessage())
-                {
-                    message.From = new MailAddress(_fromEmail, _fromDisplayName);
-                    message.To.Add(new MailAddress(to));
-                    message.Subject = subject;
-                    message.Body = body;
-                    message.IsBodyHtml = true;
-
-                    if (File.Exists(attachmentPath))
-                    {
-                        message.Attachments.Add(new Attachment(attachmentPath));
-                    }
-                    else
-                    {
-                        return ResponseModel.BadRequest("Attachment file not found");
-                    }
-
-                    using (var client = new SmtpClient(_smtpHost, _smtpPort))
-                    {
-                        client.UseDefaultCredentials = false;
-                        client.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
-                        client.EnableSsl = true;
-
-                        await client.SendMailAsync(message);
-                    }
-                }
-
-                _logger.LogInformation($"Email with attachment sent successfully to {to}");
-                return ResponseModel.Success($"Email with attachment sent successfully to {to}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error sending email with attachment to {to}: {ex.Message}");
-                return ResponseModel.BadRequest("Failed to send email with attachment", ex.Message);
-            }
+            _logger.LogError($"Error sending email to {to}: {ex.Message}");
+            return ResponseModel.BadRequest("Failed to send email", ex.Message);
         }
+    }
+
+    public async Task<ResponseModel> SendEmailWithAttachmentAsync(string to, string subject, string body,
+        string attachmentPath)
+    {
+        try
+        {
+            using (var message = new MailMessage())
+            {
+                message.From = new MailAddress(_fromEmail, _fromDisplayName);
+                message.To.Add(new MailAddress(to));
+                message.Subject = subject;
+                message.Body = body;
+                message.IsBodyHtml = true;
+
+                if (File.Exists(attachmentPath))
+                    message.Attachments.Add(new Attachment(attachmentPath));
+                else
+                    return ResponseModel.BadRequest("Attachment file not found");
+
+                using (var client = new SmtpClient(_smtpHost, _smtpPort))
+                {
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
+                    client.EnableSsl = true;
+
+                    await client.SendMailAsync(message);
+                }
+            }
+
+            _logger.LogInformation($"Email with attachment sent successfully to {to}");
+            return ResponseModel.Success($"Email with attachment sent successfully to {to}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error sending email with attachment to {to}: {ex.Message}");
+            return ResponseModel.BadRequest("Failed to send email with attachment", ex.Message);
+        }
+    }
+
+    private async Task CacheAccessKeyAsync(string cacheName, string userId, string cacheKey, TimeSpan timeSpan)
+    {
+        var db = _redis.GetDatabase();
+        await db.StringSetAsync($"{cacheName}:{userId}", cacheKey, timeSpan);
+    }
+
+    private string GenerateAccessKey()
+    {
+        var key = new byte[32];
+        using (var generator = RandomNumberGenerator.Create())
+        {
+            generator.GetBytes(key);
+        }
+
+        return Convert.ToBase64String(key);
+    }
+
+
+    public static string GenerateNumericOTP(int length)
+    {
+        var random = new Random();
+        var otp = new StringBuilder(length);
+
+        for (var i = 0; i < length; i++) otp.Append(random.Next(0, 10)); // Add a random digit (0-9)
+
+        return otp.ToString();
     }
 }

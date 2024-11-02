@@ -5,7 +5,7 @@
 ### 1. Category
 
 | Column Name   | Data Type       | Nullable | Description          |
-| ------------- | --------------- | -------- | -------------------- |
+|---------------|-----------------|----------|----------------------|
 | `CategoryId`  | `varchar(50)`   | NOT NULL | Primary key          |
 | `Name`        | `nvarchar(255)` | NULL     | Category name        |
 | `Description` | `nvarchar(max)` | NULL     | Category description |
@@ -13,7 +13,7 @@
 ### 2. Role
 
 | Column Name   | Data Type      | Nullable | Description      |
-| ------------- | -------------- | -------- | ---------------- |
+|---------------|----------------|----------|------------------|
 | `RoleId`      | `varchar(50)`  | NOT NULL | Primary key      |
 | `Rolename`    | `varchar(100)` | NULL     | Role name        |
 | `Description` | `varchar(max)` | NULL     | Role description |
@@ -21,14 +21,14 @@
 ### 3. SellConfig
 
 | Column Name    | Data Type     | Nullable | Description           |
-| -------------- | ------------- | -------- | --------------------- |
+|----------------|---------------|----------|-----------------------|
 | `SellConfigId` | `varchar(50)` | NOT NULL | Primary key           |
 | `Commision`    | `float`       | NULL     | Commission percentage |
 
 ### 4. User
 
 | Column Name    | Data Type       | Nullable | Description               |
-| -------------- | --------------- | -------- | ------------------------- |
+|----------------|-----------------|----------|---------------------------|
 | `UserId`       | `varchar(50)`   | NOT NULL | Primary key               |
 | `SellConfigId` | `varchar(50)`   | NULL     | Foreign key to SellConfig |
 | `Username`     | `varchar(100)`  | NULL     | Username                  |
@@ -52,7 +52,7 @@
 ### 5. Order
 
 | Column Name | Data Type     | Nullable | Description         |
-| ----------- | ------------- | -------- | ------------------- |
+|-------------|---------------|----------|---------------------|
 | `OrderId`   | `varchar(50)` | NOT NULL | Primary key         |
 | `BuyerId`   | `varchar(50)` | NULL     | Foreign key to User |
 | `Total`     | `float`       | NULL     | Order total         |
@@ -62,7 +62,7 @@
 ### 6. Revenue
 
 | Column Name | Data Type     | Nullable | Description         |
-| ----------- | ------------- | -------- | ------------------- |
+|-------------|---------------|----------|---------------------|
 | `RevenueId` | `varchar(50)` | NOT NULL | Primary key         |
 | `SellerId`  | `varchar(50)` | NULL     | Foreign key to User |
 | `StartDate` | `datetime2`   | NULL     | Revenue start date  |
@@ -73,7 +73,7 @@
 ### 7. Ticket
 
 | Column Name  | Data Type       | Nullable | Description            |
-| ------------ | --------------- | -------- | ---------------------- |
+|--------------|-----------------|----------|------------------------|
 | `TicketId`   | `varchar(50)`   | NOT NULL | Primary key            |
 | `SellerId`   | `varchar(50)`   | NULL     | Foreign key to User    |
 | `Name`       | `nvarchar(255)` | NULL     | Ticket name            |
@@ -88,14 +88,14 @@
 ### 8. UserRole
 
 | Column Name | Data Type     | Nullable | Description                       |
-| ----------- | ------------- | -------- | --------------------------------- |
+|-------------|---------------|----------|-----------------------------------|
 | `UserId`    | `varchar(50)` | NOT NULL | Primary key (Foreign key to User) |
 | `RoleId`    | `varchar(50)` | NOT NULL | Primary key (Foreign key to Role) |
 
 ### 9. OrderDetail
 
 | Column Name     | Data Type     | Nullable | Description           |
-| --------------- | ------------- | -------- | --------------------- |
+|-----------------|---------------|----------|-----------------------|
 | `OrderDetailId` | `varchar(50)` | NOT NULL | Primary key           |
 | `OrderId`       | `varchar(50)` | NULL     | Foreign key to Order  |
 | `TicketId`      | `varchar(50)` | NULL     | Foreign key to Ticket |
@@ -105,7 +105,7 @@
 ### 10. TicketCategory
 
 | Column Name  | Data Type     | Nullable | Description                           |
-| ------------ | ------------- | -------- | ------------------------------------- |
+|--------------|---------------|----------|---------------------------------------|
 | `TicketId`   | `varchar(50)` | NOT NULL | Primary key (Foreign key to Ticket)   |
 | `CategoryId` | `varchar(50)` | NOT NULL | Primary key (Foreign key to Category) |
 

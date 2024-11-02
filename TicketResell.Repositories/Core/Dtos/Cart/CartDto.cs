@@ -1,5 +1,4 @@
 using Repositories.Core.Dtos.OrderDetail;
-using Repositories.Core.Entities;
 
 namespace TicketResell.Repositories.Core.Dtos.Cart;
 

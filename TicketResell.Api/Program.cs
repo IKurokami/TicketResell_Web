@@ -1,29 +1,30 @@
+using Api.Middlewares;
 using Api.Utils;
 using DotNetEnv;
-
 using FluentValidation;
+using Repositories.Config;
 using Repositories.Core.AutoMapperConfig;
 using Repositories.Core.Context;
 using Repositories.Core.Validators;
-using Api.Middlewares;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using StackExchange.Redis;
+using TicketResell.Api.Hubs;
+using TicketResell.Repositories.Logger;
 using TicketResell.Repositories.UnitOfWork;
 using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Categories;
-using TicketResell.Services.Services.Tickets;
-using TicketResell.Repositories.Logger;
-using TicketResell.Services.Services.Payments;
-using Repositories.Config;
-using TicketResell.Api.Hubs;
 using TicketResell.Services.Services.History;
-using TicketResell.Services.Services.Revenues;
 using TicketResell.Services.Services.Mail;
+using TicketResell.Services.Services.Payments;
 using TicketResell.Services.Services.Ratings;
+using TicketResell.Services.Services.Revenues;
+using TicketResell.Services.Services.Tickets;
+using IValidatorFactory = Repositories.Core.Validators.IValidatorFactory;
+
 using TicketResell.Services.Services.Chatbox;
+using Microsoft.EntityFrameworkCore;
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
-
+Console.WriteLine("SQLServer string: " + Environment.GetEnvironmentVariable("SQLSERVER"));
 builder.Services.Configure<AppConfig>(config =>
 {
     config.SQLServer = Environment.GetEnvironmentVariable("SQLSERVER") ?? "default";
@@ -43,24 +44,25 @@ builder.Services.Configure<AppConfig>(config =>
     config.SmtpPort = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "default";
     config.Username = Environment.GetEnvironmentVariable("SMTP_USERNAME") ?? "default";
     config.Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? "default";
-    config.FromEmail= Environment.GetEnvironmentVariable("FROM_EMAIL") ?? "default";
+    config.FromEmail = Environment.GetEnvironmentVariable("FROM_EMAIL") ?? "default";
     config.FromDisplayName = Environment.GetEnvironmentVariable("FROM_DISPLAY_NAME") ?? "default";
 });
 builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
 
 
-
-JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", Environment.GetEnvironmentVariable("SQLServer"));
-
+JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json",
+    Environment.GetEnvironmentVariable("SQLServer"));
 
 
 // Dbcontext configuration
 builder.Services.AddDbContext<TicketResellManagementContext>();
+Console.WriteLine("Redis string: "+(Environment.GetEnvironmentVariable("REDIS_CONNECTION")??"localhost:6379"));
+var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"));
+    ConnectionMultiplexer.Connect(redisConnectionString));
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "localhost:6379";
+    options.Configuration = redisConnectionString;
     options.InstanceName = "TicketResellCacheInstance";
 });
 
@@ -103,7 +105,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<OrderValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<OrderDetailValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<TicketValidator>();
-builder.Services.AddScoped<Repositories.Core.Validators.IValidatorFactory, ValidatorFactory>();
+builder.Services.AddScoped<IValidatorFactory, ValidatorFactory>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -112,7 +114,7 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials();  // Enable credentials
+                .AllowCredentials(); // Enable credentials
         });
 });
 
@@ -126,6 +128,38 @@ builder.Services.AddSession(options =>
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<TicketResellManagementContext>();
+    var pendingMigrations = dbContext.Database.GetPendingMigrations();
+
+    // Check if there are pending migrations
+    if (pendingMigrations.Any())
+    {
+        dbContext.Database.Migrate();
+        var isDocker = Environment.GetEnvironmentVariable("IS_DOCKER") == "true";
+        string sqlFilePath;
+
+        if (isDocker)
+            sqlFilePath = Path.Combine(AppContext.BaseDirectory, "Database", "SampleData.sql");
+        else
+            sqlFilePath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "TicketResell.Repositories", "Database", "SampleData.sql");
+        sqlFilePath = Path.GetFullPath(sqlFilePath);
+        if (File.Exists(sqlFilePath))
+        {
+            var sql = File.ReadAllText(sqlFilePath);
+            dbContext.Database.ExecuteSqlRaw(sql);
+        }
+        else
+        {
+            Console.WriteLine($"Sample data file not found at: {sqlFilePath}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("No pending migrations found. Skipping sample data insertion.");
+    }
+}
 app.UseCors("AllowSpecificOrigin");
 app.UseSession();
 app.UseMiddleware<ExceptionHandlingMiddleware>();

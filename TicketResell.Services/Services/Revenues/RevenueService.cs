@@ -8,8 +8,8 @@ namespace TicketResell.Services.Services.Revenues;
 
 public class RevenueService : IRevenueService
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IUnitOfWork _unitOfWork;
 
     public RevenueService(IUnitOfWork unitOfWork, IMapper mapper)
     {
@@ -17,14 +17,14 @@ public class RevenueService : IRevenueService
         _mapper = mapper;
     }
 
-    public async Task<ResponseModel> CreateRevenueAsync(RevenueCreateDto dto,bool saveAll)
+    public async Task<ResponseModel> CreateRevenueAsync(RevenueCreateDto dto, bool saveAll)
     {
-        Revenue? newRevenue = _mapper.Map<Revenue>(dto);
+        var newRevenue = _mapper.Map<Revenue>(dto);
         newRevenue.StartDate = DateTime.UtcNow;
         newRevenue.EndDate = newRevenue.StartDate.Value.AddMonths(1);
         newRevenue.Type = RevenueConstant.MONTH_TYPE;
         await _unitOfWork.RevenueRepository.CreateAsync(newRevenue);
-        if(saveAll) await _unitOfWork.CompleteAsync();
+        if (saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success("Successfully created Revenue");
     }
 
@@ -49,61 +49,58 @@ public class RevenueService : IRevenueService
     {
         var revenues = await _unitOfWork.RevenueRepository.GetAllAsync();
         var revenueDtos = _mapper.Map<IEnumerable<RevenueReadDto>>(revenues);
-        return ResponseModel.Success($"Successfully get revenues", revenueDtos);
+        return ResponseModel.Success("Successfully get revenues", revenueDtos);
     }
 
     public async Task<ResponseModel> GetRevenuesByIdAsync(string id)
     {
         var revenues = await _unitOfWork.RevenueRepository.GetByIdAsync(id);
         var revenueDtos = _mapper.Map<RevenueReadDto>(revenues);
-        return ResponseModel.Success($"Successfully get revenues with id", revenueDtos);
+        return ResponseModel.Success("Successfully get revenues with id", revenueDtos);
     }
 
     public async Task<ResponseModel> GetRevenuesBySellerIdAsync(string id)
     {
         var revenues = await _unitOfWork.RevenueRepository.GetRevenuesBySellerIdAsync(id);
-        
+
         var revenueDtos = _mapper.Map<IEnumerable<RevenueReadDto>>(revenues);
-        return ResponseModel.Success($"Successfully get revenues with sellerId ", revenueDtos);
+        return ResponseModel.Success("Successfully get revenues with sellerId ", revenueDtos);
     }
 
-    public async Task<ResponseModel> UpdateRevenueAsync(string id, RevenueUpdateDto dto,bool saveAll)
+    public async Task<ResponseModel> UpdateRevenueAsync(string id, RevenueUpdateDto dto, bool saveAll)
     {
-        string type = RevenueConstant.MONTH_TYPE;
-        var revenues = await  _unitOfWork.RevenueRepository.GetRevenuesBySellerId_MonthAsync(id, type);
+        var type = RevenueConstant.MONTH_TYPE;
+        var revenues = await _unitOfWork.RevenueRepository.GetRevenuesBySellerId_MonthAsync(id, type);
 
-        DateTime date = DateTime.UtcNow;
+        var date = DateTime.UtcNow;
         foreach (var revenue in revenues)
-        {
             if (revenue.StartDate <= date && date <= revenue.EndDate)
             {
                 _mapper.Map(dto, revenue);
                 _unitOfWork.RevenueRepository.Update(revenue);
-                if(saveAll)  await _unitOfWork.CompleteAsync();
+                if (saveAll) await _unitOfWork.CompleteAsync();
             }
-            
-        }
 
         return ResponseModel.Success($"Successfully update revenue with id: {id}");
     }
 
-    public async Task<ResponseModel> DeleteRevenuesAsync(string id,bool saveAll)
+    public async Task<ResponseModel> DeleteRevenuesAsync(string id, bool saveAll)
     {
         await _unitOfWork.RevenueRepository.DeleteByIdAsync(id);
-        if(saveAll)  await _unitOfWork.CompleteAsync();
+        if (saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully deleted Revenue(s) with id: {id}");
     }
 
-    public async Task<ResponseModel> DeleteRevenuesBySellerIdAsync(string id,bool saveAll)
+    public async Task<ResponseModel> DeleteRevenuesBySellerIdAsync(string id, bool saveAll)
     {
         var revenues = await _unitOfWork.RevenueRepository.GetRevenuesBySellerIdAsync(id);
-        
+
         foreach (var revenueItem in revenues)
         {
-             _unitOfWork.RevenueRepository.Delete(revenueItem);
-             if(saveAll) await _unitOfWork.CompleteAsync();
+            _unitOfWork.RevenueRepository.Delete(revenueItem);
+            if (saveAll) await _unitOfWork.CompleteAsync();
         }
-        
+
         return ResponseModel.Success($"Successfully deleted Revenue(s) with SellerID: {id}");
     }
 
@@ -112,19 +109,16 @@ public class RevenueService : IRevenueService
         // Using the updated repository method to add revenue by date
         foreach (var orderDetail in order.OrderDetails)
         {
-            User seller = orderDetail.Ticket.Seller;
-            double ticketCost = orderDetail.Ticket.Cost ?? -1.0;
-            int quantity = orderDetail.Quantity ?? -1;
+            var seller = orderDetail.Ticket.Seller;
+            var ticketCost = orderDetail.Ticket.Cost ?? -1.0;
+            var quantity = orderDetail.Quantity ?? -1;
 
-            await _unitOfWork.RevenueRepository.AddRevenueByDateAsync(DateTime.Now,ticketCost*quantity,seller.UserId);
+            await _unitOfWork.RevenueRepository.AddRevenueByDateAsync(DateTime.Now, ticketCost * quantity,
+                seller.UserId);
         }
 
-        if (saveAll)
-        {
-            await _unitOfWork.CompleteAsync();
-        }
+        if (saveAll) await _unitOfWork.CompleteAsync();
 
         return ResponseModel.Success("Successfully added revenue for the specified date");
     }
-
 }

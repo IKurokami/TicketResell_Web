@@ -1,4 +1,3 @@
-
 ### **Create Category (`api/Category/create`)**
 
 - **Method:** `POST`
@@ -17,6 +16,7 @@
         "message": "Successfully created Category"
     }
     ```
+
 ### **Get All Categories (`api/Category/read`)**
 
 - **Method:** `GET`
@@ -36,6 +36,7 @@
        } 
     ]
     ```
+
 ### **Get Category By Id**
 
 **`api/Category/read/{id}`**
@@ -58,6 +59,7 @@
     ```
 
 ### **Update Category By Id**
+
 (`api/Category/update/{id}`)
 
 - **Method:** `PUT`
@@ -93,4 +95,5 @@
       "data": null
     }
     ```
+
 ---

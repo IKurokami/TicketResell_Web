@@ -1,19 +1,19 @@
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-namespace Repositories.Core.Validators
+
+namespace Repositories.Core.Validators;
+
+public class ValidatorFactory : IValidatorFactory
 {
+    private readonly IServiceProvider _serviceProvider;
 
-    public class ValidatorFactory : IValidatorFactory
+    public ValidatorFactory(IServiceProvider serviceProvider)
     {
-        private readonly IServiceProvider _serviceProvider;
+        _serviceProvider = serviceProvider;
+    }
 
-        public ValidatorFactory(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        FluentValidation.IValidator<T> IValidatorFactory.GetValidator<T>()
-        {
-            return _serviceProvider.GetRequiredService<FluentValidation.IValidator<T>>();
-        }
+    IValidator<T> IValidatorFactory.GetValidator<T>()
+    {
+        return _serviceProvider.GetRequiredService<IValidator<T>>();
     }
 }

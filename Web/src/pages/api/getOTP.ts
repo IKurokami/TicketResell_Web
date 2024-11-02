@@ -46,11 +46,11 @@ export default async function handler(
 ) {
     console.log("Something")
     if (req.method === 'POST') {
-        const { email, otp, username, password } = req.body;
-        console.log('Received data:', { email, otp, username, password });
+        const { email, otp, username, password,name } = req.body;
+        console.log('Received data:', { email, otp, username, password ,name});
 
         // Validate input
-        if (!email || !otp || !username || !password) {
+        if (!email || !otp || !username || !password ||!name) {
             console.error("Validation error: All fields are required.");
             return res.status(400).json({ success: false, message: "All fields are required." });
         }
@@ -71,7 +71,7 @@ export default async function handler(
                 },
                 body: JSON.stringify({
                     UserId: username,
-                    Username: username,
+                    Username: name,
                     Password: password,
                     Gmail: email,
                     OTP: otp

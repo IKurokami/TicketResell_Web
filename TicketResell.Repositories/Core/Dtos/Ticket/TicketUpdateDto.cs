@@ -1,5 +1,3 @@
-using Repositories.Core.Dtos.Category;
-
 namespace Repositories.Core.Dtos.Ticket;
 
 public class TicketUpdateDto
@@ -14,10 +12,10 @@ public class TicketUpdateDto
 
     public string? Image { get; set; }
 
-    
+
     public string? StartDate { get; set; }
 
     public string? Description { get; set; }
-    
+
     public List<string> CategoriesId { get; set; }
 }

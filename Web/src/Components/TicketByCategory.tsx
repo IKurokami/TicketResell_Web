@@ -82,12 +82,6 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
     return plainText.length > maxLength ? plainText.slice(0, maxLength) + "..." : plainText;
   };
 
-  const formatVND = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
 
 
   return (
@@ -126,7 +120,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
                               className="absolute top-0 left-0 w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
                             />
                             <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1.5 text-sm rounded-full shadow-lg backdrop-blur-sm bg-opacity-90">
-                              {formatVND(item.price)}
+                              {(item.price)}
                             </div>
                           </div>
 

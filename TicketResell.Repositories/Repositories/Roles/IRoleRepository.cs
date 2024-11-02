@@ -1,8 +1,7 @@
 ﻿using Repositories.Core.Entities;
 
-namespace Repositories.Repositories
+namespace Repositories.Repositories;
+
+public interface IRoleRepository : IRepository<Role>
 {
-    public interface IRoleRepository : IRepository<Role>
-    {
-    }
 }
