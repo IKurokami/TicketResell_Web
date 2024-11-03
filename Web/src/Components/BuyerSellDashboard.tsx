@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from "react";
 import { Card } from "@/Components/ui/card";
-import Cookies from "js-cookie";
 import {
   CalendarDays,
   Package,

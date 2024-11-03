@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
-const HorizontalCards = ({ categoryId, title }) => {
+interface HorizontalCardsProps {
+  categoryId: any;
+  title: any;
+}
+const HorizontalCards : React.FC<HorizontalCardsProps> = ({ categoryId, title }) => {
   const [cardsData, setCardsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,7 +35,7 @@ const HorizontalCards = ({ categoryId, title }) => {
         }
         const result = await response.json();
         setCardsData(result.data);
-      } catch (error) {
+      } catch (error:any) {
         setError(error.message);
       } finally {
         setIsLoading(false);
@@ -89,7 +86,7 @@ const HorizontalCards = ({ categoryId, title }) => {
   const getVisibleCards = () => {
     if (cardsData.length <= visibleCards) return cardsData;
 
-    const visibleCardsArray = [];
+    const visibleCardsArray: any[] = [];
     for (let i = 0; i < visibleCards; i++) {
       const index = (currentIndex + i) % cardsData.length;
       visibleCardsArray.push(cardsData[index]);
@@ -111,7 +108,7 @@ const HorizontalCards = ({ categoryId, title }) => {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {cardsData.map((card) => (
+          {cardsData.map((card : any) => (
             <div
               key={card.ticketId}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
@@ -134,7 +131,7 @@ const HorizontalCards = ({ categoryId, title }) => {
                   {new Date(card.startDate).toLocaleDateString()}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {card.categories.slice(0, 3).map((category) => (
+                  {card.categories.slice(0, 3).map((category:any) => (
                     <span
                       key={category.categoryId}
                       className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs font-semibold text-gray-700"

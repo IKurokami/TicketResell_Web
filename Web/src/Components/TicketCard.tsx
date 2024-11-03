@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/Components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import { Textarea } from "@/Components/ui/textarea";
 import {
   TooltipProvider,
@@ -17,17 +17,17 @@ import {
   TooltipContent,
 } from "@/Components/ui/tooltip";
 
-const TicketCard = ({ ticket, onCardClick }) => {
+const TicketCard : React.FC<{ ticket: any; onCardClick: any }> = ({ ticket, onCardClick }) => {
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
 
-  const handleStarClick = (e) => {
+  const handleStarClick = (e:any) => {
     e.stopPropagation(); // Prevent card click event
     setIsRatingModalOpen(true);
   };
-  const getRatingInfo = (rating) => {
+  const getRatingInfo = (rating: 1 | 2 | 3 | 4 | 5) => {
     const infos = {
       5: {
         title: "Tuyệt vời! ✨",
@@ -150,7 +150,7 @@ const TicketCard = ({ ticket, onCardClick }) => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status:any) => {
     if (status.includes("Đã diễn ra")) return "bg-gray-100 text-gray-600";
     if (status.includes("hôm nay")) return "bg-green-100 text-green-600";
     return "bg-blue-100 text-blue-600";
@@ -179,7 +179,7 @@ const TicketCard = ({ ticket, onCardClick }) => {
             </div>
             {ticket.categories && (
               <div className="absolute right-4 top-4 flex gap-2">
-                {ticket.categories.map((category, index) => (
+                {ticket.categories.map((category:any, index:any) => (
                   <span
                     key={index}
                     className="bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1 rounded-full text-xs font-medium"
@@ -284,12 +284,12 @@ const TicketCard = ({ ticket, onCardClick }) => {
           <div className="min-h-[60px] text-center">
             {rating > 0 && (
               <div className="space-y-1 animate-fade-in">
-                <div className={`flex items-center justify-center gap-2 text-lg font-semibold ${getRatingInfo(rating).color}`}>
-                  {getRatingInfo(rating).icon}
-                  <span>{getRatingInfo(rating).title}</span>
+                <div className={`flex items-center justify-center gap-2 text-lg font-semibold ${getRatingInfo(rating as 1 | 2 | 3 | 4 | 5).color}`}>
+                  {getRatingInfo(rating as 1 | 2 | 3 | 4 | 5).icon}
+                  <span>{getRatingInfo(rating as 1 | 2 | 3 | 4 | 5).title}</span>
                 </div>
                 <p className="text-gray-600 text-sm">
-                  {getRatingInfo(rating).description}
+                  {getRatingInfo(rating as 1 | 2 | 3 | 4 | 5).description}
                 </p>
               </div>
             )}

@@ -297,7 +297,7 @@ const AddTicketModal: React.FC = () => {
         console.log("Image update success:", imageUpdateSuccess);
         console.log("Images uploaded successfully (simulated).");
 
-        const createTicketPromises = async (ticket) => {
+        const createTicketPromises = async (ticket: any) => {
           await fetch("http://localhost:5296/api/Ticket/create", {
             method: "POST",
             credentials: "include",

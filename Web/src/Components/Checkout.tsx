@@ -1,7 +1,8 @@
+"use client"
 import React, { useState, useEffect } from "react";
 import { CreditCard, Calendar, CheckCircle, Lock, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchTickets, Ticket } from "@/models/TicketFetch";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface CheckoutItem {
   orderDetailId: string;

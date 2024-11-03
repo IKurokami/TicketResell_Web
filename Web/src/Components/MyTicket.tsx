@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Ticket,
   User,
   Search,
   Calendar,
@@ -70,7 +69,7 @@ interface OrderDetail {
     startDate: string;
     cost: number;
     sellerId: string;
-    seller:string;
+    seller:any;
     fullname:string;
     description?: string;
     categories?: string[];
@@ -101,7 +100,7 @@ const MyTicketPage = () => {
   const [center,setCenter] = useState({ lat: 10.762622, lng: 106.660172 });
   const ITEMS_PER_PAGE = 6;
 
-  const fetchLocation = async (address) => {
+  const fetchLocation = async (address:any) => {
     const apiKey = 'b2abc07babmsh30e6177f039fd88p18a238jsn5ec9739e64ae';
     const encodedAddress = encodeURIComponent(address);
     
@@ -403,7 +402,7 @@ const MyTicketPage = () => {
       />
     </motion.div>
   );
-  const handleGoogleMapSearch = async (address) => {
+  const handleGoogleMapSearch = async (address: any) => {
     const locationData = await fetchLocation(address);
     
     if (locationData && locationData.results.length > 0) {

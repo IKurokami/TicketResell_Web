@@ -8,7 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/Components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import TextField from "@mui/material/TextField";
 import AddressFields from "@/Hooks/location";
 import TermsModal from "./TermModal";

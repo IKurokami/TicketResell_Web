@@ -62,13 +62,12 @@ const Login: React.FC = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [timer, setTimer] = useState(60);
   const session = useSession();
-
   useEffect(() => {
     const handleLogin = async () => {
       if (session.status === "authenticated") {
         try {
           const response = await fetch(
-            `http://localhost:5296/api/authentication/login-google?accessToken=${session?.data?.token?.accessToken}`,
+            `http://localhost:5296/api/authentication/login-google?accessToken=${(session?.data as { token?: { accessToken: string } })?.token?.accessToken}`,
             {
               credentials: "include",
               method: "GET",

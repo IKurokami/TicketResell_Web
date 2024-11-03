@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { redirect } from "next/navigation";
 import { fetchTickets } from "@/models/TicketFetch";
 import { UserService, User } from "@/models/UserManagement";
 import {
@@ -26,10 +25,9 @@ import {
 } from "./EditUserPage";
 import { LogOut } from "lucide-react";
 import Cookies from "js-cookie";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { removeAllCookies } from "./Cookie";
 import { logoutUser } from "./Logout";
-import { cookies } from "next/headers";
 import OrderDetailsDashboard from "./BuyerSellDashboard";
 
 const AdminPage = () => {
@@ -889,7 +887,8 @@ const AdminPage = () => {
                 id="roleForm"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  const formData = new FormData(e.target);
+                  const form = e.target as HTMLFormElement;
+                  const formData = new FormData(form);
                   const roleData = {
                     roleId: formData.get("roleId"),
                     rolename: formData.get("rolename"),
@@ -978,7 +977,8 @@ const AdminPage = () => {
                 id="categoryForm"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  const formData = new FormData(e.target);
+                  const form = e.target as HTMLFormElement; // Cast to HTMLFormElement
+                  const formData = new FormData(form);
                   const categoryData = {
                     categoryId: formData.get("categoryId"),
                     name: formData.get("name"),

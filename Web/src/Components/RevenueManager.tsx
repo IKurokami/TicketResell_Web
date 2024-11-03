@@ -441,11 +441,11 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
   };
 
   // Format Y-axis values
-  const formatYAxis = (value: number) => {
+  const formatYAxis = (value: number): string => {
     if (value >= 1000) {
       return `${(value / 1000).toFixed(0)}K`;
     }
-    return value;
+    return String(value);
   };
 
 

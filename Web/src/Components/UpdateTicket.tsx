@@ -607,7 +607,7 @@ const UpdateTicketModal: React.FC = () => {
         console.log(firstTicket);
 
         const imageUpdateResult = await uploadImageForTicket(
-          firstTicket.Image,
+          firstTicket.Image || '',
           selectedFile
         );
         return imageUpdateResult;
@@ -654,7 +654,7 @@ const UpdateTicketModal: React.FC = () => {
       // Only delete tickets if image update was successful
       if (imageUpdateSuccess) {
         if (tickets.length > 1) {
-          await deleteManyTickets(tickets.map((ticket) => ticket.TicketId)); // Call delete many if needed
+          await deleteManyTickets(tickets.map((ticket:any) => ticket.TicketId)); // Call delete many if needed
         }
       }
 

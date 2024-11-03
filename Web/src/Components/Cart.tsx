@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
-import { BuildingBankRegular } from "@fluentui/react-icons";
 import Cookies from "js-cookie";
 import { CheckCircle, Trash2 } from "lucide-react";
 import { fetchImage } from "@/models/FetchImage";
-
 export interface CartItem {
   orderDetailId: string;
   orderId: string;
@@ -123,7 +121,6 @@ const MyCart: React.FC = () => {
     (total, item) => total + item.price * item.quantity,
     0
   );
-  const totalPrice = totalItemsPrice > 0 ? totalItemsPrice : 0;
 
   // Select a cart item
   const handleSelect = (id: string) => {
@@ -448,15 +445,11 @@ const MyCart: React.FC = () => {
                         }`}
                         onClick={() => handleSelectPayment(method.id)}
                       >
-                        {method.icon ? (
-                          <method.icon className="text-3xl mb-2 text-gray-700" />
-                        ) : (
-                          <img
+                        {<img
                             src={method.imageUrl}
                             alt={method.name}
                             className="w-12 h-12 mb-2"
-                          />
-                        )}
+                          />}
                         <span className="text-xs text-gray-700">
                           {method.name}
                         </span>

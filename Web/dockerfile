@@ -1,0 +1,21 @@
+# Use Node.js base image
+FROM node:18-alpine AS base
+
+WORKDIR /app
+
+# Copy the node_modules to avoid npm install
+COPY ./node_modules ./node_modules
+
+# Copy the rest of the app
+COPY . .
+
+# Build and expose port for production
+ENV NEXTAUTH_URL=http://localhost:3000
+ENV NEXTAUTH_SECRET=qOz3zgPyFFIntECZCB+KC0xLFrZYZ2HOcVLr5Dq146M=
+ENV NODE_ENV=production
+
+RUN npm run build
+EXPOSE 3000
+
+# Start Next.js in production mode
+CMD ["npm", "start"]
