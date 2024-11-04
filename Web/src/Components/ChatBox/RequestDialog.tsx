@@ -19,7 +19,6 @@ const Dialog: React.FC<DialogProps> = ({
   setTitle,
   description,
   setDescription,
-  setChatboxData,
 }) => {
   return (
     <div
@@ -115,7 +114,7 @@ const DialogComponent: React.FC<{ setChatboxData: React.Dispatch<React.SetStateA
       }
 
       const data = await response.json();
-      setChatboxData(prevData => [...prevData, data.data]);
+      setChatboxData(prevData => [ data.data,...prevData]);
       console.log('Success:', data);
       handleClose();
     } catch (error) {

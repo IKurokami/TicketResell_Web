@@ -33,6 +33,7 @@ interface UserRequestProps {
 const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [chatboxData, setChatboxData] = useState<Chatbox[]>([]);
+  const [filteredChatboxData, setFilteredChatboxData] = useState<Chatbox[]>([]);
 
   console.log("Fetching data for ID:", userCookie);
 
@@ -58,10 +59,19 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
     }
   };
 
+  
+
   useEffect(() => {
     fetchChatboxData();
     console.log("fetch:", chatboxData);
   }, [userData]);
+
+  useEffect(() => {
+    const filtered = chatboxData.filter((chatbox) =>
+      chatbox.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredChatboxData(filtered);
+  }, [searchTerm, chatboxData]);
 
   const hasRO3Role =
     userCookie?.roles?.some((role) => role.roleId === "RO3") ||
@@ -73,7 +83,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           !hasRO3Role ? "pt-20" : ""
         } `}
       >
-        Request table
+        Bảng yêu cầu
       </p>
       <div
         className={`container mx-auto px-5 flex flex-col  justify-between  sm:flex-row items-center`}
@@ -82,7 +92,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           <div className="relative flex items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Search requests"
+              placeholder="Tìm kiếm yêu cầu"
               className="border-none outline-none items-center bg-transparent w-96 text-gray-700 placeholder-gray-400 focus:ring-0"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -97,7 +107,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           <div className="relative flex  items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-96">
             <input
               type="text"
-              placeholder="Search requests"
+              placeholder="Tìm kiếm yêu cầu"
               className="border-none outline-none items-center bg-transparent w-96 text-gray-700 placeholder-gray-400 focus:ring-0"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -116,8 +126,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           {/* Set a max-width for the card container */}
           <ChatboxTable
             userData={userData}
-            chatboxData={chatboxData}
+            chatboxData={filteredChatboxData}
             userCookie={userCookie}
+            setChatboxData={setChatboxData}
           />
         </div>
       </div>

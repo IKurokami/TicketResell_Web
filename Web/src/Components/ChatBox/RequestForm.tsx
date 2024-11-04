@@ -2,7 +2,7 @@ import { MessageCircle } from "lucide-react";
 import { FaCheck, FaClock, FaLock } from "react-icons/fa";
 import React, { useEffect, useState, useRef } from "react";
 import ChatComponent from "./ChatComponent";
-import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
+// import ConfirmationModal from "@/Components/ChatBox/ConfirmModal";
 import Cookies from "js-cookie";
 import { IoMdClose } from "react-icons/io";
 import { FaUnlockKeyhole } from "react-icons/fa6";
@@ -20,8 +20,8 @@ interface Chatbox {
 interface ChatboxTableProps {
   userData: UserData | undefined;
   userCookie: UserData | undefined;
-
   chatboxData: Chatbox[];
+  setChatboxData: React.Dispatch<React.SetStateAction<Chatbox[]>>;
 }
 
 interface ChatMessage {
@@ -36,6 +36,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   userData,
   chatboxData,
   userCookie,
+  setChatboxData,
 }) => {
   console.log("userData", userData);
   console.log("chatboxData", chatboxData);
@@ -43,17 +44,12 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
 
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChatbox, setSelectedChatbox] = useState<Chatbox | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [chatboxes, setChatboxes] = useState<Chatbox[]>([]);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [hubConnection, setHubConnection] = useState<HubConnection | null>(
     null
   );
   const selectedChatboxRef = useRef<Chatbox | null>(null);
-
-  useEffect(() => {
-    setChatboxes(chatboxData);
-  }, [chatboxData]);
 
   useEffect(() => {
     selectedChatboxRef.current = selectedChatbox;
@@ -70,7 +66,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
 
       try {
         await connection.start();
-        console.log("SignalR Connected!");
+        console.log("SignalR Kết nối thành công!");
 
         const userId = Cookies.get("id");
         const accessKey = Cookies.get("accessKey");
@@ -79,17 +75,17 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           await connection.invoke("LoginAsync", userId, accessKey);
         }
 
-        // Set up event handlers
+        // Thiết lập các trình xử lý sự kiện
         connection.on("Welcome", (message) => {
-          console.log("Welcome:", message);
+          console.log("Chào mừng:", message);
         });
 
         connection.on("Logged", (message) => {
-          console.log("Authenticated:", message);
+          console.log("Đã xác thực:", message);
         });
 
         connection.on("LoginFail", (message) => {
-          console.error("Authentication Failed:", message);
+          console.error("Xác thực thất bại:", message);
         });
 
         connection.on("ReceiveMessage", (senderId: string, message: string) => {
@@ -101,56 +97,18 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
             date: new Date().toISOString(),
           };
 
-          console.log("New message object:", newMessage);
+          console.log("Đối tượng tin nhắn mới:", newMessage);
           setChatMessages((prev) => {
             const updated = [...prev, newMessage];
             return updated;
           });
         });
 
-        connection.on("Block", (senderId: string, message: string) => {
-          console.log(`Block event received for ${senderId}: ${message}`);
-
-          // Update the chatboxes state
-          setChatboxes((prev) =>
-            prev.map((chatbox) =>
-              chatbox.chatboxId === selectedChatbox?.chatboxId
-                ? { ...chatbox, status: 3 }
-                : chatbox
-            )
-          );
-
-          // Also update the selectedChatbox if it's the one being blocked
-          if (selectedChatbox) {
-            setSelectedChatbox((prev) =>
-              prev ? { ...prev, status: 3 } : prev
-            );
-          }
-        });
-
-        connection.on("UnblockEvent", (receiverId: string, message: string) => {
-          console.log(`Unblock ${receiverId}: ${message}`);
-
-          setChatboxes((prev) =>
-            prev.map((chatbox) =>
-              chatbox.chatboxId === selectedChatboxRef.current?.chatboxId
-                ? { ...chatbox, status: 2 }
-                : chatbox
-            )
-          );
-
-          if (selectedChatboxRef.current) {
-            setSelectedChatbox((prev) =>
-              prev ? { ...prev, status: 2 } : prev
-            );
-          }
-        });
-
         connection.on("BlockedChatEvent", (chatboxId: string) => {
-          console.log(`BlockedChatEvent received for chatboxId: ${chatboxId}`);
+          console.log(`Sự kiện chặn nhận được cho chatboxId`);
 
-          setChatboxes((prev) =>
-            prev.map((chatbox) =>
+          setChatboxData((prevChatboxes) =>
+            prevChatboxes.map((chatbox) =>
               chatbox.chatboxId === chatboxId
                 ? { ...chatbox, status: 3 }
                 : chatbox
@@ -164,13 +122,85 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           }
         });
 
+        connection.on("UnblockEvent", (chatboxId, message: string) => {
+          console.log(`Bỏ chặn ${chatboxId}: ${message}`);
+
+          setChatboxData((prevChatboxes) =>
+            prevChatboxes.map((chatbox) =>
+              chatbox.chatboxId === chatboxId
+                ? { ...chatbox, status: 2 }
+                : chatbox
+            )
+          );
+
+          if (selectedChatboxRef.current?.chatboxId === chatboxId) {
+            setSelectedChatbox((prev) =>
+              prev ? { ...prev, status: 2 } : prev
+            );
+          }
+        });
+
+        connection.on("AcceptEvent", (chatboxId) => {
+          console.log(`Chấp nhận ${chatboxId}`);
+
+          setChatboxData((prevChatboxes) =>
+            prevChatboxes.map((chatbox) =>
+              chatbox.chatboxId === chatboxId
+                ? { ...chatbox, status: 2 }
+                : chatbox
+            )
+          );
+
+          if (selectedChatboxRef.current?.chatboxId === chatboxId) {
+            setSelectedChatbox((prev) =>
+              prev ? { ...prev, status: 2 } : prev
+            );
+          }
+        });
+
+        connection.on("CompleteEvent", (chatboxId) => {
+          console.log(`Hoàn thành ${chatboxId}`);
+
+          setChatboxData((prevChatboxes) =>
+            prevChatboxes.map((chatbox) =>
+              chatbox.chatboxId === chatboxId
+                ? { ...chatbox, status: 0 }
+                : chatbox
+            )
+          );
+
+          if (selectedChatboxRef.current?.chatboxId === chatboxId) {
+            setSelectedChatbox((prev) =>
+              prev ? { ...prev, status: 0 } : prev
+            );
+          }
+        });
+
+        connection.on("RejectEvent", (chatboxId) => {
+          console.log(`Từ chối ${chatboxId}`);
+
+          setChatboxData((prevChatboxes) =>
+            prevChatboxes.map((chatbox) =>
+              chatbox.chatboxId === chatboxId
+                ? { ...chatbox, status: 8 }
+                : chatbox
+            )
+          );
+
+          if (selectedChatboxRef.current?.chatboxId === chatboxId) {
+            setSelectedChatbox((prev) =>
+              prev ? { ...prev, status: 8 } : prev
+            );
+          }
+        });
+
         setHubConnection(connection);
       } catch (err) {
-        console.error("SignalR Connection Error: ", err);
+        console.error("Lỗi kết nối SignalR: ", err);
       }
     };
 
-    // Only create connection if it doesn't exist
+    // Chỉ tạo kết nối nếu chưa tồn tại
     if (!hubConnection) {
       createHubConnection();
     }
@@ -180,7 +210,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         hubConnection.stop();
       }
     };
-  }, []); // Empty dependency array since we only want to create the connection once
+  }, []); // Mảng phụ thuộc rỗng vì chúng ta chỉ muốn tạo kết nối một lần
 
   useEffect(() => {
     const fetchChatMessages = async () => {
@@ -189,8 +219,8 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           const response = await fetch(
             `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/getValidChats/${userData.userId}`,
             {
-              method: "GET", // Specify the method if needed
-              credentials: "include", // Include credentials
+              method: "GET", // Chỉ định phương thức nếu cần
+              credentials: "include", // Bao gồm thông tin xác thực
             }
           );
           const result = await response.json();
@@ -198,10 +228,10 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           if (result.statusCode === 200 && Array.isArray(result.data)) {
             setChatMessages(result.data);
           } else {
-            console.error("Fetched data is not an array:", result.data);
+            console.error("Dữ liệu lấy về không phải là mảng:", result.data);
           }
         } catch (error) {
-          console.error("Error fetching chat messages:", error);
+          console.error("Lỗi khi lấy tin nhắn chat:", error);
         }
       }
     };
@@ -238,35 +268,35 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
 
       setChatMessages((prevMessages) => [...prevMessages, newMessage]);
 
-      // Check if the user does NOT have roles RO3 or RO4
-      const hasRestrictedRole = userCookie?.roles.some(
-        (role) => role.roleId === "RO3" || role.roleId === "RO4"
-      );
+      // Kiểm tra nếu người dùng KHÔNG có vai trò RO3 hoặc RO4
+      // const hasRestrictedRole = userCookie?.roles.some(
+      //   (role) => role.roleId === "RO3" || role.roleId === "RO4"
+      // );
 
-      if (!hasRestrictedRole) {
-        // Update the status of the selected chatbox to 3
-        const updatedChatbox: Chatbox = {
-          ...selectedChatbox,
-          status: 3,
-        };
-        setSelectedChatbox(updatedChatbox);
+      // if (!hasRestrictedRole) {
+      //   // Cập nhật trạng thái của chatbox được chọn thành 3
+      //   const updatedChatbox: Chatbox = {
+      //     ...selectedChatbox,
+      //     status: 3,
+      //   };
+      //   setSelectedChatbox(updatedChatbox);
 
-        // Update the chatboxes array with the updated chatbox
-        setChatboxes((prevChatboxes) =>
-          prevChatboxes.map((chatbox) =>
-            chatbox.chatboxId === updatedChatbox.chatboxId
-              ? updatedChatbox
-              : chatbox
-          )
-        );
-      }
+      //   // Cập nhật mảng chatboxes với chatbox đã cập nhật
+      //   setChatboxes((prevChatboxes) =>
+      //     prevChatboxes.map((chatbox) =>
+      //       chatbox.chatboxId === updatedChatbox.chatboxId
+      //         ? updatedChatbox
+      //         : chatbox
+      //     )
+      //   );
+      // }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Lỗi khi gửi tin nhắn:", error);
     }
   };
 
   const openChat = async (chatbox: Chatbox) => {
-    // Fetch chat messages for this specific chatbox
+    // Lấy tin nhắn chat cho chatbox cụ thể này
     if (userCookie?.userId) {
       try {
         const response = await fetch(
@@ -279,35 +309,26 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           setChatMessages(result.data);
         }
       } catch (error) {
-        console.error("Error fetching chat messages:", error);
+        console.error("Lỗi khi lấy tin nhắn chat:", error);
       }
     }
 
-    const accessKey = Cookies.get("confirm");
-    const isRO1 = userCookie?.roles.some((role) => role.roleId === "RO1");
-    const isRO2 = userCookie?.roles.some((role) => role.roleId === "RO2");
-
-    // Determine if modal should be shown
-    if (chatbox.status === 2 && !accessKey && (isRO1 || isRO2)) {
-      setSelectedChatbox(chatbox);
-      setIsModalOpen(true);
-    } else {
-      setSelectedChatbox(chatbox);
-      setIsChatOpen(true);
-    }
-  };
-
-  const confirmChatOpen = () => {
-    Cookies.set("confirm", "true");
+    // Xác định xem có nên hiển thị modal hay không
+    setSelectedChatbox(chatbox);
     setIsChatOpen(true);
-    setIsModalOpen(false);
   };
+
+  // const confirmChatOpen = () => {
+  //   Cookies.set("confirm", "true");
+  //   setIsChatOpen(true);
+  //   setIsModalOpen(false);
+  // };
 
   const handleProcessingUpdate = async (chatboxId: string) => {
     try {
-      // Call the map request API
+      // Gọi API map request
       const mapResponse = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/maprequest/${userData?.userId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/maprequest/${userData?.userId}/${chatboxId}`,
         {
           method: "POST",
           credentials: "include",
@@ -318,17 +339,24 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       );
 
       if (!mapResponse.ok) {
-        throw new Error("Failed to map request");
+        throw new Error("Không thể ánh xạ yêu cầu");
       }
 
-      // Update the local state
-      setChatboxes((prevChatboxes) =>
+      const receiverID = userData?.userId;
+      console.log("receiverID", receiverID);
+      if (hubConnection) {
+        await hubConnection.invoke("AcceptRequest", chatboxId, receiverID);
+      } else {
+        console.error("Kết nối Hub chưa được thiết lập.");
+      }
+      
+      setChatboxData((prevChatboxes) =>
         prevChatboxes.map((chatbox) =>
           chatbox.chatboxId === chatboxId ? { ...chatbox, status: 2 } : chatbox
         )
       );
     } catch (error) {
-      console.error("Error updating chatbox status:", error);
+      console.error("Lỗi khi cập nhật trạng thái chatbox:", error);
     }
   };
 
@@ -346,18 +374,24 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       );
 
       if (response.ok) {
-        setChatboxes((prevChatboxes) =>
+        const receiverID = userData?.userId;
+        console.log("receiverID", receiverID);
+        if (hubConnection) {
+          await hubConnection.invoke("RejectRequest", chatboxId, receiverID);
+        } else {
+          console.error("Kết nối Hub chưa được thiết lập.");
+        }
+        
+        setChatboxData((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
-            chatbox.chatboxId === chatboxId
-              ? { ...chatbox, status: 8 }
-              : chatbox
-          )
+            chatbox.chatboxId === chatboxId ? { ...chatbox, status: 8 } : chatbox
+          ) 
         );
       } else {
-        console.error("Failed to reject chatbox");
+        console.error("Không thể từ chối chatbox");
       }
     } catch (error) {
-      console.error("Error rejecting chatbox:", error);
+      console.error("Lỗi khi từ chối chatbox:", error);
     }
   };
 
@@ -375,20 +409,48 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       );
 
       if (response.ok) {
-        setChatboxes((prevChatboxes) =>
+        const receiverID = userData?.userId;
+        console.log("receiverID", receiverID);
+        if (hubConnection) {
+          await hubConnection.invoke("CompleteRequest", chatboxId, receiverID);
+        } else {
+          console.error("Kết nối Hub chưa được thiết lập.");
+        }
+        
+        setChatboxData((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
-            chatbox.chatboxId === chatboxId
-              ? { ...chatbox, status: 0 }
-              : chatbox
+            chatbox.chatboxId === chatboxId ? { ...chatbox, status: 0 } : chatbox
           )
         );
       } else {
-        console.error("Failed to update chatbox status");
+        console.error("Không thể cập nhật trạng thái chatbox");
       }
     } catch (error) {
-      console.error("Error updating chatbox status:", error);
+      console.error("Lỗi khi cập nhật trạng thái chatbox:", error);
     }
   };
+
+  const handleLockUpdate = async (chatboxId: string) => {
+    try {
+      const receiverID = userData?.userId;
+      console.log("receiverID", receiverID);
+      if (hubConnection) {
+        await hubConnection.invoke("BlockChatbox", chatboxId, receiverID);
+      } else {
+        console.error("Kết nối Hub chưa được thiết lập.");
+      }
+
+     
+      setChatboxData((prevChatboxes) =>
+        prevChatboxes.map((chatbox) =>
+          chatbox.chatboxId === chatboxId ? { ...chatbox, status: 3 } : chatbox
+        )
+      );
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái chatbox:", error);
+    }
+  };
+
   const handleUnlockUpdate = async (chatboxId: string) => {
     try {
       const receiverID = userData?.userId;
@@ -396,43 +458,44 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       if (hubConnection) {
         await hubConnection.invoke("UnblockChatbox", chatboxId, receiverID);
       } else {
-        console.error("Hub connection is not established.");
+        console.error("Kết nối Hub chưa được thiết lập.");
       }
 
-      // Update the local state
-      setChatboxes((prevChatboxes) =>
+      // Cập nhật trạng thái cục bộ
+      setChatboxData((prevChatboxes) =>
         prevChatboxes.map((chatbox) =>
           chatbox.chatboxId === chatboxId ? { ...chatbox, status: 2 } : chatbox
         )
       );
     } catch (error) {
-      console.error("Error updating chatbox status:", error);
+      console.error("Lỗi khi cập nhật trạng thái chatbox:", error);
     }
   };
+  
   const getStatusLabel = (status: number) => {
     switch (status) {
       case 1:
-        return { text: "Pending", color: "bg-yellow-100 text-yellow-800" };
+        return { text: "Đang chờ", color: "bg-yellow-100 text-yellow-800" };
       case 2:
-        return { text: "Processing", color: "bg-blue-100 text-blue-800" };
+        return { text: "Đang xử lý", color: "bg-blue-100 text-blue-800" };
       case 0:
-        return { text: "Complete", color: "bg-green-100 text-green-800" };
+        return { text: "Đã hoàn thành", color: "bg-green-100 text-green-800" };
       case 3:
         return {
-          text: "Blocking",
+          text: "Đang chặn",
           color: "bg-gray-300 text-gray-500 font-bold",
         };
       case 8:
-        return { text: "Rejected", color: "bg-red-100 text-red-800" };
+        return { text: "Đã từ chối", color: "bg-red-100 text-red-800" };
       default:
-        return { text: "Report", color: "bg-red-500 text-white font-bold" };
+        return { text: "Báo cáo", color: "bg-red-500 text-white font-bold" };
     }
   };
 
-  // Add this function to fetch chatbox data for specific users
+  // Thêm hàm này để lấy dữ liệu chatbox cho các người dùng cụ thể
   const fetchChatboxData = async () => {
     if (!userCookie?.userId || !userData?.userId) {
-      console.log("Missing user IDs for fetch");
+      console.log("Thiếu ID người dùng để lấy dữ liệu");
       return;
     }
 
@@ -451,31 +514,31 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       if (response.ok) {
         const latestData = await response.json();
         if (Array.isArray(latestData)) {
-          setChatboxes(latestData);
+          setChatboxData(latestData);
         } else {
-          console.error("Fetched chatbox data is not an array:", latestData);
+          console.error("Dữ liệu chatbox lấy về không phải là mảng:", latestData);
         }
       } else {
-        console.error("Failed to fetch chatbox data:", response.statusText);
+        console.error("Không thể lấy dữ liệu chatbox:", response.statusText);
       }
     } catch (error) {
-      console.error("Error fetching chatbox data:", error);
+      console.error("Lỗi khi lấy dữ liệu chatbox:", error);
     }
   };
 
-  // Add polling effect to check for updates
+  // Thêm hiệu ứng polling để kiểm tra cập nhật
   useEffect(() => {
-    // Initial fetch
+    // Lấy dữ liệu ban đầu
     fetchChatboxData();
 
-    // Set up polling interval
+    // Thiết lập khoảng thời gian polling
     const pollInterval = setInterval(() => {
       fetchChatboxData();
-    }, 5000); // Polls every 5 seconds
+    }, 5000); // Kiểm tra mỗi 5 giây
 
-    // Cleanup on component unmount
+    // Cleanup khi component bị hủy
     return () => clearInterval(pollInterval);
-  }, [userCookie?.userId, userData?.userId]); // Dependencies include both user IDs
+  }, [userCookie?.userId, userData?.userId]); // Phụ thuộc vào cả hai ID người dùng
 
   return (
     <div className="overflow-x-auto">
@@ -483,22 +546,22 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         <thead>
           <tr className="bg-gray-100 rounded-t-lg">
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
-              Title
+              Tiêu đề
             </th>
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
-              Description
+              Mô tả
             </th>
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
-              Status
+              Trạng thái
             </th>
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
-              Created Date
+              Ngày tạo
             </th>
             <th className="py-3 px-4 font-semibold text-gray-700 border-b"></th>
           </tr>
         </thead>
         <tbody>
-          {chatboxes.map((chatbox) => {
+          {chatboxData.map((chatbox) => {
             const { text, color } = getStatusLabel(chatbox.status);
             return (
               <tr
@@ -517,7 +580,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                   </div>
                 </td>
                 <td className="py-3 px-4 text-gray-700 text-center">
-                  {new Date(chatbox.createDate).toLocaleDateString()}
+                  {new Date(chatbox.createDate).toLocaleDateString("vi-VN")}
                 </td>
                 <td className="items-center py-3 px-4 text-gray-700 text-center">
                   {chatbox.status === 2 ? (
@@ -525,9 +588,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       {userCookie?.roles.some(
                         (role) => role.roleId === "RO2"
                       ) ||
-                        userCookie?.roles.some(
-                          (role) => role.roleId === "RO1"
-                        ) ? (
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
                         <button
                           onClick={() => openChat(chatbox)}
                           className="group relative flex items-center gap-2 px-4 py-2 text-white rounded-full transition-all duration-300 ease-in-out transform hover:-translate-y-1"
@@ -553,6 +616,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                           >
                             <FaCheck className="text-gray-500 hover:text-green-500" />
                           </button>
+                          <button onClick={()=>handleLockUpdate(chatbox.chatboxId)} className="flex justify-center items-center">
+                            <FaLock className=" text-yellow-500 " />
+                          </button>
                         </div>
                       )}
                     </div>
@@ -561,9 +627,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       {userCookie?.roles.some(
                         (role) => role.roleId === "RO2"
                       ) ||
-                        userCookie?.roles.some(
-                          (role) => role.roleId === "RO1"
-                        ) ? (
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
                         <div className="flex justify-center">
                           <FaClock className=" text-yellow-500 " />
                         </div>
@@ -609,9 +675,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       {userCookie?.roles.some(
                         (role) => role.roleId === "RO2"
                       ) ||
-                        userCookie?.roles.some(
-                          (role) => role.roleId === "RO1"
-                        ) ? (
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
                         <div className="flex justify-center items-center gap-2">
                           <button
                             onClick={() => openChat(chatbox)}
@@ -647,9 +713,9 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                       {userCookie?.roles.some(
                         (role) => role.roleId === "RO2"
                       ) ||
-                        userCookie?.roles.some(
-                          (role) => role.roleId === "RO1"
-                        ) ? (
+                      userCookie?.roles.some(
+                        (role) => role.roleId === "RO1"
+                      ) ? (
                         <FaClock className=" text-yellow-500" />
                       ) : (
                         <div className="flex justify-center gap-2">
@@ -703,12 +769,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
           }
         />
       )}
-
-      <ConfirmationModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onConfirm={confirmChatOpen}
-      />
     </div>
   );
 };

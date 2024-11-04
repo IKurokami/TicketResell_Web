@@ -50,8 +50,8 @@ namespace TicketResell.API.Controllers
             return ResponseParser.Result(await _chatService.GetAllChatById(userId));
         }
 
-        [HttpPost("maprequest/{receiverId}")]
-        public async Task<IActionResult> GetLatestChat(string receiverId)
+        [HttpPost("maprequest/{receiverId}/{chatboxId}")]
+        public async Task<IActionResult> GetLatestChat(string receiverId,string chatboxId)
         {
             var senderId = HttpContext.GetUserId();
             if (string.IsNullOrEmpty(senderId))
@@ -59,7 +59,7 @@ namespace TicketResell.API.Controllers
 
             if (!HttpContext.IsUserIdAuthenticated(senderId))
                 return ResponseParser.Result(ResponseModel.Unauthorized("You need to login first to get latest chat"));
-            var response = await _chatService.GetLatestChatBySenderAndReceiverAsync(receiverId, receiverId);
+            var response = await _chatService.GetLatestChatBySenderAndReceiverAsync(receiverId, receiverId,chatboxId);
             ChatReadDto latestChat = (ChatReadDto)response.Data;
             latestChat.ReceiverId = senderId;
             await _chatboxService.UpdateChatboxStatusAsync(latestChat.ChatboxId, 2);
