@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/Components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import {
@@ -153,7 +153,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
     try {
       const response = await fetch(
-        `http://localhost:5296/api/User/updateadmin/${userId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/updateadmin/${userId}`,
         {
           method: "PUT",
           headers: {

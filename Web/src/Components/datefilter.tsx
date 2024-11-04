@@ -4,8 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/Components/ui/card';
 import { Button } from '@/Components/ui/button';
 import { Textarea } from '@/Components/ui/textarea';
-
-const RatingModal = ({ isOpen, onClose, onSubmit }) => {
+interface RatingModalProps {
+  isOpen: any;
+  onClose: any;
+  onSubmit: any;
+}
+const RatingModal: React.FC<RatingModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState('');
@@ -89,17 +93,17 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
   );
 };
 
-const TicketCard = ({ ticket, onOpenDetails }) => {
+const TicketCard : React.FC<{ ticket: any; onOpenDetails: any }> = ({ ticket, onOpenDetails }) => {
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [ticketRating, setTicketRating] = useState(ticket.rating || 0);
 
-  const handleRatingSubmit = ({ rating, comment }) => {
+  const handleRatingSubmit = ({ rating, comment }: { rating: any; comment: any }) => {
     setTicketRating(rating);
     // Here you would typically make an API call to save the rating
     console.log('Rating submitted:', { ticketId: ticket.id, rating, comment });
   };
-
-  const handleStarClick = (e) => {
+ 
+  const handleStarClick = (e:any) => {
     e.stopPropagation(); // Prevent card click event
     setIsRatingModalOpen(true);
   };
@@ -126,14 +130,14 @@ const TicketCard = ({ ticket, onOpenDetails }) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             {/* Status badge */}
-            <div className={`absolute left-4 top-4 ${getStatusColor(calculateDaysFromNow(ticket.date))} px-4 py-1.5 rounded-full text-sm font-medium shadow-sm`}>
+            {/* <div className={`absolute left-4 top-4 ${getStatusColor(calculateDaysFromNow(ticket.date))} px-4 py-1.5 rounded-full text-sm font-medium shadow-sm`}>
               {calculateDaysFromNow(ticket.date)}
-            </div>
+            </div> */}
 
             {/* Categories */}
             {ticket.categories && (
               <div className="absolute right-4 top-4 flex gap-2">
-                {ticket.categories.map((category, index) => (
+                {ticket.categories.map((category:any, index:any) => (
                   <span
                     key={index}
                     className="bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1 rounded-full text-xs font-medium"

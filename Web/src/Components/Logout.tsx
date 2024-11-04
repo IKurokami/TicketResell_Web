@@ -4,7 +4,7 @@
 export const logoutUser = async (userId: string | undefined) => {
   try {
     const response = await fetch(
-      `http://localhost:5296/api/Authentication/logout/${userId}`,
+      `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/logout/${userId}`,
       {
         method: "POST", // or "DELETE" depending on your API
         credentials: "include",

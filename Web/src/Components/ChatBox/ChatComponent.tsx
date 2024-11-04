@@ -14,7 +14,7 @@ export interface ChatMessage {
   chatBoxId: string;
 }
 
-export  interface Chatbox {
+export interface Chatbox {
   chatboxId: string;
   status: number;
   createDate: string;
@@ -82,6 +82,13 @@ const Chat: React.FC<ChatProps> = ({
       } catch (error) {
         console.error("Error sending message:", error);
       }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
@@ -176,8 +183,8 @@ const Chat: React.FC<ChatProps> = ({
                       >
                         <div
                           className={`flex items-center justify-center h-8 w-8 rounded-full 
-          ${msg.senderId === user?.userId ? "bg-indigo-500" : "bg-gray-500"}
-          flex-shrink-0 text-white text-sm`}
+            ${msg.senderId === user?.userId ? "bg-indigo-500" : "bg-gray-500"}
+            flex-shrink-0 text-white text-sm`}
                         >
                           {msg.senderId === user?.userId
                             ? user.fullname.charAt(0).toUpperCase()
@@ -211,7 +218,8 @@ const Chat: React.FC<ChatProps> = ({
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
+              onKeyDown={handleKeyDown}
+              placeholder="Nhập tin nhắn..."
               className="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
               disabled={isInputDisabled || disableInput}
             />
@@ -226,7 +234,7 @@ const Chat: React.FC<ChatProps> = ({
           } rounded-xl text-white px-4 py-1 flex-shrink-0`}
           disabled={isInputDisabled || disableInput}
         >
-          <span>Send</span>
+          <span>Gửi</span>
           <Send className="ml-2 w-4 h-4 transform rotate-45 -mt-px" />
         </Button>
       </div>

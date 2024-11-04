@@ -15,7 +15,7 @@ export const checkAccessKey = async () => {
 
   try {
     // Gọi API để kiểm tra accessKey
-    const response = await fetch('http://localhost:5296/api/Authentication/login-key', {
+    const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/login-key`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

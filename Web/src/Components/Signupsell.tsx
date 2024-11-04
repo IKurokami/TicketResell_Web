@@ -8,7 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/Components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import TextField from "@mui/material/TextField";
 import AddressFields from "@/Hooks/location";
 import TermsModal from "./TermModal";
@@ -138,7 +138,7 @@ const ProfileForm: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5296/api/user/updateseller/${id}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/user/updateseller/${id}`,
         {
           method: "PUT",
           credentials: "include",

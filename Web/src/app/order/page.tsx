@@ -2,11 +2,12 @@
 import Order from '@/Components/Order';
 
 interface OrderPageProps {
-  searchParams: { email?: string };
+  searchParams: Promise<{ email?: string }>; // Update to Promise type
 }
 
-const OrderPage = ({ searchParams }: OrderPageProps) => {
-  const email = searchParams.email;
+const OrderPage = async ({ searchParams }: OrderPageProps) => {
+  const resolvedParams = await searchParams; // Await the promise
+  const email = resolvedParams.email;
 
   return (
     <div>

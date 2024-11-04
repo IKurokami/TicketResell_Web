@@ -28,7 +28,7 @@ const Trend = () => {
   useEffect(() => {
     const fetchData = async () => {
       const ticketData = await fetchTopTicketData(
-        "http://localhost:5296/api/ticket/gettop/6"
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/gettop/6`
       );
       setTopTicketList(ticketData);
     };
@@ -65,7 +65,7 @@ const Trend = () => {
   const fetchTrendingTickets = async () => {
     try {
       const ticketData = await fetchTopTicketData(
-        "http://localhost:5296/api/ticket/gettop/6"
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/gettop/6`
       );
       setTopTicketList(ticketData);
     } catch (error) {
@@ -86,7 +86,7 @@ const Trend = () => {
       };
 
       const ticketData = await fetchTopTicketData(
-        "http://localhost:5296/api/ticket/getticketsbytimerange",
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/getticketsbytimerange`,
         {
           method: "POST",
           headers: {

@@ -1,6 +1,6 @@
 import { fetchImage } from "./FetchImage";
 
-const baseUrl = "http://localhost:5296";
+const baseUrl = `http://${process.env.NEXT_PUBLIC_API_URL}`;
 
 export interface Category {
   categoryId: string;
@@ -107,7 +107,7 @@ export const fetchTicketsBySeller = async (): Promise<Ticket[]> => {
 export const fetchRemainingByID = async (id: string | null) => {
   try {
     const response = await fetch(
-      `http://localhost:5296/api/Ticket/count/${id}`,
+      `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/count/${id}`,
       {
         method: "GET",
       }

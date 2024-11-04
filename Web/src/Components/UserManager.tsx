@@ -141,7 +141,7 @@ const UserManager: React.FC<UserManagerProps> = ({
 
   const setupSignalRConnection = async () => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5296/chat-hub", {
+      .withUrl(`http://${process.env.NEXT_PUBLIC_API_URL}/chat-hub`, {
         withCredentials: true,
       })
       .withAutomaticReconnect()
@@ -226,6 +226,13 @@ const UserManager: React.FC<UserManagerProps> = ({
     setNewMessages((prev) => ({ ...prev, [user.userId]: "" }));
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e.currentTarget.value);
+    }
+  };
+
   const handleSendMessage = async (receiverId: string) => {
     if (!newMessages[receiverId].trim() || !hubConnectionRef.current) return;
 
@@ -274,7 +281,7 @@ const UserManager: React.FC<UserManagerProps> = ({
     try {
       const senderID = Cookies.get("id");
       const response = await fetch(
-        `http://localhost:5296/api/Chat/get/${senderID}/${receiverId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/get/${senderID}/${receiverId}`,
         {
           method: "POST",
           credentials: "include",
@@ -784,6 +791,7 @@ const UserManager: React.FC<UserManagerProps> = ({
               <div className="h-16 bg-white border-t px-4 flex items-center shrink-0">
                 <Input
                   value={newMessages[userId] || ""}
+                  onKeyDown={handleKeyDown}
                   onChange={(e) =>
                     setNewMessages((prev) => ({
                       ...prev,

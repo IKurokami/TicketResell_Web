@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { redirect } from "next/navigation";
 import { fetchTickets } from "@/models/TicketFetch";
 import { UserService, User } from "@/models/UserManagement";
 import {
@@ -26,10 +25,9 @@ import {
 } from "./EditUserPage";
 import { LogOut } from "lucide-react";
 import Cookies from "js-cookie";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { removeAllCookies } from "./Cookie";
 import { logoutUser } from "./Logout";
-import { cookies } from "next/headers";
 import OrderDetailsDashboard from "./BuyerSellDashboard";
 
 const AdminPage = () => {
@@ -95,7 +93,7 @@ const AdminPage = () => {
 
     const getRoles = async () => {
       try {
-        const response = await fetch("http://localhost:5296/api/Role/read", {
+        const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/read`, {
           method: "GET",
           credentials: "include",
         });
@@ -112,7 +110,7 @@ const AdminPage = () => {
     const getCategories = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5296/api/Category/read",
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`,
           {
             method: "GET",
             credentials: "include",
@@ -130,7 +128,7 @@ const AdminPage = () => {
 
     const getOrders = async () => {
       try {
-        const response = await fetch("http://localhost:5296/api/Order/read", {
+        const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Order/read`, {
           method: "GET",
           credentials: "include",
         });
@@ -148,7 +146,7 @@ const AdminPage = () => {
     const getRevenues = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5296/api/Revenue/readAllRevenues",
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Revenue/readAllRevenues`,
           {
             method: "GET",
             credentials: "include",
@@ -168,7 +166,7 @@ const AdminPage = () => {
     const getTopBuyers = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5296/api/User/allBuyer`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/allBuyer`,
           {
             credentials: "include",
           }
@@ -186,7 +184,7 @@ const AdminPage = () => {
     const getTransactions = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5296/api/Transaction/allBuyers",
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Transaction/allBuyers`,
           {
             method: "GET",
             credentials: "include",
@@ -226,7 +224,7 @@ const AdminPage = () => {
   };
 
   const handleTicketActive = async (ticketId: string) => {
-    const url = `http://localhost:5296/api/ticket/update/${ticketId}`;
+    const url = `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/${ticketId}`;
 
     try {
       const response = await fetch(url, {
@@ -266,7 +264,7 @@ const AdminPage = () => {
   };
 
   const handleTicketDelete = async (ticketId: string) => {
-    const url = `http://localhost:5296/api/ticket/update/${ticketId}`;
+    const url = `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/${ticketId}`;
 
     try {
       const response = await fetch(url, {
@@ -344,7 +342,7 @@ const AdminPage = () => {
     try {
       // Make the API call here
       const response = await fetch(
-        `http://localhost:5296/api/User/updatestatus/${selectedUser?.userId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/updatestatus/${selectedUser?.userId}`,
         {
           method: "PUT", // Use DELETE method
           headers: {
@@ -392,7 +390,7 @@ const AdminPage = () => {
     if (selectedUser?.userId) {
       try {
         const response = await fetch(
-          `http://localhost:5296/api/User/deleteseller/${selectedUser?.userId}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/deleteseller/${selectedUser?.userId}`,
           {
             method: "DELETE", // Use DELETE method
             headers: {
@@ -450,7 +448,7 @@ const AdminPage = () => {
       if (currentRole) {
         // Edit existing role
         response = await fetch(
-          `http://localhost:5296/api/Role/update/${roleData.roleId}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/update/${roleData.roleId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -460,7 +458,7 @@ const AdminPage = () => {
         );
       } else {
         // Add new role
-        response = await fetch("http://localhost:5296/api/Role/create", {
+        response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(roleData),
@@ -496,7 +494,7 @@ const AdminPage = () => {
     try {
       if (currentRole) {
         const response = await fetch(
-          `http://localhost:5296/api/Role/delete/${currentRole.roleId}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/delete/${currentRole.roleId}`,
           {
             method: "DELETE",
             credentials: "include",
@@ -564,7 +562,7 @@ const AdminPage = () => {
       let response;
       if (currentCategory) {
         response = await fetch(
-          `http://localhost:5296/api/Category/update/${categoryData.categoryId}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/update/${categoryData.categoryId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -574,7 +572,7 @@ const AdminPage = () => {
         );
       } else {
         // Add new category
-        response = await fetch("http://localhost:5296/api/Category/create", {
+        response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(categoryData),
@@ -612,7 +610,7 @@ const AdminPage = () => {
     try {
       if (currentCategory) {
         const response = await fetch(
-          `http://localhost:5296/api/Category/delete/${currentCategory.categoryId}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/delete/${currentCategory.categoryId}`,
           {
             method: "DELETE",
             credentials: "include",
@@ -889,7 +887,8 @@ const AdminPage = () => {
                 id="roleForm"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  const formData = new FormData(e.target);
+                  const form = e.target as HTMLFormElement;
+                  const formData = new FormData(form);
                   const roleData = {
                     roleId: formData.get("roleId"),
                     rolename: formData.get("rolename"),
@@ -978,7 +977,8 @@ const AdminPage = () => {
                 id="categoryForm"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  const formData = new FormData(e.target);
+                  const form = e.target as HTMLFormElement; // Cast to HTMLFormElement
+                  const formData = new FormData(form);
                   const categoryData = {
                     categoryId: formData.get("categoryId"),
                     name: formData.get("name"),

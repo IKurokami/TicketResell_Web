@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import RequestDialog from "./RequestDialog";
 import ChatboxTable from "./RequestForm";
-import * as signalR from "@microsoft/signalr";
+import { Chatbox } from "./ChatComponent";
 
 interface Role {
   roleId: string;
@@ -29,23 +29,18 @@ interface UserRequestProps {
   userCookie: UserData | undefined;
 }
 
-interface ChatboxItem {
-  chatboxId: number;
-  status: number;
-  createDate: string;
-  title: string;
-  description: string;
-}
+
 const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [chatboxData, setChatboxData] = useState<ChatboxItem[]>([]);
+  const [chatboxData, setChatboxData] = useState<Chatbox[]>([]);
+  const [filteredChatboxData, setFilteredChatboxData] = useState<Chatbox[]>([]);
 
   console.log("Fetching data for ID:", userCookie);
 
   const fetchChatboxData = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Chatbox/getall/${userData?.userId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/getall/${userData?.userId}`,
         { credentials: "include" }
       );
 
@@ -64,10 +59,19 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
     }
   };
 
+  
+
   useEffect(() => {
     fetchChatboxData();
     console.log("fetch:", chatboxData);
   }, [userData]);
+
+  useEffect(() => {
+    const filtered = chatboxData.filter((chatbox) =>
+      chatbox.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredChatboxData(filtered);
+  }, [searchTerm, chatboxData]);
 
   const hasRO3Role =
     userCookie?.roles?.some((role) => role.roleId === "RO3") ||
@@ -79,7 +83,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           !hasRO3Role ? "pt-20" : ""
         } `}
       >
-        Request table
+        Bảng yêu cầu
       </p>
       <div
         className={`container mx-auto px-5 flex flex-col  justify-between  sm:flex-row items-center`}
@@ -88,7 +92,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           <div className="relative flex items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Search requests"
+              placeholder="Tìm kiếm yêu cầu"
               className="border-none outline-none items-center bg-transparent w-96 text-gray-700 placeholder-gray-400 focus:ring-0"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -103,7 +107,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           <div className="relative flex  items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-96">
             <input
               type="text"
-              placeholder="Search requests"
+              placeholder="Tìm kiếm yêu cầu"
               className="border-none outline-none items-center bg-transparent w-96 text-gray-700 placeholder-gray-400 focus:ring-0"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -122,8 +126,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           {/* Set a max-width for the card container */}
           <ChatboxTable
             userData={userData}
-            chatboxData={chatboxData}
+            chatboxData={filteredChatboxData}
             userCookie={userCookie}
+            setChatboxData={setChatboxData}
           />
         </div>
       </div>
