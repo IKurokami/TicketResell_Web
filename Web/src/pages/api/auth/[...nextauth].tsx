@@ -23,19 +23,6 @@ export const authOptions = {
     async session({ session, token }) {
       session.accessToken = token.accessToken;
       session.token = token;
-      console.log("Session token:", token);
-
-      await fetch(
-        `http://localhost:5296/api/authentication/login-google?accessToken=${session.accessToken}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Include credentials (cookies)
-        }
-      );
-
       return session;
     },
   },
