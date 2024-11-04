@@ -58,6 +58,19 @@ public class ChatHub : Hub
             await chatboxService.UpdateChatboxStatusAsync(chatboxId, 2);
         }
     }
+
+    public async Task BlockChatbox(string chatboxId, string receiverID)
+    {
+        var httpContext = Context.GetHttpContext();
+        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            return;
+        var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
+        if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+        {
+            await Clients.Client(receiverConnectionId).SendAsync("BlockedChatEvent", chatboxId);
+            await chatboxService.UpdateChatboxStatusAsync(chatboxId, 3);
+        }
+    }
     
     public async Task LoginAsync(string userId, string accessKey)
     {
@@ -152,14 +165,14 @@ public class ChatHub : Hub
                     await Clients.Client(Context.ConnectionId).SendAsync("UserNotFound", $"User {receiverID} is not connected.");
                 }
                 
-                if (!(httpContext.HasEnoughtRoleLevel(UserRole.Admin) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)))
-                {
-                    if (!string.IsNullOrEmpty(receiverConnectionId))
-                    {
-                        await Clients.Client(receiverConnectionId).SendAsync("BlockedChatEvent", chatbox.ChatboxId);
-                    }
-                    await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
-                }
+                // if (!(httpContext.HasEnoughtRoleLevel(UserRole.Admin) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)))
+                // {
+                //     if (!string.IsNullOrEmpty(receiverConnectionId))
+                //     {
+                //         await Clients.Client(receiverConnectionId).SendAsync("BlockedChatEvent", chatbox.ChatboxId);
+                //     }
+                //     await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
+                // }
             }
             else
             {

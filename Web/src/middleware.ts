@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-
+import axios from 'axios';
+export const dynamic = 'force-dynamic'
 export async function middleware(request: NextRequest) {
   // Get the access key from cookies
   const accessKey = request.cookies.get(".AspNetCore.Session")?.value;
@@ -32,18 +33,19 @@ export async function middleware(request: NextRequest) {
 
   // Validate the user's session and role
 // Construct the URL with the roleId as a query parameter
-const validateUrl = `http://localhost:5296/api/Authentication/isRolelogged?roleId=${roleId}`;
-
+const validateUrl = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/isRolelogged?roleId=${roleId}`;
+console.log(validateUrl);
+console.log("Access key: ",accessKey);
 const validate = await fetch(validateUrl, {
   method: "POST",
   headers: {
-    "Content-Type": "application/json",
-    Cookie: `.AspNetCore.Session=${accessKey}`,
+    'Content-Type': 'application/json',
+    'Cookie': `.AspNetCore.Session=${accessKey};`
   },
   // Remove the body since we're now sending roleId in the URL
 });
 
-console.log(validate);
+console.log("Why fetch fail");
 
   const response = await validate.json();
   console.log(response);

@@ -55,7 +55,7 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
       } as const; // use 'as const' to fix types
 
       const statusCode = statusMap[selectedReason as keyof typeof statusMap]; // type assertion here
-      const url = `http://localhost:5296/api/Chatbox/createreport/${statusCode}`;
+      const url = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/createreport/${statusCode}`;
 
       const requestBody = {
         title: "Report",

@@ -141,7 +141,7 @@ const UserManager: React.FC<UserManagerProps> = ({
 
   const setupSignalRConnection = async () => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5296/chat-hub", {
+      .withUrl(`http://${process.env.NEXT_PUBLIC_API_URL}/chat-hub`, {
         withCredentials: true,
       })
       .withAutomaticReconnect()
@@ -274,7 +274,7 @@ const UserManager: React.FC<UserManagerProps> = ({
     try {
       const senderID = Cookies.get("id");
       const response = await fetch(
-        `http://localhost:5296/api/Chat/get/${senderID}/${receiverId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/get/${senderID}/${receiverId}`,
         {
           method: "POST",
           credentials: "include",

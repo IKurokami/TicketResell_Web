@@ -15,9 +15,15 @@ const PaymentStatus = () => {
     const verifyPayment = async () => {
       if (hasFetchedRef.current) return; // Prevent double fetch
       hasFetchedRef.current = true;
-      const method = searchParams.get("method");
-      const orderId = searchParams.get("orderId");
-      const token = method === "paypal" ? searchParams.get("token") : "default";
+      const method = searchParams ? searchParams.get("method") : null;
+      const orderId = searchParams ? searchParams.get("orderId") : null;
+      const token =
+        method === "paypal"
+          ? searchParams
+            ? searchParams.get("token")
+            : "default"
+          : "default";
+
       console.log(method);
       console.log(orderId);
       if (!method || !orderId) {
@@ -29,13 +35,13 @@ const PaymentStatus = () => {
       let apiEndpoint;
       switch (method) {
         case "momo":
-          apiEndpoint = "http://localhost:5296/api/Payment/momo/verify";
+          apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/momo/verify`;
           break;
         case "vnpay":
-          apiEndpoint = "http://localhost:5296/api/Payment/vnpay/verify";
+          apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/vnpay/verify`;
           break;
         case "paypal":
-          apiEndpoint = "http://localhost:5296/api/Payment/paypal/verify";
+          apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/paypal/verify`;
           break;
         default:
           setSuccess(false);
@@ -111,7 +117,9 @@ const PaymentStatus = () => {
       ) : (
         <div className="flex items-center space-x-3">
           <FaTimesCircle className="text-red-500" size={50} />
-          <p className="text-xl font-semibold text-red-500">Thanh toán thất bại!</p>
+          <p className="text-xl font-semibold text-red-500">
+            Thanh toán thất bại!
+          </p>
         </div>
       )}
 

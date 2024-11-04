@@ -168,29 +168,30 @@ const TopProducts: React.FC = () => {
   >("day");
 
   const categoryLabels = {
-    "day": "Ngày",
+    day: "Ngày",
     "in week": "Trong tuần",
-    "in month": "Trong tháng"
-  };
+    "in month": "Trong tháng",
+  } as const; // Use 'as const' to infer literal types
+
+  type Category = keyof typeof categoryLabels;
 
   return (
     <div className="top-products">
       <div className="top-products__categories">
-        {["day", "in week", "in month"].map((category) => (
+        {(["day", "in week", "in month"] as Category[]).map((category) => (
           <button
             key={category}
-            onClick={() =>
-              setSelectedCategory(category as "day" | "in week" | "in month")
+            onClick={
+              () => setSelectedCategory(category) // No need for type assertion here
             }
             className={`top-products__category-btn ${
               selectedCategory === category ? "active" : ""
             }`}
           >
-            {categoryLabels[category]}
+            {categoryLabels[category]} {/* This is now type-safe */}
           </button>
         ))}
       </div>
-
       <div className="top-products__list">
         {products[selectedCategory].map((product, index) => (
           <div key={index} className="top-products__item">
@@ -200,7 +201,9 @@ const TopProducts: React.FC = () => {
               className="top-products__image"
             />
             <span className="top-products__title">{product.title}</span>
-            <span className="top-products__floorPrice">Giá: {product.Price}</span>
+            <span className="top-products__floorPrice">
+              Giá: {product.Price}
+            </span>
           </div>
         ))}
       </div>

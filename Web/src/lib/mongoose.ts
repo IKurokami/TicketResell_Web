@@ -1,95 +1,173 @@
-import mongoose, { Document, Model } from "mongoose";
+
+import mongoose, { Document, Model, Schema } from "mongoose";
+
+// Base interface for all documents
+interface BaseDocument extends Document {
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 // Connect to MongoDB and specify the database
 const connectDB = async (): Promise<boolean> => {
-    // Check if the connection is already established
+  try {
     if (mongoose.connections[0].readyState) {
-        return true;
+      console.log("Using existing MongoDB connection");
+      return true;
     }
-    try {
-        // Connect to the 'ticketResell' database
-        await mongoose.connect(`${process.env.MONGODB_URI}/ticketResell`);
-        console.log("Connected to MongoDB - ticketResell");
-        return true;
-    } catch (error) {
-        console.error("MongoDB connection error:", error);
-        return false;
+
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MongoDB URI is not defined in environment variables");
     }
+
+    await mongoose.connect(`${process.env.MONGODB_URI}/ticketResell`);
+    console.log("Connected to MongoDB - ticketResell");
+    return true;
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    return false;
+  }
 };
-interface IOTP extends Document {
-    userId: string;         // ID của người dùng
-    otp: string;            // Mã OTP
-    expiresAt: Date;        // Thời gian hết hạn của OTP
+
+// OTP Interface and Schema
+interface IOTP extends BaseDocument {
+  userId: string;
+  otp: string;
+  expiresAt: Date;
+  isUsed?: boolean;
 }
 
-// Create the schema for OTP
-const otpSchema = new mongoose.Schema<IOTP>({
-    userId: { type: String, required: true },  // ID người dùng
-    otp: { type: String, required: true },     // Mã OTP
-    expiresAt: { type: Date, required: true }, // Thời gian hết hạn
-});
+const otpSchema = new Schema<IOTP>(
+  {
+    userId: { type: String, required: true, index: true },
+    otp: { type: String, required: true },
+    expiresAt: { type: Date, required: true, index: true },
+    isUsed: { type: Boolean, default: false },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
 
-// Create the OTP model
+// Create indexes for better query performance
+otpSchema.index({ userId: 1, expiresAt: 1 });
+
+// Ticket Image Interface and Schema
+interface ITicketImage extends BaseDocument {
+  id: string;
+  image: Buffer;
+  contentType: string;
+}
+
+const ticketImageSchema = new Schema<ITicketImage>(
+  {
+    id: { type: String, required: true, unique: true, index: true },
+    image: { type: Buffer, required: true },
+    contentType: { type: String, required: true },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
+
+// Create the models
 const Otp: Model<IOTP> = mongoose.models.Otp || mongoose.model<IOTP>("Otp", otpSchema);
-
-// Function to insert OTP into the OTP collection
-const insertOtp = async (userId: string, otp: string, expiresAt: Date): Promise<void> => {
-    try {
-        const otpRecord = new Otp({
-            userId,
-            otp,
-            expiresAt,
-        });
-        await otpRecord.save(); // Lưu OTP vào cơ sở dữ liệu
-        console.log("OTP saved to database");
-    } catch (error) {
-        console.error("Error saving OTP:", error);
-    }
-};
-
-// Function to fetch OTP by userId from the database
-const fetchOtpFromDb = async (userId: string): Promise<string | null> => {
-    try {
-        const otpRecord = await Otp.findOne({
-            userId,
-            expiresAt: { $gte: new Date() }, // Chỉ lấy OTP chưa hết hạn
-        });
-
-        return otpRecord ? otpRecord.otp : null;
-    } catch (error) {
-        console.error("Error fetching OTP:", error);
-        return null;
-    }
-};
-
-// Define the IImage interface
-interface ITicketImage extends Document {
-    id: string;         // Add an ID field if needed (as per your requirement)
-    image: Buffer;     // Store image data as Buffer
-}
-
-// Create the schema for ticketImage
-const ticketImageSchema = new mongoose.Schema<ITicketImage>({
-    id: { type: String, required: true },  // ID field
-    image: { type: Buffer, required: true }, // Image data field
-});
-
-// Create the TicketImage model
 const TicketImage: Model<ITicketImage> = mongoose.models.TicketImage || mongoose.model<ITicketImage>("TicketImage", ticketImageSchema);
 
-// Function to insert an image into the ticketImage collection
-const insertTicketImage = async (id: string, imageData: Buffer, contentType: string): Promise<void> => {
-    try {
-        const ticketImage = new TicketImage({
-            id,            // Set the ID
-            image: imageData, // Store the image data
-        });
-        await ticketImage.save(); // Save the image to the database
-        console.log("Image saved to ticketImage collection");
-    } catch (error) {
-        console.error("Error saving image:", error);
-    }
+// OTP Operations
+const insertOtp = async (userId: string, otp: string, expiresAt: Date): Promise<IOTP | null> => {
+  try {
+    // Invalidate any existing OTPs for this user
+    await Otp.updateMany(
+      { userId, isUsed: false },
+      { $set: { isUsed: true } }
+    );
+
+    // Create new OTP
+    const otpRecord = new Otp({
+      userId,
+      otp,
+      expiresAt,
+    });
+
+    await otpRecord.save();
+    console.log("OTP saved successfully for user:", userId);
+    return otpRecord;
+  } catch (error) {
+    console.error("Error saving OTP:", error);
+    return null;
+  }
 };
 
-// Export the functions and model
-export { connectDB, TicketImage, insertTicketImage,Otp, insertOtp, fetchOtpFromDb };
+const fetchOtpFromDb = async (userId: string): Promise<string | null> => {
+  try {
+    const otpRecord = await Otp.findOne({
+      userId,
+      expiresAt: { $gte: new Date() },
+      isUsed: false,
+    }).sort({ createdAt: -1 });
+
+    return otpRecord?.otp || null;
+  } catch (error) {
+    console.error("Error fetching OTP:", error);
+    return null;
+  }
+};
+
+// Ticket Image Operations
+const insertTicketImage = async (
+  id: string,
+  imageData: Buffer,
+  contentType: string
+): Promise<ITicketImage | null> => {
+  try {
+    // Check if image already exists
+    const existingImage = await TicketImage.findOne({ id });
+    
+    if (existingImage) {
+      // Update existing image
+      existingImage.image = imageData;
+      existingImage.contentType = contentType;
+      await existingImage.save();
+      console.log("Image updated successfully for ID:", id);
+      return existingImage;
+    }
+
+    // Create new image
+    const ticketImage = new TicketImage({
+      id,
+      image: imageData,
+      contentType,
+    });
+
+    await ticketImage.save();
+    console.log("Image saved successfully for ID:", id);
+    return ticketImage;
+  } catch (error) {
+    console.error("Error saving image:", error);
+    return null;
+  }
+};
+
+// Fetch Image Operation
+const fetchTicketImage = async (id: string): Promise<ITicketImage | null> => {
+  try {
+    return await TicketImage.findOne({ id });
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    return null;
+  }
+};
+
+export {
+  connectDB,
+  TicketImage,
+  Otp,
+  insertOtp,
+  fetchOtpFromDb,
+  insertTicketImage,
+  fetchTicketImage,
+  type IOTP,
+  type ITicketImage,
+};

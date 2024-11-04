@@ -70,7 +70,7 @@ interface CategoriesPageProps {
 }
 
 export const fetchBannerItems = async (): Promise<BannerItemCard[]> => {
-  const bannerItemsRes = await fetch("http://localhost:5296/api/ticket/read");
+  const bannerItemsRes = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/read`);
   const response = await bannerItemsRes.json();
 
   const bannerItems: Promise<BannerItemCard[]> = convertToBannerItemCards(
@@ -183,7 +183,7 @@ export const CategoriesPage = ({
 
 export const fetchCategories = async () => {
   try {
-    const response = await fetch("http://localhost:5296/api/Category/read");
+    const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`);
     if (!response.ok) {
       throw new Error("Failed to fetch categories");
     }
