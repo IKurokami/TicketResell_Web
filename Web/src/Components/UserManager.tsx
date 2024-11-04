@@ -226,6 +226,13 @@ const UserManager: React.FC<UserManagerProps> = ({
     setNewMessages((prev) => ({ ...prev, [user.userId]: "" }));
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e.currentTarget.value);
+    }
+  };
+
   const handleSendMessage = async (receiverId: string) => {
     if (!newMessages[receiverId].trim() || !hubConnectionRef.current) return;
 
@@ -781,6 +788,7 @@ const UserManager: React.FC<UserManagerProps> = ({
               <div className="h-16 bg-white border-t px-4 flex items-center shrink-0">
                 <Input
                   value={newMessages[userId] || ""}
+                  onKeyDown={handleKeyDown}
                   onChange={(e) =>
                     setNewMessages((prev) => ({
                       ...prev,

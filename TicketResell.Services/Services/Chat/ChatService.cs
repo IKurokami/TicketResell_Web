@@ -76,14 +76,14 @@ public class ChatService : IChatService
             return ResponseModel.Error($"Failed to update chat: {ex.Message}");
         }
     }
-    public async Task<ResponseModel> GetLatestChatBySenderAndReceiverAsync(string senderId, string receiverId)
+    public async Task<ResponseModel> GetLatestChatBySenderAndReceiverAsync(string senderId, string receiverId,string chatboxId)
     {
         try
         {
             if (string.IsNullOrWhiteSpace(senderId) || string.IsNullOrWhiteSpace(receiverId))
                 return ResponseModel.Error("Sender ID and Receiver ID are required");
 
-            var latestChat = await _unitOfWork.ChatRepository.GetLatestChatByChatboxIdAsync(senderId, receiverId);
+            var latestChat = await _unitOfWork.ChatRepository.GetLatestChatByChatboxIdAsync(senderId, receiverId,chatboxId);
 
             if (latestChat == null)
                 return ResponseModel.NotFound("No chat history found between these users");
