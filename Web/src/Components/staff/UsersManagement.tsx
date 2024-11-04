@@ -128,7 +128,6 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
       setUsers([]); // Set empty array on error
     }
   };
-
   const fetchSpecificUser = async () => {
     if (!userId) return;
 

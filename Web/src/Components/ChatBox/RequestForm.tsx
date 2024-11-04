@@ -349,7 +349,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       } else {
         console.error("Kết nối Hub chưa được thiết lập.");
       }
-      
+
       setChatboxData((prevChatboxes) =>
         prevChatboxes.map((chatbox) =>
           chatbox.chatboxId === chatboxId ? { ...chatbox, status: 2 } : chatbox
@@ -381,11 +381,13 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         } else {
           console.error("Kết nối Hub chưa được thiết lập.");
         }
-        
+
         setChatboxData((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
-            chatbox.chatboxId === chatboxId ? { ...chatbox, status: 8 } : chatbox
-          ) 
+            chatbox.chatboxId === chatboxId
+              ? { ...chatbox, status: 8 }
+              : chatbox
+          )
         );
       } else {
         console.error("Không thể từ chối chatbox");
@@ -416,10 +418,12 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         } else {
           console.error("Kết nối Hub chưa được thiết lập.");
         }
-        
+
         setChatboxData((prevChatboxes) =>
           prevChatboxes.map((chatbox) =>
-            chatbox.chatboxId === chatboxId ? { ...chatbox, status: 0 } : chatbox
+            chatbox.chatboxId === chatboxId
+              ? { ...chatbox, status: 0 }
+              : chatbox
           )
         );
       } else {
@@ -440,7 +444,6 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         console.error("Kết nối Hub chưa được thiết lập.");
       }
 
-     
       setChatboxData((prevChatboxes) =>
         prevChatboxes.map((chatbox) =>
           chatbox.chatboxId === chatboxId ? { ...chatbox, status: 3 } : chatbox
@@ -471,7 +474,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       console.error("Lỗi khi cập nhật trạng thái chatbox:", error);
     }
   };
-  
+
   const getStatusLabel = (status: number) => {
     switch (status) {
       case 1:
@@ -516,7 +519,10 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         if (Array.isArray(latestData)) {
           setChatboxData(latestData);
         } else {
-          console.error("Dữ liệu chatbox lấy về không phải là mảng:", latestData);
+          console.error(
+            "Dữ liệu chatbox lấy về không phải là mảng:",
+            latestData
+          );
         }
       } else {
         console.error("Không thể lấy dữ liệu chatbox:", response.statusText);
@@ -616,7 +622,10 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
                           >
                             <FaCheck className="text-gray-500 hover:text-green-500" />
                           </button>
-                          <button onClick={()=>handleLockUpdate(chatbox.chatboxId)} className="flex justify-center items-center">
+                          <button
+                            onClick={() => handleLockUpdate(chatbox.chatboxId)}
+                            className="flex justify-center items-center"
+                          >
                             <FaLock className=" text-yellow-500 " />
                           </button>
                         </div>
