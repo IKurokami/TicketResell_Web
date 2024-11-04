@@ -133,7 +133,7 @@ const UserManager: React.FC<UserManagerProps> = ({
 
     try {
       const userResponse = await fetch(
-        `http://localhost:5296/api/User/read/${userId}`
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/read/${userId}`
       );
       const userCookie = await userResponse.json();
       console.log("API Response:", userCookie);

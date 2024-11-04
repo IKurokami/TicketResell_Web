@@ -64,7 +64,7 @@ export default async function handler(
             // Send encrypted data to the putOTP API
 
             // Proceed with registration using fetch instead of axios
-            const registerResponse = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/register`, {
+            const registerResponse = await fetch(`http://${process.env.API_URL}/api/Authentication/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

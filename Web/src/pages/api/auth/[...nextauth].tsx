@@ -23,10 +23,10 @@ export const authOptions = {
       session.accessToken = token.accessToken;
       session.token = token;
       console.log("TESTss");
-      console.log(`http://${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login-google?accessToken=${session.accessToken}`);
+      console.log(`http://${process.env.API_URL}/api/authentication/login-google?accessToken=${session.accessToken}`);
       console.log("Session token:", token);
       await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login-google?accessToken=${session.accessToken}`,
+        `http://${process.env.API_URL}/api/authentication/login-google?accessToken=${session.accessToken}`,
         {
           method: "GET",
           headers: {
