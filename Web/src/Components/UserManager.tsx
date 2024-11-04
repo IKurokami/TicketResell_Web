@@ -100,7 +100,7 @@ const UserManager: React.FC<UserManagerProps> = ({
   const [showRequestPopup, setShowRequestPopup] = useState(false);
 
   const [cookieUser, setCookieUser] = useState<UserData | undefined>(undefined);
-  const userId = Cookies.get("id");
+  const userId = Cookies?.get("id");
 
   const handleRequestClick = (user: UserData) => {
     setSelectedUser(user);
@@ -128,7 +128,27 @@ const UserManager: React.FC<UserManagerProps> = ({
     }
   };
 
+  const fetchSpecificUser = async () => {
+    if (!userId) return;
+
+    try {
+      const userResponse = await fetch(
+        `http://localhost:5296/api/User/read/${userId}`
+      );
+      const userCookie = await userResponse.json();
+      console.log("API Response:", userCookie);
+      if (userCookie.statusCode === 200 && userCookie.data) {
+        const userData: UserData = userCookie.data;
+        setCookieUser(userData);
+        console.log("Setting cookieUser:", userData);
+      }
+    } catch (error) {
+      console.error("Error fetching specific user:", error);
+    }
+  };
   useEffect(() => {
+    fetchSpecificUser();
+    
     // Setup SignalR
     setupSignalRConnection();
 
@@ -303,7 +323,18 @@ const UserManager: React.FC<UserManagerProps> = ({
       console.error("Error fetching chat messages:", error);
     }
   };
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setShowRequestPopup(false);
+      }
+    };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   useEffect(() => {
     const filterAndSortUsers = () => {
       let filtered = users;
@@ -523,6 +554,7 @@ const UserManager: React.FC<UserManagerProps> = ({
                   {getSortIcon("createDate")}
                 </div>
               </th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -570,7 +602,7 @@ const UserManager: React.FC<UserManagerProps> = ({
                 <td className="px-6 py-4">
                   {new Date(user.createDate).toLocaleDateString()}
                 </td>
-                <td className="py-3 px-4">
+                <td className="px-3 px-4">
                   <button
                     onClick={() => {
                       user.roles.some(
@@ -579,7 +611,7 @@ const UserManager: React.FC<UserManagerProps> = ({
                         ? handleRequestClick(user)
                         : handleChat(user);
                     }}
-                    className="group relative flex items-center gap-2 px-4 py-2  text-white rounded-full  transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                    className="group relative flex items-center gap-2 pr-4 py-2  text-white rounded-full  transition-all duration-300 ease-in-out transform hover:-translate-y-1"
                   >
                     {user.roles.some(
                       (role) => role.roleId === "RO1" || role.roleId === "RO2"
