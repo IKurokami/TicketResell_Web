@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
       const fetchCart = async () => {
         const response = await fetch(
-          `http://localhost:5296/api/cart/items/${id}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
           {
             method: "GET",
             credentials: "include",
@@ -193,7 +193,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     const id = Cookies.get("id");
     const fetchCart = async () => {
       const response = await fetch(
-        `http://localhost:5296/api/cart/items/${id}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
         {
           method: "GET",
           credentials: "include",

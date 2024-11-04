@@ -228,7 +228,7 @@ const UpdateTicketModal: React.FC = () => {
   const fetchItems = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/ticket/readbybaseid/${id}`
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/readbybaseid/${id}`
       );
       const result = await response.json();
       console.log("Fetched Ticket Data:", result.data);
@@ -359,7 +359,7 @@ const UpdateTicketModal: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5296/api/Category/read");
+      const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`);
       const result = await response.json();
 
       if (Array.isArray(result.data)) {
@@ -513,7 +513,7 @@ const UpdateTicketModal: React.FC = () => {
   const deleteManyTickets = async (ticketIds: string[]) => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Ticket/deletemany/${baseId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/deletemany/${baseId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -574,7 +574,7 @@ const UpdateTicketModal: React.FC = () => {
       const qrCodePromises = tickets.map(async (ticket) => {
         if (ticket.Qrcode) {
           const response = await fetch(
-            `http://localhost:5296/api/Ticket/update/qr/${ticket.TicketId}`,
+            `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/update/qr/${ticket.TicketId}`,
             {
               method: "PUT",
               credentials: "include",
@@ -621,7 +621,7 @@ const UpdateTicketModal: React.FC = () => {
     const updateTickets = async () => {
       const updateTicketPromises = tickets.map(async (ticket) => {
         const response = await fetch(
-          `http://localhost:5296/api/Ticket/update/${ticket.TicketId}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/update/${ticket.TicketId}`,
           {
             method: "PUT",
             credentials: "include",

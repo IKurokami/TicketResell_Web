@@ -588,7 +588,7 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
                 {percentageChange.toFixed(2)}%
               </span>
             </div>
-            <p className="text-sm text-slate-500">Tổng doanh thu</p>
+            <p className="text-sm text-slate-500">Doanh thu của hôm nay</p>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <div className="flex items-center gap-1">
                 <Check size={16} className="text-green-500" />

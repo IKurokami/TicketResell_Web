@@ -79,13 +79,16 @@ services:
       - BASE_URL=http://localhost:3000
       - NEXTAUTH_SECRET=qOz3zgPyFFIntECZCB+KC0xLFrZYZ2HOcVLr5Dq146M=
       - NEXTAUTH_URL=http://localhost:3000
-      - NEXT_PUBLIC_API_URL=http://ticketresellapi:8080
+      - NEXT_PUBLIC_API_URL=ticketresellapi:8080
     ports:
       - "3000:3000"
-    networks:
-      - ticketresell-network
     depends_on:
       - ticketresellapi
+    networks: 
+      - ticketresell-network
+    dns:
+      - 8.8.8.8
 
 networks:
   ticketresell-network:
+    driver: bridge

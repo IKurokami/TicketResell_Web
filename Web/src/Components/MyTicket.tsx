@@ -136,7 +136,7 @@ const MyTicketPage = () => {
     try {
       const userId = Cookies.get("id");
       const response = await fetch(
-        `http://localhost:5296/api/History/get/${userId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/History/get/${userId}`,
         {
           credentials: "include",
           method: "GET",

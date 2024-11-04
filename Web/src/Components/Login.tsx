@@ -66,8 +66,9 @@ const Login: React.FC = () => {
     const handleLogin = async () => {
       if (session.status === "authenticated") {
         try {
+          console.log(`http://${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login-google?accessToken=${(session?.data as { token?: { accessToken: string } })?.token?.accessToken}`);
           const response = await fetch(
-            `http://localhost:5296/api/authentication/login-google?accessToken=${(session?.data as { token?: { accessToken: string } })?.token?.accessToken}`,
+            `http://${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login-google?accessToken=${(session?.data as { token?: { accessToken: string } })?.token?.accessToken}`,
             {
               credentials: "include",
               method: "GET",
@@ -83,23 +84,26 @@ const Login: React.FC = () => {
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);
             setLoginSuccessMessage("Đăng nhập thành công!");
-
+            console.log("TEST1");
             // Determine navigation path based on user roles
             let navigationPath = "/";
             const userRoles = result.data.user.roles.map(
               (role: any) => role.rolename
             );
-
+            
+            console.log("TEST2");
             if (userRoles.includes("Admin")) {
               navigationPath = "/admin";
             } else if (userRoles.includes("Staff")) {
               navigationPath = "/staff";
             }
-
+            
+            console.log("TEST3");
             setTimeout(() => {
               setLoginSuccessMessage(null);
             }, 3000);
-
+            
+            console.log("TEST4");
             setTimeout(() => {
               router.push(navigationPath);
             }, 500);
@@ -161,7 +165,7 @@ const Login: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5296/api/Authentication/login",
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/login`,
         {
           method: "POST",
           credentials: "include",

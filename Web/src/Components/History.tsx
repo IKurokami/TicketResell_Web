@@ -38,7 +38,7 @@ const HistoryPage = () => {
     const fetchPurchaseHistory = async () => {
       try {
         const userId = Cookies.get('id');
-        const response = await fetch(`http://localhost:5296/api/History/get/${userId}`, {
+        const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/History/get/${userId}`, {
           credentials: 'include',
           method: 'GET',
           headers: {

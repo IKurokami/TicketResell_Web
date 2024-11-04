@@ -35,13 +35,13 @@ const PaymentStatus = () => {
       let apiEndpoint;
       switch (method) {
         case "momo":
-          apiEndpoint = "http://localhost:5296/api/Payment/momo/verify";
+          apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/momo/verify`;
           break;
         case "vnpay":
-          apiEndpoint = "http://localhost:5296/api/Payment/vnpay/verify";
+          apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/vnpay/verify`;
           break;
         case "paypal":
-          apiEndpoint = "http://localhost:5296/api/Payment/paypal/verify";
+          apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/paypal/verify`;
           break;
         default:
           setSuccess(false);

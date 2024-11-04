@@ -120,7 +120,7 @@ const TicketCard : React.FC<{ ticket: any; onCardClick: any }> = ({ ticket, onCa
 
   const handleSubmitRating = async () => {
     try {
-      const response = await fetch("http://localhost:5296/api/Rating/create", {
+      const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Rating/create`, {
         method: "POST",
         credentials:"include",
         headers: {

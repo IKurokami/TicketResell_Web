@@ -153,7 +153,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
     try {
       const response = await fetch(
-        `http://localhost:5296/api/User/updateadmin/${userId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/updateadmin/${userId}`,
         {
           method: "PUT",
           headers: {

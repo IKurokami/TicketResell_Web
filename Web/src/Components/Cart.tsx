@@ -40,7 +40,7 @@ const MyCart: React.FC = () => {
         }
 
         const response = await fetch(
-          `http://localhost:5296/api/cart/items/${id}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
           {
             method: "GET",
             credentials: "include",
@@ -157,7 +157,7 @@ const MyCart: React.FC = () => {
     const userId = Cookies.get("id");
     try {
       await fetch(
-        `http://localhost:5296/api/cart/remove/${userId}/${ticketId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/cart/remove/${userId}/${ticketId}`,
         {
           credentials: "include",
           method: "DELETE",
@@ -212,13 +212,13 @@ const MyCart: React.FC = () => {
     let apiEndpoint;
     switch (selectedPayment) {
       case "momo":
-        apiEndpoint = "http://localhost:5296/api/Payment/momo/payment";
+        apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/momo/payment`;
         break;
       case "VNpay":
-        apiEndpoint = "http://localhost:5296/api/Payment/vnpay/payment";
+        apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/vnpay/payment`;
         break;
       case "Paypal":
-        apiEndpoint = "http://localhost:5296/api/Payment/paypal/payment";
+        apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/paypal/payment`;
         break;
       default:
         alert("Invalid payment method selected.");
