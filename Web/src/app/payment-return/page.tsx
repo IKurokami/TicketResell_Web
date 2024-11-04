@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import PaymentStatus from "@/Components/PaymentStatus";
@@ -7,7 +7,9 @@ const PaymentReturn = () => {
     <div className="home">
       {/* <Announce/> */}
       <Navbar page={"ticket"} />
-      <PaymentStatus />
+      <Suspense fallback={<div>Loading...</div>}>
+        <PaymentStatus />
+      </Suspense>
       <Footer />
       {/*     
       <Topticket />

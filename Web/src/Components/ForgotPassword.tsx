@@ -91,7 +91,7 @@ const ForgotPasswordForm: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5296/api/Mail/sendPasswordKey",
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Mail/sendPasswordKey`,
         {
           method: "POST",
           headers: {

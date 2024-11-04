@@ -7,7 +7,7 @@ import Announce from "@/Components/Announcement";
 const Contactt = () => {
   return (
     <div className="Contactt">
-      <Navbar />
+      <Navbar page={"ticket"}/>
       <Announce/>
       <Background test={<Contact />} />
 

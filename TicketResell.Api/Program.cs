@@ -22,6 +22,7 @@ using IValidatorFactory = Repositories.Core.Validators.IValidatorFactory;
 
 using TicketResell.Services.Services.Chatbox;
 using Microsoft.EntityFrameworkCore;
+using TicketResell.Api.Middlewares;
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 Console.WriteLine("SQLServer string: " + Environment.GetEnvironmentVariable("SQLSERVER"));
@@ -111,10 +112,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials(); // Enable credentials
+            policy.WithOrigins("http://localhost:3000","http://frontend:3000")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
         });
 });
 
@@ -160,6 +161,7 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("No pending migrations found. Skipping sample data insertion.");
     }
 }
+app.UseMiddleware<OriginLoggingMiddleware>();
 app.UseCors("AllowSpecificOrigin");
 app.UseSession();
 app.UseMiddleware<ExceptionHandlingMiddleware>();

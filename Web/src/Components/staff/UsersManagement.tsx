@@ -104,7 +104,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
 
   const fetchAllUsers = async () => {
     try {
-      const usersResponse = await fetch("http://localhost:5296/api/User/read");
+      const usersResponse = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/User/read`);
 
       if (!usersResponse.ok) {
         throw new Error(`HTTP error! status: ${usersResponse.status}`);
@@ -132,7 +132,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
 
     try {
       const userResponse = await fetch(
-        `http://localhost:5296/api/User/read/${userId}`
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/read/${userId}`
       );
       const userCookie = await userResponse.json();
       console.log("API Response:", userCookie);
@@ -188,7 +188,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   }, []);
   const setupSignalRConnection = async () => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5296/chat-hub", {
+      .withUrl(`http://${process.env.NEXT_PUBLIC_API_URL}/chat-hub`, {
         withCredentials: true,
       })
       .withAutomaticReconnect()
@@ -269,7 +269,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
     try {
       const senderID = Cookies.get("id");
       const response = await fetch(
-        `http://localhost:5296/api/Chat/get/${senderID}/${receiverId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/get/${senderID}/${receiverId}`,
         {
           method: "POST",
           credentials: "include",

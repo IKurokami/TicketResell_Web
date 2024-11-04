@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import RequestDialog from "./RequestDialog";
 import ChatboxTable from "./RequestForm";
-import * as signalR from "@microsoft/signalr";
+import { Chatbox } from "./ChatComponent";
 
 interface Role {
   roleId: string;
@@ -29,23 +29,17 @@ interface UserRequestProps {
   userCookie: UserData | undefined;
 }
 
-interface ChatboxItem {
-  chatboxId: number;
-  status: number;
-  createDate: string;
-  title: string;
-  description: string;
-}
+
 const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [chatboxData, setChatboxData] = useState<ChatboxItem[]>([]);
+  const [chatboxData, setChatboxData] = useState<Chatbox[]>([]);
 
   console.log("Fetching data for ID:", userCookie);
 
   const fetchChatboxData = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Chatbox/getall/${userData?.userId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/getall/${userData?.userId}`,
         { credentials: "include" }
       );
 

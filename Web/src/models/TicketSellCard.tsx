@@ -88,7 +88,7 @@ import Cookies from "js-cookie";
 const fetchRemainingByID = async (id: string | null) => {
   try {
     const response = await fetch(
-      `http://localhost:5296/api/Ticket/count/${id}`,
+      `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/count/${id}`,
       {
         method: "GET",
       }
@@ -108,7 +108,7 @@ export const fetchTicketItems = async (): Promise<TicketCard[]> => {
   }
 
   const response = await fetch(
-    `http://localhost:5296/api/ticket/readbySellerId/${id}`
+    `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/readbySellerId/${id}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch tickets");

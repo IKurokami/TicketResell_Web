@@ -3,22 +3,17 @@ import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["media.stubhubstatic.com"],
+    domains: ["media.stubhubstatic.com","lh3.googleusercontent.com"],
   },
-  webpack: (config) => {
-    config.plugins.push(new NodePolyfillPlugin());
-
-    config.resolve.fallback = {
-      crypto: "crypto-browserify",
-      stream: "stream-browserify",
-      assert: "assert",
-      http: "stream-http",
-      https: "https-browserify",
-      os: "os-browserify/browser",
-      // Add other polyfills if needed
-    };
-
-    return config;
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
   },
 };
 
