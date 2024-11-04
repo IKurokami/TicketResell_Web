@@ -2,6 +2,7 @@ using Api.Controllers.Models;
 using Newtonsoft.Json;
 using TicketResell.Repositories.Core.Dtos.Authentication;
 using TicketResell.Repositories.Helper;
+using TicketResell.Repositories.Logger;
 
 namespace Api.Controllers;
 
@@ -10,9 +11,11 @@ namespace Api.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationService _authService;
+    private readonly IAppLogger _logger;
 
-    public AuthenticationController(IAuthenticationService authService)
+    public AuthenticationController(IAuthenticationService authService, IAppLogger logger)
     {
+        _logger = logger;
         _authService = authService;
     }
 
@@ -100,10 +103,13 @@ public class AuthenticationController : ControllerBase
         [HttpPost("isRolelogged")]
         public async Task<IActionResult> IsRoleLogged(string roleId)
         {
+            _logger.LogInformation("Is check role");
             if (!HttpContext.GetIsAuthenticated())
             {
+                _logger.LogInformation("role check False");
                 return ResponseParser.Result(ResponseModel.Unauthorized("False"));
             }
+            _logger.LogInformation("role not");
             return ResponseParser.Result(ResponseModel.Success(HttpContext.HasEnoughtRoleLevel(RoleHelper.GetUserRole(roleId)).ToString()));
         }
         

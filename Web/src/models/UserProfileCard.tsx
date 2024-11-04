@@ -76,7 +76,7 @@ const convertToUserProfileCard = (
 export const fetchUserProfile = async (
   id: string | undefined
 ): Promise<UserProfileCard> => {
-  const response = await fetch(`http://localhost:5296/api/user/read/${id}`, {
+  const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/user/read/${id}`, {
     credentials: "include",
   });
   const responseModel = await response.json();
@@ -198,7 +198,7 @@ export const UserProfilePage: React.FC<{
 
   //   try {
   //     const response = await fetch(
-  //       `http://localhost:5296/api/user/update/${profile.id}`,
+  //       `http://${process.env.NEXT_PUBLIC_API_URL}/api/user/update/${profile.id}`,
   //       {
   //         method: "PUT",
   //         headers: {
@@ -239,7 +239,7 @@ export const UserProfilePage: React.FC<{
 
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Authentication/change-password`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-password`,
         {
           method: "POST",
           headers: {
@@ -304,7 +304,7 @@ export const UserProfilePage: React.FC<{
           address={profile.address}
           bio={profile.bio}
           birthday={profile.birthday}
-          api={`http://localhost:5296/api/Rating/${
+          api={`http://${process.env.NEXT_PUBLIC_API_URL}/api/Rating/${
             isSellerProfile ? "byseller" : "byuser"
           }/${profile.id}`}
         />

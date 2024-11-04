@@ -96,6 +96,7 @@ namespace TicketResell.Repositories.Repositories.Chatboxs
             return await _context.Chatboxes
                 .Include(c => c.Chats)
                 .Where(c => chatboxIds.Contains(c.ChatboxId))
+                .OrderByDescending(c => c.CreateDate)
                 .ToListAsync();
         }
 

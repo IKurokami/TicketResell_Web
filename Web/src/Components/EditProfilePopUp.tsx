@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/Components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import {
   Select,
@@ -78,7 +78,7 @@ interface Errors {
 const updateUserProfile = async (userId: string, data: any) => {
   try {
     const response = await fetch(
-      `http://localhost:5296/api/User/update/${userId}`,
+      `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/update/${userId}`,
       {
         method: "PUT",
 
@@ -160,7 +160,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
 
     try {
       const response = await fetch(
-        `http://localhost:5296/api/Authentication/change-password`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-password`,
         {
           method: "POST",
           headers: {

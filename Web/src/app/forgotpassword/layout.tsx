@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navbar page={""} />
+        <Navbar page={"a"} />
         {children}
         <Footer />
       </body>

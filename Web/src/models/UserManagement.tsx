@@ -61,7 +61,7 @@ export const UserService = {
   async fetchUsers(): Promise<User[]> {
     try {
       const response = await axios.get<ApiResponse<any[]>>(
-        "http://localhost:5296/api/User/read"
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/read`
       );
       console.log("response", response);
       console.log("data:", response.data);

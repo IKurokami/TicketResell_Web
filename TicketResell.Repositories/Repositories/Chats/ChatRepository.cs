@@ -76,7 +76,7 @@ public class ChatRepository : GenericRepository<Chat>, IChatRepository
         }
     }
 
-    public async Task<Chat?> GetLatestChatByChatboxIdAsync(string senderId, string receiverId)
+    public async Task<Chat?> GetLatestChatByChatboxIdAsync(string senderId, string receiverId,string chatboxId)
     {
         if (string.IsNullOrWhiteSpace(senderId) || string.IsNullOrWhiteSpace(receiverId))
             return null;
@@ -85,8 +85,8 @@ public class ChatRepository : GenericRepository<Chat>, IChatRepository
         try
         {
             var latestChat = await _context.Chats
-                .Where(c => (c.SenderId == senderId && c.ReceiverId == receiverId) ||
-                           (c.ReceiverId == senderId && c.SenderId == receiverId))
+                .Where(c => ((c.SenderId == senderId && c.ReceiverId == receiverId ) ||
+                           (c.ReceiverId == senderId && c.SenderId == receiverId)) && c.ChatboxId == chatboxId)
                 .OrderByDescending(c => c.Date)
                 .FirstOrDefaultAsync();
             _logger.LogError("Latest chat" + latestChat?.ChatboxId);

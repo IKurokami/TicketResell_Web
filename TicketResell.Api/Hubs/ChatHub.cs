@@ -54,8 +54,55 @@ public class ChatHub : Hub
         var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
         if (Users.TryGetValue(receiverID, out var receiverConnectionId))
         {
-            await Clients.Client(receiverConnectionId).SendAsync("UnblockEvent", receiverID, "Chat is unblock");
+            await Clients.Client(receiverConnectionId).SendAsync("UnblockEvent", chatboxId, "Chat is unblock");
             await chatboxService.UpdateChatboxStatusAsync(chatboxId, 2);
+        }
+    }
+
+        public async Task AcceptRequest(string chatboxId, string receiverID)
+    {
+        var httpContext = Context.GetHttpContext();
+        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            return;
+        var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
+        if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+        {
+            await Clients.Client(receiverConnectionId).SendAsync("AcceptEvent", chatboxId);
+        }
+    }
+    public async Task CompleteRequest(string chatboxId, string receiverID)
+    {
+        var httpContext = Context.GetHttpContext();
+        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            return;
+        var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
+        if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+        {
+            await Clients.Client(receiverConnectionId).SendAsync("CompleteEvent", chatboxId);
+        }
+    }
+    public async Task RejectRequest(string chatboxId, string receiverID)
+    {
+        var httpContext = Context.GetHttpContext();
+        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            return;
+        var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
+        if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+        {
+            await Clients.Client(receiverConnectionId).SendAsync("RejectEvent", chatboxId);
+        }
+    }
+
+    public async Task BlockChatbox(string chatboxId, string receiverID)
+    {
+        var httpContext = Context.GetHttpContext();
+        if (!httpContext.HasEnoughtRoleLevel(UserRole.Staff))
+            return;
+        var chatboxService = _serviceProvider.GetRequiredService<IChatboxService>();
+        if (Users.TryGetValue(receiverID, out var receiverConnectionId))
+        {
+            await Clients.Client(receiverConnectionId).SendAsync("BlockedChatEvent", chatboxId);
+            await chatboxService.UpdateChatboxStatusAsync(chatboxId, 3);
         }
     }
     
@@ -152,14 +199,14 @@ public class ChatHub : Hub
                     await Clients.Client(Context.ConnectionId).SendAsync("UserNotFound", $"User {receiverID} is not connected.");
                 }
                 
-                if (!(httpContext.HasEnoughtRoleLevel(UserRole.Admin) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)))
-                {
-                    if (!string.IsNullOrEmpty(receiverConnectionId))
-                    {
-                        await Clients.Client(receiverConnectionId).SendAsync("BlockedChatEvent", chatbox.ChatboxId);
-                    }
-                    await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
-                }
+                // if (!(httpContext.HasEnoughtRoleLevel(UserRole.Admin) || httpContext.HasEnoughtRoleLevel(UserRole.Staff)))
+                // {
+                //     if (!string.IsNullOrEmpty(receiverConnectionId))
+                //     {
+                //         await Clients.Client(receiverConnectionId).SendAsync("BlockedChatEvent", chatbox.ChatboxId);
+                //     }
+                //     await chatboxService.UpdateChatboxStatusAsync(boxchatId, 3);
+                // }
             }
             else
             {

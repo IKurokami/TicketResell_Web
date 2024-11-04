@@ -104,7 +104,9 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
 
   const fetchAllUsers = async () => {
     try {
-      const usersResponse = await fetch("http://localhost:5296/api/User/read");
+      const usersResponse = await fetch(
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/read`
+      );
 
       if (!usersResponse.ok) {
         throw new Error(`HTTP error! status: ${usersResponse.status}`);
@@ -131,7 +133,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
 
     try {
       const userResponse = await fetch(
-        `http://localhost:5296/api/User/read/${userId}`
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/read/${userId}`
       );
       const userCookie = await userResponse.json();
       console.log("API Response:", userCookie);
@@ -187,7 +189,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   }, []);
   const setupSignalRConnection = async () => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5296/chat-hub", {
+      .withUrl(`http://${process.env.NEXT_PUBLIC_API_URL}/chat-hub`, {
         withCredentials: true,
       })
       .withAutomaticReconnect()
@@ -264,11 +266,18 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e.currentTarget.value);
+    }
+  };
+
   const fetchChatMessages = async (receiverId: string) => {
     try {
       const senderID = Cookies.get("id");
       const response = await fetch(
-        `http://localhost:5296/api/Chat/get/${senderID}/${receiverId}`,
+        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/get/${senderID}/${receiverId}`,
         {
           method: "POST",
           credentials: "include",
@@ -401,7 +410,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button
+          {/* <Button
             onClick={() => {
               setFormData({});
               setIsOpen(true);
@@ -410,7 +419,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
           >
             <PlusCircle className="mr-2 h-6 w-6" />
             Thêm người dùng
-          </Button>
+          </Button> */}
         </div>
       </CardHeader>
       <CardContent>
@@ -621,6 +630,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
                 </div>
                 <div className="h-16 bg-white border-t px-4 flex items-center shrink-0">
                   <Input
+                    onKeyDown={handleKeyDown}
                     value={newMessages[userId] || ""}
                     onChange={(e) =>
                       setNewMessages((prev) => ({
@@ -628,14 +638,14 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
                         [userId]: e.target.value,
                       }))
                     }
-                    placeholder="Type a message..."
+                    placeholder="Nhập tin nhắn..."
                     className="flex-grow border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
                   />
                   <Button
                     onClick={() => handleSendMessage(userId)}
                     className={`flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0`}
                   >
-                    <span>Send</span>
+                    <span>Gửi</span>
                     <Send className="ml-2 w-4 h-4 transform rotate-45 -mt-px" />
                   </Button>
                 </div>
@@ -649,11 +659,11 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
             <Button variant="ghost" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <DialogTitle>Add New User</DialogTitle>
+            <DialogTitle>Thêm người dùng mới</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              placeholder="Full Name"
+                placeholder="Họ và tên"
               value={formData.fullname || ""}
               onChange={(e) =>
                 setFormData({ ...formData, fullname: e.target.value })
@@ -667,21 +677,21 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
               }
             />
             <Input
-              placeholder="Phone"
+              placeholder="Số điện thoại"
               value={formData.phone || ""}
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
             />
             <Input
-              placeholder="Address"
+              placeholder="Địa chỉ"
               value={formData.address || ""}
               onChange={(e) =>
                 setFormData({ ...formData, address: e.target.value })
               }
             />
             <div className="flex justify-end">
-              <Button type="submit">Add</Button>
+              <Button type="submit">Thêm</Button>
             </div>
           </form>
         </DialogContent>
