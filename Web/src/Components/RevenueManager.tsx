@@ -167,6 +167,10 @@ const countUniqueBuyersThisYear = (transactions: Transaction[]): number => {
   return uniqueBuyers.size;
 };
 
+const calculateTotalRevenue = (revenueItems: RevenueItem[]): number => {
+  return revenueItems.reduce((sum, item) => sum + item.revenue1, 0);
+};
+
 // Example usage
 const uniqueBuyersToday = countUniqueBuyersToday(transactions);
 const uniqueBuyersThisMonth = countUniqueBuyersThisMonth(transactions);
@@ -574,7 +578,7 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
                 {formatCurrency(
-                  sortedRevenueData.length ? sortedRevenueData[0].revenue1 : 0
+                  calculateTotalRevenue(sortedRevenueData)
                 )}
               </h2>
               <span
@@ -588,7 +592,7 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
                 {percentageChange.toFixed(2)}%
               </span>
             </div>
-            <p className="text-sm text-slate-500">Doanh thu của hôm nay</p>
+            <p className="text-sm text-slate-500">Tổng doanh thu</p>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <div className="flex items-center gap-1">
                 <Check size={16} className="text-green-500" />
