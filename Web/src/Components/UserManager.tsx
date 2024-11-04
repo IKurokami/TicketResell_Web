@@ -516,6 +516,9 @@ const UserManager: React.FC<UserManagerProps> = ({
                   {getSortIcon("createDate")}
                 </div>
               </th>
+              <th scope="col" className="px-6 py-3">
+                Hành động
+              </th>
             </tr>
           </thead>
           <tbody>
