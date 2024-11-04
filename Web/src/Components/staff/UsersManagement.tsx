@@ -81,7 +81,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Partial<UserData>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  
+
   const [chatMessages, setChatMessages] = useState<
     Record<string, ChatMessage[]>
   >({});
@@ -126,7 +126,6 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
       setUsers([]); // Set empty array on error
     }
   };
-
   const fetchSpecificUser = async () => {
     if (!userId) return;
 
@@ -356,8 +355,10 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   const filteredUsers = users.filter(
     (user) =>
       user.userId !== loggedInUserId && // Loại bỏ người dùng có ID trùng với ID người đăng nhập
-      ((user.fullname && user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.userId && user.userId.toLowerCase().includes(searchTerm.toLowerCase())))
+      ((user.fullname &&
+        user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (user.userId &&
+          user.userId.toLowerCase().includes(searchTerm.toLowerCase())))
   );
 
   const formatMessageDate = (date: string | null) => {

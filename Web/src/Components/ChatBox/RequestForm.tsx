@@ -483,16 +483,16 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
         <thead>
           <tr className="bg-gray-100 rounded-t-lg">
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
-              Title
+              Tiêu đề 
             </th>
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
-              Description
+              Mô tả
             </th>
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
-              Status
+              Trạng thái
             </th>
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
-              Created Date
+              Ngày tạo
             </th>
             <th className="py-3 px-4 font-semibold text-gray-700 border-b"></th>
           </tr>

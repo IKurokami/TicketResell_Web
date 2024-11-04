@@ -69,17 +69,17 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
     console.log("fetch:", chatboxData);
   }, [userData]);
 
-  const hasRO3Role =
-    userCookie?.roles?.some((role) => role.roleId === "RO3") ||
-    userCookie?.roles?.some((role) => role.roleId === "RO4");
+  const hasRO3Role = userCookie?.roles?.some((role) => role.roleId === "RO3");
+  const hasRO4Role = userCookie?.roles?.some((role) => role.roleId === "RO4");
+
   return (
     <div className="bg-white py-12 px-10 rounded-xl ">
       <p
         className={`text-2xl pb-10 text-center font-bold ${
-          !hasRO3Role ? "pt-20" : ""
+          !(hasRO3Role || hasRO4Role) ? "pt-20" : ""
         } `}
       >
-        Request table
+        Danh sách yêu cầu
       </p>
       <div
         className={`container mx-auto px-5 flex flex-col  justify-between  sm:flex-row items-center`}
@@ -88,7 +88,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           <div className="relative flex items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Search requests"
+              placeholder="Tìm kiếm yêu cầu"
               className="border-none outline-none items-center bg-transparent w-96 text-gray-700 placeholder-gray-400 focus:ring-0"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -115,7 +115,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           </div>
         )}
         <div></div>
-        {!hasRO3Role && <RequestDialog setChatboxData={setChatboxData} />}
+        {!(hasRO3Role || hasRO4Role) && (
+          <RequestDialog setChatboxData={setChatboxData} />
+        )}
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
