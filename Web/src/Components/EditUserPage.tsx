@@ -55,7 +55,7 @@ interface EditUserDialogProps {
   isOpen: boolean;
   onClose: () => void;
   user: FormData | null;
-  onSave: (data: FormData) => void;
+  onSave: (data: any) => void;
 }
 
 interface Errors {
@@ -169,12 +169,12 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
       const result = await response.json();
       console.log("Update successful", result);
+      onSave(result.data);
       // Handle successful update (e.g., show success message or redirect)
     } catch (error) {
       console.error("Error updating user:", error);
       // Handle error (e.g., show error message)
     }
-    onSave(formData);
     onClose();
   };
   const hasR02Role = roles.some((r) => r.roleId === "RO2");
@@ -184,9 +184,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
       <Card className="w-full max-w-4xl bg-white">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Chỉnh Sửa Hồ Sơ</CardTitle>
-          <CardDescription>
-            Thay đổi thông tin hồ sơ của bạn
-          </CardDescription>
+          <CardDescription>Thay đổi thông tin hồ sơ của bạn</CardDescription>
         </CardHeader>
 
         <Tabs defaultValue="personal" className="w-full">
@@ -299,7 +297,9 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                         className="w-full"
                       />
                       {errors.birthday && (
-                        <p style={{ color: "red" }}>Bạn phải đủ 18 tuổi trở lên.</p>
+                        <p style={{ color: "red" }}>
+                          Bạn phải đủ 18 tuổi trở lên.
+                        </p>
                       )}
                     </div>
                   </div>
@@ -432,12 +432,16 @@ const RoleStatusDialog: React.FC<RoleStatusDialogProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Vô hiệu hóa người bán</AlertDialogTitle>
           <AlertDialogDescription>
-            Bạn có chắc chắn muốn vô hiệu hóa vai trò này? Người dùng sẽ không thể truy cập vào hệ thống.
+            Bạn có chắc chắn muốn vô hiệu hóa vai trò này? Người dùng sẽ không
+            thể truy cập vào hệ thống.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Hủy</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-orange-600 hover:bg-orange-700">
+          <AlertDialogAction
+            onClick={onConfirm}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
             Vô hiệu hóa
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -478,7 +482,11 @@ const AccountStatusDialog: React.FC<AccountStatusDialogProps> = ({
           <AlertDialogCancel>Hủy</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className={isActive ? "bg-orange-600 hover:bg-orange-700" : "bg-green-600 hover:bg-green-700"}
+            className={
+              isActive
+                ? "bg-orange-600 hover:bg-orange-700"
+                : "bg-green-600 hover:bg-green-700"
+            }
           >
             {isActive ? "Vô hiệu hóa" : "Kích hoạt"}
           </AlertDialogAction>
@@ -507,7 +515,8 @@ const ResetPasswordDialog: React.FC<ResetPasswordDialogProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Đặt lại mật khẩu</AlertDialogTitle>
           <AlertDialogDescription>
-            Hệ thống sẽ tạo một mật khẩu ngẫu nhiên mới cho người dùng. Người dùng sẽ cần thay đổi mật khẩu khi đăng nhập lần sau.
+            Hệ thống sẽ tạo một mật khẩu ngẫu nhiên mới cho người dùng. Người
+            dùng sẽ cần thay đổi mật khẩu khi đăng nhập lần sau.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

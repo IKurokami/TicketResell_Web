@@ -119,7 +119,9 @@ public class UserService : IUserService
     {
         var user = await _unitOfWork.UserRepository.GetByIdAsync(id);
 
+        var roles = user.Roles;
         _mapper.Map(dto, user);
+        user.Roles = roles;
 
         var validator = _validatorFactory.GetValidator<User>();
 
@@ -130,7 +132,7 @@ public class UserService : IUserService
         if (saveAll)
             await _unitOfWork.CompleteAsync();
         return ResponseModel.Success($"Successfully updated user: {user.Username}",
-            _mapper.Map<UserUpdateByAdminDto>(user));
+            _mapper.Map<UserReadDto>(user));
     }
 
     public async Task<ResponseModel> RegisterSeller(string id, SellerRegisterDto dto, bool saveAll)
