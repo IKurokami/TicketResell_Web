@@ -1,3 +1,7 @@
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Repositories.Constants;
 using Repositories.Core.Dtos.Revenue;
 using TicketResell.Repositories.Helper;
 using TicketResell.Services.Services.Revenues;
@@ -25,11 +29,9 @@ public class RevenueController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return ResponseParser.Result(ResponseModel.Unauthorized("Cannot create revenue with unknown user"));
 
-        //TODO: Check for authenticated UserId is a Staff or Admin
-
-        // Optional: Add role checks if necessary
-        // if (!UserHasPermission(userId, "CreateRevenue")) return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
-
+        if (!HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+            return ResponseParser.Result(ResponseModel.Forbidden("Access denied"));
+        
         var response = await _revenueService.CreateRevenueAsync(dto);
         return ResponseParser.Result(response);
     }

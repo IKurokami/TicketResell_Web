@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Repositories.Constants;
 using Repositories.Core.Dtos.Category;
 using TicketResell.Repositories.Helper;
@@ -52,7 +55,7 @@ public class CategoryController : ControllerBase
         if (!HttpContext.HasEnoughtRoleLevel(UserRole.Staff))
             return ResponseParser.Result(
                 ResponseModel.Forbidden("You don't have permission to create categories"));
-
+        dto.CategoryId = "CAT" + Guid.NewGuid();
         return ResponseParser.Result(await _categoryService.CreateCategoryAsync(dto));
     }
 

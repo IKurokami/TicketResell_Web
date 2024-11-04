@@ -1,7 +1,11 @@
+using System;
+using System.IO;
+using System.Linq;
 using Api.Middlewares;
 using Api.Utils;
 using DotNetEnv;
 using FluentValidation;
+using Microsoft.AspNetCore.Builder;
 using Repositories.Config;
 using Repositories.Core.AutoMapperConfig;
 using Repositories.Core.Context;
@@ -22,6 +26,8 @@ using IValidatorFactory = Repositories.Core.Validators.IValidatorFactory;
 
 using TicketResell.Services.Services.Chatbox;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 Console.WriteLine("SQLServer string: " + Environment.GetEnvironmentVariable("SQLSERVER"));

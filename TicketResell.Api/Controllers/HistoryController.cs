@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using TicketResell.Services.Services.History;
 
 namespace Api.Controllers;

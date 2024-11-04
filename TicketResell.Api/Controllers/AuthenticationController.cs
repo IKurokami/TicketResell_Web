@@ -1,3 +1,6 @@
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Newtonsoft.Json;
 using TicketResell.Repositories.Core.Dtos.Authentication;
