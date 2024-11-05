@@ -138,7 +138,7 @@ const Banner = () => {
               : "text-gray-100 hover:text-white"
           }`}
               >
-                All
+                Tất cả
               </button>
 
               {limitedCategories.map((category) => (
@@ -167,7 +167,7 @@ const Banner = () => {
               >
                 <span className="inline-flex items-center gap-1">
                   <Link href="/search" className="no-underline" passHref>
-                    <span className="no-underline text-white">More</span>
+                    <span className="no-underline text-white">Nhiều hơn nữa...</span>
                   </Link>
                 </span>
               </button>

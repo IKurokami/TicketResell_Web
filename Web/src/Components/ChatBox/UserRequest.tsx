@@ -29,7 +29,6 @@ interface UserRequestProps {
   userCookie: UserData | undefined;
 }
 
-
 const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [chatboxData, setChatboxData] = useState<Chatbox[]>([]);
@@ -59,8 +58,6 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
     }
   };
 
-  
-
   useEffect(() => {
     fetchChatboxData();
     console.log("fetch:", chatboxData);
@@ -73,14 +70,13 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
     setFilteredChatboxData(filtered);
   }, [searchTerm, chatboxData]);
 
-  const hasRO3Role =
-    userCookie?.roles?.some((role) => role.roleId === "RO3") ||
-    userCookie?.roles?.some((role) => role.roleId === "RO4");
+  const hasRO3Role = userCookie?.roles?.some((role) => role.roleId === "RO3");
+  const hasRO4Role = userCookie?.roles?.some((role) => role.roleId === "RO4");
   return (
     <div className="bg-white py-12 px-10 rounded-xl ">
       <p
         className={`text-2xl pb-10 text-center font-bold ${
-          !hasRO3Role ? "pt-20" : ""
+          !(hasRO3Role || hasRO4Role) ? "pt-20" : ""
         } `}
       >
         Bảng yêu cầu
@@ -119,7 +115,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           </div>
         )}
         <div></div>
-        {!hasRO3Role && <RequestDialog setChatboxData={setChatboxData} />}
+        {!(hasRO3Role || hasRO4Role) && (
+          <RequestDialog setChatboxData={setChatboxData} />
+        )}
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">

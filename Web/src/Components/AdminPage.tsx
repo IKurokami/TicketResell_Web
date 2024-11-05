@@ -93,10 +93,13 @@ const AdminPage = () => {
 
     const getRoles = async () => {
       try {
-        const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/read`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/read`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch roles");
         }
@@ -128,10 +131,13 @@ const AdminPage = () => {
 
     const getOrders = async () => {
       try {
-        const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Order/read`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Order/read`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
         const data = await response.json();
         console.log("orders", data);
         if (!response.ok) {
@@ -458,12 +464,15 @@ const AdminPage = () => {
         );
       } else {
         // Add new role
-        response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/create`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(roleData),
-          credentials: "include",
-        });
+        response = await fetch(
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/create`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(roleData),
+            credentials: "include",
+          }
+        );
       }
 
       if (!response.ok) {
@@ -572,12 +581,15 @@ const AdminPage = () => {
         );
       } else {
         // Add new category
-        response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(categoryData),
-          credentials: "include",
-        });
+        response = await fetch(
+          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(categoryData),
+            credentials: "include",
+          }
+        );
       }
 
       if (!response.ok) {
@@ -833,9 +845,7 @@ const AdminPage = () => {
             // Handle save logic here (e.g., update user data)
             setUsers((users) =>
               users.map((user) =>
-                user.userId === updatedData.userId
-                  ? convertFormDataToUser(updatedData)
-                  : user
+                user.userId === updatedData.userId ? updatedData : user
               )
             );
             console.log("Updated User Data:", updatedData);
