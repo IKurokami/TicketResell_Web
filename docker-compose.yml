@@ -81,6 +81,18 @@ services:
       - api
     networks: 
       - ticketresell-network
+  
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"  # Expose port 80 for HTTP
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Mount your Nginx config file
+    depends_on:
+      - frontend
+      - api
+    networks:
+      - ticketresell-network
 
 networks:
   ticketresell-network:

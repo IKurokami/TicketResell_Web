@@ -21,7 +21,7 @@ const HorizontalCards : React.FC<HorizontalCardsProps> = ({ categoryId, title })
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/getByListCate`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/getByListCate`,
           {
             method: "POST",
             headers: {

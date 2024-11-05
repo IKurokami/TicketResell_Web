@@ -39,7 +39,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const fetchChatboxData = async () => {
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/getall/${userData?.userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/getall/${userData?.userId}`,
         { credentials: "include" }
       );
 

@@ -58,7 +58,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   useEffect(() => {
     const createHubConnection = async () => {
       const connection = new HubConnectionBuilder()
-        .withUrl(`http://${process.env.NEXT_PUBLIC_API_URL}/chat-hub`, {
+        .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/chat-hub`, {
           withCredentials: true,
         })
         .withAutomaticReconnect()
@@ -217,7 +217,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       if (userData?.userId) {
         try {
           const response = await fetch(
-            `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/getValidChats/${userData.userId}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/Chat/getValidChats/${userData.userId}`,
             {
               method: "GET", // Chỉ định phương thức nếu cần
               credentials: "include", // Bao gồm thông tin xác thực
@@ -300,7 +300,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     if (userCookie?.userId) {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/getChatsByBoxchatId/${chatbox.chatboxId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Chat/getChatsByBoxchatId/${chatbox.chatboxId}`,
           { credentials: "include" }
         );
         const result = await response.json();
@@ -328,7 +328,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
     try {
       // Gọi API map request
       const mapResponse = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/maprequest/${userData?.userId}/${chatboxId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Chat/maprequest/${userData?.userId}/${chatboxId}`,
         {
           method: "POST",
           credentials: "include",
@@ -363,7 +363,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   const handleRejectsUpdate = async (chatboxId: string) => {
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/rejectchat/${chatboxId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/rejectchat/${chatboxId}`,
         {
           method: "PUT",
           credentials: "include",
@@ -400,7 +400,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
   const handleCompletesUpdate = async (chatboxId: string) => {
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/closeboxchat/${chatboxId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/closeboxchat/${chatboxId}`,
         {
           method: "PUT",
           credentials: "include",
@@ -504,7 +504,7 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
 
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chat/get/${userCookie.userId}/${userData.userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Chat/get/${userCookie.userId}/${userData.userId}`,
         {
           method: "POST",
           credentials: "include",

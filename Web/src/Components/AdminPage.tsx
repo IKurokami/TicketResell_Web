@@ -94,7 +94,7 @@ const AdminPage = () => {
     const getRoles = async () => {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/read`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Role/read`,
           {
             method: "GET",
             credentials: "include",
@@ -113,7 +113,7 @@ const AdminPage = () => {
     const getCategories = async () => {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`,
           {
             method: "GET",
             credentials: "include",
@@ -132,7 +132,7 @@ const AdminPage = () => {
     const getOrders = async () => {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Order/read`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Order/read`,
           {
             method: "GET",
             credentials: "include",
@@ -152,7 +152,7 @@ const AdminPage = () => {
     const getRevenues = async () => {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Revenue/readAllRevenues`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Revenue/readAllRevenues`,
           {
             method: "GET",
             credentials: "include",
@@ -172,7 +172,7 @@ const AdminPage = () => {
     const getTopBuyers = async () => {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/allBuyer`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/User/allBuyer`,
           {
             credentials: "include",
           }
@@ -190,7 +190,7 @@ const AdminPage = () => {
     const getTransactions = async () => {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Transaction/allBuyers`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Transaction/allBuyers`,
           {
             method: "GET",
             credentials: "include",
@@ -230,7 +230,7 @@ const AdminPage = () => {
   };
 
   const handleTicketActive = async (ticketId: string) => {
-    const url = `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/${ticketId}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/${ticketId}`;
 
     try {
       const response = await fetch(url, {
@@ -270,7 +270,7 @@ const AdminPage = () => {
   };
 
   const handleTicketDelete = async (ticketId: string) => {
-    const url = `http://${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/${ticketId}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/${ticketId}`;
 
     try {
       const response = await fetch(url, {
@@ -348,7 +348,7 @@ const AdminPage = () => {
     try {
       // Make the API call here
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/updatestatus/${selectedUser?.userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/User/updatestatus/${selectedUser?.userId}`,
         {
           method: "PUT", // Use DELETE method
           headers: {
@@ -396,7 +396,7 @@ const AdminPage = () => {
     if (selectedUser?.userId) {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/deleteseller/${selectedUser?.userId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/User/deleteseller/${selectedUser?.userId}`,
           {
             method: "DELETE", // Use DELETE method
             headers: {
@@ -454,7 +454,7 @@ const AdminPage = () => {
       if (currentRole) {
         // Edit existing role
         response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/update/${roleData.roleId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Role/update/${roleData.roleId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -465,7 +465,7 @@ const AdminPage = () => {
       } else {
         // Add new role
         response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/create`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Role/create`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -503,7 +503,7 @@ const AdminPage = () => {
     try {
       if (currentRole) {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Role/delete/${currentRole.roleId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Role/delete/${currentRole.roleId}`,
           {
             method: "DELETE",
             credentials: "include",
@@ -571,7 +571,7 @@ const AdminPage = () => {
       let response;
       if (currentCategory) {
         response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/update/${categoryData.categoryId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Category/update/${categoryData.categoryId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -582,7 +582,7 @@ const AdminPage = () => {
       } else {
         // Add new category
         response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -622,7 +622,7 @@ const AdminPage = () => {
     try {
       if (currentCategory) {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/delete/${currentCategory.categoryId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Category/delete/${currentCategory.categoryId}`,
           {
             method: "DELETE",
             credentials: "include",

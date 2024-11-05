@@ -21,7 +21,7 @@ import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 
-const baseUrl = `http://${process.env.NEXT_PUBLIC_API_URL}`;
+const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}`;
 
 export interface Category {
   categoryId: string;

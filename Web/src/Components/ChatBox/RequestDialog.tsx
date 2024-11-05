@@ -95,7 +95,7 @@ const DialogComponent: React.FC<{ setChatboxData: React.Dispatch<React.SetStateA
   const handleSend = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/create`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

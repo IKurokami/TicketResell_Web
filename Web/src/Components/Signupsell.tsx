@@ -138,7 +138,7 @@ const ProfileForm: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/user/updateseller/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/user/updateseller/${id}`,
         {
           method: "PUT",
           credentials: "include",
