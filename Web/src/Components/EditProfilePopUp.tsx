@@ -102,9 +102,6 @@ const updateUserProfile = async (userId: string, data: any) => {
 
 // Password validation
 const validatePassword = (password: string) => {
-  const [formData, setFormData] = useState({
-    location: "",
-  });
   const minLength = 8;
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
@@ -129,9 +126,11 @@ const validatePassword = (password: string) => {
 const validateForm = (formData: FormData) => {
   const errors: { [key: string]: string } = {};
 
-  if (!formData.fullName?.trim()) errors.fullName = "Họ tên không được để trống";
+  if (!formData.fullName?.trim())
+    errors.fullName = "Họ tên không được để trống";
   if (!formData.sex) errors.sex = "Vui lòng chọn giới tính";
-  if (!formData.phone?.trim()) errors.phone = "Số điện thoại không được để trống";
+  if (!formData.phone?.trim())
+    errors.phone = "Số điện thoại không được để trống";
   else if (!/^\+?\d{10,}$/.test(formData.phone?.trim()))
     errors.phone = "Số điện thoại không hợp lệ";
   if (!formData.address?.trim()) errors.address = "Địa chỉ không được để trống";
@@ -163,6 +162,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
         `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-password`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -356,9 +356,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
   const [errors, setErrors] = useState<Errors>({});
   const [houseNumber, setHouseNumber] = useState<string>(" ");
   const { toast } = useToast();
-  const [formDataLocation, setFormDataLocation] = useState({
-    location: "",
-  });
+
   const HandleSubmitClick = async () => {
     await updateUserProfile(userId, formData);
     onSave(formData);
@@ -454,9 +452,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
       <Card className="w-full max-w-4xl bg-white">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Chỉnh Sửa Hồ Sơ</CardTitle>
-          <CardDescription>
-            Thay đổi thông tin cá nhân của bạn
-          </CardDescription>
+          <CardDescription>Thay đổi thông tin cá nhân của bạn</CardDescription>
         </CardHeader>
 
         <Tabs defaultValue="personal" className="w-full">

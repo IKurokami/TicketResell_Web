@@ -4,8 +4,8 @@ import EditProfilePopup from "./EditProfilePopUp";
 import { fetchImage } from "@/models/FetchImage";
 import uploadImageForTicket from "@/models/UpdateImage";
 import Link from "next/link";
-import { AlertCircle, X } from 'lucide-react';
-import { Alert, AlertDescription } from '@/Components/ui/alert';
+import { AlertCircle, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
 const DEFAULT_IMAGE = "https://images7.alphacoders.com/129/1297416.png";
 
 interface FormData {
@@ -32,7 +32,10 @@ interface Props {
   onSave: (data: FormData) => void;
 }
 
-const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
+  isOpen,
+  onClose,
+}) => {
   const [showAlert, setShowAlert] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
 
@@ -87,16 +90,19 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
     }
   };
 
-
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 mt-10" style={{ zIndex: 500 }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 mt-10"
+      style={{ zIndex: 500 }}
+    >
       <div className="w-full max-w-md mx-4 animate-in slide-in-from-bottom duration-300 mt-10">
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden mt-10">
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-red-500" />
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Báo cáo người dùng</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Báo cáo người dùng
+              </h2>
             </div>
             <button
               onClick={onClose}
@@ -220,7 +226,9 @@ const SellProfile: React.FC<Props> = ({
     }
   };
 
-  const handleCoverAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverAvatarChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -253,17 +261,36 @@ const SellProfile: React.FC<Props> = ({
             <FaPencilAlt className="mr-2 text-white" size={12} />
             <span className="text-white">Thêm ảnh bìa</span>
           </label>
-          <input id="coveravatar" type="file" className="hidden" onChange={handleCoverAvatarChange} accept="image/*" />
+          <input
+            id="coveravatar"
+            type="file"
+            className="hidden"
+            onChange={handleCoverAvatarChange}
+            accept="image/*"
+          />
         </>
       )}
       <div className="absolute w-[20vh] h-[20vh] rounded-full left-[3vw] top-[30vh] border-4 border-white bg-gray-100">
-        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+        <img
+          src={avatarUrl}
+          alt="Avatar"
+          className="w-full h-full object-cover rounded-full"
+        />
         {isAdjustVisible && (
           <>
-            <label htmlFor="avatar" className="absolute bottom-2 right-2 bg-gray-200 text-gray-600 p-1.5 rounded-full cursor-pointer">
+            <label
+              htmlFor="avatar"
+              className="absolute bottom-2 right-2 bg-gray-200 text-gray-600 p-1.5 rounded-full cursor-pointer"
+            >
               <FaPencilAlt size={12} />
             </label>
-            <input id="avatar" type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
+            <input
+              id="avatar"
+              type="file"
+              className="hidden"
+              onChange={handleAvatarChange}
+              accept="image/*"
+            />
           </>
         )}
       </div>
@@ -279,18 +306,23 @@ const SellProfile: React.FC<Props> = ({
                 {fullname ? fullname : "Không xác định"}
               </p>
             </Link>
-            <button
-              onClick={handleReportClick}
-              className="text-red-500 p-1 rounded-full hover:bg-gray-100 flex items-center justify-center mb-2"
-              aria-label="Report"
-              style={{ fontSize: "0.9em" }} // Giảm kích thước biểu tượng
-            >
-              <FaFlag />
-            </button>
+            {!isAdjustVisible && (
+              <button
+                onClick={handleReportClick}
+                className="text-red-500 p-1 rounded-full hover:bg-gray-100 flex items-center justify-center mb-2"
+                aria-label="Report"
+                style={{ fontSize: "0.9em" }} // Giảm kích thước biểu tượng
+              >
+                <FaFlag />
+              </button>
+            )}
           </div>
           <div className="flex space-x-2">
             {isAdjustVisible ? (
-              <button onClick={handleOpenEditModal} className="bg-gray-600 text-white py-2 px-4 rounded flex items-center hover:bg-gray-700">
+              <button
+                onClick={handleOpenEditModal}
+                className="bg-gray-600 text-white py-2 px-4 rounded flex items-center hover:bg-gray-700"
+              >
                 Chỉnh sửa trang cá nhân
               </button>
             ) : (
@@ -319,7 +351,13 @@ const SellProfile: React.FC<Props> = ({
       </div>
 
       {isEditModalOpen && (
-        <EditProfilePopup isOpen={isEditModalOpen} onClose={handleCloseEditModal} userId={userId} initialData={formData} onSave={onSave} />
+        <EditProfilePopup
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          userId={userId}
+          initialData={formData}
+          onSave={onSave}
+        />
       )}
 
       {/* Render ReportModal */}
