@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 export const checkLogin = async () => {
   const accessKey = Cookies.get("accessKey");
   const validate = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/islogged`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/islogged`,
     {
       method: "POST",
       credentials: "include",

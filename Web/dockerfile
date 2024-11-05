@@ -3,6 +3,7 @@ FROM node:20.17.0-alpine AS base
 
 WORKDIR /app
 
+COPY package*.json ./
 # Copy the node_modules to avoid npm install
 COPY ./node_modules ./node_modules
 # COPY package*.json ./
@@ -11,13 +12,14 @@ COPY ./node_modules ./node_modules
 COPY . .
 
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_API_URL=ticketresellapi:8080
+ENV NEXT_PUBLIC_API_URL=http://ticketresell.shop:5296
+ENV API_URL=http://api:8080
 ENV NEXTAUTH_SECRET=qOz3zgPyFFIntECZCB+KC0xLFrZYZ2HOcVLr5Dq146M=
-ENV NEXTAUTH_URL=http://localhost:3000
+ENV NEXTAUTH_URL=http://ticketresell.shop
 # Build and expose port for production
 
 RUN npm run build
 EXPOSE 3000
 
 # Start Next.js in production mode
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]

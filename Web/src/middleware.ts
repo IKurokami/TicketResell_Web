@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
 
   // Validate the user's session and role
 // Construct the URL with the roleId as a query parameter
-const validateUrl = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/isRolelogged?roleId=${roleId}`;
+const validateUrl = `${process.env.API_URL}/api/Authentication/isRolelogged?roleId=${roleId}`;
 console.log(validateUrl);
 console.log("Access key: ",accessKey);
 const validate = await fetch(validateUrl, {

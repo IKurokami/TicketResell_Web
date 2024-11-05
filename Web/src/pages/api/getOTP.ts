@@ -17,7 +17,7 @@ const encryptData = (data: string): string => {
 // Function to generate OTP and send via EmailJS
 export const getOTP = async (email: string) => {
     try {
-        const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Mail/sendopt`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Mail/sendopt`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -64,7 +64,7 @@ export default async function handler(
             // Send encrypted data to the putOTP API
 
             // Proceed with registration using fetch instead of axios
-            const registerResponse = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/register`, {
+            const registerResponse = await fetch(`${process.env.API_URL}/api/Authentication/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -41,7 +41,7 @@ const Order: React.FC<OrderProps> = ({ email }) => {
   const fetchOrders = () => {
     setLoading(true);
     if (email) {
-      fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Order/read?email=${email}`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Order/read?email=${email}`, {
         method: "GET",
         credentials: "include",
       })
@@ -66,7 +66,7 @@ const Order: React.FC<OrderProps> = ({ email }) => {
   }, [email]);
 
   const handleRefresh = (orderId: string) => {
-    fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Order/read?email=${email}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Order/read?email=${email}`, {
       method: "GET",
       credentials: "include",
     })

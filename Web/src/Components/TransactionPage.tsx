@@ -105,7 +105,7 @@ const TransactionTable: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Transaction/buyers/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Transaction/buyers/${id}`,
         {
           credentials: "include",
         }

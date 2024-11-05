@@ -154,7 +154,7 @@ const CreatePasswordForm: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-passwordKey`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-passwordKey`,
         {
           method: "POST",
           headers: {

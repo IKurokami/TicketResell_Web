@@ -13,7 +13,7 @@ const Chatpage = () => {
 
     try {
       const userResponse = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/read/${userId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/User/read/${userId}`
       );
       const response = await userResponse.json();
       console.log("API Response:", response);

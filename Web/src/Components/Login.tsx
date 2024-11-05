@@ -66,9 +66,9 @@ const Login: React.FC = () => {
     const handleLogin = async () => {
       if (session.status === "authenticated") {
         try {
-          console.log(`http://${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login-google?accessToken=${(session?.data as { token?: { accessToken: string } })?.token?.accessToken}`);
+          console.log(`${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login-google?accessToken=${(session?.data as { token?: { accessToken: string } })?.token?.accessToken}`);
           const response = await fetch(
-            `http://${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login-google?accessToken=${(session?.data as { token?: { accessToken: string } })?.token?.accessToken}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login-google?accessToken=${(session?.data as { token?: { accessToken: string } })?.token?.accessToken}`,
             {
               credentials: "include",
               method: "GET",
@@ -165,7 +165,7 @@ const Login: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/login`,
         {
           method: "POST",
           credentials: "include",

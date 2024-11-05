@@ -40,7 +40,7 @@ const MyCart: React.FC = () => {
         }
 
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
           {
             method: "GET",
             credentials: "include",
@@ -157,7 +157,7 @@ const MyCart: React.FC = () => {
     const userId = Cookies.get("id");
     try {
       await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/cart/remove/${userId}/${ticketId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/cart/remove/${userId}/${ticketId}`,
         {
           credentials: "include",
           method: "DELETE",
@@ -212,13 +212,13 @@ const MyCart: React.FC = () => {
     let apiEndpoint;
     switch (selectedPayment) {
       case "momo":
-        apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/momo/payment`;
+        apiEndpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/Payment/momo/payment`;
         break;
       case "VNpay":
-        apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/vnpay/payment`;
+        apiEndpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/Payment/vnpay/payment`;
         break;
       case "Paypal":
-        apiEndpoint = `http://${process.env.NEXT_PUBLIC_API_URL}/api/Payment/paypal/payment`;
+        apiEndpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/Payment/paypal/payment`;
         break;
       default:
         alert("Invalid payment method selected.");
@@ -245,7 +245,7 @@ const MyCart: React.FC = () => {
     } catch (error) {
       console.error(`Error processing ${selectedPayment} payment:`, error);
       alert(
-        `Đã xảy ra lỗi khi xử lý thanh toán ${selectedPayment}. Vui lòng thử lại.`
+        `Đã chọn quá số lượng sản phẩm trong kho. Vui lòng thử lại.`
       );
     }
   };

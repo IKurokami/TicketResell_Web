@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
 
       const fetchCart = async () => {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
           {
             method: "GET",
             credentials: "include",
@@ -193,7 +193,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
     const id = Cookies.get("id");
     const fetchCart = async () => {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${id}`,
         {
           method: "GET",
           credentials: "include",
@@ -244,6 +244,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
       console.log("Failed to log out. Please try again.");
     }
     removeAllCookies();
+    router.push("/login");
   };
 
   const handleEmail = () => {
@@ -429,7 +430,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 </a>
 
                 <Link
-                  href="/login"
+                  href="#"
                   onClick={() => {
                     handleLogout();
                   }}
