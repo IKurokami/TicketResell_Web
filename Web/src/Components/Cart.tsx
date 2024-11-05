@@ -245,7 +245,7 @@ const MyCart: React.FC = () => {
     } catch (error) {
       console.error(`Error processing ${selectedPayment} payment:`, error);
       alert(
-        `Đã xảy ra lỗi khi xử lý thanh toán ${selectedPayment}. Vui lòng thử lại.`
+        `Đã chọn quá số lượng sản phẩm trong kho. Vui lòng thử lại.`
       );
     }
   };

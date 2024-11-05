@@ -244,6 +244,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
       console.log("Failed to log out. Please try again.");
     }
     removeAllCookies();
+    router.push("/login");
   };
 
   const handleEmail = () => {
@@ -429,7 +430,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 </a>
 
                 <Link
-                  href="/login"
+                  href="#"
                   onClick={() => {
                     handleLogout();
                   }}

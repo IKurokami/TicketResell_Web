@@ -239,7 +239,7 @@ export const UserProfilePage: React.FC<{
 
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-password`,
+        `http://${process.env.API_URL}/api/Authentication/change-password`,
         {
           method: "POST",
           headers: {
