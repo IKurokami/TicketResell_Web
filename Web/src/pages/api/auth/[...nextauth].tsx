@@ -9,7 +9,7 @@ export const authOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  
+
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
@@ -25,8 +25,6 @@ export const authOptions = {
       return session;
     },
   },
-
-  
 };
 
 export default NextAuth(authOptions);
