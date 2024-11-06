@@ -28,7 +28,7 @@ const CategoryManagement = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`);
         const result = await response.json();
         if (result.statusCode === 200) {
           setCategories(result.data);
@@ -67,7 +67,7 @@ const CategoryManagement = () => {
       // Chỉnh sửa danh mục
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/update/${currentCategory.categoryId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Category/update/${currentCategory.categoryId}`,
           {
             method: "PUT",
             credentials: "include",
@@ -103,7 +103,7 @@ const CategoryManagement = () => {
         const newCategoryId = generateUniqueCategoryId(existingIds); // Tạo ID duy nhất
 
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`,
           {
             method: "POST",
             credentials: "include",
@@ -140,7 +140,7 @@ const CategoryManagement = () => {
   const handleDelete = async (categoryId: string) => {
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/delete/${categoryId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Category/delete/${categoryId}`,
         {
           method: "DELETE",
           credentials: "include",

@@ -103,7 +103,7 @@ const TicketDetail = () => {
   const fetchTicketById = async (id: string | null) => {
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/readbyid/${id}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/readbyid/${id}`
       );
       return await response.json();
     } catch (error) {

@@ -16,7 +16,7 @@ const addToCart = () => {
     };
 
     try {
-      const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Cart/add`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Cart/add`, {
         method: "POST",
         credentials: "include",
         headers: {

@@ -65,7 +65,7 @@ const RevenueCard = () => {
 
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Transaction/buyers/${sellerId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Transaction/buyers/${sellerId}`,
         {
           credentials: "include",
         }
@@ -87,7 +87,7 @@ const RevenueCard = () => {
     if (sellerId) {
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/Revenue/readbysellerid/${sellerId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Revenue/readbysellerid/${sellerId}`,
           {
             credentials: "include",
           }
@@ -113,7 +113,7 @@ const RevenueCard = () => {
       const sellerId = Cookies.get("id");
       try {
         const response = await fetch(
-          `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/topbuyer/${sellerId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/User/topbuyer/${sellerId}`,
           {
             credentials: "include",
           }

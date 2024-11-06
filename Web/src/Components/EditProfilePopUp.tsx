@@ -78,7 +78,7 @@ interface Errors {
 const updateUserProfile = async (userId: string, data: any) => {
   try {
     const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_API_URL}/api/User/update/${userId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/User/update/${userId}`,
       {
         method: "PUT",
 
@@ -159,7 +159,7 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
 
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-password`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-password`,
         {
           method: "POST",
           credentials: "include",

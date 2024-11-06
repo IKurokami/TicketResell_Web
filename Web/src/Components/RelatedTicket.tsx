@@ -54,14 +54,14 @@ const RelatedTicket: React.FC<RelatedTicketsProps> = ({
     const fetchRelatedTickets = async () => {
       try {
         const [notByCateResponse, byCateResponse] = await Promise.all([
-          fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/getnotbyCate/`, {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/getnotbyCate/`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify(categoriesId),
           }),
-          fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/getbyCate/${ticketID}`, {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/getbyCate/${ticketID}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

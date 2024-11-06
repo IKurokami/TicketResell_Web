@@ -15,7 +15,7 @@ interface OrderDetail {
 interface Order {
   orderId: string;
   orderDetails: OrderDetail[];
-  status: string;
+  status: number;
   date: string;
 }
 
@@ -38,7 +38,7 @@ const HistoryPage = () => {
     const fetchPurchaseHistory = async () => {
       try {
         const userId = Cookies.get('id');
-        const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/History/get/${userId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/History/get/${userId}`, {
           credentials: 'include',
           method: 'GET',
           headers: {
@@ -76,7 +76,7 @@ const HistoryPage = () => {
               })),
               price: order.orderDetails.reduce((total: number, detail: OrderDetail) =>
                 total + detail.ticket.cost * detail.quantity, 0),
-              status: order.status,
+              status: order.status === -1? 1 : order.status,
             };
           });
 

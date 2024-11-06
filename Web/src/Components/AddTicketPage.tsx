@@ -74,7 +74,7 @@ const AddTicketModal: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`);
       const result = await response.json();
 
       if (Array.isArray(result.data)) {
@@ -239,7 +239,7 @@ const AddTicketModal: React.FC = () => {
 
     const checkTicketIdExist = async (ticketId: string) => {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/checkexist/${ticketId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/checkexist/${ticketId}`
       );
       return response.status === 200;
     };
@@ -298,7 +298,7 @@ const AddTicketModal: React.FC = () => {
         console.log("Images uploaded successfully (simulated).");
 
         const createTicketPromises = async (ticket: any) => {
-          await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/create`, {
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/create`, {
             method: "POST",
             credentials: "include",
             headers: {

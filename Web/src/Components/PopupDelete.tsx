@@ -18,7 +18,7 @@ const Popup: React.FC<PopupProps> = ({ isVisible, onClose, ticketId }) => {
   const handleClick = async () => {
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/deletebybaseid/${ticketId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/deletebybaseid/${ticketId}`,
         {
           method: "DELETE",
           credentials: "include",

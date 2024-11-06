@@ -118,7 +118,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000","http://frontend:3000")
+            policy.WithOrigins("http://frontend:3000", Environment.GetEnvironmentVariable("BASE_URL") ?? "http://localhost:3000", "http://178.128.59.176:3000" )
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();
@@ -131,7 +131,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
 builder.Services.AddSignalR();
 
 var app = builder.Build();

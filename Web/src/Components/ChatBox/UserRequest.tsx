@@ -39,7 +39,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   const fetchChatboxData = async () => {
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/getall/${userData?.userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/getall/${userData?.userId}`,
         { credentials: "include" }
       );
 
@@ -76,7 +76,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
     <div className="bg-white py-12 px-10 rounded-xl ">
       <p
         className={`text-2xl pb-10 text-center font-bold ${
-          !(hasRO3Role || hasRO4Role) ? "pt-20" : ""
+          !(hasRO3Role) ? "pt-20" : ""
         } `}
       >
         Bảng yêu cầu
@@ -115,7 +115,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           </div>
         )}
         <div></div>
-        {!(hasRO3Role || hasRO4Role) && (
+        {!(hasRO3Role) && (
           <RequestDialog setChatboxData={setChatboxData} />
         )}
       </div>

@@ -7,7 +7,7 @@ export const CheckSeller = async (): Promise<boolean> => {
   if (!id) return false; 
 
   try {
-    const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/api/user/check/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/check/${id}`, {
       method: "GET",
       credentials: "include", 
       headers: {

@@ -166,12 +166,12 @@ public class MailService : IMailService
             <h2>Xin chào</h2>
             <p>Chúng tôi nhận được yêu cầu khôi phục mật khẩu cho tài khoản TicketResell của bạn. Để tạo mật khẩu mới, vui lòng nhấp vào nút bên dưới:</p>
             
-            <a href='http://localhost:3000/createpassword?key={hashedKey}&to={to}
+            <a href='{_config.BaseUrl}/createpassword?key={hashedKey}&to={to}
 ' class='reset-button'>Đặt lại mật khẩu</a>
             
             <p>Hoặc sao chép đường dẫn sau vào trình duyệt:</p>
             <div class='reset-link'>
-                http://localhost:3000/createpassword?key={hashedKey}&to={to}
+                {_config.BaseUrl}/createpassword?key={hashedKey}&to={to}
 
             </div>
 
