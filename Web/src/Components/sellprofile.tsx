@@ -326,7 +326,7 @@ const SellProfile: React.FC<Props> = ({
                 Chỉnh sửa trang cá nhân
               </button>
             ) : (
-              <button className="bg-blue-500 text-white py-2 px-4 rounded flex items-center hover:bg-blue-600">
+              <button className="bg-white-500 text-white py-2 px-4 rounded flex items-center ">
                 Theo dõi
               </button>
             )}

@@ -275,10 +275,11 @@ const MyCart: React.FC = () => {
       <div className=" bg-white rounded-t overflow-hidden">
         <div className="px-8 xl:px-24 pb-16 flex flex-col lg:flex-row relative">
           {/* Left Column: Tickets Table */}
-          <div className="w-full lg:w-2/3 overflow-y-auto max-h-[calc(100vh-6rem)]">
+          <div className={`w-full lg:w-2/3 max-h-[calc(100vh-6rem)] ${items.length === 0 ? "" : "overflow-y-auto"}`}    >
             <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
               Giỏ hàng
             </h2>
+
             <div className="hidden sm:grid sm:grid-cols-7 gap-4 mb-4 min-w-full text-sm font-medium text-gray-500 sticky top-16 bg-white z-10 py-2">
               <div className="col-span-3">Sản phẩm</div>
               <div>Giá</div>
@@ -286,122 +287,131 @@ const MyCart: React.FC = () => {
               <div>Tổng</div>
               <div>Thao tác</div>
             </div>
-            {items.map((item) => (
-              <div
-                key={item.orderDetailId}
-                className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-7 sm:gap-4 sm:items-center relative"
-              >
-                <div className="flex flex-col col-span-3 mb-4 sm:mb-0">
-                  <h3 className="font-bold text-lg text-gray-900 mb-2">
-                    {item.ticket.name}
-                  </h3>
-                  <div className="flex flex-col items-start">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.ticket.name}
-                      className="w-64 h-32 object-cover rounded mb-2"
-                    />
-                    <p className="text-sm text-gray-500">
-                      {formatDateTime(item.ticket.startDate)}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Người bán: {item.sellerName}
-                    </p>
+
+            {/* Check if items array is empty */}
+            {items.length === 0 ? (
+              <div className="flex justify-center items-center h-full">
+                <p className="text-gray-500 text-lg mb-20">Không có vé trong giỏ hàng</p>
+              </div>
+            ) : (
+              // Render items if array is not empty
+              items.map((item) => (
+                <div
+                  key={item.orderDetailId}
+                  className="border-b border-t border-gray-200 py-4 sm:grid sm:grid-cols-7 sm:gap-4 sm:items-center relative"
+                >
+                  <div className="flex flex-col col-span-3 mb-4 sm:mb-0">
+                    <h3 className="font-bold text-lg text-gray-900 mb-2">
+                      {item.ticket.name}
+                    </h3>
+                    <div className="flex flex-col items-start">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.ticket.name}
+                        className="w-64 h-32 object-cover rounded mb-2"
+                      />
+                      <p className="text-sm text-gray-500">
+                        {formatDateTime(item.ticket.startDate)}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Người bán: {item.sellerName}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="mb-2">
-                  <span className="sm:hidden font-medium mr-2">Giá:</span>
-                  {formatPriceVND(item.price)}
-                </div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="sm:hidden font-medium">Số lượng:</span>
-                  <div className="flex items-center">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleQuantityChange(item.orderDetailId, false)
-                      }
-                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                    >
-                      <svg
-                        className="h-2.5 w-2.5 text-gray-900 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 18 2"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M1 1h16"
-                        />
-                      </svg>
-                    </button>
-                    <span className="w-10 shrink-0 text-center text-sm font-medium text-gray-900">
-                      {item.quantity}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleQuantityChange(item.orderDetailId, true)
-                      }
-                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                    >
-                      <svg
-                        className="h-2.5 w-2.5 text-gray-900 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 18 18"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 1v16M1 9h16"
-                        />
-                      </svg>
-                    </button>
+                  <div className="mb-2">
+                    <span className="sm:hidden font-medium mr-2">Giá:</span>
+                    {formatPriceVND(item.price)}
                   </div>
-                </div>
-                <div className="mb-2">
-                  <span className="sm:hidden font-medium mr-2">Tổng cộng:</span>
-                  {formatPriceVND(item.price * item.quantity)}
-                </div>
-                <div className="flex items-center justify-center space-x-4">
-                  <label className="inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={item.isSelected}
-                      onChange={() => handleSelect(item.orderDetailId)}
-                      className="hidden"
-                    />
-                    <span
-                      className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ease-in-out ${
-                        item.isSelected
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="sm:hidden font-medium">Số lượng:</span>
+                    <div className="flex items-center">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleQuantityChange(item.orderDetailId, false)
+                        }
+                        className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                      >
+                        <svg
+                          className="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 18 2"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M1 1h16"
+                          />
+                        </svg>
+                      </button>
+                      <span className="w-10 shrink-0 text-center text-sm font-medium text-gray-900">
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleQuantityChange(item.orderDetailId, true)
+                        }
+                        className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                      >
+                        <svg
+                          className="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 18 18"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 1v16M1 9h16"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mb-2">
+                    <span className="sm:hidden font-medium mr-2">Tổng cộng:</span>
+                    {formatPriceVND(item.price * item.quantity)}
+                  </div>
+                  <div className="flex items-center justify-center space-x-4">
+                    <label className="inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={item.isSelected}
+                        onChange={() => handleSelect(item.orderDetailId)}
+                        className="hidden"
+                      />
+                      <span
+                        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ease-in-out ${item.isSelected
                           ? "bg-green-500 border-green-500"
                           : "border-gray-300"
-                      }`}
+                          }`}
+                      >
+                        {item.isSelected && (
+                          <CheckCircle className="w-4 h-4 text-white" />
+                        )}
+                      </span>
+                    </label>
+                    <button
+                      onClick={() => handleRemoveItem(item.ticketId)}
+                      className="text-red-500 hover:text-red-700 focus:outline-none"
+                      aria-label="Delete item"
                     >
-                      {item.isSelected && (
-                        <CheckCircle className="w-4 h-4 text-white" />
-                      )}
-                    </span>
-                  </label>
-                  <button
-                    onClick={() => handleRemoveItem(item.ticketId)}
-                    className="text-red-500 hover:text-red-700 focus:outline-none"
-                    aria-label="Delete item"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
+
 
           {/* Right Column: Payment Method and Summary */}
           <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky min-h-full">
@@ -438,18 +448,17 @@ const MyCart: React.FC = () => {
                     {paymentMethods.map((method) => (
                       <div
                         key={method.id}
-                        className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
-                          selectedPayment === method.id
-                            ? "bg-blue-100 border border-green-500"
-                            : "bg-gray-100 hover:bg-gray-200"
-                        }`}
+                        className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${selectedPayment === method.id
+                          ? "bg-blue-100 border border-green-500"
+                          : "bg-gray-100 hover:bg-gray-200"
+                          }`}
                         onClick={() => handleSelectPayment(method.id)}
                       >
                         {<img
-                            src={method.imageUrl}
-                            alt={method.name}
-                            className="w-12 h-12 mb-2"
-                          />}
+                          src={method.imageUrl}
+                          alt={method.name}
+                          className="w-12 h-12 mb-2"
+                        />}
                         <span className="text-xs text-gray-700">
                           {method.name}
                         </span>
@@ -469,7 +478,7 @@ const MyCart: React.FC = () => {
                   className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition duration-300 mt-4"
                   onClick={handleCheckout}
                 >
-                  Thành toán
+                  Thanh toán
                 </button>
               </div>
             </div>
