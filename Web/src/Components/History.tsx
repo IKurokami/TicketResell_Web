@@ -50,7 +50,8 @@ const HistoryPage = () => {
 
         const result = await response.json();
         if (result.statusCode === 200 && Array.isArray(result.data)) {
-          const groupedOrders = result.data.map((order: Order) => {
+          const filteredOrders = result.data.filter((order: Order) => order.status !== 1);
+          const groupedOrders = filteredOrders.map((order: Order) => {
             const date = order.date;
             const formattedDate = date ? (() => {
               const parsedDate = new Date(date);
@@ -111,6 +112,7 @@ const HistoryPage = () => {
         className: 'bg-red-100 text-red-800 ring-red-600/20',
         icon: '×',
       },
+      
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig[0];
