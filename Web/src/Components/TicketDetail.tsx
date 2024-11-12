@@ -376,7 +376,6 @@ const TicketDetail = () => {
                       <p className="text-4xl font-bold text-gray-900">
                         {formatVND(ticketresult?.cost)}
                       </p>
-                      <span className="text-sm text-gray-500">VND</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
