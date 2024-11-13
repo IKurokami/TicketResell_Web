@@ -78,15 +78,24 @@ const Login: React.FC = () => {
             }
           );
           const result = await response.json();
+          let navigationPath = "/";
+          if (result.message === "False") {
+            console.log("hello");
+            
+            // Navigate to the set password page
+            Cookies.set("id", result.data.userId);
+            Cookies.set("accessKey", result.data.passwordSetupToken);
+            router.push("/setpassword");
+          }
+          
           if (!response.ok) {
             console.error("Lỗi đăng nhập:", result);
-          } else {
+          } else { 
             Cookies.set("id", result.data.user.userId);
             Cookies.set("accessKey", result.data.accessKey);
             setLoginSuccessMessage("Đăng nhập thành công!");
             console.log("TEST1");
             // Determine navigation path based on user roles
-            let navigationPath = "/";
             const userRoles = result.data.user.roles.map(
               (role: any) => role.rolename
             );

@@ -88,7 +88,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
             }
             if (user != null)
             {
-                _context.Users.Update(user);
+                _context.Users.Update(user);  
             }
         }
 
