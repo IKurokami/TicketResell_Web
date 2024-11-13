@@ -55,7 +55,6 @@ interface TicketData {
   sellerId: string;
   seller:string;
   fullname:string;
-
   description: string;
   categories?: string[];
   image: string;
@@ -63,6 +62,8 @@ interface TicketData {
 }
 
 interface OrderDetail {
+  orderDetailId: string;
+  rated: number;
   ticket: {
     id: string;
     name: string;
@@ -158,9 +159,8 @@ const MyTicketPage = () => {
                 const startDate = detail.ticket.startDate;
                 const formattedDate = formatDate(startDate);
                 const { imageUrl } = await fetchImage(detail.ticket.image);
-
               return {
-                id: detail.ticket.id,
+                id: detail.orderDetailId,
                 name: detail.ticket.name,
                 date: formattedDate,
                 cost: detail.ticket.cost,
@@ -170,13 +170,13 @@ const MyTicketPage = () => {
                 description: detail.ticket.description || 'Không có mô tả',
                 categories: detail.ticket.categories || ['Chung'],
                 image: imageUrl || detail.ticket.image,
-                location: detail.ticket.location
+                location: detail.ticket.location,
+                rated: detail.rated
               };
               
             })
           )
         );
-
         setTickets(completedTickets);
       }
     } catch (error) {

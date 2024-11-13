@@ -1,6 +1,9 @@
-﻿namespace Repositories.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class Order
+namespace Repositories.Core.Entities;
+
+public partial class Order
 {
     public string OrderId { get; set; } = null!;
 

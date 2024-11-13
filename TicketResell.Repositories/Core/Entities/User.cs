@@ -1,6 +1,9 @@
-﻿namespace Repositories.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class User
+namespace Repositories.Core.Entities;
+
+public partial class User
 {
     public string UserId { get; set; } = null!;
 
