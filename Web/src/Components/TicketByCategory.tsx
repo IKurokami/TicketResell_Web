@@ -85,7 +85,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ category }) => {
 
 
   return (
-    <section className="w-full px-4 sm:px-0 py-6 md:py-8 lg:py-10 bg-gray-50">
+    <section className="w-full px-4 sm:px-0 py-6 md:py-8 lg:py-10 bg-white">
       {bannerItems.length > 0 && (
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center mb-6 space-x-2">

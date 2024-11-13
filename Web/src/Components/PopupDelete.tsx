@@ -47,9 +47,6 @@ const Popup: React.FC<PopupProps> = ({ isVisible, onClose, ticketId }) => {
       <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
         <div className="dialog-header">
           <h2>Thông báo</h2>
-          <button className="close-button" onClick={onClose}>
-            ×
-          </button>
         </div>
         <div className="dialog-body">Bạn có muốn xóa vé này không?</div>
         <div className="dialog-footer">
