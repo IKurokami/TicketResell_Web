@@ -23,7 +23,7 @@ const Dialog: React.FC<DialogProps> = ({
   description,
   setDescription,
   titleError,
-  descriptionError,
+  descriptionError
 }) => {
   return (
     <div
@@ -59,53 +59,51 @@ const Dialog: React.FC<DialogProps> = ({
               className="w-full rounded-md border border-gray-300 p-2 hover:bg-gray-100 focus:border-transparent"
               rows={3}
             ></textarea>
-            {descriptionError && (
-              <p className="text-red-500 text-xs">{descriptionError}</p>
-            )}
+            {descriptionError && <p className="text-red-500 text-xs">{descriptionError}</p>}
           </div>
           <div className="flex justify-end space-x-3 p-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex items-center rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow focus:outline-none "
-            >
-              <svg
-                className="mr-2 h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="inline-flex items-center rounded-lg bg-green-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-green-600 hover:shadow-md   "
-            >
-              <svg
-                className="mr-2 h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              Gửi
-            </button>
-          </div>
+      <button
+        type="button"
+        onClick={onClose}
+        className="inline-flex items-center rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow focus:outline-none "
+      >
+        <svg
+          className="mr-2 h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+        Hủy
+      </button>
+      <button
+        type="submit"
+        className="inline-flex items-center rounded-lg bg-green-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-green-600 hover:shadow-md   "
+      >
+        <svg
+          className="mr-2 h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+        Gửi
+      </button>
+    </div>
         </form>
       </div>
     </div>
@@ -166,14 +164,15 @@ const DialogComponent: React.FC<{
       }
 
       const data = await response.json();
-      setChatboxData((prevData) => [data.data, ...prevData]);
-      console.log("Success:", data);
+      setChatboxData(prevData => [data.data, ...prevData]);
+      console.log('Success:', data);
       handleClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Lỗi:", error);
     }
   };
 
+  const isDisabled = chatboxData.some(chatbox => chatbox.status === 1);
   const validateTitle = (title: string): boolean => {
     if (/\d/.test(title)) {
       setTitleError("Tiêu đề không được chứa số.");
