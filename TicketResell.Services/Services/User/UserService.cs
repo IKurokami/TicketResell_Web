@@ -185,6 +185,12 @@ public class UserService : IUserService
         var validationResult = validator.Validate(user);
         if (!validationResult.IsValid) return ResponseModel.BadRequest("Validation Error", validationResult.Errors);
         await _unitOfWork.UserRepository.RemoveSeller(user);
+        var tickets = await _unitOfWork.TicketRepository.GetTicketBySellerId(id);
+        foreach (var ticket in tickets)
+        {
+            var newbaseId = ticket.TicketId.Split('_')[0];
+           await _unitOfWork.TicketRepository.DeleteTicketByBaseId(newbaseId);
+        }
         if (saveAll)
             await _unitOfWork.CompleteAsync();
         return ResponseModel.Success("Successfully remove seller");

@@ -25,6 +25,10 @@ interface ProfileData {
 
 interface Errors {
   birthday?: string;
+  fullname?: string;
+  phone?: string;
+  gmail?: string;
+  location?: string;
 }
 
 const ProfileForm: React.FC = () => {
@@ -60,15 +64,40 @@ const ProfileForm: React.FC = () => {
     const name = "target" in e ? e.target.name : e.name;
     const value = "target" in e ? e.target.value : e.value;
 
-    // Update profileData state
     setProfileData((prev) => ({
       ...prev,
       [name]: value || null,
     }));
 
-    // Validate birthday if the birthday field is changed
-    if (name === "birthday") {
-      validateBirthday(value);
+    // Validate fields
+    switch (name) {
+      case "birthday":
+        validateBirthday(value);
+        break;
+      case "fullname":
+        setErrors(prev => ({
+          ...prev,
+          fullname: validateName(value)
+        }));
+        break;
+      case "phone":
+        setErrors(prev => ({
+          ...prev,
+          phone: validatePhone(value)
+        }));
+        break;
+      case "gmail":
+        setErrors(prev => ({
+          ...prev,
+          gmail: !value ? "Vui lòng nhập email." : ""
+        }));
+        break;
+      case "location":
+        setErrors(prev => ({
+          ...prev,
+          location: !value ? "Vui lòng chọn địa chỉ." : ""
+        }));
+        break;
     }
   };
 
@@ -100,6 +129,29 @@ const ProfileForm: React.FC = () => {
     }
   };
 
+  const validateName = (name: string) => {
+    if (!name) {
+      return "Vui lòng nhập họ và tên.";
+    }
+    if (name.length < 5 || name.length > 90) {
+      return "Họ và tên phải từ 5 đến 90 ký tự.";
+    }
+    if (!/^[a-zA-ZÀ-ỹ\s]*$/.test(name)) {
+      return "Họ và tên không được chứa số hoặc ký tự đặc biệt.";
+    }
+    return "";
+  };
+
+  const validatePhone = (phone: string) => {
+    if (!phone) {
+      return "Vui lòng nhập số điện thoại.";
+    }
+    if (!/^\d{8,}$/.test(phone)) {
+      return "Số điện thoại phải có ít nhất 8 chữ số.";
+    }
+    return "";
+  };
+
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
   };
@@ -107,9 +159,16 @@ const ProfileForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if there are any validation errors before submitting
-    if (errors.birthday) {
-      console.error("Form submission prevented due to validation errors");
+    // Check all validations
+    if (
+      errors.birthday ||
+      errors.fullname ||
+      errors.phone ||
+      errors.gmail ||
+      errors.location ||
+      !isChecked
+    ) {
+      setNotification("Vui lòng kiểm tra lại thông tin.");
       return;
     }
 
@@ -202,6 +261,8 @@ const ProfileForm: React.FC = () => {
                 variant="outlined"
                 placeholder="Nhập họ và tên của bạn"
                 onChange={handleChange}
+                error={!!errors.fullname}
+                helperText={errors.fullname}
                 sx={textFieldStyle}
               />
 
@@ -213,6 +274,8 @@ const ProfileForm: React.FC = () => {
                 variant="outlined"
                 placeholder="Nhập địa chỉ email của bạn"
                 onChange={handleChange}
+                error={!!errors.gmail}
+                helperText={errors.gmail}
                 sx={textFieldStyle}
                 InputProps={{
                   endAdornment: (
@@ -272,6 +335,8 @@ const ProfileForm: React.FC = () => {
                 variant="outlined"
                 placeholder="Nhập số điện thoại của bạn"
                 onChange={handleChange}
+                error={!!errors.phone}
+                helperText={errors.phone}
                 sx={textFieldStyle}
               />
 

@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
-import { motion } from "framer-motion";
 import { RiLockPasswordFill } from "react-icons/ri";
 
-// Password requirements constant remains the same
-export const PASSWORD_REQUIREMENTS = [
+// Password requirements
+const PASSWORD_REQUIREMENTS = [
   { label: "Ít nhất 8 ký tự", test: (pwd: string) => pwd.length >= 8 },
   {
-    label: "Chứa chữ cái viết hoa",
+    label: "Chứa chữ in hoa",
     test: (pwd: string) => /[A-Z]/.test(pwd),
   },
   {
-    label: "Chứa chữ cái viết thường",
+    label: "Chứa chữ thường",
     test: (pwd: string) => /[a-z]/.test(pwd),
   },
   { label: "Chứa số", test: (pwd: string) => /\d/.test(pwd) },
@@ -22,11 +21,7 @@ export const PASSWORD_REQUIREMENTS = [
   },
 ] as const;
 
-interface Params {
-  key?: string;
-  to?: string;
-}
-// Type definitions remain the same
+// Type definitions
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -41,23 +36,27 @@ interface ActionButtonProps {
   type?: "button" | "submit";
 }
 
-// InputField component remains the same
-export const InputField: React.FC<InputFieldProps> = ({
+interface SetPasswordProps {
+  onSubmit: (password: string) => Promise<void>;
+  title?: string;
+  subtitle?: string;
+}
+
+// InputField component
+const InputField: React.FC<InputFieldProps> = ({
   icon,
   rightIcon,
   onRightIconClick,
   error,
   ...props
 }) => (
-  <div className="relative">
+  <div className="relative mt-5">
     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
       {icon}
     </div>
     <input
-      className={`w-full pl-10 pr-10 py-3 bg-gray-100 border-none rounded-full focus:outline-none focus:ring-2 
-        ${
-          error ? "ring-2 ring-red-500" : "focus:ring-green-500"
-        } transition-all`}
+      className={`w-full pl-10 pr-10 py-4 bg-gray-100 border-none rounded-full focus:outline-none focus:ring-2 
+        ${error ? "ring-2 ring-red-500" : "focus:ring-green-500"} transition-all`}
       {...props}
     />
     {rightIcon && (
@@ -77,43 +76,37 @@ export const InputField: React.FC<InputFieldProps> = ({
   </div>
 );
 
-// ActionButton component remains the same
-export const ActionButton: React.FC<ActionButtonProps> = ({
+// ActionButton component
+const ActionButton: React.FC<ActionButtonProps> = ({
   children,
   onClick,
   isLoading,
   type = "button",
 }) => (
-  <motion.button
+  <button
     type={type}
     className="w-full px-4 py-4 mt-6 font-bold text-white bg-green-500 rounded-full hover:bg-green-600 
       focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 
       transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     onClick={onClick}
     disabled={isLoading}
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
   >
     {isLoading ? (
       <div className="flex items-center justify-center">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Đang xử lý...
+        Processing...
       </div>
     ) : (
       children
     )}
-  </motion.button>
+  </button>
 );
 
-const CreatePasswordForm: React.FC = () => {
-  // Update URL parameter handling
-  const urlParams =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search)
-      : null;
-  const to = urlParams ? urlParams.get("to") : null;
-  const key = urlParams ? urlParams.get("key") : null;
-
+const SetPassword: React.FC<SetPasswordProps> = ({
+  onSubmit,
+  title = "Đặt Mật Khẩu",
+  subtitle = "Vui lòng đặt mật khẩu mới",
+}) => {
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",
@@ -140,47 +133,23 @@ const CreatePasswordForm: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!validatePassword(formData.newPassword)) {
-      newErrors.newPassword = "Mật khẩu không đáp ứng yêu cầu";
+      newErrors.newPassword = "Password does not meet the requirements";
       setErrors(newErrors);
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Mật khẩu không khớp";
+      newErrors.confirmPassword = "Passwords do not match";
       setErrors(newErrors);
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/Authentication/change-passwordKey`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: to,
-            passwordKey: key,
-            newPassword: formData.newPassword,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Thay đổi mật khẩu thất bại");
-      }
-
-      // Handle success
-      window.location.href = "/login"; // Redirect to login page after success
+      await onSubmit(formData.newPassword);
     } catch (error) {
       setErrors({
-        submit:
-          error instanceof Error
-            ? error.message
-            : "Đã xảy ra lỗi khi thay đổi mật khẩu",
+        submit: error instanceof Error ? error.message : "Failed to set password",
       });
     } finally {
       setIsLoading(false);
@@ -189,12 +158,7 @@ const CreatePasswordForm: React.FC = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-5">
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-xl"
-      >
+      <div className="w-full max-w-xl">
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden mt-20 p-10 max-w-lg mx-auto">
           <div className="mb-8 text-center">
             <h1 className="text-5xl font-bold">
@@ -203,58 +167,34 @@ const CreatePasswordForm: React.FC = () => {
             </h1>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="p-8"
-          >
+          <div className="p-8">
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-gray-900">Đổi mật khẩu</h1>
-              <p className="text-gray-600 mt-2">Vui lòng đổi mật khẩu mới</p>
+              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+              <p className="text-gray-600 mt-2">{subtitle}</p>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-9">
-              <div>
-                <InputField
-                  icon={<RiLockPasswordFill />}
-                  rightIcon={
-                    showPassword.new ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )
-                  }
-                  type={showPassword.new ? "text" : "password"}
-                  placeholder="Nhập mật khẩu mới"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleChange}
-                  onRightIconClick={() =>
-                    setShowPassword((prev) => ({ ...prev, new: !prev.new }))
-                  }
-                  error={errors.newPassword}
-                />
-              </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <InputField
                 icon={<RiLockPasswordFill />}
-                rightIcon={
-                  showPassword.confirm ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )
-                }
+                rightIcon={showPassword.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                type={showPassword.new ? "text" : "password"}
+                placeholder="Nhập mật khẩu mới"
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleChange}
+                onRightIconClick={() => setShowPassword((prev) => ({ ...prev, new: !prev.new }))}
+                error={errors.newPassword}
+              />
+
+              <InputField
+                icon={<RiLockPasswordFill />}
+                rightIcon={showPassword.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 type={showPassword.confirm ? "text" : "password"}
                 placeholder="Xác nhận mật khẩu"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                onRightIconClick={() =>
-                  setShowPassword((prev) => ({
-                    ...prev,
-                    confirm: !prev.confirm,
-                  }))
-                }
+                onRightIconClick={() => setShowPassword((prev) => ({ ...prev, confirm: !prev.confirm }))}
                 error={errors.confirmPassword}
               />
 
@@ -265,7 +205,7 @@ const CreatePasswordForm: React.FC = () => {
               )}
 
               <ActionButton type="submit" isLoading={isLoading}>
-                Đổi mật khẩu 
+                Đặt Mật Khẩu
               </ActionButton>
 
               <div className="mt-4 space-y-2">
@@ -286,11 +226,11 @@ const CreatePasswordForm: React.FC = () => {
                 ))}
               </div>
             </form>
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
 
-export default CreatePasswordForm;
+export default SetPassword;

@@ -58,15 +58,7 @@ const DEFAULT_IMAGE =
           name: item.name,
           price: item.cost.toString(),
           id: baseId, 
-          date: new Date(item.startDate).toLocaleString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour12: true,
-            timeZone: "Asia/Ho_Chi_Minh",
-          }),
+          date: formatDate(item.startDate),
           categories: item.categories.map((category: any) => ({
             categoryId: category.categoryId,
             name: category.name,
@@ -82,6 +74,18 @@ const DEFAULT_IMAGE =
     return ticketCards;
   };
   
+  const formatDate = (dateString: any) => {
+    const date = new Date(dateString + "Z");
+    // Extract the day, month, and year manually
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
+    const year = date.getFullYear();
+    // Extract hours and minutes
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+
+    return `${day}/${month}/${year}, ${hours}:${minutes}`;
+  };
   
 import Cookies from "js-cookie";
 

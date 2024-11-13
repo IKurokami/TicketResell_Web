@@ -94,6 +94,24 @@ public class AuthenticationController : ControllerBase
         return ResponseParser.Result(result);
     }
 
+    [HttpPost("set-password")]
+    public async Task<IActionResult> SetPassword([FromBody] PasswordSetupDto request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("Invalid request payload.");
+        }
+
+        var response = await _authService.SetPasswordAsync(
+            request.UserId,
+            request.Password,
+            request.PasswordSetupToken
+            );
+
+        return ResponseParser.Result(response);
+    }
+
+
         [HttpPost("islogged")]
         public async Task<IActionResult> IsLogged()
         {

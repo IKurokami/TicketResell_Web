@@ -15,6 +15,7 @@ import Cookies from "js-cookie";
 import "@/Css/AddTicketModal.css";
 import uploadImageForTicket from "@/models/UpdateImage";
 import AddressFields from "@/Hooks/location";
+import styled from '@emotion/styled';
 
 
 interface FormDataType {
@@ -32,6 +33,32 @@ interface Category {
   categoryId: string;
   name: string;
 }
+
+// Add validation error types
+interface ValidationErrors {
+  quantity: string;
+  name: string;
+  cost: string;
+  date: string;
+  description: string;
+  categories: string;
+  image: string;
+  qrcode: string;
+  location: string;
+}
+
+// Add a styled component for error messages
+const ErrorText = styled('span')({
+  color: '#d32f2f',
+  fontSize: '0.75rem',
+  marginTop: '3px',
+  marginLeft: '14px',
+  lineHeight: '1.66',
+  fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
+  fontWeight: '400',
+  letterSpacing: '0.03333em',
+  display: 'block'
+});
 
 const AddTicketModal: React.FC = () => {
   const initialFormData: FormDataType = {
@@ -58,6 +85,18 @@ const AddTicketModal: React.FC = () => {
 
   const [houseNumber, setHouseNumber] = useState<string>("");
  
+  const [errors, setErrors] = useState<ValidationErrors>({
+    quantity: '',
+    name: '',
+    cost: '',
+    date: '',
+    description: '',
+    categories: '',
+    image: '',
+    qrcode: '',
+    location: ''
+  });
+
   useEffect(() => {
     // Function to format the current date and time to the 'datetime-local' format
     const getCurrentDateTime = () => {
@@ -93,46 +132,158 @@ const AddTicketModal: React.FC = () => {
     fetchCategories();
   }, []);
 
+  // Validation functions
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {
+      quantity: validateQuantity(quantity.toString()),
+      name: validateName(formData.name),
+      cost: validateCost(formData.cost),
+      date: validateDate(formData.date),
+      description: validateDescription(formData.description),
+      categories: validateCategories(formData.categories),
+      image:  validateQrCodes(),
+      qrcode: validateQrCodes(),
+      location: validateLocation()
+    };
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
+  const validateRequired = (value: any, fieldName: string): string => {
+    if (!value || (typeof value === 'string' && value.trim() === '') || 
+        (Array.isArray(value) && value.length === 0)) {
+      return `${fieldName} không được để trống`;
+    }
+    return '';
+  };
+
+  const validateQuantity = (value: string): string => {
+    const requiredError = validateRequired(value, 'Số lượng');
+    if (requiredError) return requiredError;
+    
+    const numValue = Number(value);
+    if (isNaN(numValue) || !Number.isInteger(numValue)) {
+      return 'Số lượng phải là số nguyên';
+    }
+    if (numValue < 1) {
+      return 'Số lượng phải lớn hơn 0';
+    }
+    return '';
+  };
+
+  const validateName = (value: string): string => {
+    const requiredError = validateRequired(value, 'Tên vé');
+    if (requiredError) return requiredError;
+    
+    if (value.length < 5) {
+      return 'Tên vé phải có ít nhất 5 ký tự';
+    }
+    if (value.length > 90) {
+      return 'Tên vé không được vượt quá 90 ký tự';
+    }
+    return '';
+  };
+
+  const validateCost = (value: string): string => {
+    const requiredError = validateRequired(value, 'Giá');
+    if (requiredError) return requiredError;
+    
+    if (!/^\d+000$/.test(value)) {
+      return 'Giá phải là bội số của 1000';
+    }
+    const numValue = Number(value);
+    if (numValue < 1000) {
+      return 'Giá phải lớn hơn hoặc bằng 1000';
+    }
+    return '';
+  };
+
+  const validateDate = (value: string): string => {
+    const requiredError = validateRequired(value, 'Ngày và giờ');
+    if (requiredError) return requiredError;
+    
+    const selectedDate = new Date(value);
+    const minDate = new Date(minDateTime);
+    
+    if (selectedDate < minDate) {
+      return 'Ngày và giờ không được nhỏ hơn thời điểm hiện tại';
+    }
+    return '';
+  };
+
+  const validateDescription = (value: string): string => {
+    const requiredError = validateRequired(value, 'Mô tả');
+    if (requiredError) return requiredError;
+    
+    if (value.length < 2) {
+      return 'Mô tả phải có ít nhất 2 ký tự';
+    }
+    if (value.length > 500) {
+      return 'Mô tả không được vượt quá 500 ký tự';
+    }
+    return '';
+  };
+
+  const validateCategories = (categories: Category[]): string => {
+    if (!categories || categories.length === 0) {
+      return 'Vui lòng chọn ít nhất một danh mục';
+    }
+    return '';
+  };
+
+
+
+  const validateQrCodes = (): string => {
+    if (!selectedFile && !imagePreview) {
+      return 'Vui lòng tải lên hình ảnh vé';
+    }
+    if (selectedFile && !selectedFile.type.startsWith('image/')) {
+      return 'File phải là hình ảnh';
+    }
+    if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
+      return 'Kích thước hình ảnh không được vượt quá 5MB';
+    }
+     if (qrFiles.some(file => file === null)) {
+      return 'Vui lòng tải lên đầy đủ mã QR cho tất cả vé';
+    }
+    return '';
+  };
+
+  const validateLocation = (): string => {
+    if (!formData.location) {
+      return 'Vui lòng chọn địa điểm';
+    }
+    if (!houseNumber) {
+      return 'Vui lòng nhập số nhà/đường';
+    }
+    return '';
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-  
-    if (name === "cost") {
-     
-      let baseValue = value.replace(/000$/, '');
-  
-     
-      baseValue = baseValue.replace(/\D/g, '');
-  
-   
-      setFormData({
-        ...formData,
-        [name]: baseValue + '000',
-      });
-    } else if (name === "date") {
-     
-      const newDate = new Date(value);
-      const minDate = new Date(minDateTime);
-  
-     
-      if (newDate < minDate) {
-       
-        alert("Selected date is before the minimum allowed date.");
-        return; 
-      }
-  
-      
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    } else {
-      
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+    
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when field is changed
+    setErrors(prev => ({ ...prev, [name]: '' }));
+    
+    // Validate the changed field
+    switch (name) {
+      case 'name':
+        setErrors(prev => ({ ...prev, name: validateName(value) }));
+        break;
+      case 'cost':
+        setErrors(prev => ({ ...prev, cost: validateCost(value) }));
+        break;
+      case 'date':
+        setErrors(prev => ({ ...prev, date: validateDate(value) }));
+        break;
+      case 'description':
+        setErrors(prev => ({ ...prev, description: validateDescription(value) }));
+        break;
     }
   };
   
@@ -151,13 +302,9 @@ const AddTicketModal: React.FC = () => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
       setSelectedFile(file);
-      setFormData((prevData) => ({
-        ...prevData,
-        image: file.name,
-      }));
-
-      const imageUrl = URL.createObjectURL(file);
-      setImagePreview(imageUrl);
+      setFormData(prev => ({ ...prev, image: file.name }));
+      setImagePreview(URL.createObjectURL(file));
+      setErrors(prev => ({ ...prev, image: validateQrCodes() }));
     }
   };
 
@@ -193,6 +340,7 @@ const AddTicketModal: React.FC = () => {
         reader.readAsDataURL(file);
       });
     }
+    setErrors(prev => ({ ...prev, qrcode: validateQrCodes() }));
   };
 
   const handleQuantityChange = (newQuantity: number) => {
@@ -218,6 +366,15 @@ const AddTicketModal: React.FC = () => {
 
 
   const handleSave = async () => {
+    if (!validateForm()) {
+      // Show first error message
+      const firstError = Object.values(errors).find(error => error !== '');
+      if (firstError) {
+        alert(firstError);
+      }
+      return;
+    }
+
     const sellerId = Cookies.get("id");
     if (
       !formData.name ||
@@ -353,7 +510,9 @@ const AddTicketModal: React.FC = () => {
             type="number"
             margin="normal"
             inputProps={{ min: 1 }}
+            error={!!errors.quantity}
           />
+          {errors.quantity && <ErrorText>{errors.quantity}</ErrorText>}
 
           {/* File input for image */}
 
@@ -447,6 +606,7 @@ const AddTicketModal: React.FC = () => {
                   </div>
                 ))}
               </div>
+              {errors.qrcode && <ErrorText>{errors.qrcode}</ErrorText>}
             </div>
           </div>
 
@@ -460,7 +620,9 @@ const AddTicketModal: React.FC = () => {
             margin="normal"
             type="string"
             required
+            error={!!errors.name}
           />
+          {errors.name && <ErrorText>{errors.name}</ErrorText>}
 
             <TextField
               className="custom-text-field"
@@ -472,7 +634,9 @@ const AddTicketModal: React.FC = () => {
               margin="normal"
               type="number"
               required
+              error={!!errors.cost}
             />
+          {errors.cost && <ErrorText>{errors.cost}</ErrorText>}
           {/* Location (Province, District, Ward) */}
 
           <AddressFields  houseNumber={houseNumber} setHouseNumber={setHouseNumber} setFormData={setFormData} />
@@ -484,7 +648,9 @@ const AddTicketModal: React.FC = () => {
             fullWidth
             required
             disabled={true}
+            error={!!errors.location}
           />
+          {errors.location && <ErrorText>{errors.location}</ErrorText>}
           <TextField
             className="custom-text-field"
             fullWidth
@@ -501,7 +667,9 @@ const AddTicketModal: React.FC = () => {
             inputProps={{
               min: minDateTime,
             }}
+            error={!!errors.date}
           />
+          {errors.date && <ErrorText>{errors.date}</ErrorText>}
           {/* Autocomplete for selecting multiple categories */}
           <Autocomplete
             multiple
@@ -515,6 +683,7 @@ const AddTicketModal: React.FC = () => {
                 {...params}
                 label="Danh mục"
                 margin="normal"
+                error={!!errors.categories}
               />
             )}
             loading={loading}
@@ -522,6 +691,7 @@ const AddTicketModal: React.FC = () => {
               option.categoryId === value.categoryId
             }
           />
+          {errors.categories && <ErrorText>{errors.categories}</ErrorText>}
           <div className="border rounded-md mb-4 ">
             <div className="custom-text-field">
               <RichTextEditor
@@ -530,6 +700,7 @@ const AddTicketModal: React.FC = () => {
                 onChange={handleChange}
               />
             </div>
+            {errors.description && <ErrorText>{errors.description}</ErrorText>}
           </div>
 
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>

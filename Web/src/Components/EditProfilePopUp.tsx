@@ -33,6 +33,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Label } from "./ui/label";
 import InputAddressFields from "@/Hooks/locationInputTemplate";
+import { motion } from "framer-motion";
+import { RiLockPasswordFill } from "react-icons/ri";
+import { PASSWORD_REQUIREMENTS } from "./CreatePasswordForm"; // You might need to adjust this import path
+import { InputField, ActionButton } from "./CreatePasswordForm"; // You might need to adjust this import path
 interface FormData {
   userid: string;
   fullName: string | undefined;
@@ -126,15 +130,45 @@ const validatePassword = (password: string) => {
 const validateForm = (formData: FormData) => {
   const errors: { [key: string]: string } = {};
 
-  if (!formData.fullName?.trim())
+  // Name validation
+  if (!formData.fullName?.trim()) {
     errors.fullName = "Họ tên không được để trống";
-  if (!formData.sex) errors.sex = "Vui lòng chọn giới tính";
-  if (!formData.phone?.trim())
+  } else if (formData.fullName.length < 2 || formData.fullName.length > 50) {
+    errors.fullName = "Họ tên phải từ 2 đến 50 ký tự";
+  } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(formData.fullName)) {
+    errors.fullName = "Họ tên chỉ được chứa chữ cái và khoảng trắng";
+  }
+
+  // Phone validation
+  if (!formData.phone?.trim()) {
     errors.phone = "Số điện thoại không được để trống";
-  else if (!/^\+?\d{10,}$/.test(formData.phone?.trim()))
-    errors.phone = "Số điện thoại không hợp lệ";
-  if (!formData.address?.trim()) errors.address = "Địa chỉ không được để trống";
-  if (!formData.birthday) errors.birthday = "Ngày sinh không được để trống";
+  } else if (!/^(0|\+84)[0-9]{9}$/.test(formData.phone.trim())) {
+    errors.phone =
+      "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 hoặc +84 và có 10 số)";
+  }
+
+  // Sex validation
+  if (!formData.sex) {
+    errors.sex = "Vui lòng chọn giới tính";
+  } else if (!["male", "female", "other"].includes(formData.sex)) {
+    errors.sex = "Giới tính không hợp lệ";
+  }
+
+  // Bio validation
+  if (!formData.bio?.trim()) {
+    errors.bio = "Tiểu sử không được để trống";
+  } else if (formData.bio && formData.bio.length > 500) {
+    errors.bio = "Tiểu sử không được vượt quá 500 ký tự";
+  }
+  // Birthday validation
+  if (!formData.birthday?.trim()) {
+    errors.birthday = "Ngày sinh không được để trống";
+  } else {
+    const selectedDate = new Date(formData.birthday);
+    if (isNaN(selectedDate.getTime())) {
+      errors.birthday = "Ngày sinh không hợp lệ";
+    }
+  }
 
   return errors;
 };
@@ -257,81 +291,107 @@ const PasswordChange = ({ isOpen, setIsOpen, userId }: PasswordChangeProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
-        <DialogHeader>
-          <DialogTitle>Đổi Mật Khẩu</DialogTitle>
+      <DialogContent className="bg-white rounded overflow-hidden p-6 max-w-md mx-auto mt-12">
+        <DialogHeader className="text-center space-y-2">
+          <DialogTitle className="text-xl font-bold text-gray-900">
+            Đổi mật khẩu
+          </DialogTitle>
+          <p className="text-md text-gray-600">Vui lòng nhập mật khẩu mới</p>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                name="current"
-                placeholder="Mật khẩu hiện tại"
-                value={passwords.current}
-                onChange={handlePasswordChange}
-                className={`pr-10 ${errors.current ? "border-red-500" : ""}`}
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                disabled={isLoading}
-              ></button>
-            </div>
-            {errors.current && (
-              <p className="text-sm text-red-500">{errors.current}</p>
-            )}
+          <InputField
+            icon={<RiLockPasswordFill />}
+            rightIcon={
+              showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )
+            }
+            type={showPassword ? "text" : "password"}
+            name="current"
+            placeholder="Mật khẩu hiện tại"
+            value={passwords.current}
+            onChange={handlePasswordChange}
+            onRightIconClick={() => setShowPassword(!showPassword)}
+            error={errors.current}
+            disabled={isLoading}
+          />
+
+          <InputField
+            icon={<RiLockPasswordFill />}
+            rightIcon={
+              showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )
+            }
+            type={showPassword ? "text" : "password"}
+            name="new"
+            placeholder="Mật khẩu mới"
+            value={passwords.new}
+            onChange={handlePasswordChange}
+            onRightIconClick={() => setShowPassword(!showPassword)}
+            error={errors.new}
+            disabled={isLoading}
+          />
+
+          <InputField
+            icon={<RiLockPasswordFill />}
+            rightIcon={
+              showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )
+            }
+            type={showPassword ? "text" : "password"}
+            name="confirm"
+            placeholder="Xác nhận mật khẩu mới"
+            value={passwords.confirm}
+            onChange={handlePasswordChange}
+            onRightIconClick={() => setShowPassword(!showPassword)}
+            error={errors.confirm}
+            disabled={isLoading}
+          />
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {PASSWORD_REQUIREMENTS.map((req, index) => (
+              <div
+                key={index}
+                className={`flex items-center ${
+                  req.test(passwords.new) ? "text-green-500" : "text-gray-500"
+                }`}
+              >
+                <span className="mr-1">
+                  {req.test(passwords.new) ? "✓" : "○"}
+                </span>
+                {req.label}
+              </div>
+            ))}
           </div>
 
-          <div className="space-y-1">
-            <Input
-              type="password"
-              name="new"
-              placeholder="Mật khẩu mới"
-              value={passwords.new}
-              onChange={handlePasswordChange}
-              className={errors.new ? "border-red-500" : ""}
-              disabled={isLoading}
-            />
-            {errors.new && <p className="text-sm text-red-500">{errors.new}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <Input
-              type="password"
-              name="confirm"
-              placeholder="Xác nhận mật khẩu mới"
-              value={passwords.confirm}
-              onChange={handlePasswordChange}
-              className={errors.confirm ? "border-red-500" : ""}
-              disabled={isLoading}
-            />
-            {errors.confirm && (
-              <p className="text-sm text-red-500">{errors.confirm}</p>
-            )}
-          </div>
-
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end gap-2 mt-4">
             <Button
-              className="hover:bg-gray-200 rounded"
               variant="outline"
               onClick={() => setIsOpen(false)}
               disabled={isLoading}
+              className="rounded-full px-4 py-2 text-sm hover:bg-gray-100"
             >
               Hủy
             </Button>
             <Button
-              className="bg-green-500 text-white hover:bg-green-400 rounded"
               type="submit"
               disabled={isLoading}
+              className="rounded-full px-4 py-2 text-sm bg-green-500 text-white hover:bg-green-600"
             >
               {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang cập nhật
-                </>
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Đang cập nhật</span>
+                </div>
               ) : (
                 "Cập nhật mật khẩu"
               )}
@@ -356,11 +416,85 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
   const [errors, setErrors] = useState<Errors>({});
   const [houseNumber, setHouseNumber] = useState<string>(" ");
   const { toast } = useToast();
+  const [addressError, setAddressError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("personal");
 
-  const HandleSubmitClick = async () => {
-    await updateUserProfile(userId, formData);
-    onSave(formData);
-    onClose();
+  const validateAddress = () => {
+    const addressErrors: { [key: string]: string } = {};
+
+    if (!houseNumber.trim()) {
+      addressErrors.houseNumber = "Vui lòng nhập số nhà/đường";
+    }
+
+    if (!formData.address) {
+      const parts =
+        formData.address?.split(",").map((part) => part.trim()) || [];
+
+      if (!parts[3]) {
+        addressErrors.province = "Vui lòng chọn tỉnh/thành phố";
+      }
+      if (!parts[2]) {
+        addressErrors.district = "Vui lòng chọn quận/huyện";
+      }
+      if (!parts[1]) {
+        addressErrors.ward = "Vui lòng chọn phường/xã";
+      }
+    }
+
+    return addressErrors;
+  };
+
+  const HandleSubmitClick = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate personal information fields
+    const personalInfoErrors = validateForm(formData);
+    // Validate address fields
+    const addressErrors = validateAddress();
+
+    const allErrors = { ...personalInfoErrors, ...addressErrors };
+
+    if (Object.keys(allErrors).length > 0) {
+      setErrors(allErrors);
+
+      // Check if personal information is valid but address has errors
+      if (
+        Object.keys(personalInfoErrors).length === 0 &&
+        Object.keys(addressErrors).length > 0
+      ) {
+        setActiveTab("additional"); // Switch to "Thông Tin Thêm" tab if only address errors exist
+      }
+
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng kiểm tra lại thông tin nhập vào",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await updateUserProfile(userId, formData);
+      onSave(formData);
+      toast({
+        title: "Thành công",
+        description: "Cập nhật thông tin thành công",
+        variant: "default",
+        duration: 5000,
+      });
+      onClose(); // Only close on success
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể cập nhật thông tin. Vui lòng thử lại sau.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   const [formData, setFormData] = useState<FormData>(
     initialData || {
@@ -373,27 +507,22 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
       bio: "",
     }
   );
-  const handleBirthdayChange = (e: any) => {
+  const handleBirthdayChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
 
-    // Update the form data
     setFormData((prevData) => ({
       ...prevData,
       birthday: value,
     }));
 
-    // Validate the birthday
     validateBirthday(value);
   };
 
-  // Validation function
-  const validateBirthday = (birthday: any) => {
+  const validateBirthday = (birthday: string) => {
     const selectedDate = new Date(birthday);
     const today = new Date();
 
     const age = today.getFullYear() - selectedDate.getFullYear();
-
-    // Check if birthday has already happened this year
     const hasHadBirthdayThisYear =
       today.getMonth() > selectedDate.getMonth() ||
       (today.getMonth() === selectedDate.getMonth() &&
@@ -404,7 +533,7 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
     if (finalAge < 18) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        birthday: "You must be at least 18 years old.",
+        birthday: "Bạn phải từ đủ 18 tuổi.",
       }));
     } else {
       setErrors((prevErrors) => ({
@@ -414,36 +543,90 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Validate form
-    const validationErrors = validateForm(formData);
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+    // Validate the specific field
+    const fieldError = validateField(name, value);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: fieldError,
+    }));
+  };
 
-    try {
-      setIsLoading(true);
-      await updateUserProfile(userId, formData);
+  const handleSelectChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, sex: value }));
 
-      toast({
-        title: "Success",
-        description: "Profile updated successfully.",
-        variant: "default", // Using unified type
-        duration: 5000, // Optional duration
-      });
-      onClose();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update profile.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    } finally {
-      setIsLoading(false);
+    // Validate sex field
+    const fieldError = validateField("sex", value);
+    setErrors((prev) => ({
+      ...prev,
+      sex: fieldError,
+    }));
+  };
+
+  // Helper function to validate individual fields
+  const validateField = (fieldName: string, value: string) => {
+    switch (fieldName) {
+      case "fullName":
+        if (!value?.trim()) {
+          return "Họ và tên không được để trống";
+        }
+        if (value.length < 2 || value.length > 50) {
+          return "Họ tên phải từ 2 đến 50 ký tự";
+        }
+        if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(value)) {
+          return "Họ tên chỉ được chứa chữ cái và khoảng trắng";
+        }
+        return "";
+
+      case "phone":
+        if (!value?.trim()) {
+          return "Số điện thoại không được để trống";
+        }
+        if (!/^(0|\+84)[0-9]{9}$/.test(value.trim())) {
+          return "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 hoặc +84 và có 10 số)";
+        }
+        return "";
+
+      case "sex":
+        if (!value) {
+          return "Vui lòng chọn giới tính";
+        }
+        if (!["male", "female", "other"].includes(value)) {
+          return "Giới tính không hợp lệ";
+        }
+        return "";
+
+      case "bio":
+        if (value && value.length > 500) {
+          return "Tiểu sử không được vượt quá 500 ký tự";
+        }
+        return "";
+
+      case "birthday":
+        if (!value) {
+          return "Ngày sinh không được để trống";
+        }
+        const selectedDate = new Date(value);
+        if (isNaN(selectedDate.getTime())) {
+          return "Ngày sinh không hợp lệ";
+        }
+        const today = new Date();
+        const age = today.getFullYear() - selectedDate.getFullYear();
+        const hasHadBirthdayThisYear =
+          today.getMonth() > selectedDate.getMonth() ||
+          (today.getMonth() === selectedDate.getMonth() &&
+            today.getDate() >= selectedDate.getDate());
+        const finalAge = hasHadBirthdayThisYear ? age : age - 1;
+        if (finalAge < 18) {
+          return "Bạn phải từ đủ 18 tuổi.";
+        }
+        return "";
+
+      default:
+        return "";
     }
   };
 
@@ -455,13 +638,23 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
           <CardDescription>Thay đổi thông tin cá nhân của bạn</CardDescription>
         </CardHeader>
 
-        <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="personal">Thông Tin Cá Nhân</TabsTrigger>
-            <TabsTrigger value="additional">Thông Tin Thêm</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 px-3 mx-auto gap-4 mb-4">
+            <TabsTrigger
+              value="personal"
+              className="py-3 rounded data-[state=active]:bg-green-500 data-[state=active]:text-white"
+            >
+              Thông Tin Cá Nhân
+            </TabsTrigger>
+            <TabsTrigger
+              value="additional"
+              className="py-3 rounded data-[state=active]:bg-green-500 data-[state=active]:text-white"
+            >
+              Thông Tin Thêm
+            </TabsTrigger>
           </TabsList>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={HandleSubmitClick}>
             <TabsContent value="personal">
               <Card className="border-0 space-y-4 pt-4 shadow-none border-none rounded-none">
                 <CardContent className="space-y-4 pt-4 shadow-none border-none rounded-none">
@@ -472,12 +665,16 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                       </Label>
                       <Input
                         id="fullname"
+                        name="fullName"
                         value={formData.fullName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, fullName: e.target.value })
-                        }
+                        onChange={handleInputChange}
                         className="w-full"
                       />
+                      {errors.fullName && (
+                        <p className="text-sm text-red-500">
+                          {errors.fullName}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -486,13 +683,15 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                       </Label>
                       <Input
                         id="phone"
+                        name="phone"
                         value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
+                        onChange={handleInputChange}
                         className="w-full"
                         required
                       />
+                      {errors.phone && (
+                        <p className="text-sm text-red-500">{errors.phone}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -500,10 +699,8 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                         Giới tính
                       </Label>
                       <Select
-                        value={formData.sex}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, sex: value })
-                        }
+                        value={formData.sex || "other"}
+                        onValueChange={handleSelectChange}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Chọn giới tính" />
@@ -514,6 +711,9 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                           <SelectItem value="other">Khác</SelectItem>
                         </SelectContent>
                       </Select>
+                      {errors.sex && (
+                        <p className="text-sm text-red-500">{errors.sex}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -545,12 +745,14 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                     </Label>
                     <Input
                       id="bio"
+                      name="bio"
                       value={formData.bio}
-                      onChange={(e) =>
-                        setFormData({ ...formData, bio: e.target.value })
-                      }
+                      onChange={handleInputChange}
                       className="w-full"
                     />
+                    {errors.bio && (
+                      <p className="text-sm text-red-500">{errors.bio}</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -580,10 +782,17 @@ const EditProfilePopup: React.FC<EditProfilePopupProps> = ({
                         Cập nhật địa chỉ
                       </Label>
                       <InputAddressFields
+                        oldLocation={formData.address}
                         houseNumber={houseNumber}
                         setHouseNumber={setHouseNumber}
                         setFormData={setFormData}
+                        errors={errors}
                       />
+                      {addressError && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {addressError}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>

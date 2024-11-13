@@ -48,16 +48,16 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address, id, api }) => {
   return (
     <div className="flex flex-col md:flex-row gap-4 px-4">
       {/* Left Sidebar */}
-      <div className="w-full h-fit md:w-1/4 p-4 bg-white rounded-lg shadow-md flex-shrink-0">
+      <div className="w-full h-fit md:w-1/4 p-4 bg-white rounded-lg flex-shrink-0">
         <h2 className="font-bold text-xl mb-4">Thông tin</h2>
         <div className="flex mb-1">
           <span>
             <MdCake />
           </span>
           <p className="ml-2">
-            Sinh ngày{" "}
-            {birthday
-              ? new Date(birthday).toLocaleDateString("en-GB")
+            
+            {birthday && !isNaN(new Date(birthday).getTime())
+              ? new Date(birthday).toLocaleDateString("vi-VN")
               : "Chưa cập nhật"}
           </p>
         </div>
@@ -68,7 +68,9 @@ const ProfileInfo: React.FC<props> = ({ birthday, bio, address, id, api }) => {
           <p className="ml-2">{address ? address : "Chưa cập nhật địa chỉ"}</p>
         </div>
         <div className="flex mb-2">
-          <p className="ml-2 text-gray-500">{bio ? bio : "Chưa cập nhật tiểu sử"}</p>
+          <p className="ml-2 text-gray-500">
+            {bio ? bio : "Chưa cập nhật tiểu sử"}
+          </p>
         </div>
       </div>
       <RatingsList ratings={ratingsData} />;{/* Main Content */}

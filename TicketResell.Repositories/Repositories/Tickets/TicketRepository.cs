@@ -142,11 +142,7 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .FirstOrDefaultAsync(t => t.TicketId == id);
 
         if (ticket == null) throw new KeyNotFoundException("Ticket not found");
-
-        ticket.Categories.Clear();
-
-        _context.Tickets.Remove(ticket);
-
+         ticket.Status = 0;
         await _context.SaveChangesAsync();
     }
 
