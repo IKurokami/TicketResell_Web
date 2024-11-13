@@ -1,6 +1,9 @@
-﻿namespace Repositories.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class Revenue
+namespace Repositories.Core.Entities;
+
+public partial class Revenue
 {
     public string RevenueId { get; set; } = null!;
 

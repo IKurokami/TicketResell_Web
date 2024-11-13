@@ -171,7 +171,7 @@ public class AuthenticationService : IAuthenticationService
                 UserId = googleUser.Email,
                 Username = googleUser.Given_Name,
                 Fullname = googleUser.Name,
-                Password = BCrypt.Net.BCrypt.HashPassword(GenerateAccessKey()),
+                Password = null,
                 Gmail = googleUser.Email,
                 CreateDate = DateTime.UtcNow,
                 Status = 1,
@@ -182,6 +182,24 @@ public class AuthenticationService : IAuthenticationService
             await _unitOfWork.CompleteAsync();
         }
 
+        if (string.IsNullOrEmpty(user.Password))
+        {
+            var accessKey = await GetCachedAccessKeyAsync("password_setup", user.UserId);
+            if (!accessKey.HasValue || accessKey.IsNullOrEmpty)
+            {
+                accessKey = GenerateAccessKey();
+                await CacheAccessKeyAsync("password_setup", user.UserId, accessKey, TimeSpan.FromHours(1));
+            }
+
+            var response = new PasswordSetupDto
+            {
+                UserId = user.UserId,
+                PasswordSetupToken = accessKey
+            };
+
+            return ResponseModel.NeedsPasswordSetup("False", response);
+        }
+
         var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
         if (cachedAccessKey.IsNullOrEmpty)
         {
@@ -189,13 +207,13 @@ public class AuthenticationService : IAuthenticationService
             await CacheAccessKeyAsync(user.UserId, cachedAccessKey!);
         }
 
-        var response = new LoginInfoDto
+        var loginResponse = new LoginInfoDto
         {
             User = _mapper.Map<UserReadDto>(user),
             AccessKey = cachedAccessKey!
         };
 
-        return ResponseModel.Success("Login successful", response);
+        return ResponseModel.Success("Login successful", loginResponse);
     }
 
     public async Task<bool> ValidateAccessKeyAsync(string userId, string accessKey)
@@ -330,9 +348,33 @@ public class AuthenticationService : IAuthenticationService
         return await GetCachedAccessKeyAsync("access_key", userId);
     }
 
-    private async Task RemoveCachedAccessKeyAsync(string userId)
+    private async Task RemoveCachedAccessKeyAsync(string cacheName, string userId)
     {
         var db = _redis.GetDatabase();
-        await db.KeyDeleteAsync($"access_key:{userId}");
+        await db.KeyDeleteAsync($"{cacheName}:{userId}");
+    }
+
+    private async Task RemoveCachedAccessKeyAsync(string userId)
+    {
+        await RemoveCachedAccessKeyAsync("access_key", userId);
+    }
+
+    public async Task<ResponseModel> SetPasswordAsync(string userId, string password, string passwordSetupToken)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+        if (user == null)
+            return ResponseModel.NotFound("User not found");
+
+        var cachedToken = await GetCachedAccessKeyAsync("password_setup", userId);
+        if (cachedToken != passwordSetupToken)
+            return ResponseModel.BadRequest("Invalid or expired password setup token");
+
+        user.Password = BCrypt.Net.BCrypt.HashPassword(password);
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CompleteAsync();
+
+        await RemoveCachedAccessKeyAsync("password_setup", userId);
+
+        return ResponseModel.Success("Password set successfully.");
     }
 }

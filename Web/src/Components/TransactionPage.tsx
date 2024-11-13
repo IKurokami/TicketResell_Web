@@ -42,7 +42,7 @@ const toISODate = ({ year, month, day }: DateParams): string => {
 };
 
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
+  const date = new Date(dateString + 'Z');
   if (isNaN(date.getTime())) {
     throw new Error("Invalid date string");
   }
@@ -137,6 +137,35 @@ const TransactionTable: React.FC = () => {
     return <div className="p-4 text-center">Đang tải giao dịch...</div>;
   }
 
+  if (error || transactions.length === 0) {
+    return (
+      <div className="container mx-auto px-10 py-10 max-w-screen-xl">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <div className="relative flex items-center bg-white rounded-full h-12 p-1 px-3 border border-gray-300 w-3/5 lg:w-64">
+            <input
+              type="text"
+              aria-label="Tìm kiếm vé"
+              placeholder="Tìm kiếm vé"
+              className="border-none outline-none p-1 bg-transparent w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FontAwesomeIcon
+              className="text-lg p-1 cursor-pointer"
+              icon={faMagnifyingGlass}
+            />
+          </div>
+          <div className="">
+            <DateRange onDateChange={handleDateChange} />
+          </div>
+        </div>
+        <div className="text-center text-gray-500 py-4">
+          Không có giao dịch nào.
+        </div>
+      </div>
+    );
+  }
+
   const startDate = dateRange.start ? toISODate(dateRange.start) : null;
   const endDate = dateRange.end ? toISODate(dateRange.end) : null;
 
@@ -186,7 +215,7 @@ const TransactionTable: React.FC = () => {
             {transaction.quantity} vé
           </span>
         </div>
-        <div>Từ: {transaction.order.user.username}</div>
+        <div>Người bán: {transaction.order.user.username}</div>
       </div>
     </div>
   );

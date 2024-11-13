@@ -50,20 +50,35 @@ const HistoryPage = () => {
 
         const result = await response.json();
         if (result.statusCode === 200 && Array.isArray(result.data)) {
-          const groupedOrders = result.data.map((order: Order) => {
+          const filteredOrders = result.data.filter((order: Order) => order.status !== 1);
+          const groupedOrders = filteredOrders.map((order: Order) => {
             const date = order.date;
             const formattedDate = date ? (() => {
               const parsedDate = new Date(date);
               if (isNaN(parsedDate.getTime())) {
                 return 'Ngày không hợp lệ';
               }
-              const day = parsedDate.getDate().toString().padStart(2, '0');
-              const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0');
-              const year = parsedDate.getFullYear();
-              const hours = parsedDate.getHours().toString().padStart(2, '0');
-              const minutes = parsedDate.getMinutes().toString().padStart(2, '0');
-              return `ngày ${day} tháng ${month} năm ${year}, ${hours}:${minutes}`;
+
+              // Convert to UTC+7
+              const utcDate = new Date(parsedDate.toLocaleString('en-US', { timeZone: 'UTC' }));
+              const vietnamTime = new Date(utcDate.getTime() + 14 * 60 * 60 * 1000); // Add 7 hours to convert to UTC+7
+
+              // Format date according to Vietnam timezone (UTC+7)
+              const options: Intl.DateTimeFormatOptions = {
+                weekday: 'long',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Ho_Chi_Minh', // Vietnam timezone (UTC+7)
+                hour12: false,
+              };
+
+              return vietnamTime.toLocaleString('vi-VN', options); // Format date with Vietnam locale
             })() : 'Ngày không hợp lệ';
+
 
             return {
               id: order.orderId,
@@ -76,7 +91,7 @@ const HistoryPage = () => {
               })),
               price: order.orderDetails.reduce((total: number, detail: OrderDetail) =>
                 total + detail.ticket.cost * detail.quantity, 0),
-              status: order.status === -1? 1 : order.status,
+              status: order.status === -1 ? 1 : order.status,
             };
           });
 
@@ -111,6 +126,7 @@ const HistoryPage = () => {
         className: 'bg-red-100 text-red-800 ring-red-600/20',
         icon: '×',
       },
+
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig[0];

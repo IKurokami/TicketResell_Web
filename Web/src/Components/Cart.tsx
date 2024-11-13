@@ -92,6 +92,18 @@ const MyCart: React.FC = () => {
     }
   };
 
+  const [loading, setLoading] = useState(false);
+
+  const handleCheckoutLoading = async () => {
+    setLoading(true);
+    try {
+      // Simulate checkout process
+      await handleCheckout(); // Replace with actual checkout logic
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch cart items when component loads
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -307,14 +319,13 @@ const MyCart: React.FC = () => {
 
       if (result.statusCode === 200 && result.data) {
         router.push(result.data[0].data); // Redirect to the payment URL
+        await new Promise((resolve) => setTimeout(resolve, 15000));
       } else {
         throw new Error(result.message || "Failed to process payment");
       }
     } catch (error) {
       console.error(`Error processing ${selectedPayment} payment:`, error);
-      alert(
-        `Đã chọn quá số lượng sản phẩm trong kho. Vui lòng thử lại.`
-      );
+      alert(`Đã chọn quá số lượng sản phẩm trong kho. Vui lòng thử lại.`);
     }
   };
 
@@ -641,7 +652,8 @@ const MyCart: React.FC = () => {
                             }
                           } : {}}
                         >
-                          {<img
+                          {
+                          <img
                             src={method.imageUrl}
                             alt={method.name}
                             className="w-12 h-12 mb-2"

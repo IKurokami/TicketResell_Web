@@ -60,7 +60,6 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
 
   useEffect(() => {
     fetchChatboxData();
-    console.log("fetch:", chatboxData);
   }, [userData]);
 
   useEffect(() => {
@@ -80,8 +79,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
         Bảng yêu cầu
       </p>
       <div
-        className={`container mx-auto px-5 flex flex-col  justify-between  sm:flex-row items-center`}
+        className={`container mx-auto px-28 flex flex-col sm:flex-row lg:flex-row xl:flex-row 2xl:flex-row justify-between gap-4`}
       >
+        {!(hasRO3Role || hasRO4Role) && (
         {!(hasRO3Role || hasRO4Role) && (
           <div className="relative flex items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-auto">
             <input
@@ -114,12 +114,13 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
         )}
         <div></div>
         {!(hasRO3Role || hasRO4Role) && (
-          <RequestDialog setChatboxData={setChatboxData} />
+          <RequestDialog chatboxData={chatboxData} setChatboxData={setChatboxData} />
         )}
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
-          {filteredChatboxData.length > 0 ? (
+          {/* Set a max-width for the card container */}
+          {chatboxData.length > 0 ? (
             <ChatboxTable
               userData={userData}
               chatboxData={filteredChatboxData}
@@ -127,9 +128,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
               setChatboxData={setChatboxData}
             />
           ) : (
-            <div className="text-center text-gray-500 py-8">
-              Không có yêu cầu nào
-            </div>
+            <p className="text-center text-gray-500">Không tìm thấy</p>
           )}
         </div>
       </div>

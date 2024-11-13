@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Repositories.Core.Dtos.Payment;
 using TicketResell.Repositories.Helper;
+using TicketResell.Repositories.Logger;
 using TicketResell.Services.Services.Carts;
 using TicketResell.Services.Services.Payments;
 using TicketResell.Services.Services.Revenues;
@@ -20,12 +21,14 @@ public class PaymentController : ControllerBase
     private readonly IOrderService _orderService;
     private readonly IPaypalService _paypalService;
     private readonly IRevenueService _revenueService;
+    private readonly IAppLogger _logger;
 
     private readonly double _tax = 1.05;
     private readonly IVnpayService _vnpayService;
 
-    public PaymentController(IServiceProvider serviceProvider)
+    public PaymentController(IServiceProvider serviceProvider, IAppLogger logger)
     {
+        _logger = logger;
         _momoService = serviceProvider.GetRequiredService<IMomoService>();
         _orderService = serviceProvider.GetRequiredService<IOrderService>();
         _vnpayService = serviceProvider.GetRequiredService<IVnpayService>();
@@ -187,6 +190,8 @@ public class PaymentController : ControllerBase
             return ResponseParser.Result(ResponseModel.Error("Already payed"));
 
         var paypalResponse = await _paypalService.CheckTransactionStatus(dto.Token);
+        string captureId = (string)paypalResponse.Data;
+        // var aa = await _paypalService.GetCaptureDetailsAsync(captureId);
         var message = "Payment Success";
         var orderResponse = new ResponseModel();
         var paypalResponse2 = new ResponseModel();
@@ -194,7 +199,7 @@ public class PaymentController : ControllerBase
         var updateTicketQuantity = new ResponseModel();
         if (paypalResponse.Status == "Success")
         {
-            orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 0);
+            orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 0, captureId);
             if (orderResponse.Data is OrderDto order) await _cartService.RemoveFromCart(order);
             var orderWithDetails = (Order)(await _orderService.GetTicketDetailsByIdAsync(dto.OrderId)).Data;
             paypalResponse2 = await _paypalService.CreatePayoutAsync(orderWithDetails);
@@ -202,8 +207,11 @@ public class PaymentController : ControllerBase
             updateTicketQuantity = await _cartService.UpdateTicketQuantitiesAsync(dto.OrderId);
             // paypalResponse3 = await _paypalService.CheckPayoutStatusAsync((string)paypalResponse2.Data);
         }
-        else
+        else if(paypalResponse.Message == "VOIDED")
         {
+            orderResponse = await _orderService.SetOrderStatus(dto.OrderId, 3, captureId);
+            message = "Payment Cancel";
+        }else{
             message = "Payment Failed";
         }
 

@@ -9,7 +9,7 @@ import { FaUnlockKeyhole } from "react-icons/fa6";
 import { UserData } from "./UserRequest";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
-interface Chatbox {
+export interface Chatbox {
   chatboxId: string;
   status: number;
   createDate: string;
@@ -551,10 +551,10 @@ const ChatboxTable: React.FC<ChatboxTableProps> = ({
       <table className="min-w-full rounded-lg shadow-lg">
         <thead>
           <tr className="bg-gray-100 rounded-t-lg">
-            <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
+            <th className="py-3 px-4 font-semibold text-left text-gray-700 border-b">
               Tiêu đề
             </th>
-            <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">
+            <th className="py-3 px-4 font-semibold text-left text-gray-700 border-b">
               Mô tả
             </th>
             <th className="py-3 px-4 font-semibold text-center text-gray-700 border-b">

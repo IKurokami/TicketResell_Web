@@ -1,6 +1,9 @@
-﻿namespace Repositories.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class Rating
+namespace Repositories.Core.Entities;
+
+public partial class Rating
 {
     public string RatingId { get; set; } = null!;
 
@@ -13,6 +16,10 @@ public class Rating
     public string? Comment { get; set; }
 
     public DateTime? CreateDate { get; set; }
+
+    public string? OrderDetailId { get; set; }
+
+    public virtual OrderDetail? OrderDetail { get; set; }
 
     public virtual User? Seller { get; set; }
 

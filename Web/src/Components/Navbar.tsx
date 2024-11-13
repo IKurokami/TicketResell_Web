@@ -188,6 +188,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
         setIsLoggedIn(true); // User is logged in
       } else {
         setIsLoggedIn(false); // User is logged out
+
       }
     };
     const id = Cookies.get("id");
@@ -232,19 +233,20 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
   }, []);
 
   // Handle logout
-  const handleLogout = async () => {
-    await signOut();
+  const handleLogout = async (e: any) => {
+    e.preventDefault(); // Prevents Link's default behavior
 
+    await signOut();
     const isLoggedOut = await logoutUser(Cookies.get("id"));
     removeAllCookies();
+
     if (isLoggedOut) {
       setDropdownVisible(false);
       setIsLoggedIn(false);
+      router.push("/login"); // Manually trigger redirect after logout is complete
     } else {
       console.log("Failed to log out. Please try again.");
     }
-    removeAllCookies();
-    router.push("/login");
   };
 
   const handleEmail = () => {
@@ -299,7 +301,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
           </li>
           <li>
             <Link
-              href="/contact"
+              href="#"
               style={{ color: page === "ticket" ? "black" : undefined }}
             >
               Liên Hệ
@@ -361,7 +363,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/profileuser")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="no-underline block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
                     <svg
@@ -385,7 +387,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/history")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="no-underline block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
                     <svg
@@ -408,7 +410,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/my-ticket")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="no-underline block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
                     <svg
@@ -430,11 +432,9 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 </a>
 
                 <Link
-                  href="#"
-                  onClick={() => {
-                    handleLogout();
-                  }}
-                  className="block px-3 py-2 text-xs text-red-600 hover:bg-gray-50 transition-colors duration-150"
+                  href="/login"
+                  onClick={(e) => handleLogout(e)} // Pass event to prevent default
+                  className="no-underline block px-3 py-2 text-xs text-red-600 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
                     <svg
@@ -445,9 +445,9 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                       ></path>
                     </svg>
@@ -490,7 +490,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
           style={{ color: page === "ticket" ? "rgb(0,0,0)" : undefined }}
           aria-label="Notifications"
         >
-      
+
         </a>
       </div>
     </header>

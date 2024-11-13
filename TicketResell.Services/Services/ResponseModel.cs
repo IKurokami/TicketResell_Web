@@ -51,4 +51,17 @@ public class ResponseModel
     {
         return new ResponseModel(403, "Forbidden", message, data);
     }
+
+    /// <summary>
+    /// Returns a response indicating that password setup is required.
+    /// </summary>
+    public static ResponseModel NeedsPasswordSetup(string message, object data)
+    {
+        return new ResponseModel
+        {
+            Status = "NeedsPasswordSetup",
+            Message = message,
+            Data = data
+        };
+    }
 }

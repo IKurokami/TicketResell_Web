@@ -2,12 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { PlusCircle, Pencil, Trash2, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/Components/ui/dialog";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 
@@ -23,6 +17,11 @@ const CategoryManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState<Partial<Category>>({});
+  const [errors, setErrors] = useState({
+    categoryId: '',
+    name: '',
+    description: ''
+  });
 
   // Lấy danh mục từ API
   useEffect(() => {
@@ -60,6 +59,31 @@ const CategoryManagement = () => {
     }
 
     return newId;
+  };
+
+  const validateCategoryId = (id: string) => {
+    const regex = /^CAT\d{3}$/;
+    return regex.test(id);
+  };
+
+  const validateName = (name: string) => {
+    const regex = /^[^0-9]{5,90}$/;
+    return regex.test(name);
+  };
+
+  const validateDescription = (description: string) => {
+    return  description.length <= 200;
+  };
+
+  const handleCloseModal = () => {
+    setIsOpen(false);
+    setCurrentCategory(null);
+    setFormData({});
+    setErrors({
+      categoryId: '',
+      name: '',
+      description: ''
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -134,9 +158,7 @@ const CategoryManagement = () => {
       }
     }
 
-    setIsOpen(false);
-    setCurrentCategory(null);
-    setFormData({});
+    handleCloseModal();
   };
 
   const handleDelete = async (categoryId: string) => {
@@ -263,44 +285,96 @@ const CategoryManagement = () => {
         </div>
       </CardContent>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-white">
-          <DialogHeader>
-            <DialogTitle>
-              {currentCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tên</label>
-                <Input
-                  value={formData.name || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mô tả</label>
-                <textarea
-                  className="w-full rounded-md border border-gray-300 p-2"
-                  rows={3}
-                  value={formData.description || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  required
-                />
-              </div>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <button
+                onClick={handleCloseModal}
+                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200"
+              >
+                Hủy
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {currentCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
+              </h3>
+              <button
+                type="submit"
+                form="categoryForm"
+                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200"
+              >
+                {currentCategory ? "Cập nhật" : "Thêm"}
+              </button>
             </div>
-            <Button type="submit">
-              {currentCategory ? "Cập nhật" : "Tạo"}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+            
+            <div className="p-6 space-y-4">
+              <form id="categoryForm" onSubmit={handleSubmit} className="space-y-4 rounded-md">
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    name="categoryId"
+                    placeholder="Mã danh mục (VD: CAT001)"
+                    defaultValue={currentCategory?.categoryId || ""}
+                    onChange={(e) => {
+                      const isValid = validateCategoryId(e.target.value);
+                      setErrors(prev => ({
+                        ...prev,
+                        categoryId: isValid ? '' : 'ID phải có dạng CAT và 3 số (VD: CAT001)'
+                      }));
+                    }}
+                    className={`w-full border ${errors.categoryId ? 'border-red-500' : 'border-gray-200'} rounded-xl shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-200`}
+                  />
+                  {errors.categoryId && (
+                    <p className="text-red-500 text-xs mt-1">{errors.categoryId}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={formData.name || ""}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      const isValid = validateName(e.target.value);
+                      setErrors(prev => ({
+                        ...prev,
+                        name: isValid ? '' : 'Tên phải từ 5-90 ký tự và không được chứa số'
+                      }));
+                    }}
+                    placeholder="Tên danh mục"
+                    className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-200'} rounded-xl shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-200`}
+                    required
+                  />
+                  {errors.name && (
+                    <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={formData.description || ""}
+                    onChange={(e) => {
+                      setFormData({ ...formData, description: e.target.value });
+                      const isValid = validateDescription(e.target.value);
+                      setErrors(prev => ({
+                        ...prev,
+                        description: isValid ? '' : 'Mô tả phải dưới 200 ký tự'
+                      }));
+                    }}
+                    placeholder="Mô tả"
+                    className={`w-full border ${errors.description ? 'border-red-500' : 'border-gray-200'} rounded-xl shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-200`}
+                    required
+                  />
+                  {errors.description && (
+                    <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 };

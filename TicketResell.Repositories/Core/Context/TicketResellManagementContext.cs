@@ -59,6 +59,8 @@ public partial class TicketResellManagementContext : DbContext
         {
             entity.ToTable("Chat");
 
+            entity.HasIndex(e => e.ChatboxId, "IX_Chat_ChatboxId");
+
             entity.HasIndex(e => e.ReceiverId, "IX_Chat_ReceiverId");
 
             entity.HasIndex(e => e.SenderId, "IX_Chat_SenderId");
@@ -120,6 +122,10 @@ public partial class TicketResellManagementContext : DbContext
             entity.Property(e => e.BuyerId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.CaptureId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("captureId");
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
 
             entity.HasOne(d => d.Buyer).WithMany(p => p.Orders)
@@ -162,6 +168,8 @@ public partial class TicketResellManagementContext : DbContext
 
             entity.ToTable("Rating");
 
+            entity.HasIndex(e => e.OrderDetailId, "IX_Rating_OrderDetailId");
+
             entity.HasIndex(e => e.SellerId, "IX_Rating_SellerId");
 
             entity.HasIndex(e => e.UserId, "IX_Rating_UserId");
@@ -172,12 +180,20 @@ public partial class TicketResellManagementContext : DbContext
             entity.Property(e => e.CreateDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.OrderDetailId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.SellerId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.UserId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.OrderDetail).WithMany(p => p.Ratings)
+                .HasForeignKey(d => d.OrderDetailId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Rating_OrderDetail");
 
             entity.HasOne(d => d.Seller).WithMany(p => p.RatingSellers)
                 .HasForeignKey(d => d.SellerId)

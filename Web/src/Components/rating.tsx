@@ -123,7 +123,7 @@ const RatingsList = ({ ratings }: any) => {
   // Function to format date
 
   const formatDate = (dateString: any) => {
-    const date = new Date(dateString);
+    const date = new Date(dateString + "Z");
     // Extract the day, month, and year manually
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed

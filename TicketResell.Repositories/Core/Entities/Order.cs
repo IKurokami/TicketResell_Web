@@ -1,6 +1,9 @@
-﻿namespace Repositories.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class Order
+namespace Repositories.Core.Entities;
+
+public partial class Order
 {
     public string OrderId { get; set; } = null!;
 
@@ -13,6 +16,8 @@ public class Order
     public int? Status { get; set; }
 
     public string? PaymentMethod { get; set; }
+
+    public string? CaptureId { get; set; }
 
     public virtual User? Buyer { get; set; }
 
