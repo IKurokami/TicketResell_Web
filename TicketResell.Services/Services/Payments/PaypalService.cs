@@ -73,14 +73,64 @@ public class PaypalService : IPaypalService
         request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-
         var content = await response.Content.ReadAsStringAsync();
-        var jsonDoc = JsonDocument.Parse(content);
-        var status = jsonDoc.RootElement.GetProperty("status").GetString();
-        if (status == "COMPLETED") return ResponseModel.Success("PayPal order captured successfully");
-        return ResponseModel.Error("Error capturing PayPal order");
+
+            
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonDoc = JsonDocument.Parse(content);
+            var status = jsonDoc.RootElement.GetProperty("status").GetString();
+            _logger.LogError("STATUS " + status);
+            // Extract the capture ID
+            var captureId = jsonDoc.RootElement
+                .GetProperty("purchase_units")[0]
+                .GetProperty("payments")
+                .GetProperty("captures")[0]
+                .GetProperty("id")
+                .GetString();
+            if (status == "COMPLETED")
+            {
+                return ResponseModel.Success("PayPal order captured successfully", captureId);
+            }
+
+            return ResponseModel.Error("Error capturing PayPal order");
+        }
+        else
+        {
+            return ResponseModel.Error($"Error capturing PayPal order: {content}");
+        }
     }
+    public async Task<ResponseModel> GetCaptureDetailsAsync(string captureId)
+    {
+        try
+        {
+            var accessToken = await GenerateAccessTokenAsync();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_config.PayPalApiUrl}/v2/payments/captures/{captureId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonDoc = JsonDocument.Parse(content);
+                var status = jsonDoc.RootElement.GetProperty("status").GetString();
+
+                // You can extract other details if needed
+                return ResponseModel.Success("Capture details retrieved successfully", status);
+            }
+            else
+            {
+                return ResponseModel.Error($"Error retrieving capture details: {content}");
+            }
+        }
+        catch (Exception ex)
+        {
+            return ResponseModel.Error($"Exception occurred while retrieving capture details: {ex.Message}");
+        }
+    }
+
 
     public async Task<ResponseModel> CreatePaymentAsync(PaymentDto paymentRequest, double amount)
     {
@@ -272,6 +322,30 @@ public class PaypalService : IPaypalService
         return paymentUrl;
     }
 
+    public async Task<ResponseModel> CapturePaymentAsync(string token)
+    {
+        var accessToken = await GenerateAccessTokenAsync();
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v2/checkout/orders/{token}/capture");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var jsonDoc = JsonDocument.Parse(content);
+
+        // Extract the capture ID from the response
+        var captureId = jsonDoc.RootElement
+            .GetProperty("purchase_units")[0]
+            .GetProperty("payments")
+            .GetProperty("captures")[0]
+            .GetProperty("id")
+            .GetString();
+
+        return ResponseModel.Success("Payment captured successfully", captureId);
+    }
+
+
     public async Task<string> GetApprovalLink(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
@@ -289,4 +363,33 @@ public class PaypalService : IPaypalService
 
         return approvalLink;
     }
+
+    public async Task<ResponseModel> RefundPaymentAsync(string transactionId)
+    {
+        try
+        {
+            var accessToken = await GenerateAccessTokenAsync();
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.PayPalApiUrl}/v2/payments/captures/{transactionId}/refund");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Content = new StringContent("{}", Encoding.UTF8, "application/json"); // Empty JSON body for refund
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(content);
+            var status = jsonDoc.RootElement.GetProperty("status").GetString();
+
+            if (status == "COMPLETED")
+                return ResponseModel.Success("Refund completed successfully");
+
+            return ResponseModel.Error("Refund failed");
+        }
+        catch (Exception ex)
+        {
+            return ResponseModel.Error($"Error processing refund: {ex.Message}");
+        }
+    }
+
 }

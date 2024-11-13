@@ -17,6 +17,8 @@ public partial class Order
 
     public string? PaymentMethod { get; set; }
 
+    public string? CaptureId { get; set; }
+
     public virtual User? Buyer { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();

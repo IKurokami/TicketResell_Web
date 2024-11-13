@@ -20,7 +20,7 @@ public class OrderService : IOrderService
         _validatorFactory = validatorFactory;
     }
 
-    public async Task<ResponseModel> SetOrderStatus(string orderId, int status)
+    public async Task<ResponseModel> SetOrderStatus(string orderId, int status, string captureId = null)
     {
         var order = await _unitOfWork.OrderRepository.GetDetailsByIdAsync(orderId);
 
@@ -30,6 +30,7 @@ public class OrderService : IOrderService
             return ResponseModel.BadRequest($"Invalid order status: {status}");
 
         order.Status = status;
+        order.CaptureId = captureId;
 
         var validator = _validatorFactory.GetValidator<Order>();
         var validationResult = await validator.ValidateAsync(order);

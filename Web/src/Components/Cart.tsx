@@ -28,6 +28,18 @@ const MyCart: React.FC = () => {
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const router = useRouter();
 
+  const [loading, setLoading] = useState(false);
+
+  const handleCheckoutLoading = async () => {
+    setLoading(true);
+    try {
+      // Simulate checkout process
+      await handleCheckout(); // Replace with actual checkout logic
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch cart items when component loads
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -239,14 +251,13 @@ const MyCart: React.FC = () => {
 
       if (result.statusCode === 200 && result.data) {
         router.push(result.data[0].data); // Redirect to the payment URL
+        await new Promise((resolve) => setTimeout(resolve, 15000));
       } else {
         throw new Error(result.message || "Failed to process payment");
       }
     } catch (error) {
       console.error(`Error processing ${selectedPayment} payment:`, error);
-      alert(
-        `Đã chọn quá số lượng sản phẩm trong kho. Vui lòng thử lại.`
-      );
+      alert(`Đã chọn quá số lượng sản phẩm trong kho. Vui lòng thử lại.`);
     }
   };
 
@@ -275,7 +286,11 @@ const MyCart: React.FC = () => {
       <div className=" bg-white rounded-t overflow-hidden">
         <div className="px-8 xl:px-24 pb-16 flex flex-col lg:flex-row relative">
           {/* Left Column: Tickets Table */}
-          <div className={`w-full lg:w-2/3 max-h-[calc(100vh-6rem)] ${items.length === 0 ? "" : "overflow-y-auto"}`}    >
+          <div
+            className={`w-full lg:w-2/3 max-h-[calc(100vh-6rem)] ${
+              items.length === 0 ? "" : "overflow-y-auto"
+            }`}
+          >
             <h2 className="text-2xl font-bold mb-6 sticky top-0 bg-white z-10 py-4">
               Giỏ hàng
             </h2>
@@ -291,7 +306,9 @@ const MyCart: React.FC = () => {
             {/* Check if items array is empty */}
             {items.length === 0 ? (
               <div className="flex justify-center items-center h-full">
-                <p className="text-gray-500 text-lg mb-20">Không có vé trong giỏ hàng</p>
+                <p className="text-gray-500 text-lg mb-20">
+                  Không có vé trong giỏ hàng
+                </p>
               </div>
             ) : (
               // Render items if array is not empty
@@ -377,7 +394,9 @@ const MyCart: React.FC = () => {
                     </div>
                   </div>
                   <div className="mb-2">
-                    <span className="sm:hidden font-medium mr-2">Tổng cộng:</span>
+                    <span className="sm:hidden font-medium mr-2">
+                      Tổng cộng:
+                    </span>
                     {formatPriceVND(item.price * item.quantity)}
                   </div>
                   <div className="flex items-center justify-center space-x-4">
@@ -389,10 +408,11 @@ const MyCart: React.FC = () => {
                         className="hidden"
                       />
                       <span
-                        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ease-in-out ${item.isSelected
-                          ? "bg-green-500 border-green-500"
-                          : "border-gray-300"
-                          }`}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ease-in-out ${
+                          item.isSelected
+                            ? "bg-green-500 border-green-500"
+                            : "border-gray-300"
+                        }`}
                       >
                         {item.isSelected && (
                           <CheckCircle className="w-4 h-4 text-white" />
@@ -411,7 +431,6 @@ const MyCart: React.FC = () => {
               ))
             )}
           </div>
-
 
           {/* Right Column: Payment Method and Summary */}
           <div className="w-full lg:w-1/3 lg:pl-6 lg:border-l lg:border-gray-200 sticky min-h-full">
@@ -448,17 +467,20 @@ const MyCart: React.FC = () => {
                     {paymentMethods.map((method) => (
                       <div
                         key={method.id}
-                        className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${selectedPayment === method.id
-                          ? "bg-blue-100 border border-green-500"
-                          : "bg-gray-100 hover:bg-gray-200"
-                          }`}
+                        className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
+                          selectedPayment === method.id
+                            ? "bg-blue-100 border border-green-500"
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }`}
                         onClick={() => handleSelectPayment(method.id)}
                       >
-                        {<img
-                          src={method.imageUrl}
-                          alt={method.name}
-                          className="w-12 h-12 mb-2"
-                        />}
+                        {
+                          <img
+                            src={method.imageUrl}
+                            alt={method.name}
+                            className="w-12 h-12 mb-2"
+                          />
+                        }
                         <span className="text-xs text-gray-700">
                           {method.name}
                         </span>
@@ -475,10 +497,40 @@ const MyCart: React.FC = () => {
                   </span>
                 </div>
                 <button
-                  className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition duration-300 mt-4"
-                  onClick={handleCheckout}
+                  className={`w-full py-4 rounded-lg font-semibold transition duration-300 mt-4 ${
+                    loading
+                      ? "bg-gray-400 cursor-not-allowed text-gray-200"
+                      : "bg-green-500 text-white hover:bg-green-600"
+                  }`}
+                  onClick={handleCheckoutLoading}
+                  disabled={loading}
                 >
-                  Thanh toán
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin h-6 w-6 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        ></path>
+                      </svg>
+                    </div>
+                  ) : (
+                    "Thanh toán"
+                  )}
                 </button>
               </div>
             </div>
