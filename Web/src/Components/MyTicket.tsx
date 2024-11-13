@@ -103,18 +103,18 @@ const MyTicketPage = () => {
   const ITEMS_PER_PAGE = 6;
 
   const fetchLocation = async (address: any) => {
-    const apiKey = 'b2abc07babmsh30e6177f039fd88p18a238jsn5ec9739e64ae';
+    const apiKey = "b2abc07babmsh30e6177f039fd88p18a238jsn5ec9739e64ae";
     const encodedAddress = encodeURIComponent(address);
 
     const url = `https://google-map-places.p.rapidapi.com/maps/api/geocode/json?address=${encodedAddress}&language=vn&region=vn&result_type=administrative_area_level_1&location_type=APPROXIMATE`;
 
     try {
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'x-rapidapi-host': 'google-map-places.p.rapidapi.com',
-          'x-rapidapi-key': apiKey
-        }
+          "x-rapidapi-host": "google-map-places.p.rapidapi.com",
+          "x-rapidapi-key": apiKey,
+        },
       });
 
       if (!response.ok) {
@@ -124,7 +124,7 @@ const MyTicketPage = () => {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching location data:', error);
+      console.error("Error fetching location data:", error);
       return null;
     }
   };
@@ -133,16 +133,25 @@ const MyTicketPage = () => {
     fetchTickets();
   }, []);
   const detectMimeType = (base64String: string) => {
-    if (base64String.startsWith("/9j/")) return "image/jpeg";  // JPEG
-    if (base64String.startsWith("iVBORw0KGgo")) return "image/png";  // PNG
-    if (base64String.startsWith("UklGR")) return "image/webp";  // WebP
-    return "image/png";  // Mặc định trả về PNG nếu không phát hiện được loại
+    if (base64String.startsWith("/9j/")) return "image/jpeg"; // JPEG
+    if (base64String.startsWith("iVBORw0KGgo")) return "image/png"; // PNG
+    if (base64String.startsWith("UklGR")) return "image/webp"; // WebP
+    return "image/png"; // Mặc định trả về PNG nếu không phát hiện được loại
   };
 
   // Hàm tải mã QR từ API
-  const fetchQRCode = async (ticketId: any) => {
+  const fetchQRCode = async (ticketId: any, quantity: number) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/qr/${ticketId}`, {
+      // Check if ticketId contains an underscore
+      const splitTicketId = ticketId.split("_");
+      const isMultiQR = splitTicketId.length > 1 && splitTicketId[1] !== null;
+
+      // Construct the appropriate URL based on the ticketId format
+      const url = isMultiQR
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/multiqr/${ticketId}/${quantity}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/qr/${ticketId}`;
+
+      const response = await fetch(url, {
         credentials: "include",
         method: "GET",
         headers: {
@@ -153,7 +162,6 @@ const MyTicketPage = () => {
       if (!response.ok) throw new Error("Failed to fetch QR code");
 
       const result = await response.json();
-
       return result.statusCode === 200 ? result.data : null;
     } catch (error) {
       console.error(`Error fetching QR code for ticket ID ${ticketId}:`, error);
@@ -190,7 +198,10 @@ const MyTicketPage = () => {
                 const { imageUrl } = await fetchImage(detail.ticket.image);
 
                 // Fetch QR code for each ticket
-                const qrCodeData = await fetchQRCode(detail.ticketId); // Fetch the QR code data from the API
+                const qrCodeData = await fetchQRCode(
+                  detail.ticketId,
+                  detail.quantity
+                ); // Fetch the QR code data from the API
 
                 return {
                   id: detail.orderDetailId,
@@ -201,8 +212,8 @@ const MyTicketPage = () => {
                   quantity: detail.quantity,
                   sellerId: detail.ticket.sellerId,
                   fullname: detail.ticket.seller.fullname,
-                  description: detail.ticket.description || 'Không có mô tả',
-                  categories: detail.ticket.categories || ['Chung'],
+                  description: detail.ticket.description || "Không có mô tả",
+                  categories: detail.ticket.categories || ["Chung"],
                   image: imageUrl || detail.ticket.image,
                   location: detail.ticket.location,
                   rated: detail.rated,
@@ -221,60 +232,86 @@ const MyTicketPage = () => {
   };
 
   const downloadQRCodes = async (ticket: any) => {
-    console.log('downloadQRCodes called with ticket:', ticket);
+    console.log("downloadQRCodes called with ticket:", ticket);
     try {
-      let qrDataUrl = ticket.qrcode;
+      // Check if we have multiple QR codes
+      const qrCodes = Array.isArray(ticket.qrcode)
+        ? ticket.qrcode
+        : [ticket.qrcode];
 
-      if (qrDataUrl.startsWith("iVBORw0KGgo")) {
-        qrDataUrl = "data:image/png;base64," + qrDataUrl;  // Thêm tiền tố cho PNG
-      } else if (qrDataUrl.startsWith("/9j/")) {
-        qrDataUrl = "data:image/jpeg;base64," + qrDataUrl;  // Thêm tiền tố cho JPEG
-      } else if (qrDataUrl.startsWith("UklGR")) {
-        qrDataUrl = "data:image/webp;base64," + qrDataUrl;  // Thêm tiền tố cho WebP
+      // Create a zip file if we have multiple QR codes
+      if (qrCodes.length > 1) {
+        const zip = new JSZip();
+
+        // Add each QR code to the zip file
+        qrCodes.forEach((qrCode: string, index: number) => {
+          let qrDataUrl = qrCode;
+          if (qrDataUrl.startsWith("iVBORw0KGgo")) {
+            qrDataUrl = "data:image/png;base64," + qrDataUrl;
+          } else if (qrDataUrl.startsWith("/9j/")) {
+            qrDataUrl = "data:image/jpeg;base64," + qrDataUrl;
+          } else if (qrDataUrl.startsWith("UklGR")) {
+            qrDataUrl = "data:image/webp;base64," + qrDataUrl;
+          }
+
+          const base64Data = qrDataUrl.split(",")[1];
+          const mimeType = detectMimeType(base64Data);
+          const extension = mimeType.split("/")[1];
+
+          zip.file(
+            `ticket-${ticket.ticketId}-${index + 1}.${extension}`,
+            base64Data,
+            { base64: true }
+          );
+        });
+
+        // Generate and download the zip file
+        const content = await zip.generateAsync({ type: "blob" });
+        const url = URL.createObjectURL(content);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `tickets-${ticket.ticketId}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       } else {
-        console.warn('Invalid QR code data or data is not an image.');
-        return;
+        // Handle single QR code (existing logic)
+        let qrDataUrl = ticket.qrcode;
+
+        if (qrDataUrl.startsWith("iVBORw0KGgo")) {
+          qrDataUrl = "data:image/png;base64," + qrDataUrl;
+        } else if (qrDataUrl.startsWith("/9j/")) {
+          qrDataUrl = "data:image/jpeg;base64," + qrDataUrl;
+        } else if (qrDataUrl.startsWith("UklGR")) {
+          qrDataUrl = "data:image/webp;base64," + qrDataUrl;
+        }
+
+        const base64Data = qrDataUrl.split(",")[1];
+        const mimeType = detectMimeType(base64Data);
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `ticket-${ticket.ticketId}.${mimeType.split("/")[1]}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       }
-
-      const base64Data = qrDataUrl.split(",")[1];  // Lấy phần base64 từ URL
-      if (!base64Data) {
-        console.error("Base64 data is empty.");
-        return;
-      }
-
-      const mimeType = detectMimeType(base64Data);  // Phát hiện loại MIME
-
-      // Chuyển đổi base64 thành mảng byte
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-
-      // Tạo liên kết để tải tệp xuống
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `ticket-${ticket.ticketId}.${mimeType.split("/")[1]}`;  // Đặt tên tệp với phần mở rộng đúng
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Hủy đối tượng URL sau khi tải xong
-      URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading QR code:", error);
       alert("Có lỗi xảy ra khi tải mã QR.");
     }
   };
-
-
-
 
   const calculateDaysFromNow = (startDate: string) => {
     // Parse ngày từ format "DD/MM/YYYY, HH:mm"
@@ -526,10 +563,11 @@ const MyTicketPage = () => {
               </motion.div>
               <div className="flex items-center gap-2">
                 <button
-                  className={`p-2 rounded-lg transition-colors ${viewMode === "grid"
-                    ? "bg-blue-100 text-blue-600"
-                    : "bg-gray-100 text-gray-600"
-                    }`}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === "grid"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
                   onClick={() => setViewMode("grid")}
                 >
                   <div className="grid grid-cols-2 gap-1">
@@ -542,10 +580,11 @@ const MyTicketPage = () => {
                   </div>
                 </button>
                 <button
-                  className={`p-2 rounded-lg transition-colors ${viewMode === "list"
-                    ? "bg-blue-100 text-blue-600"
-                    : "bg-gray-100 text-gray-600"
-                    }`}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === "list"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
                   onClick={() => setViewMode("list")}
                 >
                   <div className="flex flex-col gap-1">
@@ -656,10 +695,10 @@ const MyTicketPage = () => {
                       {sortBy === "date"
                         ? "Ngày"
                         : sortBy === "price"
-                          ? "Giá"
-                          : sortBy === "name"
-                            ? "Sắp xếp theo"
-                            : "Sắp xếp theo"}
+                        ? "Giá"
+                        : sortBy === "name"
+                        ? "Sắp xếp theo"
+                        : "Sắp xếp theo"}
                     </span>
                   </div>
                 </SelectTrigger>
@@ -773,10 +812,11 @@ const MyTicketPage = () => {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-4 py-2 rounded-lg ${currentPage === page
-                          ? "bg-blue-600 text-white"
-                          : "border border-gray-200 hover:bg-gray-50"
-                          }`}
+                        className={`px-4 py-2 rounded-lg ${
+                          currentPage === page
+                            ? "bg-blue-600 text-white"
+                            : "border border-gray-200 hover:bg-gray-50"
+                        }`}
                       >
                         {page}
                       </button>
