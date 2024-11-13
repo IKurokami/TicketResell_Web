@@ -82,7 +82,6 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
         className={`container mx-auto px-28 flex flex-col sm:flex-row lg:flex-row xl:flex-row 2xl:flex-row justify-between gap-4`}
       >
         {!(hasRO3Role || hasRO4Role) && (
-        {!(hasRO3Role || hasRO4Role) && (
           <div className="relative flex items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-auto">
             <input
               type="text"

@@ -181,20 +181,21 @@ public class AuthenticationService : IAuthenticationService
             await _unitOfWork.UserRepository.CreateAsync(user);
             await _unitOfWork.CompleteAsync();
         }
-
+        
         if (string.IsNullOrEmpty(user.Password))
         {
             var accessKey = await GetCachedAccessKeyAsync("password_setup", user.UserId);
             if (!accessKey.HasValue || accessKey.IsNullOrEmpty)
             {
                 accessKey = GenerateAccessKey();
-                await CacheAccessKeyAsync("password_setup", user.UserId, accessKey, TimeSpan.FromHours(1));
+                await CacheAccessKeyAsync("password_setup", user.UserId, accessKey!, TimeSpan.FromHours(1));
+                await CacheAccessKeyAsync(user.UserId, accessKey!);
             }
 
             var response = new PasswordSetupDto
             {
                 UserId = user.UserId,
-                PasswordSetupToken = accessKey
+                PasswordSetupToken = accessKey!
             };
 
             return ResponseModel.NeedsPasswordSetup("False", response);

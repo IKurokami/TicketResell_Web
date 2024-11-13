@@ -17,6 +17,11 @@ public class TicketController : ControllerBase
         _ticketService = serviceProvider.GetRequiredService<ITicketService>();
     }
 
+    private bool HasAdminOrRequiredRole(UserRole requiredRole)
+    {
+        return HttpContext.HasEnoughtRoleLevel(UserRole.Admin) || HttpContext.HasEnoughtRoleLevel(requiredRole);
+    }
+
     [HttpPost]
     [Route("create")]
     public async Task<IActionResult> CreateTicket([FromBody] TicketCreateDto[] dto)
@@ -24,7 +29,7 @@ public class TicketController : ControllerBase
         if (!HttpContext.GetIsAuthenticated())
             return ResponseParser.Result(
                 ResponseModel.Unauthorized("You need to be authenticated to create a ticket"));
-        if (!HttpContext.HasEnoughtRoleLevel(UserRole.Seller))
+        if (HasAdminOrRequiredRole(UserRole.Seller))
             return ResponseParser.Result(
                 ResponseModel.Unauthorized("You are not seller"));
         var response = new ResponseModel();
@@ -170,16 +175,18 @@ public class TicketController : ControllerBase
             return ResponseParser.Result(
                 ResponseModel.Unauthorized("You need to be authenticated to update a ticket"));
 
-        var ticket = (await _ticketService.GetTicketByBaseIdAsync(id)).Data as List<TicketReadDto>;
-        if (ticket != null)
-            if (ticket[0].SellerId == HttpContext.GetUserId())
-                return ResponseParser.Result(
-                    await _ticketService.UpdateTicketsByBaseIdAsync(id, dto, dto.CategoriesId, true));
+        if ((await _ticketService.GetTicketByBaseIdAsync(id)).Data is not List<TicketReadDto> ticket) 
+            return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
+        
+        if (HttpContext.HasEnoughtRoleLevel(UserRole.Admin) || ticket[0].SellerId == HttpContext.GetUserId())
+        {
+            return ResponseParser.Result(
+                await _ticketService.UpdateTicketsByBaseIdAsync(id, dto, dto.CategoriesId, true));
+        }
 
         return ResponseParser.Result(ResponseModel.Unauthorized("No way"));
     }
-
-
+    
     [HttpPut]
     [Route("update/qr/{id}")]
     public async Task<IActionResult> UpdateQrTicket(string id, [FromBody] TicketQrDto dto)

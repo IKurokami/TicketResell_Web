@@ -85,7 +85,8 @@ public class AuthenticationController : ControllerBase
             return ResponseParser.Result(ResponseModel.Unauthorized("Unable to retrieve user info from Google"));
 
         var result = await _authService.LoginWithGoogleAsync(googleUser);
-        if (result.Data != null && result.Data is LoginInfoDto loginInfo)
+        if (result.Data == null) return ResponseParser.Result(result);
+        if (result.Data is LoginInfoDto loginInfo)
         {
             if (loginInfo.User != null)
                 HttpContext.SetUserId(loginInfo.User.UserId);
@@ -93,6 +94,11 @@ public class AuthenticationController : ControllerBase
             HttpContext.SetAccessKey(loginInfo.AccessKey);
             HttpContext.SetIsAuthenticated(true);
         }
+
+        if (result.Data is not PasswordSetupDto passwordSetupDto) return ResponseParser.Result(result);
+        HttpContext.SetUserId(passwordSetupDto.UserId);
+        HttpContext.SetAccessKey(passwordSetupDto.PasswordSetupToken);
+        HttpContext.SetIsAuthenticated(true);
 
         return ResponseParser.Result(result);
     }
@@ -109,31 +115,33 @@ public class AuthenticationController : ControllerBase
             request.UserId,
             request.Password,
             request.PasswordSetupToken
-            );
+        );
 
         return ResponseParser.Result(response);
     }
 
 
-        [HttpPost("islogged")]
-        public async Task<IActionResult> IsLogged()
+    [HttpPost("islogged")]
+    public async Task<IActionResult> IsLogged()
+    {
+        return ResponseParser.Result(ResponseModel.Success(HttpContext.GetIsAuthenticated().ToString()));
+    }
+
+    [HttpPost("isRolelogged")]
+    public async Task<IActionResult> IsRoleLogged(string roleId)
+    {
+        _logger.LogInformation("Is check role");
+        if (!HttpContext.GetIsAuthenticated())
         {
-            return ResponseParser.Result(ResponseModel.Success(HttpContext.GetIsAuthenticated().ToString()));
+            _logger.LogInformation("role check False");
+            return ResponseParser.Result(ResponseModel.Unauthorized("False"));
         }
-        
-        [HttpPost("isRolelogged")]
-        public async Task<IActionResult> IsRoleLogged(string roleId)
-        {
-            _logger.LogInformation("Is check role");
-            if (!HttpContext.GetIsAuthenticated())
-            {
-                _logger.LogInformation("role check False");
-                return ResponseParser.Result(ResponseModel.Unauthorized("False"));
-            }
-            _logger.LogInformation("role not");
-            return ResponseParser.Result(ResponseModel.Success(HttpContext.HasEnoughtRoleLevel(RoleHelper.GetUserRole(roleId)).ToString()));
-        }
-        
+
+        _logger.LogInformation("role not");
+        return ResponseParser.Result(
+            ResponseModel.Success(HttpContext.HasEnoughtRoleLevel(RoleHelper.GetUserRole(roleId)).ToString()));
+    }
+
 
     [HttpPost("logout/{userId}")]
     public async Task<IActionResult> Logout(string userId)
@@ -164,8 +172,6 @@ public class AuthenticationController : ControllerBase
     [HttpPost("change-passwordKey")]
     public async Task<IActionResult> ChangePasswordByKey([FromBody] ChangePasswordKeyDto changePasswordDto)
     {
-        
-
         var result = await _authService.CheckPassswordKeyAsync(changePasswordDto.PasswordKey, changePasswordDto.UserId,
             changePasswordDto.NewPassword);
         return ResponseParser.Result(result);
