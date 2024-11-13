@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Core.Entities;
+
 namespace Repositories.Core.Context;
 
 public partial class TicketResellManagementContext : DbContext
@@ -121,6 +122,10 @@ public partial class TicketResellManagementContext : DbContext
             entity.Property(e => e.BuyerId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.CaptureId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("captureId");
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
 
             entity.HasOne(d => d.Buyer).WithMany(p => p.Orders)

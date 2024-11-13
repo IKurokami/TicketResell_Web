@@ -76,8 +76,8 @@ namespace Api.Controllers
             return ResponseParser.Result(chatbox);
         }
 
-        [HttpPost("createreport/{status}")]
-        public async Task<IActionResult> CreateReport(int status)
+        [HttpPost("createreport/{status}/{sellerId}")]
+        public async Task<IActionResult> CreateReport(int status, string sellerId)
         {   
             if (!HttpContext.GetIsAuthenticated())
                 return ResponseParser.Result(
@@ -89,7 +89,7 @@ namespace Api.Controllers
             ChatboxCreateDto dto = new ChatboxCreateDto(){
                 ChatboxId = "CB"+ Guid.NewGuid(),
                 Title="Report",
-                Description= ReportHelper.GetStatusString(status),
+                Description= ReportHelper.GetStatusString(status)+$", người bị tố cáo: {sellerId}",
                 Status = status
             };
             var response = await _chatboxService.CreateReportAsync(dto, userId);
