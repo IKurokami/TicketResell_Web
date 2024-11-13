@@ -344,4 +344,26 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
             .ToList();
         return filteredTicketsByCategory;
     }
+
+    public async Task<List<string>> GetMultiQrImagesAsBase64Async(string ticketId, int quantity)
+    {
+        var position = int.Parse(ticketId.Split('_')[1]);
+        var baseTicketId = ticketId.Split('_')[0];
+
+        var qrCodes = await _context.Tickets
+            .Where(t => t.TicketId.StartsWith(baseTicketId) && t.Status == 0)
+            .ToListAsync();
+
+        var orderedQrCodes = qrCodes
+            .OrderBy(t => int.Parse(t.TicketId.Split('_')[1]))
+            .Skip(position - 1)
+            .Take(quantity)
+            .Select(t => t.Qr)
+            .ToList();
+
+        if (orderedQrCodes == null || orderedQrCodes.Count == 0)
+            throw new KeyNotFoundException("No QR codes found for the specified criteria.");
+
+        return orderedQrCodes.Select(qr => Convert.ToBase64String(qr)).ToList();
+    }
 }

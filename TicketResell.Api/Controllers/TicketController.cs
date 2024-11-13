@@ -90,6 +90,14 @@ public class TicketController : ControllerBase
         return ResponseParser.Result(response);
     }
 
+     [HttpGet("multiqr/{ticketId}/{quantity:int}")]
+    public async Task<IActionResult> GetMultiQrImage(string ticketId, int quantity)
+    {
+        var response = await _ticketService.GetMultiQrImageAsBase64Async(ticketId, quantity);
+        return ResponseParser.Result(response);
+    }
+
+
     [HttpPost("getticketsbytimerange")]
     public async Task<IActionResult> GetTicketsStartingWithinTimeRange([FromBody] TicketTimeRangeRequestDto request)
     {

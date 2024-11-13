@@ -50,7 +50,7 @@ export const InputField: React.FC<InputFieldProps> = ({
   ...props
 }) => (
   <div className="relative">
-    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+    <div className="absolute inset-y-0 top-5 left-0 flex  pl-3 pointer-events-none text-gray-400">
       {icon}
     </div>
     <input
@@ -64,13 +64,13 @@ export const InputField: React.FC<InputFieldProps> = ({
       <button
         type="button"
         onClick={onRightIconClick}
-        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+        className="absolute inset-y-0 top-5 right-0 flex pr-3 text-gray-400 hover:text-gray-600"
       >
         {rightIcon}
       </button>
     )}
     {error && (
-      <Alert variant="destructive" className="mt-2">
+      <Alert variant="destructive" className="mt-2 border-white">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     )}
@@ -265,7 +265,7 @@ const CreatePasswordForm: React.FC = () => {
               )}
 
               <ActionButton type="submit" isLoading={isLoading}>
-                Đổi mật khẩu 
+                Đổi mật khẩu
               </ActionButton>
 
               <div className="mt-4 space-y-2">
