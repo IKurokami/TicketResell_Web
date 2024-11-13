@@ -54,6 +54,8 @@ builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfi
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json",
     Environment.GetEnvironmentVariable("SQLServer"));
 
+JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.Development.json",
+    Environment.GetEnvironmentVariable("SQLServer"));
 
 // Dbcontext configuration
 builder.Services.AddDbContext<TicketResellManagementContext>();
@@ -181,3 +183,4 @@ app.MapHub<ChatHub>("chat-hub");
 app.Run();
 
 JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.json", "default");
+JsonUtils.UpdateJsonValue("ConnectionStrings:SQLServer", "appsettings.Development.json", "default");
