@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Chatbox } from "./RequestForm";
 
 interface DialogProps {
   open: boolean;
@@ -35,19 +36,19 @@ const Dialog: React.FC<DialogProps> = ({
 
         <form onSubmit={onSend} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Title</label>
+            <label className="text-sm font-medium">Tiêu đề</label>
             <input
               type="text"
-              placeholder="Title"
+              placeholder="Tiêu đề"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full rounded-md border border-gray-300 p-2 hover:bg-gray-100  focus:border-transparent"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
+            <label className="text-sm font-medium">Mô tả</label>
             <textarea
-              placeholder="Description"
+              placeholder="Mô tả"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full rounded-md border border-gray-300 p-2 hover:bg-gray-100 focus:border-transparent"
@@ -60,13 +61,13 @@ const Dialog: React.FC<DialogProps> = ({
               className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
               onClick={onClose}
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
               className="rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              Send
+              Gửi
             </button>
           </div>
         </form>
@@ -75,8 +76,10 @@ const Dialog: React.FC<DialogProps> = ({
   );
 };
 
-const DialogComponent: React.FC<{ setChatboxData: React.Dispatch<React.SetStateAction<any[]>> }> = ({ setChatboxData }) => {
-  // Define state variables with TypeScript type annotations
+const DialogComponent: React.FC<{
+  chatboxData: Chatbox[];
+  setChatboxData: React.Dispatch<React.SetStateAction<any[]>>;
+}> = ({ chatboxData, setChatboxData }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -91,42 +94,49 @@ const DialogComponent: React.FC<{ setChatboxData: React.Dispatch<React.SetStateA
     setDescription("");
   };
 
-  
   const handleSend = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          chatboxId: "string",
-          title,
-          status: 0,
-          description,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            chatboxId: "string",
+            title,
+            status: 0,
+            description,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to create chatbox');
+        throw new Error("Không thể tạo chatbox");
       }
 
       const data = await response.json();
-      setChatboxData(prevData => [ data.data,...prevData]);
-      console.log('Success:', data);
+      setChatboxData((prevData) => [data.data, ...prevData]);
+      console.log("Thành công:", data);
       handleClose();
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Lỗi:", error);
     }
   };
+
+  const isDisabled = chatboxData.some(chatbox => chatbox.status === 1);
 
   return (
     <>
       <button
-        className="border border-gray-300 rounded-full mb-5  bg-green-500 hover:bg-green-600 text-white px-4 py-2"
+        className={`border border-gray-300 rounded-full mb-5 px-4 py-2 text-white ${
+          isDisabled ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+        }`}
         onClick={handleOpen}
+        disabled={isDisabled}
       >
         Thêm
       </button>

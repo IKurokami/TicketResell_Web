@@ -9,7 +9,7 @@ import { FaUnlockKeyhole } from "react-icons/fa6";
 import { UserData } from "./UserRequest";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
-interface Chatbox {
+export interface Chatbox {
   chatboxId: string;
   status: number;
   createDate: string;

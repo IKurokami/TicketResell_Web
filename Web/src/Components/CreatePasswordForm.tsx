@@ -5,19 +5,19 @@ import { motion } from "framer-motion";
 import { RiLockPasswordFill } from "react-icons/ri";
 
 // Password requirements constant remains the same
-const PASSWORD_REQUIREMENTS = [
-  { label: "At least 8 characters", test: (pwd: string) => pwd.length >= 8 },
+export const PASSWORD_REQUIREMENTS = [
+  { label: "Ít nhất 8 ký tự", test: (pwd: string) => pwd.length >= 8 },
   {
-    label: "Contains uppercase letter",
+    label: "Chứa chữ cái viết hoa",
     test: (pwd: string) => /[A-Z]/.test(pwd),
   },
   {
-    label: "Contains lowercase letter",
+    label: "Chứa chữ cái viết thường",
     test: (pwd: string) => /[a-z]/.test(pwd),
   },
-  { label: "Contains number", test: (pwd: string) => /\d/.test(pwd) },
+  { label: "Chứa số", test: (pwd: string) => /\d/.test(pwd) },
   {
-    label: "Contains special character",
+    label: "Chứa ký tự đặc biệt",
     test: (pwd: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd),
   },
 ] as const;
@@ -42,19 +42,19 @@ interface ActionButtonProps {
 }
 
 // InputField component remains the same
-const InputField: React.FC<InputFieldProps> = ({
+export const InputField: React.FC<InputFieldProps> = ({
   icon,
   rightIcon,
   onRightIconClick,
   error,
   ...props
 }) => (
-  <div className="relative mt-5">
+  <div className="relative">
     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
       {icon}
     </div>
     <input
-      className={`w-full pl-10 pr-10 py-4 bg-gray-100 border-none rounded-full focus:outline-none focus:ring-2 
+      className={`w-full pl-10 pr-10 py-3 bg-gray-100 border-none rounded-full focus:outline-none focus:ring-2 
         ${
           error ? "ring-2 ring-red-500" : "focus:ring-green-500"
         } transition-all`}
@@ -78,7 +78,7 @@ const InputField: React.FC<InputFieldProps> = ({
 );
 
 // ActionButton component remains the same
-const ActionButton: React.FC<ActionButtonProps> = ({
+export const ActionButton: React.FC<ActionButtonProps> = ({
   children,
   onClick,
   isLoading,
@@ -97,7 +97,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     {isLoading ? (
       <div className="flex items-center justify-center">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Processing...
+        Đang xử lý...
       </div>
     ) : (
       children
@@ -140,13 +140,13 @@ const CreatePasswordForm: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!validatePassword(formData.newPassword)) {
-      newErrors.newPassword = "Password does not meet the requirements";
+      newErrors.newPassword = "Mật khẩu không đáp ứng yêu cầu";
       setErrors(newErrors);
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = "Mật khẩu không khớp";
       setErrors(newErrors);
       return;
     }
@@ -170,7 +170,7 @@ const CreatePasswordForm: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to change password");
+        throw new Error(errorData.message || "Thay đổi mật khẩu thất bại");
       }
 
       // Handle success
@@ -180,7 +180,7 @@ const CreatePasswordForm: React.FC = () => {
         submit:
           error instanceof Error
             ? error.message
-            : "An error occurred while changing password",
+            : "Đã xảy ra lỗi khi thay đổi mật khẩu",
       });
     } finally {
       setIsLoading(false);
@@ -213,7 +213,7 @@ const CreatePasswordForm: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">Đổi mật khẩu</h1>
               <p className="text-gray-600 mt-2">Vui lòng đổi mật khẩu mới</p>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-9">
               <div>
                 <InputField
                   icon={<RiLockPasswordFill />}
@@ -236,7 +236,7 @@ const CreatePasswordForm: React.FC = () => {
                 />
               </div>
               <InputField
-                icon={<Eye className="h-4 w-4" />}
+                icon={<RiLockPasswordFill />}
                 rightIcon={
                   showPassword.confirm ? (
                     <EyeOff className="h-4 w-4" />
@@ -245,7 +245,7 @@ const CreatePasswordForm: React.FC = () => {
                   )
                 }
                 type={showPassword.confirm ? "text" : "password"}
-                placeholder="Confirm Password"
+                placeholder="Xác nhận mật khẩu"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
@@ -265,7 +265,7 @@ const CreatePasswordForm: React.FC = () => {
               )}
 
               <ActionButton type="submit" isLoading={isLoading}>
-                Change Password
+                Đổi mật khẩu 
               </ActionButton>
 
               <div className="mt-4 space-y-2">

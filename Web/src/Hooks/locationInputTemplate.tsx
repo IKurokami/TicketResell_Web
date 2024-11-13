@@ -18,15 +18,19 @@ type Ward = {
 };
 
 interface InputAddressFieldsProps {
+  oldLocation: string | undefined;
   houseNumber: string;
   setHouseNumber: React.Dispatch<React.SetStateAction<string>>;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
+  errors?: { [key: string]: string };
 }
 
 const InputAddressFields: React.FC<InputAddressFieldsProps> = ({
+  oldLocation,
   houseNumber,
   setHouseNumber,
   setFormData,
+  errors,
 }) => {
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -57,8 +61,10 @@ const InputAddressFields: React.FC<InputAddressFieldsProps> = ({
         (district) => district.ProvinceId === provinceId
       );
       setDistricts(filteredDistricts);
+      return filteredDistricts;
     } catch (error) {
       console.error("Error fetching districts:", error);
+      return [];
     }
   };
 
@@ -72,14 +78,48 @@ const InputAddressFields: React.FC<InputAddressFieldsProps> = ({
         (ward) => ward.DistrictId === districtId
       );
       setWards(filteredWards);
+      return filteredWards;
     } catch (error) {
       console.error("Error fetching wards:", error);
+      return [];
     }
   };
 
   useEffect(() => {
     fetchProvinces();
   }, []);
+
+  useEffect(() => {
+    const initializeLocation = async () => {
+      if (!oldLocation || provinces.length === 0) return;
+
+      const parts = oldLocation.split(",").map((part) => part.trim());
+      if (parts.length === 4) {
+        const [houseNum, wardName, districtName, provinceName] = parts;
+
+        setHouseNumber(houseNum);
+
+        const province = provinces.find((p) => p.Name === provinceName);
+        if (!province) return;
+
+        setSelectedProvince(province.Id);
+
+        const districtsData = await fetchDistricts(province.Id);
+        const district = districtsData.find((d) => d.Name === districtName);
+        if (!district) return;
+
+        setSelectedDistrict(district.Id);
+
+        const wardsData = await fetchWards(district.Id);
+        const ward = wardsData.find((w) => w.Name === wardName);
+        if (!ward) return;
+
+        setSelectedWard(ward.Id);
+      }
+    };
+
+    initializeLocation();
+  }, [oldLocation, provinces]);
 
   const handleProvinceChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -134,7 +174,7 @@ const InputAddressFields: React.FC<InputAddressFieldsProps> = ({
       if (houseNumber && provinceName && districtName && wardName) {
         const fullAddress =
           `${houseNumber}, ${wardName}, ${districtName}, ${provinceName}`.trim();
-        setFormData((prevData) => ({
+        setFormData((prevData: any) => ({
           ...prevData,
           address: fullAddress,
         }));
@@ -167,15 +207,20 @@ const InputAddressFields: React.FC<InputAddressFieldsProps> = ({
           htmlFor="houseNumber"
           className="mb-1 text-sm font-medium text-gray-700"
         >
-          House Number/Street
+          Số nhà/Đường
         </label>
         <input
           id="houseNumber"
           type="text"
           value={houseNumber}
           onChange={handleHouseNumberChange}
-          className="w-full px-3 py-2 bg-[#F5F7FC] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className={`w-full px-3 py-2 bg-[#F5F7FC] border ${
+            errors?.houseNumber ? "border-red-500" : "border-gray-300"
+          } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
         />
+        {errors?.houseNumber && (
+          <p className="text-sm text-red-500 mt-1">{errors.houseNumber}</p>
+        )}
       </div>
 
       <div className="flex flex-col">
@@ -183,21 +228,26 @@ const InputAddressFields: React.FC<InputAddressFieldsProps> = ({
           htmlFor="province"
           className="mb-1 text-sm font-medium text-gray-700"
         >
-          Province
+          Tỉnh/Thành phố
         </label>
         <select
           id="province"
           value={selectedProvince || ""}
           onChange={handleProvinceChange}
-          className="w-full px-3 py-2 bg-[#F5F7FC] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className={`w-full px-3 py-2 bg-[#F5F7FC] border ${
+            errors?.province ? "border-red-500" : "border-gray-300"
+          } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
         >
-          <option value="">Select Province</option>
+          <option value="">Chọn tỉnh/ Thành phố</option>
           {provinces.map((province) => (
             <option key={province.Id} value={province.Id}>
               {province.Name}
             </option>
           ))}
         </select>
+        {errors?.province && (
+          <p className="text-sm text-red-500 mt-1">{errors.province}</p>
+        )}
       </div>
 
       <div className="flex flex-col">
@@ -205,22 +255,27 @@ const InputAddressFields: React.FC<InputAddressFieldsProps> = ({
           htmlFor="district"
           className="mb-1 text-sm font-medium text-gray-700"
         >
-          District
+          Huyện/Thị Xã
         </label>
         <select
           id="district"
           value={selectedDistrict || ""}
           onChange={handleDistrictChange}
           disabled={!selectedProvince}
-          className="w-full px-3 py-2 bg-[#F5F7FC] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className={`w-full px-3 py-2 bg-[#F5F7FC] border ${
+            errors?.district ? "border-red-500" : "border-gray-300"
+          } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed`}
         >
-          <option value="">Select District</option>
+          <option value="">Chọn Huyện/Thị Xã</option>
           {districts.map((district) => (
             <option key={district.Id} value={district.Id}>
               {district.Name}
             </option>
           ))}
         </select>
+        {errors?.district && (
+          <p className="text-sm text-red-500 mt-1">{errors.district}</p>
+        )}
       </div>
 
       <div className="flex flex-col">
@@ -228,22 +283,27 @@ const InputAddressFields: React.FC<InputAddressFieldsProps> = ({
           htmlFor="ward"
           className="mb-1 text-sm font-medium text-gray-700"
         >
-          Ward
+          Phường/Xã
         </label>
         <select
           id="ward"
           value={selectedWard || ""}
           onChange={handleWardChange}
           disabled={!selectedDistrict}
-          className="w-full px-3 py-2 bg-[#F5F7FC] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className={`w-full px-3 py-2 bg-[#F5F7FC] border ${
+            errors?.ward ? "border-red-500" : "border-gray-300"
+          } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed`}
         >
-          <option value="">Select Ward</option>
+          <option value="">Chọn Phường/Xã</option>
           {wards.map((ward) => (
             <option key={ward.Id} value={ward.Id}>
               {ward.Name}
             </option>
           ))}
         </select>
+        {errors?.ward && (
+          <p className="text-sm text-red-500 mt-1">{errors.ward}</p>
+        )}
       </div>
     </div>
   );
