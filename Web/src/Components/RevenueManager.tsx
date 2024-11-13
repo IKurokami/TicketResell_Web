@@ -594,10 +594,10 @@ const uniqueBuyersThisYear = countUniqueBuyersThisYear(transactions);
             </div>
             <p className="text-sm text-slate-500">Tổng doanh thu</p>
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <div className="flex items-center gap-1">
+              {/* <div className="flex items-center gap-1">
                 <Check size={16} className="text-green-500" />
                 <span className="text-green-500">Đang tăng</span>
-              </div>
+              </div> */}
               <span className="px-2 py-1 text-sm font-medium text-blue-500 bg-blue-50 rounded-lg whitespace-nowrap">
                 Doanh thu trung bình:{" "}
                 {calculateAverageDailyRateForToday(

@@ -73,7 +73,7 @@ const OrderDetailsDashboard = ({
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = new Date(dateString + 'Z');
     const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() returns month index (0-11)
     const day = String(date.getDate()).padStart(2, "0"); // getDate() returns the day (1-31)
     const year = date.getFullYear(); // getFullYear() returns the full year
@@ -162,8 +162,8 @@ const OrderDetailsDashboard = ({
                 Giá Trị Trung Bình
               </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 truncate">
-                {formatCurrency(calculateTotalRevenue(revenue) / transactions.length)}
-              </p>
+                  {formatCurrency(transactions.length ? calculateTotalRevenue(revenue) / transactions.length : 0)}
+                </p>
             </div>
           </div>
         </Card>
@@ -231,37 +231,40 @@ const OrderDetailsDashboard = ({
           </div>
 
           <div className="space-y-3  md:space-y-4 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-            {topBuyers.slice(0,3).map((buyer, index) => (
-              <div
-                key={buyer.userId}
-                className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 hover:bg-slate-50 rounded-lg transition-colors gap-3 sm:gap-4"
-              >
-                <div className="flex items-center space-x-3 md:space-x-4 w-full sm:w-auto">
-                  <div
-                    className={`w-6 h-6  md:w-8 md:h-8 rounded-full flex items-center justify-center text-white font-semibold shrink-0
-                  ${
-                    index === 0
-                      ? "bg-yellow-500"
-                      : index === 1
-                      ? "bg-slate-400"
-                      : index === 2
-                      ? "bg-amber-600"
-                      : "bg-slate-300"
-                  }`}
-                  >
-                    {index + 1}
+            {topBuyers
+              .sort((a, b) => sumOrderTotals(b.orders) - sumOrderTotals(a.orders))
+              .slice(0,3)
+              .map((buyer, index) => (
+                <div
+                  key={buyer.userId}
+                  className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 hover:bg-slate-50 rounded-lg transition-colors gap-3 sm:gap-4"
+                >
+                  <div className="flex items-center space-x-3 md:space-x-4 w-full sm:w-auto">
+                    <div
+                      className={`w-6 h-6  md:w-8 md:h-8 rounded-full flex items-center justify-center text-white font-semibold shrink-0
+                    ${
+                      index === 0
+                        ? "bg-yellow-500"
+                        : index === 1
+                        ? "bg-slate-400"
+                        : index === 2
+                        ? "bg-amber-600"
+                        : "bg-slate-300"
+                    }`}
+                    >
+                      {index + 1}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm md:text-base text-slate-900 truncate">
+                        {buyer.username}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm md:text-base text-slate-900 truncate">
-                      {buyer.username}
-                    </p>
-                  </div>
+                  <span className="font-semibold text-sm md:text-base text-slate-900 w-full sm:w-auto text-left sm:text-right">
+                    {formatCurrency(sumOrderTotals(buyer.orders))}
+                  </span>
                 </div>
-                <span className="font-semibold text-sm md:text-base text-slate-900 w-full sm:w-auto text-left sm:text-right">
-                  {formatCurrency(sumOrderTotals(buyer.orders))}
-                </span>
-              </div>
-            ))}
+              ))}
           </div>
         </Card>
       </div>

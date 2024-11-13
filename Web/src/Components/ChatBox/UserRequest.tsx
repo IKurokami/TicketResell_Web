@@ -60,7 +60,6 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
 
   useEffect(() => {
     fetchChatboxData();
-    console.log("fetch:", chatboxData);
   }, [userData]);
 
   useEffect(() => {
@@ -82,9 +81,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
         Bảng yêu cầu
       </p>
       <div
-        className={`container mx-auto px-5 flex flex-col  justify-between  sm:flex-row items-center`}
+        className={`container mx-auto px-28 flex flex-col sm:flex-row lg:flex-row xl:flex-row 2xl:flex-row justify-between gap-4`}
       >
-        {!hasRO3Role && (
+        {!(hasRO3Role || hasRO4Role) && (
           <div className="relative flex items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-auto">
             <input
               type="text"
@@ -99,35 +98,25 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
             />
           </div>
         )}
-        {hasRO3Role && (
-          <div className="relative flex  items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-96">
-            <input
-              type="text"
-              placeholder="Tìm kiếm yêu cầu"
-              className="border-none outline-none items-center bg-transparent w-96 text-gray-700 placeholder-gray-400 focus:ring-0"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <FontAwesomeIcon
-              className="text-gray-500 cursor-pointer"
-              icon={faMagnifyingGlass}
-            />
-          </div>
-        )}
+        
         <div></div>
-        {!(hasRO3Role) && (
+        {!(hasRO3Role || hasRO4Role) && (
           <RequestDialog chatboxData={chatboxData} setChatboxData={setChatboxData} />
         )}
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
           {/* Set a max-width for the card container */}
-          <ChatboxTable
-            userData={userData}
-            chatboxData={filteredChatboxData}
-            userCookie={userCookie}
-            setChatboxData={setChatboxData}
-          />
+          {chatboxData.length > 0 ? (
+            <ChatboxTable
+              userData={userData}
+              chatboxData={filteredChatboxData}
+              userCookie={userCookie}
+              setChatboxData={setChatboxData}
+            />
+          ) : (
+            <p className="text-center text-gray-500">Không tìm thấy</p>
+          )}
         </div>
       </div>
     </div>

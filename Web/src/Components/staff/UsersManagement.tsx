@@ -78,7 +78,6 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState<Record<string, boolean>>({});
-  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Partial<UserData>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
@@ -362,12 +361,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
   };
   const loggedInUserId = Cookies.get("id");
   const filteredUsers = users.filter(
-    (user) =>
-      user.userId !== loggedInUserId && // Loại bỏ người dùng có ID trùng với ID người đăng nhập
-      ((user.fullname &&
-        user.fullname.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (user.userId &&
-          user.userId.toLowerCase().includes(searchTerm.toLowerCase())))
+    (user) => user.userId !== loggedInUserId // Loại bỏ người dùng có ID trùng với ID người đăng nhập
   );
 
   const formatMessageDate = (date: string | null) => {
@@ -401,7 +395,8 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
           </span>
         </div>
         <div className="flex space-x-4">
-          <div className="relative">
+          {/* Remove the search bar */}
+          {/* <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
             <Input
               placeholder="Tìm kiếm người dùng..."
@@ -409,17 +404,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
-          {/* <Button
-            onClick={() => {
-              setFormData({});
-              setIsOpen(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full py-3 px-6 shadow-md"
-          >
-            <PlusCircle className="mr-2 h-6 w-6" />
-            Thêm người dùng
-          </Button> */}
+          </div> */}
         </div>
       </CardHeader>
       <CardContent>
@@ -491,14 +476,13 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
                       )}
                     </button>
                   </td>
-                  <td className="py-3 px-4 text-center">
+                  <td className="py-3 px-4 text-center flex justify-center items-center">
                     <Button
                       onClick={() => handleOrder(user.gmail)}
-                      variant="default"
-                      color="success"
-                      className=" font-bold py-2 px-4 rounded shadow-none"
+                      variant="ghost"
+                      className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 font-medium py-2 px-4 rounded-md transition duration-200 ease-in-out"
                     >
-                      <VisibilityIcon />
+                      <VisibilityIcon className="w-5 h-5" />
                     </Button>
                   </td>
                 </tr>
@@ -663,7 +647,7 @@ const UserManagement: React.FC<UsersManagementProps> = ({ userDetails }) => {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-                placeholder="Họ và tên"
+              placeholder="Họ và tên"
               value={formData.fullname || ""}
               onChange={(e) =>
                 setFormData({ ...formData, fullname: e.target.value })

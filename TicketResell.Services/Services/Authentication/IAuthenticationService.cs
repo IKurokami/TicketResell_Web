@@ -6,7 +6,7 @@ public interface IAuthenticationService
 {
     Task<ResponseModel> RegisterAsync(RegisterDto registerDto);
     Task<ResponseModel> PutOtpAsync(string data);
-
+    Task<ResponseModel> SetPasswordAsync(string userId, string password, string passwordSetupToken);
     Task<ResponseModel> LoginAsync(LoginDto loginDto);
     Task<ResponseModel> LogoutAsync(string userId);
 
