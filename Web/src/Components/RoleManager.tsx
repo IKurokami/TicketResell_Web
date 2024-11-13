@@ -82,7 +82,7 @@ const RoleManager: React.FC<RoleListProps> = ({
       {/* Header */}
       <div className="p-4">
         <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-          <div className="relative flex-grow mx-2 w-full mb-4 md:mb-0">
+          <div className="relative flex-grow mx-2 w-full md:mb-0">
             <input
               type="text"
               placeholder="Tìm kiếm theo tên vai trò hoặc mô tả"

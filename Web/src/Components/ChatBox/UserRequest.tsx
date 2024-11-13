@@ -74,9 +74,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   return (
     <div className="bg-white py-12 px-10 rounded-xl ">
       <p
-        className={`text-2xl pb-10 text-center font-bold ${
-          !(hasRO3Role) ? "pt-20" : ""
-        } `}
+        className={`text-2xl pb-10 text-center font-bold`}
       >
         Bảng yêu cầu
       </p>
@@ -98,7 +96,21 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
             />
           </div>
         )}
-        
+        {(hasRO3Role || hasRO4Role) && (
+          <div className="relative flex  items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-96">
+            <input
+              type="text"
+              placeholder="Tìm kiếm yêu cầu"
+              className="border-none outline-none items-center bg-transparent w-96 text-gray-700 placeholder-gray-400 focus:ring-0"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FontAwesomeIcon
+              className="text-gray-500 cursor-pointer"
+              icon={faMagnifyingGlass}
+            />
+          </div>
+        )}
         <div></div>
         {!(hasRO3Role || hasRO4Role) && (
           <RequestDialog chatboxData={chatboxData} setChatboxData={setChatboxData} />

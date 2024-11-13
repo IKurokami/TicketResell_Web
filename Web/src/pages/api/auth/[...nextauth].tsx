@@ -9,7 +9,7 @@ export const authOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  
+
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
@@ -22,25 +22,9 @@ export const authOptions = {
     async session({ session, token }) {
       session.accessToken = token.accessToken;
       session.token = token;
-      console.log("TESTss");
-      console.log(`${process.env.API_URL}/api/authentication/login-google?accessToken=${session.accessToken}`);
-      console.log("Session token:", token);
-      await fetch(
-        `${process.env.API_URL}/api/authentication/login-google?accessToken=${session.accessToken}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
       return session;
     },
   },
-
-  
 };
 
 export default NextAuth(authOptions);

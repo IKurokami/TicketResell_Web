@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { fetchTickets } from "@/models/TicketFetch";
-import { UserService, User } from "@/models/UserManagement";
+import { UserService, User, Role } from "@/models/UserManagement";
 import {
   Person as UsersIcon,
   Group as RolesIcon,
@@ -29,6 +29,7 @@ import { signOut } from "next-auth/react";
 import { removeAllCookies } from "./Cookie";
 import { logoutUser } from "./Logout";
 import OrderDetailsDashboard from "./BuyerSellDashboard";
+import { motion, AnimatePresence } from "framer-motion";
 
 const AdminPage = () => {
   const [id, setId] = useState("");
@@ -41,7 +42,7 @@ const AdminPage = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [topBuyers, setTopBuyers] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("Tickets");
+  const [activeTab, setActiveTab] = useState("Người dùng");
   const router = useRouter();
   const searchParams = useSearchParams();
   const sidebarTabs = [
@@ -344,6 +345,40 @@ const AdminPage = () => {
       setEditStatusOpen(true); // Open the edit dialog
     }
   };
+
+  const handleEditUserRoles = async (userId: string, updatedRoles: Role[]) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/User/updaterole/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(updatedRoles),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update user roles.");
+      }
+
+      const result = await response.json();
+      console.log("User roles updated successfully:", result);
+
+      // Update the local users state
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.userId === userId ? { ...user, roles: updatedRoles } : user
+        )
+      );
+
+      // Optionally, you can show a success message to the admin
+      alert("User roles updated successfully.");
+    } catch (error) {
+      console.error("Error updating user roles:", error);
+      alert(`Error updating user roles: ${error}`);
+    }
+  };
   const handleConfirmStatus = async () => {
     try {
       // Make the API call here
@@ -363,9 +398,9 @@ const AdminPage = () => {
         users.map((user) =>
           user.userId === selectedUser.userId
             ? {
-                ...user,
-                status: user.status === 0 ? 1 : 0, // Toggle status
-              }
+              ...user,
+              status: user.status === 0 ? 1 : 0, // Toggle status
+            }
             : user
         )
       );
@@ -416,9 +451,9 @@ const AdminPage = () => {
           users.map((user) =>
             user.userId === selectedUser.userId
               ? {
-                  ...user,
-                  roles: user.roles.filter((role) => role.roleId !== "RO2"),
-                }
+                ...user,
+                roles: user.roles.filter((role) => role.roleId !== "RO2"),
+              }
               : user
           )
         );
@@ -430,7 +465,7 @@ const AdminPage = () => {
     setEditRoleOpen(false); // Close the dialog after the operation
     setSelectedUser(null); // Clear the selected user ID
   };
-  const handleUserOnResetPassword = async (userId: string) => {};
+  const handleUserOnResetPassword = async (userId: string) => { };
 
   const handleRoleAdd = async () => {
     setCurrentRole(null);
@@ -448,8 +483,22 @@ const AdminPage = () => {
     setIsDeleteConfirmOpen(true);
   };
 
+  const validateRole = (roleData: any) => {
+    const errors = [];
+    if (!roleData.roleId?.trim()) errors.push("Mã vai trò không được để trống");
+    if (!roleData.rolename?.trim()) errors.push("Tên vai trò không được để trống");
+    if (roleData.roleId?.length > 10) errors.push("Mã vai trò không được quá 10 ký tự");
+    return errors;
+  };
+
   const handleRoleSubmit = async (roleData: any) => {
     try {
+      const validationErrors = validateRole(roleData);
+      if (validationErrors.length > 0) {
+        alert(validationErrors.join('\n'));
+        return;
+      }
+
       let response;
       if (currentRole) {
         // Edit existing role
@@ -463,7 +512,13 @@ const AdminPage = () => {
           }
         );
       } else {
-        // Add new role
+        // Check if roleId already exists
+        const existingRole = roles.find(r => r.roleId === roleData.roleId);
+        if (existingRole) {
+          alert("Mã vai trò đã tồn tại");
+          return;
+        }
+
         response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/Role/create`,
           {
@@ -484,11 +539,9 @@ const AdminPage = () => {
 
       // Update the roles state
       if (currentRole) {
-        setRoles(
-          roles.map((role) =>
-            role.roleId === roleData.roleId ? result.data : role
-          )
-        );
+        setRoles(roles.map((role) =>
+          role.roleId === roleData.roleId ? result.data : role
+        ));
       } else {
         setRoles([...roles, result.data]);
       }
@@ -496,6 +549,7 @@ const AdminPage = () => {
       setIsRoleModalOpen(false);
     } catch (error) {
       console.error("Error submitting role:", error);
+      alert("Có lỗi xảy ra khi lưu vai trò");
     }
   };
 
@@ -566,8 +620,22 @@ const AdminPage = () => {
     setIsCategoryDeleteConfirmOpen(true);
   };
 
+  const validateCategory = (categoryData: any) => {
+    const errors = [];
+    if (!categoryData.categoryId?.trim()) errors.push("Mã danh mục không được để trống");
+    if (!categoryData.name?.trim()) errors.push("Tên danh mục không được để trống");
+    if (categoryData.categoryId?.length > 10) errors.push("Mã danh mục không được quá 10 ký tự");
+    return errors;
+  };
+
   const handleCategorySubmit = async (categoryData: any) => {
     try {
+      const validationErrors = validateCategory(categoryData);
+      if (validationErrors.length > 0) {
+        alert(validationErrors.join('\n'));
+        return;
+      }
+
       let response;
       if (currentCategory) {
         response = await fetch(
@@ -580,7 +648,13 @@ const AdminPage = () => {
           }
         );
       } else {
-        // Add new category
+        // Check if categoryId already exists
+        const existingCategory = categories.find(c => c.categoryId === categoryData.categoryId);
+        if (existingCategory) {
+          alert("Mã danh mục đã tồn tại");
+          return;
+        }
+
         response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`,
           {
@@ -601,13 +675,9 @@ const AdminPage = () => {
 
       // Update the categories state
       if (currentCategory) {
-        setCategories(
-          categories.map((category) =>
-            category.categoryId === categoryData.categoryId
-              ? { ...category, ...categoryData }
-              : category
-          )
-        );
+        setCategories(categories.map((category) =>
+          category.categoryId === categoryData.categoryId ? { ...category, ...categoryData } : category
+        ));
       } else {
         setCategories([...categories, categoryData]);
       }
@@ -615,6 +685,7 @@ const AdminPage = () => {
       setIsCategoryModalOpen(false);
     } catch (error) {
       console.error("Error submitting category:", error);
+      alert("Có lỗi xảy ra khi lưu danh mục");
     }
   };
 
@@ -650,7 +721,7 @@ const AdminPage = () => {
     }
   };
 
-  const handleOrderRefresh = async (orderID: string) => {};
+  const handleOrderRefresh = async (orderID: string) => { };
 
   const handleNavigation = (tabName: string) => {
     router.push(`/admin?page=${tabName}`, undefined);
@@ -681,6 +752,7 @@ const AdminPage = () => {
             onEnableAccount={handleUserOnEnableAccount}
             onDisableSeller={handleUserOnEditRoles}
             onResetPassword={handleUserOnResetPassword}
+            onEditRoles={handleEditUserRoles} // Add this line
           />
         );
       case "Vai trò":
@@ -718,7 +790,16 @@ const AdminPage = () => {
           </>
         );
       default:
-        return <div>{activeTab} content goes here</div>;
+        return (
+          <UserManager
+            users={users}
+            onEdit={handleUserOnEdit}
+            onDisableAccount={handleUserOnDisableAccount}
+            onEnableAccount={handleUserOnEnableAccount}
+            onDisableSeller={handleUserOnEditRoles}
+            onResetPassword={handleUserOnResetPassword}
+          />
+        );
     }
   };
 
@@ -730,6 +811,33 @@ const AdminPage = () => {
     await signOut();
     removeAllCookies();
     window.location.href = "/login";
+  };
+
+  // Add these animation variants
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+  };
+
+  const modalVariants = {
+    hidden: { 
+      y: "100%", 
+      opacity: 0,
+      transition: { 
+        type: "spring",
+        damping: 30,
+        stiffness: 300
+      }
+    },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        type: "spring",
+        damping: 25,
+        stiffness: 300
+      }
+    },
   };
 
   return (
@@ -755,10 +863,264 @@ const AdminPage = () => {
         </svg>
       </button>
 
+      <div className="z-50 relative">
+        <AnimatePresence>
+          {isEditDialogOpen && selectedUser && (
+            <EditUserDialog
+              roles={selectedUser.roles}
+              isOpen={isEditDialogOpen}
+              onClose={handleCloseDialog}
+              user={selectedUser}
+              onSave={(updatedData) => {
+                setUsers((users) =>
+                  users.map((user) =>
+                    user.userId === updatedData.userId ? updatedData : user
+                  )
+                );
+                console.log("Updated User Data:", updatedData);
+                handleCloseDialog();
+              }}
+            />
+          )}
+
+          {isEditRoleOpen && selectedUser && (
+            <RoleStatusDialog
+              isOpen={isEditRoleOpen}
+              onClose={handleCloseRoleDialog}
+              onConfirm={handleConfirmDisableRole}
+            />
+          )}
+
+          {isEditStatusOpen && selectedUser && (
+            <AccountStatusDialog
+              isOpen={isEditStatusOpen}
+              onClose={handleCloseStatusDialog}
+              isActive={isActive}
+              onConfirm={handleConfirmStatus}
+            />
+          )}
+
+          {isRoleModalOpen && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={overlayVariants}
+              className="fixed inset-0 bg-black/50 bg-opacity-20 flex items-end justify-center sm:items-center p-4"
+            >
+              <motion.div
+                variants={modalVariants}
+                className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md"
+              >
+                <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                  <button
+                    onClick={() => setIsRoleModalOpen(false)}
+                    className="text-blue-500 font-semibold"
+                  >
+                    Hủy
+                  </button>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {currentRole ? "Chỉnh sửa vai trò" : "Thêm vai trò mới"}
+                  </h3>
+                  <button
+                    type="submit"
+                    form="roleForm"
+                    className="text-blue-500 font-semibold"
+                  >
+                    {currentRole ? "Cập nhật" : "Thêm"}
+                  </button>
+                </div>
+                <div className="p-4 space-y-4">
+                  <form
+                    id="roleForm"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const form = e.target as HTMLFormElement;
+                      const formData = new FormData(form);
+                      const roleData = {
+                        roleId: formData.get("roleId"),
+                        rolename: formData.get("rolename"),
+                        description: formData.get("description"),
+                      };
+                      handleRoleSubmit(roleData);
+                    }}
+                  >
+                    <input
+                      type="text"
+                      name="roleId"
+                      placeholder="Mã vai trò"
+                      defaultValue={currentRole?.roleId || ""}
+                      className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                    />
+                    <input
+                      type="text"
+                      name="rolename"
+                      placeholder="Tên vai trò"
+                      defaultValue={currentRole?.rolename || ""}
+                      className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                    />
+                    <input
+                      type="text"
+                      name="description"
+                      placeholder="Mô tả"
+                      defaultValue={currentRole?.description || ""}
+                      className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                    />
+                  </form>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {isRoleDeleteConfirmOpen && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={overlayVariants}
+              className="fixed inset-0 bg-black/50 bg-opacity-20 flex items-end justify-center sm:items-center p-4"
+            >
+              <motion.div
+                variants={modalVariants}
+                className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md"
+              >
+                <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                  <button
+                    onClick={() => setIsDeleteConfirmOpen(false)}
+                    className="text-blue-500 font-semibold"
+                  >
+                    Hủy
+                  </button>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Xác nhận xóa
+                  </h3>
+                  <button
+                    onClick={handleConfirmDelete}
+                    className="text-red-500 font-semibold"
+                  >
+                    Xóa
+                  </button>
+                </div>
+                <div className="p-4">
+                  <p>Bạn có chắc chắn muốn xóa vai trò này?</p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {isCategoryModalOpen && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={overlayVariants}
+              className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4"
+            >
+              <motion.div
+                variants={modalVariants}
+                className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md"
+              >
+                <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                  <button
+                    onClick={() => setIsCategoryModalOpen(false)}
+                    className="text-blue-500 font-semibold"
+                  >
+                    Hủy
+                  </button>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {currentCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
+                  </h3>
+                  <button
+                    type="submit"
+                    form="categoryForm"
+                    className="text-blue-500 font-semibold"
+                  >
+                    {currentCategory ? "Cập nhật" : "Thêm"}
+                  </button>
+                </div>
+                <div className="p-4 space-y-4">
+                  <form
+                    id="categoryForm"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const form = e.target as HTMLFormElement; // Cast to HTMLFormElement
+                      const formData = new FormData(form);
+                      const categoryData = {
+                        categoryId: formData.get("categoryId"),
+                        name: formData.get("name"),
+                        description: formData.get("description"),
+                      };
+                      handleCategorySubmit(categoryData);
+                    }}
+                  >
+                    <input
+                      type="text"
+                      name="categoryId"
+                      placeholder="Mã danh mục"
+                      defaultValue={currentCategory?.categoryId || ""}
+                      className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                    />
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Tên danh mục"
+                      defaultValue={currentCategory?.name || ""}
+                      className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                    />
+                    <input
+                      type="text"
+                      name="description"
+                      placeholder="Mô tả"
+                      defaultValue={currentCategory?.description || ""}
+                      className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                    />
+                  </form>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {isCategoryDeleteConfirmOpen && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={overlayVariants}
+              className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4"
+            >
+              <motion.div
+                variants={modalVariants}
+                className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md"
+              >
+                <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                  <button
+                    onClick={() => setIsCategoryDeleteConfirmOpen(false)}
+                    className="text-blue-500 font-semibold"
+                  >
+                    Hủy
+                  </button>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Xác nhận xóa
+                  </h3>
+                  <button
+                    onClick={handleConfirmCategoryDelete}
+                    className="text-red-500 font-semibold"
+                  >
+                    Xóa
+                  </button>
+                </div>
+                <div className="p-4">
+                  <p>Bạn có chắc chắn muốn xóa danh mục này?</p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } sm:translate-x-0`}
+        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } sm:translate-x-0`}
         aria-label="Sidebar"
       >
         <div className="flex flex-col h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
@@ -799,9 +1161,8 @@ const AdminPage = () => {
               <li key={index}>
                 <button
                   onClick={() => handleNavigation(tab.name)}
-                  className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group w-full text-left ${
-                    activeTab === tab.name ? "bg-gray-100 dark:bg-gray-700" : ""
-                  }`}
+                  className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group w-full text-left ${activeTab === tab.name ? "bg-gray-100 dark:bg-gray-700" : ""
+                    }`}
                 >
                   <span className="flex items-center justify-center w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
                     {tab.icon}
@@ -835,221 +1196,8 @@ const AdminPage = () => {
         <h2 className="text-2xl font-bold mb-4">{activeTab}</h2>
         {renderContent()}
       </div>
-      {isEditDialogOpen && selectedUser && (
-        <EditUserDialog
-          roles={selectedUser.roles}
-          isOpen={isEditDialogOpen}
-          onClose={handleCloseDialog}
-          user={selectedUser}
-          onSave={(updatedData) => {
-            // Handle save logic here (e.g., update user data)
-            setUsers((users) =>
-              users.map((user) =>
-                user.userId === updatedData.userId ? updatedData : user
-              )
-            );
-            console.log("Updated User Data:", updatedData);
-            handleCloseDialog(); // Close the dialog after saving
-          }}
-        />
-      )}
 
-      {isEditRoleOpen && selectedUser && (
-        <RoleStatusDialog
-          isOpen={isEditRoleOpen}
-          onClose={handleCloseRoleDialog}
-          onConfirm={handleConfirmDisableRole}
-        />
-      )}
 
-      {isEditStatusOpen && selectedUser && (
-        <AccountStatusDialog
-          isOpen={isEditStatusOpen}
-          onClose={handleCloseStatusDialog}
-          isActive={isActive}
-          onConfirm={handleConfirmStatus}
-        />
-      )}
-
-      {isRoleModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">
-          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <button
-                onClick={() => setIsRoleModalOpen(false)}
-                className="text-blue-500 font-semibold"
-              >
-                Hủy
-              </button>
-              <h3 className="text-lg font-medium text-gray-900">
-                {currentRole ? "Chỉnh sửa vai trò" : "Thêm vai trò mới"}
-              </h3>
-              <button
-                type="submit"
-                form="roleForm"
-                className="text-blue-500 font-semibold"
-              >
-                {currentRole ? "Cập nhật" : "Thêm"}
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <form
-                id="roleForm"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = e.target as HTMLFormElement;
-                  const formData = new FormData(form);
-                  const roleData = {
-                    roleId: formData.get("roleId"),
-                    rolename: formData.get("rolename"),
-                    description: formData.get("description"),
-                  };
-                  handleRoleSubmit(roleData);
-                }}
-              >
-                <input
-                  type="text"
-                  name="roleId"
-                  placeholder="Mã vai trò"
-                  defaultValue={currentRole?.roleId || ""}
-                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
-                />
-                <input
-                  type="text"
-                  name="rolename"
-                  placeholder="Tên vai trò"
-                  defaultValue={currentRole?.rolename || ""}
-                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
-                />
-                <input
-                  type="text"
-                  name="description"
-                  placeholder="Mô tả"
-                  defaultValue={currentRole?.description || ""}
-                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
-                />
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isRoleDeleteConfirmOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">
-          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <button
-                onClick={() => setIsDeleteConfirmOpen(false)}
-                className="text-blue-500 font-semibold"
-              >
-                Hủy
-              </button>
-              <h3 className="text-lg font-medium text-gray-900">
-                Xác nhận xóa
-              </h3>
-              <button
-                onClick={handleConfirmDelete}
-                className="text-red-500 font-semibold"
-              >
-                Xóa
-              </button>
-            </div>
-            <div className="p-4">
-              <p>Bạn có chắc chắn muốn xóa vai trò này?</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isCategoryModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">
-          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <button
-                onClick={() => setIsCategoryModalOpen(false)}
-                className="text-blue-500 font-semibold"
-              >
-                Hủy
-              </button>
-              <h3 className="text-lg font-medium text-gray-900">
-                {currentCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
-              </h3>
-              <button
-                type="submit"
-                form="categoryForm"
-                className="text-blue-500 font-semibold"
-              >
-                {currentCategory ? "Cập nhật" : "Thêm"}
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <form
-                id="categoryForm"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = e.target as HTMLFormElement; // Cast to HTMLFormElement
-                  const formData = new FormData(form);
-                  const categoryData = {
-                    categoryId: formData.get("categoryId"),
-                    name: formData.get("name"),
-                    description: formData.get("description"),
-                  };
-                  handleCategorySubmit(categoryData);
-                }}
-              >
-                <input
-                  type="text"
-                  name="categoryId"
-                  placeholder="Mã danh mục"
-                  defaultValue={currentCategory?.categoryId || ""}
-                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
-                />
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Tên danh mục"
-                  defaultValue={currentCategory?.name || ""}
-                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
-                />
-                <input
-                  type="text"
-                  name="description"
-                  placeholder="Mô tả"
-                  defaultValue={currentCategory?.description || ""}
-                  className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
-                />
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isCategoryDeleteConfirmOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4">
-          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <button
-                onClick={() => setIsCategoryDeleteConfirmOpen(false)}
-                className="text-blue-500 font-semibold"
-              >
-                Hủy
-              </button>
-              <h3 className="text-lg font-medium text-gray-900">
-                Xác nhận xóa
-              </h3>
-              <button
-                onClick={handleConfirmCategoryDelete}
-                className="text-red-500 font-semibold"
-              >
-                Xóa
-              </button>
-            </div>
-            <div className="p-4">
-              <p>Bạn có chắc chắn muốn xóa danh mục này?</p>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
