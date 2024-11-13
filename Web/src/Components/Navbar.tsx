@@ -304,7 +304,6 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
               href="#"
               style={{ color: page === "ticket" ? "black" : undefined }}
             >
-              Liên Hệ
             </Link>
           </li>
         </ul>

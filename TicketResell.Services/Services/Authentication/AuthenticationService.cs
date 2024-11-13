@@ -373,9 +373,7 @@ public class AuthenticationService : IAuthenticationService
         user.Password = BCrypt.Net.BCrypt.HashPassword(password);
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CompleteAsync();
-
         await RemoveCachedAccessKeyAsync("password_setup", userId);
-
         return ResponseModel.Success("Password set successfully.");
     }
 }

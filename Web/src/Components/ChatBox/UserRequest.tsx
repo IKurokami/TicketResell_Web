@@ -96,30 +96,15 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
             />
           </div>
         )}
-        {(hasRO3Role || hasRO4Role) && (
-          <div className="relative flex  items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-96">
-            <input
-              type="text"
-              placeholder="Tìm kiếm yêu cầu"
-              className="border-none outline-none items-center bg-transparent w-96 text-gray-700 placeholder-gray-400 focus:ring-0"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <FontAwesomeIcon
-              className="text-gray-500 cursor-pointer"
-              icon={faMagnifyingGlass}
-            />
-          </div>
-        )}
+        
         <div></div>
         {!(hasRO3Role || hasRO4Role) && (
-          <RequestDialog chatboxData={chatboxData} setChatboxData={setChatboxData} />
+          <RequestDialog setChatboxData={setChatboxData} chatboxData={chatboxData} />
         )}
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
-          {/* Set a max-width for the card container */}
-          {chatboxData.length > 0 ? (
+          {filteredChatboxData.length > 0 ? (
             <ChatboxTable
               userData={userData}
               chatboxData={filteredChatboxData}
@@ -127,7 +112,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
               setChatboxData={setChatboxData}
             />
           ) : (
-            <p className="text-center text-gray-500">Không tìm thấy</p>
+            <div className="text-center text-gray-500 py-8">
+              Không có yêu cầu nào
+            </div>
           )}
         </div>
       </div>
