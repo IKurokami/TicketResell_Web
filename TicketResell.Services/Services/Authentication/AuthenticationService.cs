@@ -110,6 +110,9 @@ public class AuthenticationService : IAuthenticationService
         if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
             return ResponseModel.BadRequest("Login failed", "Password wrong");
 
+        if(user.Status == 0)
+            return ResponseModel.BadRequest("Login failed", "Account is locked");
+
         var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
 
         if (cachedAccessKey.IsNullOrEmpty) cachedAccessKey = GenerateAccessKey();

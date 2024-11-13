@@ -1,6 +1,6 @@
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+import { NumberProvider } from "@/Components/NumberContext";
 import React from "react";
 export const metadata = {
   title: "Ticket Resell - Buy & Sell Event Tickets Legitimately",
@@ -14,11 +14,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <Navbar page={"a"} />
-        {children}
-        <Footer />
-      </body>
+      <NumberProvider>
+        <body>
+          <Navbar page={"a"} />
+          {children}
+          <Footer />
+        </body>
+      </NumberProvider>
     </html>
   );
 }

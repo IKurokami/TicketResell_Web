@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "@/Css/MyCart.css";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { CheckCircle, Trash2 } from "lucide-react";
 import { fetchImage } from "@/models/FetchImage";
+import { NumberContext } from "./NumberContext";
 export interface CartItem {
   orderDetailId: string;
   orderId: string;
@@ -27,6 +28,8 @@ const MyCart: React.FC = () => {
   const [items, setItems] = useState<CartItemWithSelection[]>([]);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const router = useRouter();
+  const context = useContext(NumberContext);
+
 
   // Fetch cart items when component loads
   useEffect(() => {
@@ -92,7 +95,11 @@ const MyCart: React.FC = () => {
 
   useEffect(() => {
     console.log("Cart items updated: ", items);
-  }, [items]);
+    if (context) {
+      const { setNumber } = context;
+      setNumber(items.length);
+    }
+  }, [items, context]);
 
   const paymentMethods = [
     {
@@ -380,11 +387,10 @@ const MyCart: React.FC = () => {
                       className="hidden"
                     />
                     <span
-                      className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ease-in-out ${
-                        item.isSelected
+                      className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ease-in-out ${item.isSelected
                           ? "bg-green-500 border-green-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                     >
                       {item.isSelected && (
                         <CheckCircle className="w-4 h-4 text-white" />
@@ -438,18 +444,17 @@ const MyCart: React.FC = () => {
                     {paymentMethods.map((method) => (
                       <div
                         key={method.id}
-                        className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${
-                          selectedPayment === method.id
+                        className={`flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition duration-300 ${selectedPayment === method.id
                             ? "bg-blue-100 border border-green-500"
                             : "bg-gray-100 hover:bg-gray-200"
-                        }`}
+                          }`}
                         onClick={() => handleSelectPayment(method.id)}
                       >
                         {<img
-                            src={method.imageUrl}
-                            alt={method.name}
-                            className="w-12 h-12 mb-2"
-                          />}
+                          src={method.imageUrl}
+                          alt={method.name}
+                          className="w-12 h-12 mb-2"
+                        />}
                         <span className="text-xs text-gray-700">
                           {method.name}
                         </span>

@@ -187,8 +187,8 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
           <CardDescription>Thay đổi thông tin hồ sơ của bạn</CardDescription>
         </CardHeader>
 
-        <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+        <Tabs defaultValue="personal" className="w-full p-2">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="personal">Thông Tin Cá Nhân</TabsTrigger>
             <TabsTrigger value="additional">Thông Tin Bổ Sung</TabsTrigger>
           </TabsList>

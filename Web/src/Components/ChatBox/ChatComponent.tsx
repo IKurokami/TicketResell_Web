@@ -148,43 +148,39 @@ const Chat: React.FC<ChatProps> = ({
             {localChatMessages.map((msg, i) => (
               <div
                 key={i}
-                className={`${
-                  msg.senderId === user?.userId
-                    ? "col-start-1 col-end-13 text-right"
-                    : "col-start-1 col-end-13"
-                } px-2`}
+                className={`${msg.senderId === user?.userId
+                  ? "col-start-1 col-end-13 text-right"
+                  : "col-start-1 col-end-13"
+                  } px-2`}
               >
                 <div
-                  className={`flex flex-col ${
-                    msg.senderId === user?.userId
-                      ? "items-stretch"
-                      : "items-stretch"
-                  }`}
+                  className={`flex flex-col ${msg.senderId === user?.userId
+                    ? "items-stretch"
+                    : "items-stretch"
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      msg.senderId === user?.userId
-                        ? "flex-row-reverse "
-                        : "flex-row"
-                    }`}
+                    className={`flex items-center ${msg.senderId === user?.userId
+                      ? "flex-row-reverse "
+                      : "flex-row"
+                      }`}
                   >
                     <div
                       className={`relative text-sm
-  ${msg.senderId === user?.userId ? "   bg-indigo-100" : "  bg-white"}
-  py-2 px-4  w-full flex-wrap border-solid border-b-2 border-gray-300
-  break-all`}
+                        ${msg.senderId === user?.userId ? "   bg-indigo-100" : "  bg-white"}
+                        py-2 px-4  w-full flex-wrap border-solid border-b-2 border-gray-300
+                        break-all`}
                     >
                       <div
-                        className={`flex items-center ${
-                          msg.senderId === user?.userId
-                            ? "flex-row-reverse"
-                            : "flex-row"
-                        } gap-2`}
+                        className={`flex items-center ${msg.senderId === user?.userId
+                          ? "flex-row-reverse"
+                          : "flex-row"
+                          } gap-2`}
                       >
                         <div
                           className={`flex items-center justify-center h-8 w-8 rounded-full 
-            ${msg.senderId === user?.userId ? "bg-indigo-500" : "bg-gray-500"}
-            flex-shrink-0 text-white text-sm`}
+                            ${msg.senderId === user?.userId ? "bg-indigo-500" : "bg-gray-500"}
+                            flex-shrink-0 text-white text-sm`}
                         >
                           {msg.senderId === user?.userId
                             ? user.fullname.charAt(0).toUpperCase()
@@ -227,11 +223,10 @@ const Chat: React.FC<ChatProps> = ({
         </div>
         <Button
           onClick={handleSendMessage}
-          className={`flex items-center justify-center ${
-            isInputDisabled
-              ? "bg-gray-300"
-              : "bg-indigo-500 hover:bg-indigo-600"
-          } rounded-xl text-white px-4 py-1 flex-shrink-0`}
+          className={`flex items-center justify-center ${isInputDisabled
+            ? "bg-gray-300"
+            : "bg-indigo-500 hover:bg-indigo-600"
+            } rounded-xl text-white px-4 py-1 flex-shrink-0`}
           disabled={isInputDisabled || disableInput}
         >
           <span>Gửi</span>
@@ -243,4 +238,3 @@ const Chat: React.FC<ChatProps> = ({
 };
 
 export default Chat;
- 

@@ -75,16 +75,14 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   return (
     <div className="bg-white py-12 px-10 rounded-xl ">
       <p
-        className={`text-2xl pb-10 text-center font-bold ${
-          !(hasRO3Role) ? "pt-20" : ""
-        } `}
+        className={`text-2xl pb-10 text-center font-bold`}
       >
         Bảng yêu cầu
       </p>
       <div
         className={`container mx-auto px-5 flex flex-col  justify-between  sm:flex-row items-center`}
       >
-        {!hasRO3Role && (
+        {!(hasRO3Role || hasRO4Role) && (
           <div className="relative flex items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-auto">
             <input
               type="text"
@@ -99,7 +97,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
             />
           </div>
         )}
-        {hasRO3Role && (
+        {(hasRO3Role || hasRO4Role) && (
           <div className="relative flex  items-center bg-gray-100 mb-5 rounded-full px-4 h-12 w-full sm:w-96">
             <input
               type="text"
@@ -115,19 +113,24 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
           </div>
         )}
         <div></div>
-        {!(hasRO3Role) && (
+        {!(hasRO3Role || hasRO4Role) && (
           <RequestDialog setChatboxData={setChatboxData} />
         )}
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
-          {/* Set a max-width for the card container */}
-          <ChatboxTable
-            userData={userData}
-            chatboxData={filteredChatboxData}
-            userCookie={userCookie}
-            setChatboxData={setChatboxData}
-          />
+          {filteredChatboxData.length > 0 ? (
+            <ChatboxTable
+              userData={userData}
+              chatboxData={filteredChatboxData}
+              userCookie={userCookie}
+              setChatboxData={setChatboxData}
+            />
+          ) : (
+            <div className="text-center text-gray-500 py-8">
+              Không có yêu cầu nào
+            </div>
+          )}
         </div>
       </div>
     </div>

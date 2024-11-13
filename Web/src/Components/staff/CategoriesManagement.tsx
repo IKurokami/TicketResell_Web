@@ -28,7 +28,9 @@ const CategoryManagement = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Category/read`
+        );
         const result = await response.json();
         if (result.statusCode === 200) {
           setCategories(result.data);
@@ -180,10 +182,10 @@ const CategoryManagement = () => {
         <CardTitle>Quản lí danh mục</CardTitle>
         <div className="flex space-x-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+            <Search className="absolute left-3 transform h-5 w-5 text-gray-500" />
             <Input
               placeholder="Tìm danh mục..."
-              className="px-10 py-4 rounded-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-80"
+              className="px-10 rounded-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-80"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -194,14 +196,12 @@ const CategoryManagement = () => {
               setFormData({});
               setIsOpen(true);
             }}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full py-3 px-6 shadow-md"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full px-6 shadow-md"
           >
             <PlusCircle className="mr-2 h-6 w-6" />
             Thêm danh mục
           </Button>
         </div>
-
-
       </CardHeader>
       <CardContent>
         <div className=" border rounded-xl overflow-x-auto bg-white">
@@ -216,14 +216,20 @@ const CategoryManagement = () => {
             </thead>
             <tbody>
               {filteredCategories.map((category) => (
-                <tr key={category.categoryId} className="border-b hover:bg-gray-50">
+                <tr
+                  key={category.categoryId}
+                  className="border-b hover:bg-gray-50"
+                >
                   <td className="py-3 px-4">{category.categoryId}</td>
                   <td className="py-3 px-4">{category.name}</td>
                   <td className="py-3 px-4">{category.description}</td>
                   <td className="py-3 px-4">
                     <div className="flex space-x-2">
                       {/* Edit Icon */}
-                      <div onClick={() => handleEdit(category)} className="cursor-pointer">
+                      <div
+                        onClick={() => handleEdit(category)}
+                        className="cursor-pointer"
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-4 w-4 text-blue-600"
@@ -235,7 +241,10 @@ const CategoryManagement = () => {
                       </div>
 
                       {/* Delete Icon */}
-                      <div onClick={() => handleDelete(category.categoryId)} className="cursor-pointer">
+                      <div
+                        onClick={() => handleDelete(category.categoryId)}
+                        className="cursor-pointer"
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-4 w-4 text-red-600"
@@ -252,7 +261,6 @@ const CategoryManagement = () => {
             </tbody>
           </table>
         </div>
-
       </CardContent>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
