@@ -1,5 +1,6 @@
 using AutoMapper;
 using Repositories.Core.Dtos.Order;
+using Repositories.Core.Entities;
 using Repositories.Core.Validators;
 using TicketResell.Repositories.UnitOfWork;
 
@@ -20,11 +21,29 @@ public class HistoryService : IHistoryService
 
     public async Task<ResponseModel> GetHistoryByUserId(string userID)
     {
-        if (string.IsNullOrEmpty(userID)) return ResponseModel.BadRequest("UserID cannot be null or empty.");
+        if (string.IsNullOrEmpty(userID))
+            return ResponseModel.BadRequest("UserID cannot be null or empty.");
 
-        var response = await _unitOfWork.OrderRepository.GetOrdersByBuyerIdAsync(userID);
-        if (response == null) return ResponseModel.NotFound($"Not found any history for user {userID}.");
+        var orders = await _unitOfWork.OrderRepository.GetOrdersByBuyerIdAsync(userID);
+        if (orders == null)
+            return ResponseModel.NotFound($"No history found for user {userID}.");
 
-        return ResponseModel.Success("Get history successful", _mapper.Map<IEnumerable<OrderDto>>(response));
+        var orderDtos = new List<OrderDto>();
+
+        foreach (var order in orders)
+        {
+            var orderDto = _mapper.Map<OrderDto>(order);
+
+            foreach (var orderDetailDto in orderDto.OrderDetails)
+            {
+                bool isRated = await _unitOfWork.RatingRepository.OrderDetailHasRatingAsync(orderDetailDto.OrderDetailId);
+                orderDetailDto.Rated = isRated ? 1 : 0; 
+            }
+
+            orderDtos.Add(orderDto);
+        }
+
+        return ResponseModel.Success("Get history successful", orderDtos);
     }
+
 }

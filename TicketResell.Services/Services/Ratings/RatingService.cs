@@ -21,11 +21,17 @@ public class RatingService : IRatingService
 
     public async Task<ResponseModel> CreateRatingAsync(RatingCreateDto dto, string userId, bool saveAll = true)
     {
+        bool exists = await _unitOfWork.RatingRepository.RatingExistsAsync(userId, dto.SellerId, dto.OrderDetailId);
+    
+        if (exists)
+        {
+            return ResponseModel.Error("A rating for this order detail, seller, and user already exists.");
+        }
+
         var newRating = _mapper.Map<Rating>(dto);
         newRating.RatingId = "RAT" + Guid.NewGuid();
         newRating.CreateDate = DateTime.UtcNow;
         newRating.UserId = userId;
-        _logger.LogError(newRating.RatingId);
         await _unitOfWork.RatingRepository.CreateAsync(newRating);
         if (saveAll) await _unitOfWork.CompleteAsync();
         return ResponseModel.Success("Successfully created Rating");

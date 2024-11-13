@@ -1,6 +1,9 @@
-﻿namespace Repositories.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class Role
+namespace Repositories.Core.Entities;
+
+public partial class Role
 {
     public string RoleId { get; set; } = null!;
 

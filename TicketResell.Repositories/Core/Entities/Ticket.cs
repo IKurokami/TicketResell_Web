@@ -1,6 +1,9 @@
-﻿namespace Repositories.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class Ticket
+namespace Repositories.Core.Entities;
+
+public partial class Ticket
 {
     public string TicketId { get; set; } = null!;
 

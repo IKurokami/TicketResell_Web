@@ -49,6 +49,11 @@ namespace Repositories.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasDefaultValue("");
 
+                    b.Property<string>("ChatboxId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<DateTime?>("Date")
                         .HasColumnType("datetime2");
 
@@ -71,11 +76,43 @@ namespace Repositories.Migrations
 
                     b.HasKey("ChatId");
 
+                    b.HasIndex(new[] { "ChatboxId" }, "IX_Chat_ChatboxId");
+
                     b.HasIndex(new[] { "ReceiverId" }, "IX_Chat_ReceiverId");
 
                     b.HasIndex(new[] { "SenderId" }, "IX_Chat_SenderId");
 
                     b.ToTable("Chat", (string)null);
+                });
+
+            modelBuilder.Entity("Repositories.Core.Entities.Chatbox", b =>
+                {
+                    b.Property<string>("ChatboxId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("ChatboxId")
+                        .HasName("PK__Chatbox__FC2C542683201E28");
+
+                    b.ToTable("Chatbox", (string)null);
                 });
 
             modelBuilder.Entity("Repositories.Core.Entities.Order", b =>
@@ -176,9 +213,9 @@ namespace Repositories.Migrations
                     b.HasKey("RatingId")
                         .HasName("PK__Rating__FCCDF87C6FC41DB2");
 
-                    b.HasIndex("SellerId");
+                    b.HasIndex(new[] { "SellerId" }, "IX_Rating_SellerId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Rating_UserId");
 
                     b.ToTable("Rating", (string)null);
                 });
@@ -441,6 +478,11 @@ namespace Repositories.Migrations
 
             modelBuilder.Entity("Repositories.Core.Entities.Chat", b =>
                 {
+                    b.HasOne("Repositories.Core.Entities.Chatbox", "Chatbox")
+                        .WithMany("Chats")
+                        .HasForeignKey("ChatboxId")
+                        .HasConstraintName("FK_Chat_Chatbox");
+
                     b.HasOne("Repositories.Core.Entities.User", "Receiver")
                         .WithMany("ChatReceivers")
                         .HasForeignKey("ReceiverId")
@@ -452,6 +494,8 @@ namespace Repositories.Migrations
                         .HasForeignKey("SenderId")
                         .IsRequired()
                         .HasConstraintName("FK_Chat_Sender");
+
+                    b.Navigation("Chatbox");
 
                     b.Navigation("Receiver");
 
@@ -562,6 +606,11 @@ namespace Repositories.Migrations
                         .HasForeignKey("UserId")
                         .IsRequired()
                         .HasConstraintName("FK__UserRole__UserId__3E52440B");
+                });
+
+            modelBuilder.Entity("Repositories.Core.Entities.Chatbox", b =>
+                {
+                    b.Navigation("Chats");
                 });
 
             modelBuilder.Entity("Repositories.Core.Entities.Order", b =>
