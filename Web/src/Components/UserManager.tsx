@@ -148,7 +148,7 @@ const UserManager: React.FC<UserManagerProps> = ({
   };
   useEffect(() => {
     fetchSpecificUser();
-    
+
     // Setup SignalR
     setupSignalRConnection();
 
@@ -554,7 +554,9 @@ const UserManager: React.FC<UserManagerProps> = ({
                   {getSortIcon("createDate")}
                 </div>
               </th>
-              <th>Hành động</th>
+              <th scope="col" className="px-6 py-3">
+                Hành động
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -666,11 +668,6 @@ const UserManager: React.FC<UserManagerProps> = ({
               className: contextMenu.isActive
                 ? "text-orange-600"
                 : "text-green-600",
-            },
-            {
-              label: "Đặt Lại Mật Khẩu",
-              icon: <FaKey className="w-4 h-4" />,
-              onClick: () => onResetPassword?.(contextMenu.userId),
             },
           ]}
         />

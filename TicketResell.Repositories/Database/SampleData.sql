@@ -154,43 +154,45 @@ VALUES
 
 -- Sample data for Order table
 -- Extended Order table insertions for users
+-- Corrected Order table insertions with accurate totals based on OrderDetail
 INSERT INTO [TicketResellManagement].[dbo].[Order]
     ([OrderId], [BuyerId], [Total], [Date], [Status], [PaymentMethod])
 VALUES
     -- Giap's Orders
-    (1, 'giap@personal.example.com', 150.75, '2024-10-30', 0, 'Paypal'),
-    (2, 'giap@personal.example.com', 200.50, '2024-09-15', 1, 'VNPay'),
-    (3, 'giap@personal.example.com', 300.00, '2024-08-20', 2, 'Momo'),
-    (4, 'giap@personal.example.com', 120.25, '2024-07-10', 3, 'Paypal'),
-    (5, 'giap@personal.example.com', 90.00, '2024-06-05', -1, 'VNPay'),
+    -- OrderId 1: (500001 × 2) + (500002 × 3) = 2500007
+    (1, 'giap@personal.example.com', 2500007.00, '2024-10-30', 0, 'Paypal'),
+    -- OrderId 2: (500003 × 1) + (500004 × 2) = 1500011
+    (2, 'giap@personal.example.com', 1500011.00, '2024-09-15', 1, 'VNPay'),
+    -- OrderId 3: (500005 × 1) + (500006 × 2) = 1500017
+    (3, 'giap@personal.example.com', 1500017.00, '2024-08-20', 2, 'Momo'),
+    -- OrderId 4: (500007 × 3) + (500008 × 1) = 2000029
+    (4, 'giap@personal.example.com', 2000029.00, '2024-07-10', 3, 'Paypal'),
+    -- OrderId 5: (500009 × 4) + (500010 × 2) = 3000056
+    (5, 'giap@personal.example.com', 3000056.00, '2024-06-05', -1, 'VNPay'),
 
     -- Khang Seller's Orders
-    (6, 'khangseller@personal.example.com', 200.00, '2024-10-30', 0, 'VNPay'),
-    (7, 'khangseller@personal.example.com', 250.50, '2024-09-10', 1, 'Momo'),
-    (8, 'khangseller@personal.example.com', 320.75, '2024-08-25', 2, 'Paypal'),
-    (9, 'khangseller@personal.example.com', 175.00, '2024-07-20', 3, 'VNPay'),
-    (10, 'khangseller@personal.example.com', 140.80, '2024-06-15', -1, 'Momo'),
+    -- OrderId 6: (500011 × 1) + (500012 × 2) = 1500035
+    (6, 'khangseller@personal.example.com', 1500035.00, '2024-10-30', 0, 'VNPay'),
+    -- OrderId 7: (500013 × 1) + (500014 × 2) = 1500041
+    (7, 'khangseller@personal.example.com', 1500041.00, '2024-09-10', 1, 'Momo'),
+    -- OrderId 8: (500015 × 1) + (500016 × 3) = 2000063
+    (8, 'khangseller@personal.example.com', 2000063.00, '2024-08-25', 2, 'Paypal'),
+    -- OrderId 9: (500017 × 1) + (500018 × 2) = 1500053
+    (9, 'khangseller@personal.example.com', 1500053.00, '2024-07-20', 3, 'VNPay'),
+    -- OrderId 10: (500019 × 3) + (500020 × 1) = 2000077
+    (10, 'khangseller@personal.example.com', 2000077.00, '2024-06-15', -1, 'Momo'),
 
     -- Vinh Seller's Orders
-    (11, 'vinhseller@personal.example.com', 350.50, '2024-10-30', 0, 'Momo'),
-    (12, 'vinhseller@personal.example.com', 400.00, '2024-09-05', 1, 'Paypal'),
-    (13, 'vinhseller@personal.example.com', 275.25, '2024-08-12', 2, 'VNPay'),
-    (14, 'vinhseller@personal.example.com', 320.00, '2024-07-08', 3, 'Momo'),
-    (15, 'vinhseller@personal.example.com', 200.00, '2024-06-01', -1, 'Paypal'),
-
-    -- Quang's Orders
-    (16, 'khongphaiquang@personal.example.com', 300.25, '2024-10-30', 0, 'Paypal'),
-    (17, 'khongphaiquang@personal.example.com', 180.00, '2024-09-25', 1, 'VNPay'),
-    (18, 'khongphaiquang@personal.example.com', 240.50, '2024-08-14', 2, 'Momo'),
-    (19, 'khongphaiquang@personal.example.com', 160.00, '2024-07-02', 3, 'Paypal'),
-    (20, 'khongphaiquang@personal.example.com', 110.00, '2024-06-18', -1, 'VNPay'),
-
-    -- Cuong Dola's Orders
-    (21, 'cuongdola@personal.example.com', 180.00, '2024-10-30', 0, 'VNPay'),
-    (22, 'cuongdola@personal.example.com', 160.75, '2024-09-20', 1, 'Momo'),
-    (23, 'cuongdola@personal.example.com', 210.50, '2024-08-28', 2, 'Paypal'),
-    (24, 'cuongdola@personal.example.com', 140.00, '2024-07-15', 3, 'VNPay'),
-    (25, 'cuongdola@personal.example.com', 125.50, '2024-06-30', -1, 'Momo');
+    -- OrderId 11: (500021 × 2) + (500022 × 3) = 2500107
+    (11, 'vinhseller@personal.example.com', 2500107.00, '2024-10-30', 0, 'Momo'),
+    -- OrderId 12: (500023 × 1) + (500024 × 2) = 1500071
+    (12, 'vinhseller@personal.example.com', 1500071.00, '2024-09-05', 1, 'Paypal'),
+    -- OrderId 13: (500025 × 2) + (500026 × 1) = 1500076
+    (13, 'vinhseller@personal.example.com', 1500076.00, '2024-08-12', 2, 'VNPay'),
+    -- OrderId 14: (500027 × 4) + (500028 × 5) = 4500248
+    (14, 'vinhseller@personal.example.com', 4500248.00, '2024-07-08', 3, 'Momo'),
+    -- OrderId 15: (500029 × 3) + (500030 × 10) = 6500387
+    (15, 'vinhseller@personal.example.com', 6500387.00, '2024-06-01', -1, 'Paypal');
 
 
 INSERT INTO [TicketResellManagement].[dbo].[OrderDetail]

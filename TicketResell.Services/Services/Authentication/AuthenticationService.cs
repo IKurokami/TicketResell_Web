@@ -110,6 +110,9 @@ public class AuthenticationService : IAuthenticationService
         if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
             return ResponseModel.BadRequest("Login failed", "Password wrong");
 
+        if(user.Status == 0)
+            return ResponseModel.BadRequest("Login failed", "Account is locked");
+
         var cachedAccessKey = await GetCachedAccessKeyAsync(user.UserId);
 
         if (cachedAccessKey.IsNullOrEmpty) cachedAccessKey = GenerateAccessKey();
@@ -178,20 +181,21 @@ public class AuthenticationService : IAuthenticationService
             await _unitOfWork.UserRepository.CreateAsync(user);
             await _unitOfWork.CompleteAsync();
         }
-
+        
         if (string.IsNullOrEmpty(user.Password))
         {
             var accessKey = await GetCachedAccessKeyAsync("password_setup", user.UserId);
             if (!accessKey.HasValue || accessKey.IsNullOrEmpty)
             {
                 accessKey = GenerateAccessKey();
-                await CacheAccessKeyAsync("password_setup", user.UserId, accessKey, TimeSpan.FromHours(1));
+                await CacheAccessKeyAsync("password_setup", user.UserId, accessKey!, TimeSpan.FromHours(1));
+                await CacheAccessKeyAsync(user.UserId, accessKey!);
             }
 
             var response = new PasswordSetupDto
             {
                 UserId = user.UserId,
-                PasswordSetupToken = accessKey
+                PasswordSetupToken = accessKey!
             };
 
             return ResponseModel.NeedsPasswordSetup("False", response);
@@ -369,9 +373,7 @@ public class AuthenticationService : IAuthenticationService
         user.Password = BCrypt.Net.BCrypt.HashPassword(password);
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CompleteAsync();
-
         await RemoveCachedAccessKeyAsync("password_setup", userId);
-
         return ResponseModel.Success("Password set successfully.");
     }
 }

@@ -1,3 +1,6 @@
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Newtonsoft.Json;
 using TicketResell.Repositories.Core.Dtos.Authentication;
@@ -82,7 +85,8 @@ public class AuthenticationController : ControllerBase
             return ResponseParser.Result(ResponseModel.Unauthorized("Unable to retrieve user info from Google"));
 
         var result = await _authService.LoginWithGoogleAsync(googleUser);
-        if (result.Data != null && result.Data is LoginInfoDto loginInfo)
+        if (result.Data == null) return ResponseParser.Result(result);
+        if (result.Data is LoginInfoDto loginInfo)
         {
             if (loginInfo.User != null)
                 HttpContext.SetUserId(loginInfo.User.UserId);
@@ -90,6 +94,11 @@ public class AuthenticationController : ControllerBase
             HttpContext.SetAccessKey(loginInfo.AccessKey);
             HttpContext.SetIsAuthenticated(true);
         }
+
+        if (result.Data is not PasswordSetupDto passwordSetupDto) return ResponseParser.Result(result);
+        HttpContext.SetUserId(passwordSetupDto.UserId);
+        HttpContext.SetAccessKey(passwordSetupDto.PasswordSetupToken);
+        HttpContext.SetIsAuthenticated(true);
 
         return ResponseParser.Result(result);
     }

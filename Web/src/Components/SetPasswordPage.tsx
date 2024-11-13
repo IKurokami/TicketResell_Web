@@ -15,7 +15,7 @@ const SetPasswordPage = () => {
         throw new Error("Thiếu mã xác thực.");
       }
       // Gọi API để đặt mật khẩu
-      const response = await fetch(`http://localhost:5296/api/authentication/set-password`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authentication/set-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

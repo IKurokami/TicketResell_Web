@@ -74,9 +74,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
   return (
     <div className="bg-white py-12 px-10 rounded-xl ">
       <p
-        className={`text-2xl pb-10 text-center font-bold ${
-          !(hasRO3Role) ? "pt-20" : ""
-        } `}
+        className={`text-2xl pb-10 text-center font-bold`}
       >
         Bảng yêu cầu
       </p>
@@ -101,13 +99,12 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
         
         <div></div>
         {!(hasRO3Role || hasRO4Role) && (
-          <RequestDialog chatboxData={chatboxData} setChatboxData={setChatboxData} />
+          <RequestDialog setChatboxData={setChatboxData} chatboxData={chatboxData} />
         )}
       </div>
       <div className="flex justify-center w-full ">
         <div className="w-full max-w-7xl">
-          {/* Set a max-width for the card container */}
-          {chatboxData.length > 0 ? (
+          {filteredChatboxData.length > 0 ? (
             <ChatboxTable
               userData={userData}
               chatboxData={filteredChatboxData}
@@ -115,7 +112,9 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
               setChatboxData={setChatboxData}
             />
           ) : (
-            <p className="text-center text-gray-500">Không tìm thấy</p>
+            <div className="text-center text-gray-500 py-8">
+              Không có yêu cầu nào
+            </div>
           )}
         </div>
       </div>
