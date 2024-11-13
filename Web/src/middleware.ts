@@ -3,8 +3,6 @@ import { NextRequest } from "next/server";
 import axios from "axios";
 export const dynamic = "force-dynamic";
 export async function middleware(request: NextRequest) {
-
-
   // Get the access key from cookies
   const accessKey = request.cookies.get(".AspNetCore.Session")?.value;
 
@@ -61,9 +59,6 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-
-
-
 // Specify which routes should trigger this middleware
 export const config = {
   matcher: [
@@ -76,6 +71,5 @@ export const config = {
     "/sell/:path*",
     "/staff/:path*",
     "/requestchat/:path*",
-    "/:path*",
   ],
 };

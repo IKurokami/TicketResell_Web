@@ -265,7 +265,7 @@ const TransactionTable: React.FC = () => {
             <table className="w-full divide-y divide-gray-200">
               <thead>
                 <tr className="bg-gray-100">
-                  {["NGÀY", "VÉ", "GIÁ", "SỐ LƯỢNG", "TỔNG CỘNG", "TỪ"].map(
+                  {["NGÀY", "VÉ", "GIÁ", "SỐ LƯỢNG", "TỔNG CỘNG", "KHÁCH HÀNG"].map(
                     (header) => (
                       <th
                         key={header}
