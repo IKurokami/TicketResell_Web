@@ -448,8 +448,22 @@ const AdminPage = () => {
     setIsDeleteConfirmOpen(true);
   };
 
+  const validateRole = (roleData: any) => {
+    const errors = [];
+    if (!roleData.roleId?.trim()) errors.push("Mã vai trò không được để trống");
+    if (!roleData.rolename?.trim()) errors.push("Tên vai trò không được để trống");
+    if (roleData.roleId?.length > 10) errors.push("Mã vai trò không được quá 10 ký tự");
+    return errors;
+  };
+
   const handleRoleSubmit = async (roleData: any) => {
     try {
+      const validationErrors = validateRole(roleData);
+      if (validationErrors.length > 0) {
+        alert(validationErrors.join('\n'));
+        return;
+      }
+
       let response;
       if (currentRole) {
         // Edit existing role
@@ -463,7 +477,13 @@ const AdminPage = () => {
           }
         );
       } else {
-        // Add new role
+        // Check if roleId already exists
+        const existingRole = roles.find(r => r.roleId === roleData.roleId);
+        if (existingRole) {
+          alert("Mã vai trò đã tồn tại");
+          return;
+        }
+
         response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/Role/create`,
           {
@@ -484,11 +504,9 @@ const AdminPage = () => {
 
       // Update the roles state
       if (currentRole) {
-        setRoles(
-          roles.map((role) =>
-            role.roleId === roleData.roleId ? result.data : role
-          )
-        );
+        setRoles(roles.map((role) =>
+          role.roleId === roleData.roleId ? result.data : role
+        ));
       } else {
         setRoles([...roles, result.data]);
       }
@@ -496,6 +514,7 @@ const AdminPage = () => {
       setIsRoleModalOpen(false);
     } catch (error) {
       console.error("Error submitting role:", error);
+      alert("Có lỗi xảy ra khi lưu vai trò");
     }
   };
 
@@ -566,8 +585,22 @@ const AdminPage = () => {
     setIsCategoryDeleteConfirmOpen(true);
   };
 
+  const validateCategory = (categoryData: any) => {
+    const errors = [];
+    if (!categoryData.categoryId?.trim()) errors.push("Mã danh mục không được để trống");
+    if (!categoryData.name?.trim()) errors.push("Tên danh mục không được để trống");
+    if (categoryData.categoryId?.length > 10) errors.push("Mã danh mục không được quá 10 ký tự");
+    return errors;
+  };
+
   const handleCategorySubmit = async (categoryData: any) => {
     try {
+      const validationErrors = validateCategory(categoryData);
+      if (validationErrors.length > 0) {
+        alert(validationErrors.join('\n'));
+        return;
+      }
+
       let response;
       if (currentCategory) {
         response = await fetch(
@@ -580,7 +613,13 @@ const AdminPage = () => {
           }
         );
       } else {
-        // Add new category
+        // Check if categoryId already exists
+        const existingCategory = categories.find(c => c.categoryId === categoryData.categoryId);
+        if (existingCategory) {
+          alert("Mã danh mục đã tồn tại");
+          return;
+        }
+
         response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/Category/create`,
           {
@@ -601,13 +640,9 @@ const AdminPage = () => {
 
       // Update the categories state
       if (currentCategory) {
-        setCategories(
-          categories.map((category) =>
-            category.categoryId === categoryData.categoryId
-              ? { ...category, ...categoryData }
-              : category
-          )
-        );
+        setCategories(categories.map((category) =>
+          category.categoryId === categoryData.categoryId ? { ...category, ...categoryData } : category
+        ));
       } else {
         setCategories([...categories, categoryData]);
       }
@@ -615,6 +650,7 @@ const AdminPage = () => {
       setIsCategoryModalOpen(false);
     } catch (error) {
       console.error("Error submitting category:", error);
+      alert("Có lỗi xảy ra khi lưu danh mục");
     }
   };
 

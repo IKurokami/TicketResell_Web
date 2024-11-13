@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TicketResell.Repositories.Constants;
 
 namespace TicketResell.Repositories.Core.Helper
 {
     public static class ReportHelper
     {
-
-
         public static string GetStatusString(int status)
         {
             return status switch
