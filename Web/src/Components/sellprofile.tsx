@@ -5,6 +5,8 @@ import { fetchImage } from "@/models/FetchImage";
 import uploadImageForTicket from "@/models/UpdateImage";
 import Link from "next/link";
 import { AlertCircle, X } from "lucide-react";
+import Cookies from "js-cookie";
+
 import { Alert, AlertDescription } from "@/Components/ui/alert";
 const DEFAULT_IMAGE = "https://images7.alphacoders.com/129/1297416.png";
 
@@ -32,11 +34,11 @@ interface Props {
   onSave: (data: FormData) => void;
 }
 
-const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void ; userId:string}> = ({
-  isOpen,
-  onClose,
-  userId
-}) => {
+const ReportModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string;
+}> = ({ isOpen, onClose, userId }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
 
@@ -57,7 +59,7 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void ; userId:stri
         "Báo cáo giá cao": 6,
         "Báo cáo vé giả": 7,
       } as const; // use 'as const' to fix types
-      console.log("asdsadasdasd",userId)
+      console.log("asdsadasdasd", userId);
       const statusCode = statusMap[selectedReason as keyof typeof statusMap]; // type assertion here
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/createreport/${statusCode}/${userId}`;
 
@@ -185,6 +187,7 @@ const SellProfile: React.FC<Props> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const coverId = `${userId}_cover`;
+  const id = Cookies.get("id");
 
   const fetchImageAvatar = async (imageId: string) => {
     const { imageUrl: fetchedImageUrl, error } = await fetchImage(imageId);
@@ -307,7 +310,7 @@ const SellProfile: React.FC<Props> = ({
                 {fullname ? fullname : "Không xác định"}
               </p>
             </Link>
-            {!isAdjustVisible && (
+            {!isAdjustVisible && userId !== id && (
               <button
                 onClick={handleReportClick}
                 className="text-red-500 p-1 rounded-full hover:bg-gray-100 flex items-center justify-center mb-2"
@@ -362,7 +365,11 @@ const SellProfile: React.FC<Props> = ({
       )}
 
       {/* Render ReportModal */}
-      <ReportModal isOpen={isReportModalOpen} onClose={closeReportModal} userId={userId}/>
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={closeReportModal}
+        userId={userId}
+      />
     </div>
   );
 };

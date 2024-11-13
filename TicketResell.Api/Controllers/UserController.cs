@@ -142,9 +142,12 @@ public class UserController : ControllerBase
     [Route("updaterole/{id}")]
     public async Task<IActionResult> UpdateRole(string id, [FromBody] List<Role> roles)
     {
-        //if (!HttpContext.GetIsAuthenticated())
-        //    return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a user."));
+        if (!HttpContext.GetIsAuthenticated())
+            return ResponseParser.Result(ResponseModel.Unauthorized("You need to be authenticated to update a user."));
 
+        if (!HttpContext.HasEnoughtRoleLevel(UserRole.Admin))
+            return ResponseParser.Result(ResponseModel.Forbidden("Access denied."));
+        
         var response = await _userService.UpdateRoleAsync(id, roles);
         return ResponseParser.Result(response);
     }

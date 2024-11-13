@@ -51,25 +51,27 @@ const InputField: React.FC<InputFieldProps> = ({
   ...props
 }) => (
   <div className="relative mt-5">
-    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+    <div className="absolute inset-y-0 left-0 flex top-5 pl-3 pointer-events-none text-gray-400">
       {icon}
     </div>
     <input
       className={`w-full pl-10 pr-10 py-4 bg-gray-100 border-none rounded-full focus:outline-none focus:ring-2 
-        ${error ? "ring-2 ring-red-500" : "focus:ring-green-500"} transition-all`}
+        ${
+          error ? "ring-2 ring-red-500" : "focus:ring-green-500"
+        } transition-all`}
       {...props}
     />
     {rightIcon && (
       <button
         type="button"
         onClick={onRightIconClick}
-        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+        className="absolute inset-y-0 right-0 flex top-5 pr-3 text-gray-400 hover:text-gray-600"
       >
         {rightIcon}
       </button>
     )}
     {error && (
-      <Alert variant="destructive" className="mt-2">
+      <Alert variant="destructive" className="mt-2 border-white">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     )}
@@ -149,7 +151,8 @@ const SetPassword: React.FC<SetPasswordProps> = ({
       await onSubmit(formData.newPassword);
     } catch (error) {
       setErrors({
-        submit: error instanceof Error ? error.message : "Failed to set password",
+        submit:
+          error instanceof Error ? error.message : "Failed to set password",
       });
     } finally {
       setIsLoading(false);
@@ -176,25 +179,44 @@ const SetPassword: React.FC<SetPasswordProps> = ({
             <form onSubmit={handleSubmit} className="space-y-6">
               <InputField
                 icon={<RiLockPasswordFill />}
-                rightIcon={showPassword.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                rightIcon={
+                  showPassword.new ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )
+                }
                 type={showPassword.new ? "text" : "password"}
                 placeholder="Nhập mật khẩu mới"
                 name="newPassword"
                 value={formData.newPassword}
                 onChange={handleChange}
-                onRightIconClick={() => setShowPassword((prev) => ({ ...prev, new: !prev.new }))}
+                onRightIconClick={() =>
+                  setShowPassword((prev) => ({ ...prev, new: !prev.new }))
+                }
                 error={errors.newPassword}
               />
 
               <InputField
                 icon={<RiLockPasswordFill />}
-                rightIcon={showPassword.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                rightIcon={
+                  showPassword.confirm ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )
+                }
                 type={showPassword.confirm ? "text" : "password"}
                 placeholder="Xác nhận mật khẩu"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                onRightIconClick={() => setShowPassword((prev) => ({ ...prev, confirm: !prev.confirm }))}
+                onRightIconClick={() =>
+                  setShowPassword((prev) => ({
+                    ...prev,
+                    confirm: !prev.confirm,
+                  }))
+                }
                 error={errors.confirmPassword}
               />
 

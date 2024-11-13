@@ -23,7 +23,7 @@ import {
   faArrowRight,
   faMapMarkerAlt,
   faLock,
-  faCheckCircle
+  faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { NumberContext } from "./NumberContext";
 import { checkLogin } from "./checkLogin";
@@ -103,7 +103,7 @@ const TicketDetail = () => {
   const fetchTicketById = async (id: string | null) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/readbyid/${id}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/readbyid/${baseId}`
       );
       return await response.json();
     } catch (error) {
@@ -232,21 +232,35 @@ const TicketDetail = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Hero Section with Solid White Background */}
       <div className="relative h-64 bg-white overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-40"></div> {/* Lớp phủ đen */}
-        <div className="absolute inset-0 bg-white opacity-109"></div> {/* Họa tiết nền */}
+        <div className="absolute inset-0 bg-black opacity-40"></div>{" "}
+        {/* Lớp phủ đen */}
+        <div className="absolute inset-0 bg-white opacity-109"></div>{" "}
+        {/* Họa tiết nền */}
         <div className="container mx-auto px-4 h-full flex items-end pb-16">
           <nav className="text-white/90 text-sm">
             <ol className="flex items-center space-x-2">
-              <li><Link href="/" className="hover:text-white transition-colors">Trang chủ</Link></li>
+              <li>
+                <Link href="/" className="hover:text-white transition-colors">
+                  Trang chủ
+                </Link>
+              </li>
               <li>/</li>
-              <li><Link href="/tickets" className="hover:text-white transition-colors">Vé</Link></li>
+              <li>
+                <Link
+                  href="/tickets"
+                  className="hover:text-white transition-colors"
+                >
+                  Vé
+                </Link>
+              </li>
               <li>/</li>
-              <li className="font-medium truncate max-w-[200px]">{ticketresult?.name}</li>
+              <li className="font-medium truncate max-w-[200px]">
+                {ticketresult?.name}
+              </li>
             </ol>
           </nav>
         </div>
       </div>
-
 
       <main className="container mx-auto px-4 -mt-32 pb-16 relative z-10">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -262,14 +276,22 @@ const TicketDetail = () => {
                 />
                 <div className="absolute top-4 right-4 space-x-2">
                   <button className="bg-white/95 hover:bg-white p-3 rounded-full shadow-lg transition-all hover:-translate-y-1">
-                    <FontAwesomeIcon icon={faShare} className="text-gray-700 w-5 h-5" />
+                    <FontAwesomeIcon
+                      icon={faShare}
+                      className="text-gray-700 w-5 h-5"
+                    />
                   </button>
                   <button className="bg-white/95 hover:bg-white p-3 rounded-full shadow-lg transition-all hover:-translate-y-1">
-                    <FontAwesomeIcon icon={faHeart} className="text-gray-700 w-5 h-5" />
+                    <FontAwesomeIcon
+                      icon={faHeart}
+                      className="text-gray-700 w-5 h-5"
+                    />
                   </button>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-                  <h1 className="text-3xl font-bold text-white mb-2">{ticketresult?.name}</h1>
+                  <h1 className="text-3xl font-bold text-white mb-2">
+                    {ticketresult?.name}
+                  </h1>
                   <div className="flex items-center space-x-4">
                     <span className="px-3 py-1 rounded-full bg-green-500 text-white text-sm font-medium">
                       {remainingItems} vé còn lại
@@ -287,7 +309,10 @@ const TicketDetail = () => {
             <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
               <div className="flex items-center justify-between pb-6 border-b border-gray-100">
                 <h3 className="text-xl font-semibold flex items-center gap-3">
-                  <FontAwesomeIcon icon={faInfoCircle} className="text-green-600 w-6 h-6" />
+                  <FontAwesomeIcon
+                    icon={faInfoCircle}
+                    className="text-green-600 w-6 h-6"
+                  />
                   Thông tin sự kiện
                 </h3>
                 <span className="text-sm text-gray-500">#{id}</span>
@@ -295,7 +320,10 @@ const TicketDetail = () => {
 
               <div className="space-y-4">
                 <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-                  <FontAwesomeIcon icon={faLocationDot} className="text-green-600 w-5 h-5 mt-1" />
+                  <FontAwesomeIcon
+                    icon={faLocationDot}
+                    className="text-green-600 w-5 h-5 mt-1"
+                  />
                   <div>
                     <h4 className="font-medium text-gray-900">Địa điểm</h4>
                     <p className="text-gray-600">{ticketresult?.location}</p>
@@ -303,7 +331,10 @@ const TicketDetail = () => {
                 </div>
 
                 <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-                  <FontAwesomeIcon icon={faCalendar} className="text-green-600 w-5 h-5 mt-1" />
+                  <FontAwesomeIcon
+                    icon={faCalendar}
+                    className="text-green-600 w-5 h-5 mt-1"
+                  />
                   <div>
                     <h4 className="font-medium text-gray-900">Ngày & Giờ</h4>
                     <p className="text-gray-600">{ticketresult?.startDate}</p>
@@ -331,7 +362,10 @@ const TicketDetail = () => {
                       }}
                     >
                       <span className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-green-50 text-green-700 hover:bg-green-100 transition-colors">
-                        <FontAwesomeIcon icon={faTag} className="mr-2 w-4 h-4" />
+                        <FontAwesomeIcon
+                          icon={faTag}
+                          className="mr-2 w-4 h-4"
+                        />
                         {category.name}
                       </span>
                     </Link>
@@ -349,10 +383,15 @@ const TicketDetail = () => {
               <div className="flex items-center justify-between p-6 bg-gray-50 rounded-xl mb-8">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <FontAwesomeIcon icon={faUser} className="text-white text-2xl" />
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      className="text-white text-2xl"
+                    />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Người bán đã xác thực</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      Người bán đã xác thực
+                    </p>
                     <Link
                       href={`/sellshop/${ticketresult?.author.userId}`}
                       className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors"
@@ -363,7 +402,9 @@ const TicketDetail = () => {
                 </div>
                 <div className="flex items-center text-green-600">
                   <FontAwesomeIcon icon={faShieldHalved} className="mr-2" />
-                  <span className="text-sm font-medium">Đảm bảo chính hãng</span>
+                  <span className="text-sm font-medium">
+                    Đảm bảo chính hãng
+                  </span>
                 </div>
               </div>
 
@@ -384,7 +425,10 @@ const TicketDetail = () => {
                       onClick={decrease}
                       disabled={count <= 1}
                     >
-                      <FontAwesomeIcon icon={faMinus} className="text-gray-600" />
+                      <FontAwesomeIcon
+                        icon={faMinus}
+                        className="text-gray-600"
+                      />
                     </button>
                     <span className="text-2xl font-semibold w-16 text-center">
                       {count}
@@ -394,7 +438,10 @@ const TicketDetail = () => {
                       onClick={increase}
                       disabled={count >= remainingItems}
                     >
-                      <FontAwesomeIcon icon={faPlus} className="text-gray-600" />
+                      <FontAwesomeIcon
+                        icon={faPlus}
+                        className="text-gray-600"
+                      />
                     </button>
                   </div>
                 </div>
@@ -403,12 +450,16 @@ const TicketDetail = () => {
                 <div className="p-6 bg-gray-50 rounded-xl">
                   <div className="flex justify-between mb-4">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">{formatVND(ticketresult?.cost * count)}</span>
+                    <span className="font-medium">
+                      {formatVND(ticketresult?.cost * count)}
+                    </span>
                   </div>
 
                   <div className="h-px bg-gray-200 my-4"></div>
                   <div className="flex justify-between">
-                    <span className="font-semibold">Tổng cộng (chưa bao gồm thuế)</span>
+                    <span className="font-semibold">
+                      Tổng cộng (chưa bao gồm thuế)
+                    </span>
                     <span className="font-bold text-xl">
                       {formatVND(ticketresult?.cost * count)}
                     </span>
@@ -425,9 +476,7 @@ const TicketDetail = () => {
                       <FontAwesomeIcon icon={faCartShopping} />
                       <span>Thêm vào giỏ hàng</span>
                     </button>
-                    <button
-                      className="col-span-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300"
-                    >
+                    <button className="col-span-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300">
                       <FontAwesomeIcon icon={faCashRegister} />
                       <span>Mua ngay</span>
                     </button>
@@ -438,17 +487,31 @@ const TicketDetail = () => {
               {/* Security Features */}
               <div className="mt-8 grid grid-cols-2 gap-4">
                 <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                  <FontAwesomeIcon icon={faLock} className="text-green-600 w-5 h-5 mt-1" />
+                  <FontAwesomeIcon
+                    icon={faLock}
+                    className="text-green-600 w-5 h-5 mt-1"
+                  />
                   <div>
-                    <h4 className="font-medium text-gray-900">Giao dịch an toàn</h4>
-                    <p className="text-sm text-gray-600">Protected by SSL encryption</p>
+                    <h4 className="font-medium text-gray-900">
+                      Giao dịch an toàn
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Protected by SSL encryption
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 w-5 h-5 mt-1" />
+                  <FontAwesomeIcon
+                    icon={faCheckCircle}
+                    className="text-green-600 w-5 h-5 mt-1"
+                  />
                   <div>
-                    <h4 className="font-medium text-gray-900">Sự kiện đã được xác minh</h4>
-                    <p className="text-sm text-gray-600">100% authentic tickets</p>
+                    <h4 className="font-medium text-gray-900">
+                      Sự kiện đã được xác minh
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      100% authentic tickets
+                    </p>
                   </div>
                 </div>
               </div>
@@ -468,15 +531,11 @@ const TicketDetail = () => {
 
         {/* Related Tickets Section */}
         <section className="mt-8 md:mt-16 px-4 md:px-0">
-
-
           <div className=" rounded-lg md:rounded-2xl  p-4 md:p-8 transition-shadow duration-200 ">
             <div className="overflow-hidden text-ellipsis whitespace-nowrap">
               <RelatedTicket categoriesId={categoriesId} ticketID={baseId} />
             </div>
           </div>
-
-
         </section>
 
         {/* Enhanced Notification Popup */}
@@ -484,11 +543,18 @@ const TicketDetail = () => {
           message={
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <FontAwesomeIcon icon={faCartShopping} className="text-green-600 w-5 h-5" />
+                <FontAwesomeIcon
+                  icon={faCartShopping}
+                  className="text-green-600 w-5 h-5"
+                />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Đã thêm vào giỏ hàng!</h3>
-                <p className="text-sm text-gray-600">Vé của bạn đã được thêm thành công</p>
+                <h3 className="font-semibold text-gray-900">
+                  Đã thêm vào giỏ hàng!
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Vé của bạn đã được thêm thành công
+                </p>
               </div>
             </div>
           }
@@ -508,9 +574,7 @@ const TicketDetail = () => {
                   <FontAwesomeIcon icon={faCartShopping} />
                   <span>Thêm vào giỏ hàng</span>
                 </button>
-                <button
-                  className="flex-1 bg-green-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center space-x-2"
-                >
+                <button className="flex-1 bg-green-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center space-x-2">
                   <FontAwesomeIcon icon={faCashRegister} />
                   <span>Mua ngay</span>
                 </button>
@@ -529,14 +593,19 @@ const TicketDetail = () => {
                 </h3>
                 <span className="text-sm text-gray-500">|</span>
                 <div className="flex items-center text-gray-600">
-                  <FontAwesomeIcon icon={faLocationDot} className="mr-2 w-4 h-4" />
+                  <FontAwesomeIcon
+                    icon={faLocationDot}
+                    className="mr-2 w-4 h-4"
+                  />
                   <span className="text-sm">{ticketresult?.location}</span>
                 </div>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Giá</p>
-                  <p className="font-semibold text-gray-900">{formatVND(ticketresult?.cost)}</p>
+                  <p className="font-semibold text-gray-900">
+                    {formatVND(ticketresult?.cost)}
+                  </p>
                 </div>
                 {!checkOwner && (
                   <button
@@ -556,32 +625,52 @@ const TicketDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
           <div className="bg-white rounded-2xl shadow-xl p-6 flex items-start space-x-4">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <FontAwesomeIcon icon={faTicket} className="text-green-600 w-6 h-6" />
+              <FontAwesomeIcon
+                icon={faTicket}
+                className="text-green-600 w-6 h-6"
+              />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Nhận vé ngay lập tức</h3>
-              <p className="text-sm text-gray-600">Vé sẽ được gửi qua email của bạn ngay sau khi thanh toán</p>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Nhận vé ngay lập tức
+              </h3>
+              <p className="text-sm text-gray-600">
+                Vé sẽ được gửi qua email của bạn ngay sau khi thanh toán
+              </p>
             </div>
-
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl p-6 flex items-start space-x-4">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <FontAwesomeIcon icon={faShieldHalved} className="text-green-600 w-6 h-6" />
+              <FontAwesomeIcon
+                icon={faShieldHalved}
+                className="text-green-600 w-6 h-6"
+              />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Mua hàng an toàn</h3>
-              <p className="text-sm text-gray-600">Xử lý thanh toán 100% an toàn</p>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Mua hàng an toàn
+              </h3>
+              <p className="text-sm text-gray-600">
+                Xử lý thanh toán 100% an toàn
+              </p>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl p-6 flex items-start space-x-4">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <FontAwesomeIcon icon={faStar} className="text-green-600 w-6 h-6" />
+              <FontAwesomeIcon
+                icon={faStar}
+                className="text-green-600 w-6 h-6"
+              />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Hỗ trợ khách hàng</h3>
-              <p className="text-sm text-gray-600">Đội ngũ hỗ trợ tận tâm 24/7</p>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Hỗ trợ khách hàng
+              </h3>
+              <p className="text-sm text-gray-600">
+                Đội ngũ hỗ trợ tận tâm 24/7
+              </p>
             </div>
           </div>
         </div>
@@ -589,7 +678,7 @@ const TicketDetail = () => {
 
       {/* Back to Top Button */}
       <button
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className="fixed bottom-24 right-8 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-colors z-50"
       >
         <FontAwesomeIcon icon={faArrowRight} className="rotate-270 w-5 h-5" />

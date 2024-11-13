@@ -161,7 +161,7 @@ public class AuthenticationService : IAuthenticationService
         return await LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
     }
 
-    public async Task<ResponseModel> LoginWithGoogleAsync(GoogleUserInfoDto googleUser)
+  public async Task<ResponseModel> LoginWithGoogleAsync(GoogleUserInfoDto googleUser)
     {
         var user = await _unitOfWork.UserRepository.GetByIdAsync(googleUser.Email);
         if (user == null)

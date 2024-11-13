@@ -96,11 +96,14 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     {
         if (user == null) throw new ArgumentNullException(nameof(user), "User cannot be null.");
 
-        if (roles != null) user.Roles = roles; // Assuming Roles is a List<Role>
+        user.Roles.Clear();
 
-        _context.Users.Update(user); // Mark the user entity as modified
+        foreach (var existingRole in roles.Select(role => _context.Roles.Find(role.RoleId)).OfType<Role>())
+        {
+            user.Roles.Add(existingRole);
+        }
 
-        // Save changes to the database
+        _context.Users.Update(user);
     }
 
     public async Task ChangeStatus(User user)

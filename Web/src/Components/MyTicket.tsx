@@ -53,8 +53,8 @@ interface TicketData {
   cost: number;
   quantity: number;
   sellerId: string;
-  seller:string;
-  fullname:string;
+  seller: string;
+  fullname: string;
   description: string;
   categories?: string[];
   image: string;
@@ -63,6 +63,7 @@ interface TicketData {
 
 interface OrderDetail {
   orderDetailId: string;
+  ticketId: string;
   rated: number;
   ticket: {
     id: string;
@@ -70,8 +71,8 @@ interface OrderDetail {
     startDate: string;
     cost: number;
     sellerId: string;
-    seller:any;
-    fullname:string;
+    seller: any;
+    fullname: string;
     description?: string;
     categories?: string[];
     image: string;
@@ -98,32 +99,32 @@ const MyTicketPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [center,setCenter] = useState({ lat: 10.762622, lng: 106.660172 });
+  const [center, setCenter] = useState({ lat: 10.762622, lng: 106.660172 });
   const ITEMS_PER_PAGE = 6;
 
-  const fetchLocation = async (address:any) => {
-    const apiKey = 'b2abc07babmsh30e6177f039fd88p18a238jsn5ec9739e64ae';
+  const fetchLocation = async (address: any) => {
+    const apiKey = "b2abc07babmsh30e6177f039fd88p18a238jsn5ec9739e64ae";
     const encodedAddress = encodeURIComponent(address);
-    
+
     const url = `https://google-map-places.p.rapidapi.com/maps/api/geocode/json?address=${encodedAddress}&language=vn&region=vn&result_type=administrative_area_level_1&location_type=APPROXIMATE`;
-    
+
     try {
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'x-rapidapi-host': 'google-map-places.p.rapidapi.com',
-          'x-rapidapi-key': apiKey
-        }
+          "x-rapidapi-host": "google-map-places.p.rapidapi.com",
+          "x-rapidapi-key": apiKey,
+        },
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching location data:', error);
+      console.error("Error fetching location data:", error);
       return null;
     }
   };
@@ -131,6 +132,42 @@ const MyTicketPage = () => {
   useEffect(() => {
     fetchTickets();
   }, []);
+  const detectMimeType = (base64String: string) => {
+    if (base64String.startsWith("/9j/")) return "image/jpeg"; // JPEG
+    if (base64String.startsWith("iVBORw0KGgo")) return "image/png"; // PNG
+    if (base64String.startsWith("UklGR")) return "image/webp"; // WebP
+    return "image/png"; // Mặc định trả về PNG nếu không phát hiện được loại
+  };
+
+  // Hàm tải mã QR từ API
+  const fetchQRCode = async (ticketId: any, quantity: number) => {
+    try {
+      // Check if ticketId contains an underscore
+      const splitTicketId = ticketId.split("_");
+      const isMultiQR = splitTicketId.length > 1 && splitTicketId[1] !== null;
+
+      // Construct the appropriate URL based on the ticketId format
+      const url = isMultiQR
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/multiqr/${ticketId}/${quantity}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/Ticket/qr/${ticketId}`;
+
+      const response = await fetch(url, {
+        credentials: "include",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch QR code");
+
+      const result = await response.json();
+      return result.statusCode === 200 ? result.data : null;
+    } catch (error) {
+      console.error(`Error fetching QR code for ticket ID ${ticketId}:`, error);
+      return null;
+    }
+  };
 
   const fetchTickets = async () => {
     setIsLoading(true);
@@ -153,29 +190,37 @@ const MyTicketPage = () => {
       if (result.statusCode === 200 && Array.isArray(result.data)) {
         const completedTickets = await Promise.all(
           result.data
-            .filter((order: Order) => order.status === 0)
-            .flatMap((order: Order) =>
-              order.orderDetails.map(async (detail: OrderDetail) => {
+            .filter((order: any) => order.status === 0)
+            .flatMap((order: any) =>
+              order.orderDetails.map(async (detail: any) => {
                 const startDate = detail.ticket.startDate;
                 const formattedDate = formatDate(startDate);
                 const { imageUrl } = await fetchImage(detail.ticket.image);
-              return {
-                id: detail.orderDetailId,
-                name: detail.ticket.name,
-                date: formattedDate,
-                cost: detail.ticket.cost,
-                quantity: detail.quantity,
-                sellerId: detail.ticket.sellerId, // Use seller's fullname
-                fullname: detail.ticket.seller.fullname,
-                description: detail.ticket.description || 'Không có mô tả',
-                categories: detail.ticket.categories || ['Chung'],
-                image: imageUrl || detail.ticket.image,
-                location: detail.ticket.location,
-                rated: detail.rated
-              };
-              
-            })
-          )
+
+                // Fetch QR code for each ticket
+                const qrCodeData = await fetchQRCode(
+                  detail.ticketId,
+                  detail.quantity
+                ); // Fetch the QR code data from the API
+
+                return {
+                  id: detail.orderDetailId,
+                  ticketId: detail.ticketId,
+                  name: detail.ticket.name,
+                  date: formattedDate,
+                  cost: detail.ticket.cost,
+                  quantity: detail.quantity,
+                  sellerId: detail.ticket.sellerId,
+                  fullname: detail.ticket.seller.fullname,
+                  description: detail.ticket.description || "Không có mô tả",
+                  categories: detail.ticket.categories || ["Chung"],
+                  image: imageUrl || detail.ticket.image,
+                  location: detail.ticket.location,
+                  rated: detail.rated,
+                  qrcode: qrCodeData || null, // Add QR code data (result.data) here
+                };
+              })
+            )
         );
         setTickets(completedTickets);
       }
@@ -185,66 +230,89 @@ const MyTicketPage = () => {
       setIsLoading(false);
     }
   };
+
   const downloadQRCodes = async (ticket: any) => {
+    console.log("downloadQRCodes called with ticket:", ticket);
     try {
-      // Create an array of promises for generating QR codes
-      const qrPromises = Array.from(
-        { length: ticket.quantity },
-        async (_, index) => {
-          // Create unique data for each ticket
-          const ticketData = {
-            id: ticket.id,
-            name: ticket.name,
-            date: ticket.date,
-            ticketNumber: `${index + 1}/${ticket.quantity}`,
-          };
+      // Check if we have multiple QR codes
+      const qrCodes = Array.isArray(ticket.qrcode)
+        ? ticket.qrcode
+        : [ticket.qrcode];
 
-          // Generate QR code as data URL
-          return await QRCode.toDataURL(JSON.stringify(ticketData), {
-            errorCorrectionLevel: "H",
-            margin: 1,
-            width: 300,
-          });
-        }
-      );
-
-      // Generate all QR codes
-      const qrDataUrls = await Promise.all(qrPromises);
-
-      // Create a zip file if there are multiple tickets
-      if (ticket.quantity > 1) {
+      // Create a zip file if we have multiple QR codes
+      if (qrCodes.length > 1) {
         const zip = new JSZip();
 
-        // Add each QR code to the zip
-        qrDataUrls.forEach((dataUrl: any, index: any) => {
-          const data = dataUrl.split(",")[1];
-          zip.file(`ticket-${index + 1}.png`, data, { base64: true });
+        // Add each QR code to the zip file
+        qrCodes.forEach((qrCode: string, index: number) => {
+          let qrDataUrl = qrCode;
+          if (qrDataUrl.startsWith("iVBORw0KGgo")) {
+            qrDataUrl = "data:image/png;base64," + qrDataUrl;
+          } else if (qrDataUrl.startsWith("/9j/")) {
+            qrDataUrl = "data:image/jpeg;base64," + qrDataUrl;
+          } else if (qrDataUrl.startsWith("UklGR")) {
+            qrDataUrl = "data:image/webp;base64," + qrDataUrl;
+          }
+
+          const base64Data = qrDataUrl.split(",")[1];
+          const mimeType = detectMimeType(base64Data);
+          const extension = mimeType.split("/")[1];
+
+          zip.file(
+            `ticket-${ticket.ticketId}-${index + 1}.${extension}`,
+            base64Data,
+            { base64: true }
+          );
         });
 
-        // Generate and download zip
+        // Generate and download the zip file
         const content = await zip.generateAsync({ type: "blob" });
-        const zipUrl = URL.createObjectURL(content);
+        const url = URL.createObjectURL(content);
         const link = document.createElement("a");
-        link.href = zipUrl;
-        link.download = `tickets-${ticket.id}.zip`;
+        link.href = url;
+        link.download = `tickets-${ticket.ticketId}.zip`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(zipUrl);
+        URL.revokeObjectURL(url);
       } else {
-        // Download single QR code directly
+        // Handle single QR code (existing logic)
+        let qrDataUrl = ticket.qrcode;
+
+        if (qrDataUrl.startsWith("iVBORw0KGgo")) {
+          qrDataUrl = "data:image/png;base64," + qrDataUrl;
+        } else if (qrDataUrl.startsWith("/9j/")) {
+          qrDataUrl = "data:image/jpeg;base64," + qrDataUrl;
+        } else if (qrDataUrl.startsWith("UklGR")) {
+          qrDataUrl = "data:image/webp;base64," + qrDataUrl;
+        }
+
+        const base64Data = qrDataUrl.split(",")[1];
+        const mimeType = detectMimeType(base64Data);
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+        const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = qrDataUrls[0];
-        link.download = `ticket-${ticket.id}.png`;
+        link.href = url;
+        link.download = `ticket-${ticket.ticketId}.${mimeType.split("/")[1]}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error("Error generating QR codes:", error);
-      // You might want to add proper error handling here
+      console.error("Error downloading QR code:", error);
+      alert("Có lỗi xảy ra khi tải mã QR.");
     }
   };
+
   const calculateDaysFromNow = (startDate: string) => {
     // Parse ngày từ format "DD/MM/YYYY, HH:mm"
     const [datePart, timePart] = startDate.split(", ");
@@ -404,7 +472,7 @@ const MyTicketPage = () => {
   );
   const handleGoogleMapSearch = async (address: any) => {
     const locationData = await fetchLocation(address);
-    
+
     if (locationData && locationData.results.length > 0) {
       const { lat, lng } = locationData.results[0].geometry.location;
       setCenter({ lat, lng });

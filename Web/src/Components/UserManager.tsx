@@ -8,7 +8,7 @@ import {
   FaUserSlash,
   FaKey,
 } from "react-icons/fa";
-import { User } from "@/models/UserManagement";
+import { Role, User } from "@/models/UserManagement";
 import Cookies from "js-cookie";
 import * as signalR from "@microsoft/signalr";
 import UserRequest, { UserData } from "./ChatBox/UserRequest";
@@ -16,6 +16,7 @@ import { BlockStatus, ChatMessage } from "./staff/UsersManagement";
 import { Mail, MessageCircle, Send, X } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "@/Components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ContextMenuProps {
   x: number;
@@ -35,19 +36,61 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
   onClose,
   options,
 }) => {
+  const [position, setPosition] = useState({ x, y });
+  const menuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleClick = () => onClose();
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, [onClose]);
 
+  // Adjust position to keep menu in viewport
+  useEffect(() => {
+    if (menuRef.current) {
+      const menu = menuRef.current;
+      const rect = menu.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let adjustedX = x;
+      let adjustedY = y;
+
+      // Adjust horizontal position if menu would overflow right side
+      if (x + rect.width > viewportWidth) {
+        adjustedX = x - rect.width;
+      }
+
+      // Adjust vertical position if menu would overflow bottom
+      if (y + rect.height > viewportHeight) {
+        adjustedY = y - rect.height;
+      }
+
+      setPosition({ x: adjustedX, y: adjustedY });
+    }
+  }, [x, y]);
+
   return (
-    <div
-      className="fixed bg-white shadow-lg rounded-lg py-2 z-50 min-w-[200px] border border-gray-200"
-      style={{ top: y, left: x }}
+    <motion.div
+      ref={menuRef}
+      className="fixed bg-white/80 backdrop-blur-sm shadow-lg rounded-lg py-2 z-50 min-w-[200px] border border-gray-200"
+      style={{ 
+        top: position.y,
+        left: position.x,
+        transformOrigin: 'top left'
+      }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 25,
+        mass: 0.5
+      }}
     >
       {options.map((option, index) => (
-        <button
+        <motion.button
           key={index}
           onClick={(e) => {
             e.stopPropagation();
@@ -57,12 +100,42 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           className={`w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 ${
             option.className || "text-gray-700"
           }`}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 25,
+            mass: 0.5,
+            delay: option.delay
+          }}
+          whileHover={{
+            scale: 1.02,
+            x: 4,
+            transition: { duration: 0.2 }
+          }}
+          whileTap={{
+            scale: 0.98,
+            transition: { duration: 0.1 }
+          }}
         >
-          {option.icon}
+          <motion.span
+            initial={{ rotate: -20, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 25,
+              mass: 0.5,
+              delay: option.delay + 0.1
+            }}
+          >
+            {option.icon}
+          </motion.span>
           {option.label}
-        </button>
+        </motion.button>
       ))}
-    </div>
+    </motion.div>
   );
 };
 
@@ -73,6 +146,7 @@ interface UserManagerProps {
   onDisableSeller?: (userId: string) => void;
   onEnableAccount?: (userId: string) => void;
   onResetPassword?: (userId: string) => void;
+  onEditRoles?: (userId: string, updatedRoles: Role[]) => void; // Add this line
 }
 
 const UserManager: React.FC<UserManagerProps> = ({
@@ -82,6 +156,7 @@ const UserManager: React.FC<UserManagerProps> = ({
   onEnableAccount,
   onDisableSeller,
   onResetPassword,
+  onEditRoles
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
@@ -116,6 +191,34 @@ const UserManager: React.FC<UserManagerProps> = ({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Inside UserManager component
+
+  const [isEditRoleModalOpen, setIsEditRoleModalOpen] = useState(false);
+  const [selectedUserForRoleEdit, setSelectedUserForRoleEdit] = useState<User | null>(null);
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+
+  // Fetch available roles when the component mounts
+  useEffect(() => {
+    const fetchAvailableRoles = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Role/read`, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch available roles.");
+        }
+        const data = await response.json();
+        setAvailableRoles(data.data); // Assuming the roles are in data.data
+      } catch (error) {
+        console.error("Error fetching available roles:", error);
+        alert("Error fetching available roles.");
+      }
+    };
+
+    fetchAvailableRoles();
+  }, []);
 
   const handleSort = (
     field: "fullname" | "userId" | "gmail" | "createDate"
@@ -424,11 +527,10 @@ const UserManager: React.FC<UserManagerProps> = ({
         <button
           key={i}
           onClick={() => handlePageChange(i)}
-          className={`w-10 h-10 mx-1 rounded-full transition-colors duration-200 ${
-            currentPage === i
-              ? "bg-blue-500 text-white"
-              : "bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
-          }`}
+          className={`w-10 h-10 mx-1 rounded-full transition-colors duration-200 ${currentPage === i
+            ? "bg-blue-500 text-white"
+            : "bg-white text-blue-500 border border-blue-500 hover:bg-blue-100"
+            }`}
         >
           {i}
         </button>
@@ -462,9 +564,8 @@ const UserManager: React.FC<UserManagerProps> = ({
       return <FaSort className="w-3 h-3 ms-1.5 text-gray-400" />;
     return (
       <FaSort
-        className={`w-3 h-3 ms-1.5 ${
-          sortDirection === "asc" ? "text-blue-500" : "text-blue-700"
-        }`}
+        className={`w-3 h-3 ms-1.5 ${sortDirection === "asc" ? "text-blue-500" : "text-blue-700"
+          }`}
       />
     );
   };
@@ -493,6 +594,124 @@ const UserManager: React.FC<UserManagerProps> = ({
 
   return (
     <div className="flex-1 flex flex-col px-4 lg:px-16 ">
+      {isEditRoleModalOpen && selectedUserForRoleEdit && (
+        <AnimatePresence>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ 
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                mass: 1
+              }}
+              className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md"
+            >
+              <div className="px-8 pt-8 pb-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-1">
+                      Chỉnh Sửa Vai Trò
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Chọn vai trò cho {selectedUserForRoleEdit.fullname}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsEditRoleModalOpen(false)}
+                    className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  >
+                    <X className="h-5 w-5 text-gray-400" />
+                  </button>
+                </div>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const formData = new FormData(form);
+                  const selectedRoleIds = formData.getAll("roles") as string[];
+                  const updatedRoles = availableRoles.filter((role) =>
+                    selectedRoleIds.includes(role.roleId)
+                  );
+                  onEditRoles?.(selectedUserForRoleEdit.userId, updatedRoles);
+                  setIsEditRoleModalOpen(false);
+                }}>
+                  <div className="space-y-6">
+                    {/* Current Roles Section */}
+                    <div className="bg-gray-50/50 rounded-2xl p-4">
+                      <label className="block text-sm font-medium text-gray-900 mb-3">
+                        Vai trò hiện tại
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedUserForRoleEdit.roles.map((role) => (
+                          <span
+                            key={role.roleId}
+                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 border border-blue-100"
+                          >
+                            {role.rolename}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Role Selection Section */}
+                    <div className="bg-gray-50/50 rounded-2xl p-4">
+                      <label className="block text-sm font-medium text-gray-900 mb-3">
+                        Chọn vai trò mới
+                      </label>
+                      <div className="grid grid-cols-1 gap-3">
+                        {availableRoles.map((role) => (
+                          <label
+                            key={role.roleId}
+                            className="relative flex items-center p-3 rounded-xl hover:bg-white transition-colors duration-200 cursor-pointer group"
+                          >
+                            <input
+                              type="checkbox"
+                              name="roles"
+                              value={role.roleId}
+                              defaultChecked={selectedUserForRoleEdit.roles.some(
+                                (userRole) => userRole.roleId === role.roleId
+                              )}
+                              className="peer h-5 w-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="ml-3 text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                              {role.rolename}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditRoleModalOpen(false)}
+                      className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors duration-200"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2.5 rounded-full text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+                    >
+                      Lưu thay đổi
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
       {/* Search Bar */}
       <div className="p-4">
         <div className="relative">
@@ -669,6 +888,17 @@ const UserManager: React.FC<UserManagerProps> = ({
                 ? "text-orange-600"
                 : "text-green-600",
             },
+            {
+              label: "Chỉnh Sửa Vai Trò", // Add this option
+              icon: <FaUserCog className="w-4 h-4" />,
+              onClick: () => {
+                const user = users.find((u) => u.userId === contextMenu.userId);
+                if (user) {
+                  setSelectedUserForRoleEdit(user);
+                  setIsEditRoleModalOpen(true);
+                }
+              },
+            },
           ]}
         />
       )}
@@ -747,46 +977,40 @@ const UserManager: React.FC<UserManagerProps> = ({
                     {chatMessages[userId]?.map((msg, i) => (
                       <div
                         key={i}
-                        className={`${
-                          msg.senderId === Cookies.get("id")
-                            ? "col-start-1 col-end-13 text-right"
-                            : "col-start-1 col-end-13"
-                        } px-2`}
+                        className={`${msg.senderId === Cookies.get("id")
+                          ? "col-start-1 col-end-13 text-right"
+                          : "col-start-1 col-end-13"
+                          } px-2`}
                       >
                         <div
-                          className={`flex flex-col ${
-                            msg.senderId === Cookies.get("id")
-                              ? "items-stretch"
-                              : "items-stretch"
-                          }`}
+                          className={`flex flex-col ${msg.senderId === Cookies.get("id")
+                            ? "items-stretch"
+                            : "items-stretch"
+                            }`}
                         >
                           <div
-                            className={`flex items-center ${
-                              msg.senderId === Cookies.get("id")
-                                ? "flex-row-reverse"
-                                : "flex-row"
-                            }`}
+                            className={`flex items-center ${msg.senderId === Cookies.get("id")
+                              ? "flex-row-reverse"
+                              : "flex-row"
+                              }`}
                           >
                             <div
-                              className={`relative text-sm ${
-                                msg.senderId === Cookies.get("id")
-                                  ? "bg-indigo-100"
-                                  : "bg-white"
-                              } py-2 px-4 w-full flex-wrap border-solid border-b-2 border-gray-300 break-all`}
+                              className={`relative text-sm ${msg.senderId === Cookies.get("id")
+                                ? "bg-indigo-100"
+                                : "bg-white"
+                                } py-2 px-4 w-full flex-wrap border-solid border-b-2 border-gray-300 break-all`}
                             >
                               <div
-                                className={`flex items-center ${
-                                  msg.senderId === Cookies.get("id")
-                                    ? "flex-row-reverse"
-                                    : "flex-row"
-                                } gap-2`}
+                                className={`flex items-center ${msg.senderId === Cookies.get("id")
+                                  ? "flex-row-reverse"
+                                  : "flex-row"
+                                  } gap-2`}
                               >
                                 <div
-                                  className={`flex items-center justify-center h-8 w-8 rounded-full ${
-                                    msg.senderId === Cookies.get("id")
-                                      ? "bg-indigo-500"
-                                      : "bg-gray-500"
-                                  } flex-shrink-0 text-white text-sm`}
+                                  className={`flex items-center justify-center h-8 w-8 rounded-full ${msg.senderId === Cookies.get("id")
+                                    ? "bg-indigo-500"
+                                    : "bg-gray-500"
+                                    } flex-shrink-0 text-white text-sm`}
                                 >
                                   {msg.senderId === Cookies.get("id")
                                     ? user.fullname.charAt(0).toUpperCase()

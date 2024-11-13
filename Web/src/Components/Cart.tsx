@@ -652,7 +652,8 @@ const MyCart: React.FC = () => {
                             }
                           } : {}}
                         >
-                          {<img
+                          {
+                          <img
                             src={method.imageUrl}
                             alt={method.name}
                             className="w-12 h-12 mb-2"
