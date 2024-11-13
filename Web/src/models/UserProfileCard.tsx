@@ -63,12 +63,12 @@ const convertToUserProfileCard = (
     phone: response.phone ?? "",
     address: response.address ?? "",
     status: response.status,
-    fullname: response.fullname ?? "Anonymous",
-    sex: response.sex ?? "Not Specified",
+    fullname: response.fullname ?? "Unknown",
+    sex: response.sex ?? "Khác",
     createDate: response.createDate,
     sellConfigId: response.sellConfigId ?? null,
-    bio: response.bio ?? "No bio provided",
-    birthday: response.birthday ?? "Not Provided",
+    bio: response.bio ?? "Đây là tiểu sử của tôi",
+    birthday: response.birthday ?? "không có",
     roles: response.roles ?? [],
   };
 };
@@ -76,9 +76,12 @@ const convertToUserProfileCard = (
 export const fetchUserProfile = async (
   id: string | undefined
 ): Promise<UserProfileCard> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/read/${id}`, {
-    credentials: "include",
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/user/read/${id}`,
+    {
+      credentials: "include",
+    }
+  );
   const responseModel = await response.json();
   const userProfile: UserProfileCard = convertToUserProfileCard(
     responseModel.data

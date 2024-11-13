@@ -18,7 +18,7 @@ public class User
 
     public string? Fullname { get; set; }
 
-    public string? Sex { get; set; }
+    public string? Sex { get; set; } = "other";
 
     public string? Phone { get; set; }
 

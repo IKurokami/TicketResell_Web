@@ -116,7 +116,7 @@ const UserRequest: React.FC<UserRequestProps> = ({ userData, userCookie }) => {
         )}
         <div></div>
         {!(hasRO3Role) && (
-          <RequestDialog setChatboxData={setChatboxData} />
+          <RequestDialog chatboxData={chatboxData} setChatboxData={setChatboxData} />
         )}
       </div>
       <div className="flex justify-center w-full ">

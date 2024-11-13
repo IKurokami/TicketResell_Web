@@ -363,7 +363,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/profileuser")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="no-underline block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
                     <svg
@@ -387,7 +387,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/history")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="no-underline block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
                     <svg
@@ -410,7 +410,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 <a
                   href="#"
                   onClick={(e) => handleMenuItemClick(e, "/my-ticket")}
-                  className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="no-underline block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
                     <svg
@@ -434,7 +434,7 @@ const Navbar: React.FC<NavbarProps> = ({ page = "defaultPage" }) => {
                 <Link
                   href="/login"
                   onClick={(e) => handleLogout(e)} // Pass event to prevent default
-                  className="block px-3 py-2 text-xs text-red-600 hover:bg-gray-50 transition-colors duration-150"
+                  className="no-underline block px-3 py-2 text-xs text-red-600 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <div className="flex items-center">
                     <svg
