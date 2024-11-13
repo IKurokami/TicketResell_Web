@@ -158,7 +158,7 @@ public class AuthenticationService : IAuthenticationService
         return await LoginWithAccessKeyAsync(accessKeyLoginDto.UserId, accessKeyLoginDto.AccessKey);
     }
 
-    public async Task<ResponseModel> LoginWithGoogleAsync(GoogleUserInfoDto googleUser)
+  public async Task<ResponseModel> LoginWithGoogleAsync(GoogleUserInfoDto googleUser)
     {
         var user = await _unitOfWork.UserRepository.GetByIdAsync(googleUser.Email);
         if (user == null)
@@ -178,20 +178,21 @@ public class AuthenticationService : IAuthenticationService
             await _unitOfWork.UserRepository.CreateAsync(user);
             await _unitOfWork.CompleteAsync();
         }
-
+        
         if (string.IsNullOrEmpty(user.Password))
         {
             var accessKey = await GetCachedAccessKeyAsync("password_setup", user.UserId);
             if (!accessKey.HasValue || accessKey.IsNullOrEmpty)
             {
                 accessKey = GenerateAccessKey();
-                await CacheAccessKeyAsync("password_setup", user.UserId, accessKey, TimeSpan.FromHours(1));
+                await CacheAccessKeyAsync("password_setup", user.UserId, accessKey!, TimeSpan.FromHours(1));
+                await CacheAccessKeyAsync(user.UserId, accessKey!);
             }
 
             var response = new PasswordSetupDto
             {
                 UserId = user.UserId,
-                PasswordSetupToken = accessKey
+                PasswordSetupToken = accessKey!
             };
 
             return ResponseModel.NeedsPasswordSetup("False", response);

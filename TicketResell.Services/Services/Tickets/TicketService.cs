@@ -131,6 +131,12 @@ public class TicketService : ITicketService
         return ResponseModel.Success("Successfully get qr", qr);
     }
 
+    public async Task<ResponseModel> GetMultiQrImageAsBase64Async(string ticketId, int quantity)
+    {
+        var qr = await _unitOfWork.TicketRepository.GetMultiQrImagesAsBase64Async(ticketId, quantity);
+        return ResponseModel.Success("Successfully get list qr", qr);
+    }
+
     public async Task<ResponseModel> GetTicketsAsync()
     {
         var tickets = await _unitOfWork.TicketRepository.GetAllAsync();

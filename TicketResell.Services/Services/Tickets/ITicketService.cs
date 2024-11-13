@@ -12,6 +12,7 @@ public interface ITicketService
 
     public Task<ResponseModel> GetTicketByNameAsync(string name);
     public Task<ResponseModel> GetQrImageAsBase64Async(string ticketId);
+    public Task<ResponseModel> GetMultiQrImageAsBase64Async(string ticketId, int quantity);
     public Task<ResponseModel> GetTicketsAsync();
     public Task<ResponseModel> GetTicketRangeAsync(int start, int count);
     public Task<ResponseModel> GetTopTicket(int amount);
