@@ -32,9 +32,10 @@ interface Props {
   onSave: (data: FormData) => void;
 }
 
-const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
+const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void ; userId:string}> = ({
   isOpen,
   onClose,
+  userId
 }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
@@ -56,9 +57,9 @@ const ReportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         "Báo cáo giá cao": 6,
         "Báo cáo vé giả": 7,
       } as const; // use 'as const' to fix types
-
+      console.log("asdsadasdasd",userId)
       const statusCode = statusMap[selectedReason as keyof typeof statusMap]; // type assertion here
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/createreport/${statusCode}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/Chatbox/createreport/${statusCode}/${userId}`;
 
       const requestBody = {
         title: "Report",
@@ -361,7 +362,7 @@ const SellProfile: React.FC<Props> = ({
       )}
 
       {/* Render ReportModal */}
-      <ReportModal isOpen={isReportModalOpen} onClose={closeReportModal} />
+      <ReportModal isOpen={isReportModalOpen} onClose={closeReportModal} userId={userId}/>
     </div>
   );
 };
