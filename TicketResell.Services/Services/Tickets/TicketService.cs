@@ -144,6 +144,33 @@ public class TicketService : ITicketService
         var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
         return ResponseModel.Success("Successfully get ticket", ticketDtos);
     }
+    public async Task<ResponseModel> ActivateTicketsByBaseIdAsync(string ticketId, bool saveAll)
+    {
+        var baseId = ticketId.Contains("_") ? ticketId.Split('_')[0] : ticketId;
+
+        await _unitOfWork.TicketRepository.ActivateTicketsByBaseIdAsync(baseId);
+        if (saveAll) await _unitOfWork.CompleteAsync();
+
+        return ResponseModel.Success($"Successfully activated tickets with base ID: {baseId}");
+    }
+    
+ public async Task<ResponseModel> DisableTicketsByBaseIdAsync(string ticketId, bool saveAll)
+    {
+        var baseId = ticketId.Contains("_") ? ticketId.Split('_')[0] : ticketId;
+
+        await _unitOfWork.TicketRepository.DisableTicketsByBaseIdAsync(baseId);
+        if (saveAll) await _unitOfWork.CompleteAsync();
+
+        return ResponseModel.Success($"Successfully activated tickets with base ID: {baseId}");
+    }
+
+    public async Task<ResponseModel> GetRealAllAsync()
+    {
+        var tickets = await _unitOfWork.TicketRepository.GetRealAllAsync(false);
+
+        var ticketDtos = _mapper.Map<List<TicketReadDto>>(tickets);
+        return ResponseModel.Success("Successfully get ticket", ticketDtos);
+    }
 
     public async Task<ResponseModel> GetTicketRangeAsync(int start, int count)
     {

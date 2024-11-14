@@ -15,6 +15,39 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
         _context = context;
         _logger = logger;
     }
+    public async Task ActivateTicketsByBaseIdAsync(string baseId)
+    {
+        var tickets = await _context.Tickets
+            .Where(t => t.TicketId.StartsWith(baseId) && t.Status == 0)
+            .ToListAsync();
+
+        if (tickets == null || tickets.Count == 0)
+            throw new KeyNotFoundException("No inactive tickets found with the specified base ID");
+
+        foreach (var ticket in tickets)
+        {
+            ticket.Status = 1;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+    
+    public async Task DisableTicketsByBaseIdAsync(string baseId)
+    {
+        var tickets = await _context.Tickets
+            .Where(t => t.TicketId.StartsWith(baseId) && t.Status == 1)
+            .ToListAsync();
+
+        if (tickets == null || tickets.Count == 0)
+            throw new KeyNotFoundException("No inactive tickets found with the specified base ID");
+
+        foreach (var ticket in tickets)
+        {
+            ticket.Status = 0;
+        }
+
+        await _context.SaveChangesAsync();
+    }
 
     public new async Task<List<Ticket>> GetAllAsync()
     {
@@ -33,6 +66,31 @@ public class TicketRepository : GenericRepository<Ticket>, ITicketRepository
 
         return groupedTickets;
     }
+    
+    public async Task<List<Ticket>> GetRealAllAsync(bool onlyActive = true)
+    {
+        var query = _context.Tickets
+            .Include(x => x.Seller)
+            .Include(x => x.Categories)
+            .AsQueryable();
+
+        if (onlyActive)
+        {
+            query = query.Where(x => x.Status == 1);
+        }
+
+        var tickets = await query.ToListAsync();
+
+        var groupedTickets = tickets
+            .GroupBy(t => t.TicketId.Split('_')[0])
+            .Select(g => g.First())
+            .ToList();
+
+        if (!groupedTickets.Any()) throw new KeyNotFoundException("No ticket in database");
+
+        return groupedTickets;
+    }
+
 
 
     public async Task<List<Ticket>> GetTicketRangeAsync(int start, int count)

@@ -231,26 +231,15 @@ const AdminPage = () => {
   };
 
   const handleTicketActive = async (ticketId: string) => {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/${ticketId}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/active/${ticketId}`;
 
     try {
       const response = await fetch(url, {
-        method: "PUT", // or PATCH based on your API
+        method: "GET", // or PATCH based on your API
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: null,
-          cost: null,
-          location: null,
-          status: 1, // Setting the status back to 1 (Active)
-          image: null,
-          qrcode: null,
-          description: null,
-          createDate: null,
-          categories: [], // Sending an empty array or null if no update to categories
-        }),
       });
 
       if (!response.ok) {
@@ -271,26 +260,15 @@ const AdminPage = () => {
   };
 
   const handleTicketDelete = async (ticketId: string) => {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/${ticketId}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/disable/${ticketId}`;
 
     try {
       const response = await fetch(url, {
-        method: "PUT", // or PATCH based on your API
+        method: "GET", // or PATCH based on your API
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: null,
-          cost: null,
-          location: null,
-          status: 0, // Updating only the status to 0
-          image: null,
-          qrcode: null,
-          description: null,
-          createDate: null,
-          categories: [], // Sending an empty array or null if no update to categories
-        }),
       });
 
       if (!response.ok) {
@@ -485,9 +463,24 @@ const AdminPage = () => {
 
   const validateRole = (roleData: any) => {
     const errors = [];
-    if (!roleData.roleId?.trim()) errors.push("Mã vai trò không được để trống");
-    if (!roleData.rolename?.trim()) errors.push("Tên vai trò không được để trống");
-    if (roleData.roleId?.length > 10) errors.push("Mã vai trò không được quá 10 ký tự");
+    
+    // Required field validations
+    if (!roleData.roleId?.trim()) {
+      errors.push("Mã vai trò không được để trống");
+    } else {
+      // RoleId format validation
+      if (!roleData.roleId.startsWith("RO")) {
+        errors.push("Mã vai trò phải bắt đầu bằng 'RO'");
+      }
+      if (roleData.roleId.length > 10) {
+        errors.push("Mã vai trò không được quá 10 ký tự");
+      }
+    }
+    
+    if (!roleData.rolename?.trim()) {
+      errors.push("Tên vai trò không được để trống");
+    }
+
     return errors;
   };
 
@@ -622,9 +615,24 @@ const AdminPage = () => {
 
   const validateCategory = (categoryData: any) => {
     const errors = [];
-    if (!categoryData.categoryId?.trim()) errors.push("Mã danh mục không được để trống");
-    if (!categoryData.name?.trim()) errors.push("Tên danh mục không được để trống");
-    if (categoryData.categoryId?.length > 10) errors.push("Mã danh mục không được quá 10 ký tự");
+    
+    // Required field validations
+    if (!categoryData.categoryId?.trim()) {
+      errors.push("Mã danh mục không được để trống");
+    } else {
+      // CategoryId format validation
+      if (!categoryData.categoryId.startsWith("CAT")) {
+        errors.push("Mã danh mục phải bắt đầu bằng 'CAT'");
+      }
+      if (categoryData.categoryId.length > 10) {
+        errors.push("Mã danh mục không được quá 10 ký tự");
+      }
+    }
+    
+    if (!categoryData.name?.trim()) {
+      errors.push("Tên danh mục không được để trống");
+    }
+
     return errors;
   };
 
@@ -950,7 +958,10 @@ const AdminPage = () => {
                       name="roleId"
                       placeholder="Mã vai trò"
                       defaultValue={currentRole?.roleId || ""}
-                      className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                      readOnly={!!currentRole}
+                      className={`w-full border rounded-md shadow-sm py-2 px-3 mb-2 ${
+                        currentRole ? 'bg-gray-100 cursor-not-allowed' : ''
+                      }`}
                     />
                     <input
                       type="text"
@@ -1014,7 +1025,7 @@ const AdminPage = () => {
               animate="visible"
               exit="hidden"
               variants={overlayVariants}
-              className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4"
+              className="fixed inset-0 bg-black/50 bg-opacity-20 flex items-end justify-center sm:items-center p-4"
             >
               <motion.div
                 variants={modalVariants}
@@ -1043,7 +1054,7 @@ const AdminPage = () => {
                     id="categoryForm"
                     onSubmit={(e) => {
                       e.preventDefault();
-                      const form = e.target as HTMLFormElement; // Cast to HTMLFormElement
+                      const form = e.target as HTMLFormElement;
                       const formData = new FormData(form);
                       const categoryData = {
                         categoryId: formData.get("categoryId"),
@@ -1058,7 +1069,10 @@ const AdminPage = () => {
                       name="categoryId"
                       placeholder="Mã danh mục"
                       defaultValue={currentCategory?.categoryId || ""}
-                      className="w-full border rounded-md shadow-sm py-2 px-3 mb-2"
+                      readOnly={!!currentCategory}
+                      className={`w-full border rounded-md shadow-sm py-2 px-3 mb-2 ${
+                        currentCategory ? 'bg-gray-100 cursor-not-allowed' : ''
+                      }`}
                     />
                     <input
                       type="text"
@@ -1086,7 +1100,7 @@ const AdminPage = () => {
               animate="visible"
               exit="hidden"
               variants={overlayVariants}
-              className="fixed inset-0 bg-black bg-opacity-20 flex items-end justify-center sm:items-center p-4"
+              className="fixed inset-0 bg-black/50 bg-opacity-20 flex items-end justify-center sm:items-center p-4"
             >
               <motion.div
                 variants={modalVariants}
@@ -1129,7 +1143,7 @@ const AdminPage = () => {
               <span className="text-emerald-500 text-2xl font-bold">
                 Ticket{" "}
               </span>
-              <span className="resell text-black text-2xl font-bold">
+              <span className="resell text-black/50 text-2xl font-bold">
                 Resell{" "}
               </span>
               Admin

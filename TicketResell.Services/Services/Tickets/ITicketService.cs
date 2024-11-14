@@ -9,11 +9,13 @@ public interface ITicketService
     public Task<ResponseModel> GetTicketBySellerId(string id);
     public Task<ResponseModel> GetTicketsByOrderIdWithStatusZeroAsync(string userId, int status);
     public Task<ResponseModel> CheckExistId(string id);
-
+    Task<ResponseModel> ActivateTicketsByBaseIdAsync(string ticketId, bool saveAll);
+    Task<ResponseModel> DisableTicketsByBaseIdAsync(string ticketId, bool saveAll);
     public Task<ResponseModel> GetTicketByNameAsync(string name);
     public Task<ResponseModel> GetQrImageAsBase64Async(string ticketId);
     public Task<ResponseModel> GetMultiQrImageAsBase64Async(string ticketId, int quantity);
     public Task<ResponseModel> GetTicketsAsync();
+    public Task<ResponseModel> GetRealAllAsync();
     public Task<ResponseModel> GetTicketRangeAsync(int start, int count);
     public Task<ResponseModel> GetTopTicket(int amount);
     public Task<ResponseModel> GetTicketByDateAsync(DateTime date);

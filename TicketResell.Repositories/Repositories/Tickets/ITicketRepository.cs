@@ -4,6 +4,9 @@ namespace Repositories.Repositories;
 
 public interface ITicketRepository : IRepository<Ticket>
 {
+    Task ActivateTicketsByBaseIdAsync(string baseId);
+    Task DisableTicketsByBaseIdAsync(string baseId);
+    Task<List<Ticket>> GetRealAllAsync(bool onlyActive = true);
     Task<List<Ticket>> GetTicketRangeAsync(int start, int count);
     Task<List<Ticket>> GetTicketsByIds(List<string> ticketIds);
     Task<List<Ticket>> GetTicketByNameAsync(string name);

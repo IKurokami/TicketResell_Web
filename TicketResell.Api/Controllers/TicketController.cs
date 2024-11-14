@@ -61,10 +61,49 @@ public class TicketController : ControllerBase
     [Route("read")]
     public async Task<IActionResult> GetTicket()
     {
-        var response = await _ticketService.GetTicketsAsync();
+        ResponseModel response = null;
+
+        if (HttpContext.GetIsAuthenticated() && HttpContext.HasEnoughtRoleLevel(UserRole.Seller))
+        {
+            response = await _ticketService.GetRealAllAsync();
+        }
+        else
+        {
+            response = await _ticketService.GetTicketsAsync();
+        }
+        
         return ResponseParser.Result(response);
     }
+    
+    [HttpGet("active/{ticketId}")]
+    public async Task<IActionResult> ActiveTicket(string ticketId)
+    {
+        if (!HttpContext.GetIsAuthenticated())
+            return ResponseParser.Result(
+                ResponseModel.Unauthorized("You need to be authenticated to activate tickets"));
 
+        if (!HasAdminOrRequiredRole(UserRole.Seller))
+            return ResponseParser.Result(
+                ResponseModel.Unauthorized("You do not have the required permissions to activate tickets"));
+
+        var response = await _ticketService.ActivateTicketsByBaseIdAsync(ticketId, true);
+        return ResponseParser.Result(response);
+    }
+    
+    [HttpGet("disable/{ticketId}")]
+    public async Task<IActionResult> DisableTicket(string ticketId)
+    {
+        if (!HttpContext.GetIsAuthenticated())
+            return ResponseParser.Result(
+                ResponseModel.Unauthorized("You need to be authenticated to activate tickets"));
+
+        if (!HasAdminOrRequiredRole(UserRole.Seller))
+            return ResponseParser.Result(
+                ResponseModel.Unauthorized("You do not have the required permissions to activate tickets"));
+
+        var response = await _ticketService.DisableTicketsByBaseIdAsync(ticketId, true);
+        return ResponseParser.Result(response);
+    }
 
     [HttpGet]
     [Route("readbySellerId/{id}")]
