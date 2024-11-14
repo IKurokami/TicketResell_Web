@@ -668,7 +668,10 @@ const UserManager: React.FC<UserManagerProps> = ({
                         Chọn vai trò mới
                       </label>
                       <div className="grid grid-cols-1 gap-3">
-                        {availableRoles.map((role) => (
+                        {availableRoles
+                          // Filter out admin role from selection
+                          .filter(role => role.roleId !== "RO4")
+                          .map((role) => (
                           <label
                             key={role.roleId}
                             className="relative flex items-center p-3 rounded-xl hover:bg-white transition-colors duration-200 cursor-pointer group"
@@ -884,20 +887,34 @@ const UserManager: React.FC<UserManagerProps> = ({
                 contextMenu.isActive
                   ? onDisableAccount?.(contextMenu.userId)
                   : onEnableAccount?.(contextMenu.userId),
-              className: contextMenu.isActive
-                ? "text-orange-600"
-                : "text-green-600",
+              className: `${
+                contextMenu.userId === Cookies.get("id")
+                  ? "hidden"
+                  : contextMenu.isActive
+                  ? "text-orange-600"
+                  : "text-green-600"
+              }`,
             },
             {
-              label: "Chỉnh Sửa Vai Trò", // Add this option
+              label: "Chỉnh Sửa Vai Trò",
               icon: <FaUserCog className="w-4 h-4" />,
               onClick: () => {
                 const user = users.find((u) => u.userId === contextMenu.userId);
                 if (user) {
+                  // Check if user has admin role
+                  const hasAdminRole = user.roles.some(role => role.roleId === "RO4"); // Assuming "RO1" is admin role ID
+                  if (hasAdminRole) {
+                    alert("Không thể chỉnh sửa vai trò của Admin");
+                    return;
+                  }
                   setSelectedUserForRoleEdit(user);
                   setIsEditRoleModalOpen(true);
                 }
               },
+              // Hide the edit role option if the user has admin role
+              className: users.find(u => u.userId === contextMenu.userId)?.roles.some(role => role.roleId === "RO4") 
+                ? "hidden" 
+                : "",
             },
           ]}
         />

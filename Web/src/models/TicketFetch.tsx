@@ -61,7 +61,10 @@ const convertToTickets = async (response: any[]): Promise<Ticket[]> => {
 
 export const fetchTickets = async (): Promise<Ticket[]> => {
   try {
-    const response = await fetch(`${baseUrl}/api/Ticket/read`);
+    const response = await fetch(`${baseUrl}/api/Ticket/read`,{
+      credentials: "include"
+    }); 
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

@@ -17,7 +17,7 @@ const RoleManager: React.FC<RoleListProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
-  const [sortField, setSortField] = useState<"rolename" | "description">(
+  const [sortField, setSortField] = useState<"roleId" | "rolename" | "description">(
     "rolename"
   );
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -52,7 +52,7 @@ const RoleManager: React.FC<RoleListProps> = ({
     filterRoles();
   }, [searchTerm, roles, sortField, sortDirection]);
 
-  const handleSort = (field: "rolename" | "description") => {
+  const handleSort = (field: "roleId" | "rolename" | "description") => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -109,6 +109,15 @@ const RoleManager: React.FC<RoleListProps> = ({
               <th scope="col" className="px-6 py-3">
                 <div
                   className="flex items-center cursor-pointer hover:text-blue-600"
+                  onClick={() => handleSort("roleId")}
+                >
+                  Mã Vai Trò
+                  {getSortIcon("roleId")}
+                </div>
+              </th>
+              <th scope="col" className="px-6 py-3">
+                <div
+                  className="flex items-center cursor-pointer hover:text-blue-600"
                   onClick={() => handleSort("rolename")}
                 >
                   Tên Vai Trò
@@ -136,6 +145,9 @@ const RoleManager: React.FC<RoleListProps> = ({
                   key={role.roleId}
                   className="bg-white border-b hover:bg-gray-50"
                 >
+                  <td className="px-6 py-4">
+                    {role.roleId}
+                  </td>
                   <th
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
@@ -167,7 +179,7 @@ const RoleManager: React.FC<RoleListProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
                   Không tìm thấy vai trò nào.
                 </td>
               </tr>
