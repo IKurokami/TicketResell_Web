@@ -204,7 +204,7 @@ const CategoryManagement = () => {
         <CardTitle>Quản lí danh mục</CardTitle>
         <div className="flex space-x-4">
           <div className="relative">
-            <Search className="absolute left-3 transform h-5 w-5 text-gray-500" />
+            <Search className="absolute left-3 bottom-2 transform h-5 w-5 text-gray-500" />
             <Input
               placeholder="Tìm danh mục..."
               className="px-10 rounded-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-80"

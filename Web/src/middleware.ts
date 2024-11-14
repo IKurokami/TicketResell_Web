@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
     "/profileuser": "RO1",
     "/favorites": "RO1",
     "/history": "RO1",
-    "/myticket": "RO1",
+    "/my-ticket": "RO1",
     "/settings": "RO1",
     "/requestchat": "RO1",
   };
@@ -65,7 +65,7 @@ export const config = {
     "/profileuser/:path*",
     "/favorites/:path*",
     "/history/:path*",
-    "/myticket/:path*",
+    "/my-ticket/:path*",
     "/settings/:path*",
     "/admin/:path*",
     "/sell/:path*",
