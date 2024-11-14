@@ -22,7 +22,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
-  const [sortField, setSortField] = useState<"name" | "description">("name");
+  const [sortField, setSortField] = useState<"categoryId" | "name" | "description">("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
@@ -55,7 +55,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     filterCategories();
   }, [searchTerm, categories, sortField, sortDirection]);
 
-  const handleSort = (field: "name" | "description") => {
+  const handleSort = (field: "categoryId" | "name" | "description") => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -84,8 +84,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     <div className="flex-1 flex flex-col px-4 lg:px-16 xl:px-32">
       {/* Header */}
       <div className="p-4">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-          <div className="relative flex-grow mx-2 w-full mb-4 md:mb-0">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="relative flex-grow mx-2 w-full md:mb-0">
             <input
               type="text"
               placeholder="Tìm kiếm theo tên hoặc mô tả danh mục"
@@ -109,6 +109,15 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
+              <th scope="col" className="px-6 py-3">
+                <div
+                  className="flex items-center cursor-pointer hover:text-blue-600"
+                  onClick={() => handleSort("categoryId")}
+                >
+                  Mã Danh Mục
+                  {getSortIcon("categoryId")}
+                </div>
+              </th>
               <th scope="col" className="px-6 py-3">
                 <div
                   className="flex items-center cursor-pointer hover:text-blue-600"
@@ -139,6 +148,9 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                   key={category.categoryId}
                   className="bg-white border-b hover:bg-gray-50"
                 >
+                  <td className="px-6 py-4">
+                    {category.categoryId}
+                  </td>
                   <th
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
@@ -170,7 +182,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
                   Không tìm thấy danh mục nào.
                 </td>
               </tr>
