@@ -29,7 +29,7 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:8080
       - SQLSERVER=Server=sqlserver,1433;Database=TicketResellManagement;User Id=sa;Password=12345678Kg!;Integrated Security=False;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;
-      - BASE_URL=http://localhost:3000
+      - BASE_URL=http://ticketresell.shop
       - MOMO_PARTNER_CODE=MOMONPMB20210629
       - MOMO_ACCESS_KEY=Q2XhhSdgpKUlQ4Ky
       - MOMO_SECRET_KEY=k6B53GQKSjktZGJBK2MyrDa7w9S6RyCf
@@ -72,17 +72,16 @@ services:
       - GOOGLE_CLIENT_SECRET=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
       - BASE_URL=http://localhost:3000
       - NEXTAUTH_SECRET=qOz3zgPyFFIntECZCB+KC0xLFrZYZ2HOcVLr5Dq146M=
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXT_PUBLIC_API_URL=localhost:5296
-      - API_URL=api:8080
+      - NEXTAUTH_URL=http://ticketresell.shop
+      - NEXT_PUBLIC_API_URL=http://ticketresell.shop:5296
+      - API_URL=http://api:8080
     ports:
-      - "3000:3000"
+      - "80:3000"
     depends_on:
       - api
     networks: 
       - ticketresell-network
   
-
 networks:
   ticketresell-network:
     driver: bridge

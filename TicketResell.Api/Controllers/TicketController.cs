@@ -29,9 +29,9 @@ public class TicketController : ControllerBase
         if (!HttpContext.GetIsAuthenticated())
             return ResponseParser.Result(
                 ResponseModel.Unauthorized("You need to be authenticated to create a ticket"));
-        if (HasAdminOrRequiredRole(UserRole.Seller))
-            return ResponseParser.Result(
-                ResponseModel.Unauthorized("You are not seller"));
+        // if (HasAdminOrRequiredRole(UserRole.Seller))
+        //     return ResponseParser.Result(
+        //         ResponseModel.Unauthorized("You are not seller"));
         var response = new ResponseModel();
         for (var i = 0; i < dto.Length; i++)
             if (i == dto.Length - 1)
